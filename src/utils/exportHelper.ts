@@ -128,16 +128,17 @@ export function printPDFReport(
           background-color: #f9f9f9;
         }
         .container {
+          width: 95%;
           max-width: 900px;
           margin: 0 auto;
           background: #fff;
-          padding: 30px;
+          padding: 15px;
           border: 1px solid #ddd;
           box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
         @media print {
           body { padding: 0; }
-          .container { border: none; box-shadow: none; padding: 0; max-width: 100%; }
+          .container { border: none; box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
         }
       </style>
     </head>

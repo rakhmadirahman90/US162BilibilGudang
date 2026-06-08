@@ -564,7 +564,7 @@ export default function App() {
   const totalOutstandingDebts = debts.filter(d => d.status === 'BELUM_LUNAS').reduce((acc, d) => acc + d.remainingBalance, 0);
 
   return (
-    <div className={`min-h-screen ${theme.pageBg} text-neutral-800 font-sans flex flex-col transition-colors duration-300`}>
+    <div className={`h-screen ${theme.pageBg} text-neutral-800 font-sans flex flex-col transition-colors duration-300`}>
       
       {/* GLOBAL WAREHOUSE HEADER BAR */}
       <header className={`text-white shadow-md border-b sticky top-0 z-40 transition-all duration-300 ${theme.headerBg} ${theme.headerBorder}`}>
@@ -760,7 +760,7 @@ export default function App() {
       </div>
 
       {/* CORE WORKSPACE PORTALS */}
-      <main className="max-w-7xl mx-auto px-4 py-8 flex-1 w-full">
+      <main className="max-w-7xl mx-auto px-4 py-8 flex-1 w-full overflow-y-auto">
         
         {/* VIEW 1: DASHBOARD OVERVIEW */}
         {activeTab === 'DASHBOARD' && (
@@ -794,9 +794,9 @@ export default function App() {
               <div className="flex gap-2.5 flex-wrap justify-center z-10">
                 <button
                   onClick={() => setActiveTab('TIMBANG')}
-                  className={`${theme.heroBtnBg} ${theme.heroBtnHover} ${theme.heroBtnText} font-extrabold text-xs px-4 py-2.5 rounded-lg active:scale-95 transition-all shadow-md cursor-pointer`}
+                  className="bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg active:scale-95 transition-all shadow-md cursor-pointer hover:bg-emerald-600"
                 >
-                  🚚 Timbang Truk Masuk
+                  🚚 Timbangan Baru
                 </button>
                 <button
                   onClick={() => setActiveTab('FINANCE')}
@@ -1141,14 +1141,8 @@ export default function App() {
 
       {/* FOOTER METADATA */}
       <footer className={`py-6 border-t text-xs mt-auto transition-colors duration-300 ${theme.footerBg} ${theme.footerBorder} text-neutral-400`}>
-        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-center">
-          <div>
-            <p className="font-bold text-neutral-300">Aplikasi Pergudangan Terpadu US Bilibili 162</p>
-            <p className="text-[10px] text-neutral-550 mt-1">US Bilibili 162 Indonesia &bull; Pinrang &bull; Sulawesi Selatan &bull; Version 2.0</p>
-          </div>
-          <div className="text-[10px] text-neutral-550 font-mono">
-            Sistem Digitalisasi Industri Beras - Jagung &bull; Build Date: 2026-06-08
-          </div>
+        <div className="max-w-7xl mx-auto px-4 flex justify-center items-center text-center">
+          <p className="font-bold text-neutral-300">Aplikasi Pergudangan Terpadu US Bilibili 162 @2026</p>
         </div>
       </footer>
 
