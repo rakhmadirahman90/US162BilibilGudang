@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { WeighbridgeTicket } from '../types';
+import { WeighbridgeTicket, VehicleRecord, BuyerRecord, SupplierRecord } from '../types';
 import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -13,13 +13,19 @@ interface WeighbridgeModuleProps {
   onAddTicket: (ticket: WeighbridgeTicket) => void;
   onUpdateTicket: (ticket: WeighbridgeTicket) => void;
   onDeleteTicket: (id: string) => void;
+  vehicles?: VehicleRecord[];
+  buyers?: BuyerRecord[];
+  suppliers?: SupplierRecord[];
 }
 
 export default function WeighbridgeModule({
   tickets,
   onAddTicket,
   onUpdateTicket,
-  onDeleteTicket
+  onDeleteTicket,
+  vehicles = [],
+  buyers = [],
+  suppliers = []
 }: WeighbridgeModuleProps) {
   // Simulator State
   const [simulatorWeight, setSimulatorWeight] = useState<number>(3560);
@@ -38,6 +44,12 @@ export default function WeighbridgeModule({
   // UI states
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (errorMessage) {
+      (window as any).__showToast?.(errorMessage, 'error');
+    }
+  }, [errorMessage]);
   const [printTicket, setPrintTicket] = useState<WeighbridgeTicket | null>(null);
   const [isCreatingNew, setIsCreatingNew] = useState<boolean>(false);
   const [editingTicketId, setEditingTicketId] = useState<string | null>(null);
@@ -387,13 +399,28 @@ export default function WeighbridgeModule({
                   <span className="w-32 text-[#a0c5fc] inline-block">No. Polisi</span>
                   <span className="mr-2 text-[#a0c5fc]">:</span>
                   {isCreatingNew ? (
-                    <input 
-                      type="text" 
-                      value={policeNo} 
-                      onChange={(e) => setPoliceNo(e.target.value.toUpperCase())}
-                      className="bg-[#122345] border border-[#2d4d8c] text-[#efefef] px-2 py-0.5 rounded text-sm w-36 outline-none focus:border-yellow-400"
-                      placeholder="DP 8600 AL"
-                    />
+                    <>
+                      <input 
+                        type="text" 
+                        value={policeNo} 
+                        onChange={(e) => {
+                          const val = e.target.value.toUpperCase();
+                          setPoliceNo(val);
+                          const matched = vehicles.find(v => v.policeNo === val);
+                          if (matched && matched.driverName) {
+                            setNotes(prev => prev ? prev : `Sopir: ${matched.driverName} (${matched.vehicleType})`);
+                          }
+                        }}
+                        className="bg-[#122345] border border-[#2d4d8c] text-[#efefef] px-2 py-0.5 rounded text-sm w-36 outline-none focus:border-yellow-400"
+                        placeholder="DP 8600 AL"
+                        list="master-vehicles"
+                      />
+                      <datalist id="master-vehicles">
+                        {vehicles.map(v => (
+                          <option key={v.id} value={v.policeNo}>{v.driverName} &bull; {v.vehicleType} (Tara: {v.tareWeight}kg)</option>
+                        ))}
+                      </datalist>
+                    </>
                   ) : (
                     <span className="text-[#efefef] font-semibold">{selectedTicket ? selectedTicket.policeNo : '-'}</span>
                   )}
@@ -423,13 +450,24 @@ export default function WeighbridgeModule({
                   <span className="w-32 text-[#a0c5fc] inline-block">Agen/Tujuan</span>
                   <span className="mr-2 text-[#a0c5fc]">:</span>
                   {isCreatingNew ? (
-                    <input 
-                      type="text" 
-                      value={agency} 
-                      onChange={(e) => setAgency(e.target.value.toUpperCase())}
-                      className="bg-[#122345] border border-[#2d4d8c] text-[#efefef] px-2 py-0.5 rounded text-sm flex-1 outline-none focus:border-yellow-400"
-                      placeholder="Contoh: UCU POLES"
-                    />
+                    <>
+                      <input 
+                        type="text" 
+                        value={agency} 
+                        onChange={(e) => setAgency(e.target.value.toUpperCase())}
+                        className="bg-[#122345] border border-[#2d4d8c] text-[#efefef] px-2 py-0.5 rounded text-sm flex-1 outline-none focus:border-yellow-400"
+                        placeholder="Contoh: UCU POLES"
+                        list="master-agencies"
+                      />
+                      <datalist id="master-agencies">
+                        {buyers.map(b => (
+                          <option key={b.id} value={b.name}>{b.address}</option>
+                        ))}
+                        {suppliers.map(s => (
+                          <option key={s.id} value={s.name}>Supplier &bull; {s.address}</option>
+                        ))}
+                      </datalist>
+                    </>
                   ) : (
                     <span className="text-[#efefef]">{selectedTicket ? selectedTicket.agency : '-'}</span>
                   )}
@@ -695,9 +733,9 @@ export default function WeighbridgeModule({
               <div className="bg-neutral-50 p-4 border border-dashed border-neutral-300 rounded font-mono text-[11px] text-neutral-800 leading-relaxed shadow-inner">
                 <div className="text-center border-b border-neutral-300 pb-2 mb-2">
                   <div className="font-bold text-sm tracking-widest text-emerald-950">GUDANG US BILIBILI 162</div>
-                  <div className="text-[9px]">SAMPANO, KEC. LAROMPONG TIMUR, LUWU</div>
-                  <div className="text-[9px]">SULAWESI SELATAN, INDONESIA</div>
-                  <div className="text-[9px] mt-0.5">TELP: 0812-4455-1620</div>
+                  <div className="text-[9px]">Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa</div>
+                  <div className="text-[9px]">Kabupaten Pinrang, Sulawesi Selatan 91131</div>
+                  <div className="text-[9px] mt-0.5">TELP - 085244466009</div>
                 </div>
 
                 <div className="flex justify-between">
@@ -790,7 +828,7 @@ export default function WeighbridgeModule({
               <div className="mt-4 flex gap-2">
                 <button 
                   onClick={() => {
-                    alert("Mencetak slip timbangan ke thermal printer...");
+                    (window as any).__showToast?.("Mengirimkan cetakan slip timbangan ke thermal printer ESC/POS...", "info");
                     setPrintTicket(null);
                   }}
                   className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1.5 shadow"

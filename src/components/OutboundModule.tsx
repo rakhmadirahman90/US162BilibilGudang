@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { OutboundRecord, WeighbridgeTicket } from '../types';
+import { OutboundRecord, WeighbridgeTicket, VehicleRecord, BuyerRecord } from '../types';
 import { ArrowUpCircle, PlusCircle, Search, Calendar, FileText, Scale, Landmark, UserCheck } from 'lucide-react';
 
 interface OutboundModuleProps {
@@ -12,13 +12,17 @@ interface OutboundModuleProps {
   tickets: WeighbridgeTicket[];
   onAddRecord: (record: OutboundRecord) => void;
   onDeleteRecord: (id: string) => void;
+  vehicles?: VehicleRecord[];
+  buyers?: BuyerRecord[];
 }
 
 export default function OutboundModule({
   records,
   tickets,
   onAddRecord,
-  onDeleteRecord
+  onDeleteRecord,
+  vehicles = [],
+  buyers = []
 }: OutboundModuleProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -48,7 +52,7 @@ export default function OutboundModule({
   const handleCreateRecord = (e: React.FormEvent) => {
     e.preventDefault();
     if (!vehicleNo.trim() || !buyer.trim() || !invoiceNo.trim()) {
-      alert("Harap lengkapi No. Kendaraan, Pembeli, dan No. Invoice!");
+      (window as any).__showToast?.("Harap lengkapi No. Kendaraan, Pembeli, dan No. Invoice!", "error");
       return;
     }
 
@@ -148,9 +152,15 @@ export default function OutboundModule({
                   type="text"
                   placeholder="Misal: DD 8021 KK"
                   value={vehicleNo}
-                  onChange={(e) => setVehicleNo(e.target.value)}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600"
+                  onChange={(e) => setVehicleNo(e.target.value.toUpperCase())}
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 uppercase"
+                  list="outbound-vehicles"
                 />
+                <datalist id="outbound-vehicles">
+                  {vehicles.map(v => (
+                    <option key={v.id} value={v.policeNo}>{v.driverName} &bull; {v.vehicleType} (Tara: {v.tareWeight}kg)</option>
+                  ))}
+                </datalist>
               </div>
 
               <div>
@@ -184,14 +194,20 @@ export default function OutboundModule({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-neutral-600 mb-1">Nama Pembeli (Buyer)</label>
+                  <label className="block text-[#1e293b] font-semibold mb-1">Nama Pembeli (Buyer)</label>
                   <input
                     type="text"
                     placeholder="Contoh: PT Sinar Indah"
                     value={buyer}
                     onChange={(e) => setBuyer(e.target.value)}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 font-bold"
+                    list="outbound-buyers"
                   />
+                  <datalist id="outbound-buyers">
+                    {buyers.map(b => (
+                      <option key={b.id} value={b.name}>{b.address} &bull; PIC: {b.phone || 'N/A'}</option>
+                    ))}
+                  </datalist>
                 </div>
               </div>
 

@@ -57,7 +57,7 @@ export default function FinanceModule({
   const handleCreateFinance = (e: React.FormEvent) => {
     e.preventDefault();
     if (!finDesc.trim()) {
-      alert("Harap tulis deskripsi mutasi!");
+      (window as any).__showToast?.("Gagal: Harap tulis deskripsi mutasi!", "error");
       return;
     }
     const newFin: FinancialRecord = {
@@ -91,13 +91,13 @@ export default function FinanceModule({
       bankAccount: 'Kas Gudang Tunai'
     };
     onAddFinance(newFin);
-    alert(`Komisi Makelar ${activeBroker.name} sebesar Rp ${calculatedCommission.toLocaleString()} berhasil dicatat dalam Buku Mutasi!`);
+    (window as any).__showToast?.(`Komisi Makelar ${activeBroker.name} sebesar Rp ${calculatedCommission.toLocaleString('id-ID')} berhasil dicatat dalam Buku Mutasi!`, "success");
   };
 
   const handleCreateDebt = (e: React.FormEvent) => {
     e.preventDefault();
     if (!supplierName.trim() || !debtDesc.trim()) {
-      alert("Harap lengkapi nama suplier & perincian!");
+      (window as any).__showToast?.("Gagal: Harap lengkapi nama suplier & perincian utang!", "error");
       return;
     }
     const newDebt: DebtRecord = {
@@ -311,7 +311,7 @@ export default function FinanceModule({
           <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm">
             <h3 className="font-bold text-neutral-800 text-sm flex items-center gap-1.5 border-b border-neutral-100 pb-2 mb-3">
               <Users className="text-emerald-600 w-4.5 h-4.5" />
-              Kalkulator Komisi Makelar & Buruh Luwu
+              Kalkulator Komisi Makelar & Buruh Bilibili
             </h3>
             <p className="text-xs text-neutral-500 mb-4">
               Hitung komisi agen makelar pembawa pasokan tani beralaskan total berat netto timbangan dikali tarif operasional.

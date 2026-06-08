@@ -97,6 +97,37 @@ export interface EmployeeRecord {
   ratePerKg?: number; // specially for brokers standard commissions (e.g. 50 Rp/kg) or labor loaders
 }
 
+export interface VehicleRecord {
+  id: string;
+  policeNo: string;
+  driverName: string;
+  vehicleType: string;
+  tareWeight: number;
+}
+
+export interface SupplierRecord {
+  id: string;
+  name: string;
+  phone: string;
+  address: string;
+  mainCommodity: 'BERAS' | 'JAGUNG' | 'GABAH' | 'LAINNYA';
+}
+
+export interface BuyerRecord {
+  id: string;
+  name: string;
+  phone: string;
+  address: string;
+}
+
+export interface CommodityRecord {
+  id: string;
+  name: string;
+  type: 'BERAS' | 'JAGUNG' | 'GABAH' | 'LAINNYA';
+  moistureStandard: number;
+  bagDeductionPercent: number;
+}
+
 export interface CornMoistureRule {
   moistureMin: number;
   moistureMax: number;

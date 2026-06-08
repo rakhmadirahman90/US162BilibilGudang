@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { InboundRecord, WeighbridgeTicket } from '../types';
+import { InboundRecord, WeighbridgeTicket, VehicleRecord, SupplierRecord } from '../types';
 import { mockCornMoistureRefaksi } from '../data';
 import { ArrowDownCircle, PlusCircle, Search, Calendar, Scale, Hammer, Percent, Archive } from 'lucide-react';
 
@@ -13,13 +13,17 @@ interface InboundModuleProps {
   tickets: WeighbridgeTicket[];
   onAddRecord: (record: InboundRecord) => void;
   onDeleteRecord: (id: string) => void;
+  vehicles?: VehicleRecord[];
+  suppliers?: SupplierRecord[];
 }
 
 export default function InboundModule({
   records,
   tickets,
   onAddRecord,
-  onDeleteRecord
+  onDeleteRecord,
+  vehicles = [],
+  suppliers = []
 }: InboundModuleProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,7 +59,7 @@ export default function InboundModule({
   const handleCreateRecord = (e: React.FormEvent) => {
     e.preventDefault();
     if (!vehicleNo.trim() || !supplier.trim()) {
-      alert("Harap lengkapi semua isian wajib!");
+      (window as any).__showToast?.("Harap lengkapi semua isian wajib seperti nomor kendaraan dan nama suplier!", "error");
       return;
     }
 
@@ -177,9 +181,27 @@ export default function InboundModule({
                   type="text"
                   placeholder="Contoh: DD 8214 KK"
                   value={vehicleNo}
-                  onChange={(e) => setVehicleNo(e.target.value)}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
+                  onChange={(e) => {
+                    const uppercaseVal = e.target.value.toUpperCase();
+                    setVehicleNo(uppercaseVal);
+                    const matched = vehicles.find(v => v.policeNo === uppercaseVal);
+                    if (matched) {
+                      if (matched.driverName && !driverName) {
+                        setDriverName(matched.driverName);
+                      }
+                      if (matched.tareWeight && !tareWeight) {
+                        setTareWeight(matched.tareWeight);
+                      }
+                    }
+                  }}
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 uppercase"
+                  list="inbound-vehicles"
                 />
+                <datalist id="inbound-vehicles">
+                  {vehicles.map(v => (
+                    <option key={v.id} value={v.policeNo}>{v.driverName} &bull; {v.vehicleType} (Tara: {v.tareWeight}kg)</option>
+                  ))}
+                </datalist>
               </div>
 
               <div>
@@ -190,7 +212,13 @@ export default function InboundModule({
                   value={driverName}
                   onChange={(e) => setDriverName(e.target.value)}
                   className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
+                  list="inbound-drivers"
                 />
+                <datalist id="inbound-drivers">
+                  {vehicles.map(v => (
+                    <option key={v.id} value={v.driverName}>{v.policeNo}</option>
+                  ))}
+                </datalist>
               </div>
             </div>
 
@@ -213,14 +241,20 @@ export default function InboundModule({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-neutral-600 mb-1">Nama Suplier / Pemilik</label>
+                  <label className="block text-[#475569] font-semibold mb-1">Nama Suplier / Pemilik</label>
                   <input
                     type="text"
                     placeholder="Contoh: H. Mustamin"
                     value={supplier}
                     onChange={(e) => setSupplier(e.target.value)}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 font-bold"
+                    list="inbound-suppliers"
                   />
+                  <datalist id="inbound-suppliers">
+                    {suppliers.map(s => (
+                      <option key={s.id} value={s.name}>{s.address} &bull; {s.phone}</option>
+                    ))}
+                  </datalist>
                 </div>
               </div>
 

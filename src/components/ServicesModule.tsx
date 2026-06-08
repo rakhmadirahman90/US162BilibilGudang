@@ -45,7 +45,7 @@ export default function ServicesModule({
   const handleCreateService = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName.trim() || !commodity.trim()) {
-      alert("Harap masukkan nama pelanggan!");
+      (window as any).__showToast?.("Harap masukkan nama pelanggan dan jenis komoditas!", "error");
       return;
     }
 

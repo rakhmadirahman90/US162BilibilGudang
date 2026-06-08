@@ -4,6 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { showToast } from './utils/toast';
 import { 
   WeighbridgeTicket, 
   InboundRecord, 
@@ -11,7 +13,11 @@ import {
   ServiceRecord, 
   DebtRecord, 
   FinancialRecord,
-  EmployeeRecord
+  EmployeeRecord,
+  VehicleRecord,
+  SupplierRecord,
+  BuyerRecord,
+  CommodityRecord
 } from './types';
 import { 
   initialWeighbridgeTickets, 
@@ -20,7 +26,11 @@ import {
   initialServiceRecords, 
   initialDebtRecords, 
   initialFinancialRecords,
-  initialEmployeeRecords 
+  initialEmployeeRecords,
+  initialVehicles,
+  initialSuppliers,
+  initialBuyers,
+  initialCommodities
 } from './data';
 
 // Import our modular subcomponents
@@ -30,6 +40,7 @@ import OutboundModule from './components/OutboundModule';
 import ServicesModule from './components/ServicesModule';
 import MoistureRefaksiModule from './components/MoistureRefaksiModule';
 import FinanceModule from './components/FinanceModule';
+import DatabaseMasterModule from './components/DatabaseMasterModule';
 
 // Brand Assets
 import bilibiliLogo from './assets/images/bilibili_logo_1780925186692.png';
@@ -52,8 +63,170 @@ import {
   FileSpreadsheet,
   CheckCircle,
   Clock,
-  ChevronRight
+  ChevronRight,
+  Database
 } from 'lucide-react';
+
+// Define professional industrial & agricultural application themes
+export interface AppTheme {
+  id: string;
+  name: string;
+  emoji: string;
+  headerBg: string;
+  headerBorder: string;
+  headerBadgeBg: string;
+  headerBadgeText: string;
+  headerBadgeBorder: string;
+  statusBoxBg: string;
+  statusBoxBorder: string;
+  tabActiveBorder: string;
+  tabActiveText: string;
+  tabActiveBg: string;
+  heroGradient: string;
+  heroTextGradient: string;
+  heroBtnBg: string;
+  heroBtnHover: string;
+  heroBtnText: string;
+  pageBg: string;
+  accentText: string;
+  btnPrimaryBg: string;
+  btnPrimaryHover: string;
+  footerBg: string;
+  footerBorder: string;
+}
+
+export const APP_THEMES: AppTheme[] = [
+  {
+    id: 'EMERALD',
+    name: 'Emerald Harvest',
+    emoji: '🌾',
+    headerBg: 'bg-emerald-950',
+    headerBorder: 'border-emerald-900',
+    headerBadgeBg: 'bg-emerald-800',
+    headerBadgeText: 'text-yellow-300',
+    headerBadgeBorder: 'border-emerald-700',
+    statusBoxBg: 'bg-emerald-900/60',
+    statusBoxBorder: 'border-emerald-800',
+    tabActiveBorder: 'border-emerald-600',
+    tabActiveText: 'text-emerald-800',
+    tabActiveBg: 'bg-emerald-50/20',
+    heroGradient: 'from-emerald-900 via-emerald-950 to-neutral-900',
+    heroTextGradient: 'from-yellow-300 via-yellow-105 to-white',
+    heroBtnBg: 'bg-yellow-405 hover:bg-yellow-350',
+    heroBtnHover: 'hover:bg-yellow-350',
+    heroBtnText: 'text-emerald-950',
+    pageBg: 'bg-slate-50',
+    accentText: 'text-emerald-800',
+    btnPrimaryBg: 'bg-emerald-600',
+    btnPrimaryHover: 'hover:bg-emerald-500',
+    footerBg: 'bg-neutral-800',
+    footerBorder: 'border-neutral-700',
+  },
+  {
+    id: 'MIDNIGHT',
+    name: 'Midnight Ocean',
+    emoji: '⚓',
+    headerBg: 'bg-indigo-950',
+    headerBorder: 'border-indigo-900',
+    headerBadgeBg: 'bg-indigo-800',
+    headerBadgeText: 'text-cyan-300',
+    headerBadgeBorder: 'border-indigo-700',
+    statusBoxBg: 'bg-indigo-900/60',
+    statusBoxBorder: 'border-indigo-800',
+    tabActiveBorder: 'border-indigo-600',
+    tabActiveText: 'text-indigo-800',
+    tabActiveBg: 'bg-indigo-50/20',
+    heroGradient: 'from-indigo-900 via-indigo-950 to-neutral-900',
+    heroTextGradient: 'from-cyan-305 via-cyan-100 to-white',
+    heroBtnBg: 'bg-cyan-400 hover:bg-cyan-300',
+    heroBtnHover: 'hover:bg-cyan-300',
+    heroBtnText: 'text-indigo-950',
+    pageBg: 'bg-zinc-50',
+    accentText: 'text-indigo-800',
+    btnPrimaryBg: 'bg-indigo-600',
+    btnPrimaryHover: 'hover:bg-indigo-500',
+    footerBg: 'bg-indigo-950',
+    footerBorder: 'border-indigo-900',
+  },
+  {
+    id: 'RUST',
+    name: 'Charcoal Rust',
+    emoji: '🚜',
+    headerBg: 'bg-stone-900',
+    headerBorder: 'border-stone-800',
+    headerBadgeBg: 'bg-stone-800',
+    headerBadgeText: 'text-orange-400',
+    headerBadgeBorder: 'border-stone-700',
+    statusBoxBg: 'bg-stone-950/50',
+    statusBoxBorder: 'border-stone-800',
+    tabActiveBorder: 'border-orange-600',
+    tabActiveText: 'text-orange-850',
+    tabActiveBg: 'bg-orange-50/20',
+    heroGradient: 'from-stone-900 via-stone-950 to-neutral-900',
+    heroTextGradient: 'from-orange-400 via-amber-200 to-white',
+    heroBtnBg: 'bg-orange-500 hover:bg-orange-400',
+    heroBtnHover: 'hover:bg-orange-400',
+    heroBtnText: 'text-stone-950',
+    pageBg: 'bg-[#faf8f5]',
+    accentText: 'text-orange-800',
+    btnPrimaryBg: 'bg-orange-600',
+    btnPrimaryHover: 'hover:bg-orange-500',
+    footerBg: 'bg-stone-950',
+    footerBorder: 'border-stone-900',
+  },
+  {
+    id: 'GOLDEN',
+    name: 'Golden Field',
+    emoji: '🌾',
+    headerBg: 'bg-amber-950',
+    headerBorder: 'border-amber-900',
+    headerBadgeBg: 'bg-amber-800',
+    headerBadgeText: 'text-yellow-200',
+    headerBadgeBorder: 'border-amber-700',
+    statusBoxBg: 'bg-amber-900/60',
+    statusBoxBorder: 'border-amber-800',
+    tabActiveBorder: 'border-amber-600',
+    tabActiveText: 'text-amber-850',
+    tabActiveBg: 'bg-amber-50/20',
+    heroGradient: 'from-amber-900 via-amber-950 to-neutral-950',
+    heroTextGradient: 'from-yellow-300 via-yellow-105 to-white',
+    heroBtnBg: 'bg-yellow-405 hover:bg-yellow-350',
+    heroBtnHover: 'hover:bg-yellow-350',
+    heroBtnText: 'text-amber-950',
+    pageBg: 'bg-[#fffef7]',
+    accentText: 'text-amber-800',
+    btnPrimaryBg: 'bg-amber-600',
+    btnPrimaryHover: 'hover:bg-amber-500',
+    footerBg: 'bg-amber-950',
+    footerBorder: 'border-amber-900',
+  },
+  {
+    id: 'SILVER',
+    name: 'Classic Steel',
+    emoji: '🏢',
+    headerBg: 'bg-slate-800',
+    headerBorder: 'border-slate-700',
+    headerBadgeBg: 'bg-slate-700',
+    headerBadgeText: 'text-slate-200',
+    headerBadgeBorder: 'border-slate-600',
+    statusBoxBg: 'bg-slate-900/40',
+    statusBoxBorder: 'border-slate-700',
+    tabActiveBorder: 'border-slate-700',
+    tabActiveText: 'text-slate-800',
+    tabActiveBg: 'bg-slate-100/50',
+    heroGradient: 'from-slate-800 via-slate-900 to-slate-950',
+    heroTextGradient: 'from-slate-200 via-white to-blue-300',
+    heroBtnBg: 'bg-white hover:bg-slate-100',
+    heroBtnHover: 'hover:bg-slate-100',
+    heroBtnText: 'text-slate-950',
+    pageBg: 'bg-slate-50',
+    accentText: 'text-slate-800',
+    btnPrimaryBg: 'bg-slate-700',
+    btnPrimaryHover: 'hover:bg-slate-600',
+    footerBg: 'bg-slate-900',
+    footerBorder: 'border-slate-800',
+  }
+];
 
 export default function App() {
   // --- STATE WITH LOCALSTORAGE PERSISTENCE ---
@@ -92,8 +265,39 @@ export default function App() {
     return saved ? JSON.parse(saved) : initialEmployeeRecords;
   });
 
+  const [vehicles, setVehicles] = useState<VehicleRecord[]>(() => {
+    const saved = localStorage.getItem('bilibili_vehicles');
+    return saved ? JSON.parse(saved) : initialVehicles;
+  });
+
+  const [suppliers, setSuppliers] = useState<SupplierRecord[]>(() => {
+    const saved = localStorage.getItem('bilibili_suppliers');
+    return saved ? JSON.parse(saved) : initialSuppliers;
+  });
+
+  const [buyers, setBuyers] = useState<BuyerRecord[]>(() => {
+    const saved = localStorage.getItem('bilibili_buyers');
+    return saved ? JSON.parse(saved) : initialBuyers;
+  });
+
+  const [commodities, setCommodities] = useState<CommodityRecord[]>(() => {
+    const saved = localStorage.getItem('bilibili_commodities');
+    return saved ? JSON.parse(saved) : initialCommodities;
+  });
+
   // Active navigational tab
-  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE'>('DASHBOARD');
+  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE' | 'DATABASE'>('DASHBOARD');
+
+  // Premium customizable active theme state with LocalStorage persistence
+  const [activeThemeId, setActiveThemeId] = useState<string>(() => {
+    return localStorage.getItem('bilibili_theme') || 'EMERALD';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('bilibili_theme', activeThemeId);
+  }, [activeThemeId]);
+
+  const theme = APP_THEMES.find(t => t.id === activeThemeId) || APP_THEMES[0];
 
   // Trigger LocalStorage save whenever records alter
   useEffect(() => {
@@ -120,60 +324,146 @@ export default function App() {
     localStorage.setItem('bilibili_finances', JSON.stringify(finances));
   }, [finances]);
 
+  // --- LOCAL TOAST NOTIFICATION STATE ---
+  interface ToastItem {
+    id: string;
+    message: string;
+    type: 'success' | 'error' | 'info' | 'warning';
+    duration: number;
+  }
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+
+  useEffect(() => {
+    const handleToastEvent = (e: Event) => {
+      const customEvent = e as CustomEvent<{ message: string; type: 'success' | 'error' | 'info' | 'warning'; duration?: number }>;
+      if (customEvent.detail) {
+        const { message, type = 'success', duration = 3500 } = customEvent.detail;
+        const id = `toast-${Date.now()}-${Math.random()}`;
+        setToasts(prev => [...prev, { id, message, type, duration }]);
+        
+        // Auto remove
+        setTimeout(() => {
+          setToasts(prev => prev.filter(t => t.id !== id));
+        }, duration);
+      }
+    };
+
+    window.addEventListener('app-toast', handleToastEvent);
+    return () => {
+      window.removeEventListener('app-toast', handleToastEvent);
+    };
+  }, []);
+
+  const handleRemoveToast = (id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
+
+  const handleThemeChange = (themeId: string) => {
+    setActiveThemeId(themeId);
+    const selected = APP_THEMES.find(t => t.id === themeId);
+    if (selected) {
+      showToast(`Tema visual berhasil diubah ke: ${selected.emoji} ${selected.name}`, 'info');
+    }
+  };
+
   useEffect(() => {
     localStorage.setItem('bilibili_employees', JSON.stringify(employees));
   }, [employees]);
 
+  useEffect(() => {
+    localStorage.setItem('bilibili_vehicles', JSON.stringify(vehicles));
+  }, [vehicles]);
+
+  useEffect(() => {
+    localStorage.setItem('bilibili_suppliers', JSON.stringify(suppliers));
+  }, [suppliers]);
+
+  useEffect(() => {
+    localStorage.setItem('bilibili_buyers', JSON.stringify(buyers));
+  }, [buyers]);
+
+  useEffect(() => {
+    localStorage.setItem('bilibili_commodities', JSON.stringify(commodities));
+  }, [commodities]);
+
   // --- COMPONENT ACTION CALLBACKS ---
   const handleAddTicket = (tk: WeighbridgeTicket) => {
     setTickets(prev => [tk, ...prev]);
+    showToast(`Berhasil mencatatkan Timbang I (#${tk.ticketNo} - ${tk.policeNo})!`, 'success');
   };
 
   const handleUpdateTicket = (updatedTk: WeighbridgeTicket) => {
     setTickets(prev => prev.map(t => t.id === updatedTk.id ? updatedTk : t));
+    const isComp = updatedTk.status === 'COMPLETED';
+    showToast(
+      isComp 
+        ? `Berhasil menyelesaikan Timbang II (#${updatedTk.ticketNo} - ${updatedTk.policeNo}). Status: SELESAI TIMBANG!`
+        : `Berhasil memperbarui info tiket (#${updatedTk.ticketNo} - ${updatedTk.policeNo})!`, 
+      'success'
+    );
   };
 
   const handleDeleteTicket = (id: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus tiket jembatan timbang ini?")) {
+      const target = tickets.find(t => t.id === id);
+      const label = target ? `#${target.ticketNo}` : '';
       setTickets(prev => prev.filter(t => t.id !== id));
+      showToast(`Sukses menghapus tiket timbangan ${label}!`, 'success');
+    } else {
+      showToast('Penghapusan tiket dibatalkan.', 'info');
     }
   };
 
   const handleAddInbound = (rec: InboundRecord) => {
     setInboundRecords(prev => [rec, ...prev]);
+    showToast(`Sukses menyimpan: Penerimaan ${rec.commodity} dari ${rec.supplier} (${rec.netWeight.toLocaleString('id-ID')} Kg Netto)!`, 'success');
   };
 
   const handleDeleteInbound = (id: string) => {
     if (confirm("Hapus catatan penerimaan ini?")) {
       setInboundRecords(prev => prev.filter(r => r.id !== id));
+      showToast('Catatan barang masuk berhasil dihapus!', 'success');
+    } else {
+      showToast('Penghapusan dibatalkan.', 'info');
     }
   };
 
   const handleAddOutbound = (rec: OutboundRecord) => {
     setOutboundRecords(prev => [rec, ...prev]);
+    showToast(`Sukses menyimpan: Pengiriman ${rec.commodity} ke ${rec.buyer} (${rec.totalWeight.toLocaleString('id-ID')} Kg Netto)!`, 'success');
   };
 
   const handleDeleteOutbound = (id: string) => {
     if (confirm("Hapus catatan pengiriman ini?")) {
       setOutboundRecords(prev => prev.filter(r => r.id !== id));
+      showToast('Catatan barang keluar berhasil dihapus!', 'success');
+    } else {
+      showToast('Penghapusan dibatalkan.', 'info');
     }
   };
 
   const handleAddService = (rec: ServiceRecord) => {
     setServiceRecords(prev => [rec, ...prev]);
+    showToast(`Sukses mencatatkan layanan jasa poles/kipas untuk ${rec.customerName}!`, 'success');
   };
 
   const handleDeleteService = (id: string) => {
     if (confirm("Hapus catatan jasa milling?")) {
       setServiceRecords(prev => prev.filter(r => r.id !== id));
+      showToast('Catatan layanan jasa poles berhasil dihapus!', 'success');
+    } else {
+      showToast('Penghapusan dibatalkan.', 'info');
     }
   };
 
   const handleAddDebt = (debt: DebtRecord) => {
     setDebts(prev => [debt, ...prev]);
+    showToast(`Sukses mencatatkan utang kepada ${debt.supplierName} sebesar Rp ${debt.totalDebt.toLocaleString('id-ID')}!`, 'success');
   };
 
   const handlePayDebt = (id: string, amount: number) => {
+    const target = debts.find(d => d.id === id);
+    const supplier = target ? target.supplierName : 'Supplier';
     setDebts(prev => prev.map(d => {
       if (d.id === id) {
         const paid = d.paidAmount + amount;
@@ -191,16 +481,18 @@ export default function App() {
           amount: amount,
           bankAccount: 'Kas Gudang Tunai'
         };
-        handleAddFinance(newFin);
+        setFinances(prev => [newFin, ...prev]);
 
         return { ...d, paidAmount: paid, remainingBalance: remaining, status };
       }
       return d;
     }));
+    showToast(`Pembayaran cicilan utang kepada ${supplier} sebesar Rp ${amount.toLocaleString('id-ID')} berhasil dicatat!`, 'success');
   };
 
   const handleAddFinance = (fin: FinancialRecord) => {
     setFinances(prev => [fin, ...prev]);
+    showToast(`Mutasi kas ${fin.type === 'DEBIT' ? 'Pemasukan' : 'Pengeluaran'} Rp ${fin.amount.toLocaleString('id-ID')} berhasil disimpan!`, 'success');
   };
 
   // --- INTEGRATED METRICS CALCULATOR FOR COVER DASHBOARD ---
@@ -225,10 +517,10 @@ export default function App() {
   const totalOutstandingDebts = debts.filter(d => d.status === 'BELUM_LUNAS').reduce((acc, d) => acc + d.remainingBalance, 0);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-neutral-800 font-sans flex flex-col">
+    <div className={`min-h-screen ${theme.pageBg} text-neutral-800 font-sans flex flex-col transition-colors duration-300`}>
       
       {/* GLOBAL WAREHOUSE HEADER BAR */}
-      <header className="bg-emerald-950 text-white shadow-md border-b border-emerald-900 sticky top-0 z-40">
+      <header className={`text-white shadow-md border-b sticky top-0 z-40 transition-all duration-300 ${theme.headerBg} ${theme.headerBorder}`}>
         <div className="max-w-7xl mx-auto px-4 py-3.5 flex flex-col sm:flex-row justify-between items-center gap-3">
           
           <div className="flex items-center gap-3">
@@ -244,7 +536,7 @@ export default function App() {
             <div>
               <h1 className="font-extrabold tracking-tight text-base sm:text-lg flex items-center gap-1.5 font-sans">
                 US BILIBILI 162
-                <span className="text-[10px] bg-emerald-800 text-yellow-405 border border-emerald-700 rounded px-1.5 py-0.5 font-semibold">
+                <span className={`text-[10px] border rounded px-1.5 py-0.5 font-bold transition-all duration-300 ${theme.headerBadgeBg} ${theme.headerBadgeText} ${theme.headerBadgeBorder}`}>
                   GUDANG PUSAT 🌽
                 </span>
               </h1>
@@ -254,16 +546,40 @@ export default function App() {
             </div>
           </div>
 
-          {/* Time & Quick Stats Bar */}
-          <div className="flex items-center gap-4 text-xs font-mono text-emerald-200">
-            <div className="bg-emerald-900/60 px-3 py-1 rounded border border-emerald-800 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-yellow-300" />
+          {/* Time, Active status & Visual Theme Switcher */}
+          <div className="flex flex-wrap items-center gap-3.5 text-xs font-sans">
+            
+            {/* Real-time clock */}
+            <div className={`hidden sm:flex px-3 py-1.5 rounded border items-center gap-1.5 font-mono text-[11px] transition-all duration-300 ${theme.statusBoxBg} ${theme.statusBoxBorder}`}>
+              <Clock className="w-3.5 h-3.5 text-yellow-300 animate-spin-slow" />
               <span>{new Date().toLocaleTimeString('id-US', { hour12: false })} WITA</span>
             </div>
-            <div className="hidden md:block">
-              <span className="text-neutral-300">Sistem Active: </span>
-              <span className="text-green-400 font-bold">● ONLINE</span>
+
+            {/* Premium Theme Selector Picker Dropdown */}
+            <div className="relative flex items-center gap-1">
+              <span className="text-[10px] text-white/70 font-bold font-mono tracking-wider mr-1 hidden lg:inline">TEMA:</span>
+              <select
+                value={activeThemeId}
+                onChange={(e) => handleThemeChange(e.target.value)}
+                className={`text-[11px] font-bold px-2 py-1.5 rounded-lg border focus:outline-none transition-all cursor-pointer shadow-sm ${theme.statusBoxBg} ${theme.statusBoxBorder} text-white hover:brightness-110`}
+              >
+                {APP_THEMES.map((t) => (
+                  <option key={t.id} value={t.id} className="text-neutral-900 font-bold font-sans">
+                    {t.emoji} {t.name}
+                  </option>
+                ))}
+              </select>
             </div>
+
+            {/* Active connection point */}
+            <div className="hidden md:flex items-center gap-1.5 font-mono text-[11px] text-emerald-250">
+              <span className="text-white/60">STATUS:</span>
+              <span className="text-green-400 font-bold flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse"></span>
+                ONLINE
+              </span>
+            </div>
+
           </div>
 
         </div>
@@ -277,84 +593,96 @@ export default function App() {
             onClick={() => setActiveTab('DASHBOARD')}
             className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
               activeTab === 'DASHBOARD' 
-                ? 'border-emerald-600 text-emerald-800 bg-emerald-50/20' 
+                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
                 : 'border-transparent text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <LayoutDashboard className="w-4 h-4" />
-            PANEL UTAMA (DASHBOARD)
+            1. PANEL UTAMA (DASHBOARD)
           </button>
-
+ 
           <button
             onClick={() => setActiveTab('TIMBANG')}
             className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
               activeTab === 'TIMBANG' 
-                ? 'border-emerald-600 text-emerald-800 bg-emerald-50/20 shadow-sm' 
+                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg} shadow-sm` 
                 : 'border-transparent text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <Scale className="w-4 h-4 text-blue-500" />
-            JEMBATAN TIMBANG
+            2. JEMBATAN TIMBANG
           </button>
-
+ 
           <button
             onClick={() => setActiveTab('MASUK')}
             className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
               activeTab === 'MASUK' 
-                ? 'border-emerald-600 text-emerald-800 bg-emerald-50/20' 
+                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
                 : 'border-transparent text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <ArrowDownCircle className="w-4 h-4 text-emerald-600" />
-            1. BARANG MASUK
+            3. BARANG MASUK
           </button>
-
+ 
           <button
             onClick={() => setActiveTab('KELUAR')}
             className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
               activeTab === 'KELUAR' 
-                ? 'border-emerald-600 text-emerald-800 bg-emerald-50/20' 
+                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
                 : 'border-transparent text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <ArrowUpCircle className="w-4 h-4 text-blue-600" />
-            12. BARANG KELUAR
+            4. BARANG KELUAR
           </button>
-
+ 
           <button
             onClick={() => setActiveTab('SERVICES')}
             className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
               activeTab === 'SERVICES' 
-                ? 'border-emerald-600 text-emerald-800 bg-emerald-50/20' 
+                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
                 : 'border-transparent text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <Wind className="w-4 h-4 text-sky-500" />
-            3. JASA POLES & KIPAS
+            5. JASA POLES & KIPAS
           </button>
-
+ 
           <button
             onClick={() => setActiveTab('REFAKSI')}
             className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
               activeTab === 'REFAKSI' 
-                ? 'border-emerald-600 text-emerald-800 bg-emerald-50/20' 
+                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
                 : 'border-transparent text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <Percent className="w-4 h-4 text-amber-500" />
-            REFAKSI KA JAGUNG
+            6. REFAKSI KA JAGUNG
           </button>
-
+ 
           <button
             onClick={() => setActiveTab('FINANCE')}
             className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
               activeTab === 'FINANCE' 
-                ? 'border-emerald-600 text-emerald-800 bg-emerald-50/20' 
+                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
                 : 'border-transparent text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <DollarSign className="w-4 h-4 text-emerald-600" />
-            2. UTANG & 7. MUTASI KAS
+            7. UTANG & MUTASI KAS
+          </button>
+
+          <button
+            onClick={() => setActiveTab('DATABASE')}
+            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+              activeTab === 'DATABASE' 
+                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
+                : 'border-transparent text-neutral-500 hover:text-neutral-800'
+            }`}
+          >
+            <Database className="w-4 h-4 text-rose-500" />
+            8. DATABASE MASTER
           </button>
 
         </div>
@@ -368,8 +696,8 @@ export default function App() {
           <div className="flex flex-col gap-8">
             
             {/* Hero Brand Welcome Banner */}
-            <div className="bg-gradient-to-r from-emerald-900 via-emerald-950 to-neutral-900 text-white rounded-2xl p-6 shadow-md border border-emerald-850 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative">
-              <div className="absolute right-0 top-0 w-64 h-64 bg-emerald-800/10 rounded-full -mr-20 -mt-20 blur-2xl pointer-events-none"></div>
+            <div className={`bg-gradient-to-r ${theme.heroGradient} text-white rounded-2xl p-6 shadow-md border ${theme.headerBorder} flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative transition-all duration-300`}>
+              <div className="absolute right-0 top-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-2xl pointer-events-none"></div>
               <div className="flex flex-col md:flex-row items-center gap-5 text-center md:text-left z-10">
                 <div className="w-20 h-20 rounded-full overflow-hidden border-3 border-yellow-400 bg-white shadow-xl shrink-0 flex items-center justify-center">
                   <img
@@ -380,22 +708,22 @@ export default function App() {
                   />
                 </div>
                 <div>
-                  <h2 className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-105 to-white tracking-tight">
+                  <h2 className={`text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r ${theme.heroTextGradient} tracking-tight transition-all duration-300`}>
                     US BILIBILI 162 - GUDANG BILIBILI
                   </h2>
-                  <p className="text-sm text-emerald-200 font-medium mt-1">
+                  <p className="text-sm text-white/90 font-medium mt-1">
                     Sistem Manajemen Pergudangan Terpadu & Jembatan Timbang Digital
                   </p>
-                  <p className="text-xs text-emerald-350 font-mono mt-2 flex items-center justify-center md:justify-start gap-2">
+                  <p className="text-xs text-white/70 font-mono mt-2 flex items-center justify-center md:justify-start gap-2">
                     <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    Terminal Timbang GSC GST-9700 &bull; Luwu, Sulawesi Selatan
+                    Terminal Timbang GSC GST-9700 &bull; Kabupaten Pinrang, Sulawesi Selatan
                   </p>
                 </div>
               </div>
               <div className="flex gap-2.5 flex-wrap justify-center z-10">
                 <button
                   onClick={() => setActiveTab('TIMBANG')}
-                  className="bg-yellow-405 hover:bg-yellow-350 text-emerald-950 font-extrabold text-xs px-4 py-2.5 rounded-lg active:scale-95 transition-all shadow cursor-pointer"
+                  className={`${theme.heroBtnBg} ${theme.heroBtnHover} ${theme.heroBtnText} font-extrabold text-xs px-4 py-2.5 rounded-lg active:scale-95 transition-all shadow-md cursor-pointer`}
                 >
                   🚚 Timbang Truk Masuk
                 </button>
@@ -637,6 +965,9 @@ export default function App() {
             onAddTicket={handleAddTicket}
             onUpdateTicket={handleUpdateTicket}
             onDeleteTicket={handleDeleteTicket}
+            vehicles={vehicles}
+            buyers={buyers}
+            suppliers={suppliers}
           />
         )}
 
@@ -647,6 +978,8 @@ export default function App() {
             tickets={tickets}
             onAddRecord={handleAddInbound}
             onDeleteRecord={handleDeleteInbound}
+            vehicles={vehicles}
+            suppliers={suppliers}
           />
         )}
 
@@ -657,6 +990,8 @@ export default function App() {
             tickets={tickets}
             onAddRecord={handleAddOutbound}
             onDeleteRecord={handleDeleteOutbound}
+            vehicles={vehicles}
+            buyers={buyers}
           />
         )}
 
@@ -686,20 +1021,102 @@ export default function App() {
           />
         )}
 
+        {/* VIEW 8: DATABASE MASTER */}
+        {activeTab === 'DATABASE' && (
+          <DatabaseMasterModule
+            vehicles={vehicles}
+            setVehicles={setVehicles}
+            suppliers={suppliers}
+            setSuppliers={setSuppliers}
+            buyers={buyers}
+            setBuyers={setBuyers}
+            employees={employees}
+            setEmployees={setEmployees}
+            commodities={commodities}
+            setCommodities={setCommodities}
+          />
+        )}
+
       </main>
 
       {/* FOOTER METADATA */}
-      <footer className="bg-neutral-800 text-neutral-400 py-6 border-t border-neutral-700 text-xs mt-auto">
+      <footer className={`py-6 border-t text-xs mt-auto transition-colors duration-300 ${theme.footerBg} ${theme.footerBorder} text-neutral-400`}>
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-center">
           <div>
             <p className="font-bold text-neutral-300">Aplikasi Pergudangan Terpadu US Bilibili 162</p>
-            <p className="text-[10px] text-neutral-500 mt-1">US Bilibili 162 Indonesia &bull; Luwu &bull; Sulawesi Selatan &bull; Version 2.0</p>
+            <p className="text-[10px] text-neutral-550 mt-1">US Bilibili 162 Indonesia &bull; Pinrang &bull; Sulawesi Selatan &bull; Version 2.0</p>
           </div>
-          <div className="text-[10px] text-neutral-500 font-mono">
+          <div className="text-[10px] text-neutral-550 font-mono">
             Sistem Digitalisasi Industri Beras - Jagung &bull; Build Date: 2026-06-08
           </div>
         </div>
       </footer>
+
+      {/* GLOBAL TOAST NOTIFICATION FLOATING PANEL */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3 max-w-sm w-full px-4 sm:px-0 pointer-events-none font-sans">
+        <AnimatePresence>
+          {toasts.map((toast) => {
+            let bgStyle = "bg-white border-neutral-200 shadow-xl text-neutral-800";
+            let iconColor = "text-emerald-500 bg-emerald-50";
+            let progressColor = "bg-emerald-500";
+            let IconComponent = CheckCircle;
+
+            if (toast.type === 'error') {
+              bgStyle = "bg-red-50 border-red-200 shadow-red-100/30 shadow-lg text-red-950";
+              iconColor = "text-red-650 bg-red-100/80";
+              progressColor = "bg-red-500";
+              IconComponent = AlertCircle;
+            } else if (toast.type === 'warning') {
+              bgStyle = "bg-amber-50 border-amber-200 shadow-amber-100/30 shadow-lg text-amber-950";
+              iconColor = "text-amber-650 bg-amber-100/85";
+              progressColor = "bg-amber-500";
+              IconComponent = AlertCircle;
+            } else if (toast.type === 'info') {
+              bgStyle = "bg-blue-50 border-blue-200 shadow-blue-100/30 shadow-lg text-blue-950";
+              iconColor = "text-blue-650 bg-blue-100/85";
+              progressColor = "bg-blue-500";
+              IconComponent = Clock;
+            }
+
+            return (
+              <motion.div
+                key={toast.id}
+                initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className={`pointer-events-auto flex items-start gap-3 border rounded-xl p-4 relative overflow-hidden transition-all duration-200 ${bgStyle}`}
+              >
+                <div className={`p-1.5 rounded-lg shrink-0 ${iconColor}`}>
+                  <IconComponent className="w-5 h-5" />
+                </div>
+                
+                <div className="flex-1 min-w-0 pr-4">
+                  <p className="text-xs font-extrabold leading-tight tracking-tight uppercase opacity-55 font-mono">
+                    {toast.type === 'success' ? 'SUKSES' : toast.type === 'error' ? 'KESALAHAN' : toast.type === 'warning' ? 'PERINGATAN' : 'INFORMASI'}
+                  </p>
+                  <p className="text-xs leading-normal mt-1 text-neutral-800 font-bold font-sans break-words whitespace-pre-wrap">
+                    {toast.message}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => handleRemoveToast(toast.id)}
+                  className="text-neutral-400 hover:text-neutral-600 transition p-1 rounded-md -mr-1.5 -mt-1 hover:bg-neutral-100/50"
+                >
+                  <span className="text-lg font-bold leading-none select-none block">&times;</span>
+                </button>
+
+                {/* Shrinking bottom progress ribbon */}
+                <div 
+                  className={`absolute bottom-0 left-0 h-1 animate-shrink ${progressColor}`}
+                  style={{ animationDuration: `${toast.duration}ms` }}
+                />
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </div>
 
     </div>
   );

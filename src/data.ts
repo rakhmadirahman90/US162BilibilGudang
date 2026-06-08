@@ -10,7 +10,11 @@ import {
   ServiceRecord, 
   DebtRecord, 
   FinancialRecord,
-  EmployeeRecord
+  EmployeeRecord,
+  VehicleRecord,
+  SupplierRecord,
+  BuyerRecord,
+  CommodityRecord
 } from './types';
 
 // Standard Corn Moisture Deduction (Refaksi KA Jagung) Table lookup helper
@@ -318,3 +322,33 @@ export const initialEmployeeRecords: EmployeeRecord[] = [
   { id: "emp-4", name: "Kamaludin", role: "MAKELAR", phone: "0853-2211-1633", ratePerKg: 30 },
   { id: "emp-5", name: "Mandor Haris", role: "BURUH", phone: "0821-8877-1622" }
 ];
+
+export const initialVehicles: VehicleRecord[] = [
+  { id: "veh-1", policeNo: "DP 8600 AL", driverName: "Anto", vehicleType: "Colt Diesel Canter 6 Roda", tareWeight: 3120 },
+  { id: "veh-2", policeNo: "DD 9188 CD", driverName: "Budi", vehicleType: "Fuso Colt 6 Roda", tareWeight: 4250 },
+  { id: "veh-3", policeNo: "DP 3422 BB", driverName: "Kamal", vehicleType: "Tronton 10 Roda", tareWeight: 7500 },
+  { id: "veh-4", policeNo: "DD 8021 KK", driverName: "Hendra", vehicleType: "Colt Diesel Canter 6 Roda", tareWeight: 3900 },
+  { id: "veh-5", policeNo: "DP 1122 SS", driverName: "Dudi", vehicleType: "L300 Pick Up", tareWeight: 1450 }
+];
+
+export const initialSuppliers: SupplierRecord[] = [
+  { id: "sup-1", name: "H. Sudirman - Sidrap", phone: "0813-5566-2211", address: "Jl. Poros Sidrap - Wajo Km 12", mainCommodity: "JAGUNG" },
+  { id: "sup-2", name: "Kelompok Tani Harapan", phone: "0852-9900-1122", address: "Kec. Larompong Timur, Luwu", mainCommodity: "GABAH" },
+  { id: "sup-3", name: "Bpk. Rahmat", phone: "0823-1122-3344", address: "Tamping, Luwu", mainCommodity: "JAGUNG" },
+  { id: "sup-4", name: "CV Indo Tani Abadi", phone: "0812-7788-9900", address: "Palopo, Sulsel", mainCommodity: "LAINNYA" }
+];
+
+export const initialBuyers: BuyerRecord[] = [
+  { id: "buy-1", name: "PT Sinar Indah Grains", phone: "0811-4200-555", address: "Kawasan Industri Makassar (KIMA) Kav. 12" },
+  { id: "buy-2", name: "Pabrik Pakan Phokphand", phone: "0811-4433-222", address: "Jl. KIMA XVII, Makassar" },
+  { id: "buy-3", name: "PT Wahana Sumber Makmur", phone: "0821-3344-5566", address: "Pelabuhan Luwu Belopa" }
+];
+
+export const initialCommodities: CommodityRecord[] = [
+  { id: "com-1", name: "JAGUNG PIPIL KERING", type: "JAGUNG", moistureStandard: 14.0, bagDeductionPercent: 1.0 },
+  { id: "com-2", name: "JAGUNG PIPIL BASAH", type: "JAGUNG", moistureStandard: 14.0, bagDeductionPercent: 1.0 },
+  { id: "com-3", name: "BERAS KEPALA SUPER", type: "BERAS", moistureStandard: 14.0, bagDeductionPercent: 1.2 },
+  { id: "com-4", name: "GABAH KERING GILING", type: "GABAH", moistureStandard: 14.0, bagDeductionPercent: 0.5 },
+  { id: "com-5", name: "AMPAZ JAGUNG FLOUR", type: "LAINNYA", moistureStandard: 12.0, bagDeductionPercent: 0.0 }
+];
+
