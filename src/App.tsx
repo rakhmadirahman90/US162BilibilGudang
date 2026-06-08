@@ -40,6 +40,7 @@ import OutboundModule from './components/OutboundModule';
 import ServicesModule from './components/ServicesModule';
 import MoistureRefaksiModule from './components/MoistureRefaksiModule';
 import FinanceModule from './components/FinanceModule';
+import ReportsModule from './components/ReportsModule';
 import DatabaseMasterModule from './components/DatabaseMasterModule';
 
 // Brand Assets
@@ -286,7 +287,7 @@ export default function App() {
   });
 
   // Active navigational tab
-  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE' | 'DATABASE'>('DASHBOARD');
+  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE' | 'LAPORAN' | 'DATABASE'>('DASHBOARD');
 
   // Premium customizable active theme state with LocalStorage persistence
   const [activeThemeId, setActiveThemeId] = useState<string>(() => {
@@ -404,14 +405,10 @@ export default function App() {
   };
 
   const handleDeleteTicket = (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus tiket jembatan timbang ini?")) {
-      const target = tickets.find(t => t.id === id);
-      const label = target ? `#${target.ticketNo}` : '';
-      setTickets(prev => prev.filter(t => t.id !== id));
-      showToast(`Sukses menghapus tiket timbangan ${label}!`, 'success');
-    } else {
-      showToast('Penghapusan tiket dibatalkan.', 'info');
-    }
+    const target = tickets.find(t => t.id === id);
+    const label = target ? `#${target.ticketNo}` : '';
+    setTickets(prev => prev.filter(t => t.id !== id));
+    showToast(`Sukses menghapus tiket timbangan ${label}!`, 'success');
   };
 
   const handleAddInbound = (rec: InboundRecord) => {
@@ -419,13 +416,14 @@ export default function App() {
     showToast(`Sukses menyimpan: Penerimaan ${rec.commodity} dari ${rec.supplier} (${rec.netWeight.toLocaleString('id-ID')} Kg Netto)!`, 'success');
   };
 
+  const handleUpdateInbound = (rec: InboundRecord) => {
+    setInboundRecords(prev => prev.map(r => r.id === rec.id ? rec : r));
+    showToast(`Sukses memperbarui catatan penerimaan ${rec.commodity} dari ${rec.supplier}!`, 'success');
+  };
+
   const handleDeleteInbound = (id: string) => {
-    if (confirm("Hapus catatan penerimaan ini?")) {
-      setInboundRecords(prev => prev.filter(r => r.id !== id));
-      showToast('Catatan barang masuk berhasil dihapus!', 'success');
-    } else {
-      showToast('Penghapusan dibatalkan.', 'info');
-    }
+    setInboundRecords(prev => prev.filter(r => r.id !== id));
+    showToast('Catatan barang masuk berhasil dihapus!', 'success');
   };
 
   const handleAddOutbound = (rec: OutboundRecord) => {
@@ -433,13 +431,14 @@ export default function App() {
     showToast(`Sukses menyimpan: Pengiriman ${rec.commodity} ke ${rec.buyer} (${rec.totalWeight.toLocaleString('id-ID')} Kg Netto)!`, 'success');
   };
 
+  const handleUpdateOutbound = (rec: OutboundRecord) => {
+    setOutboundRecords(prev => prev.map(r => r.id === rec.id ? rec : r));
+    showToast(`Sukses memperbarui catatan pengiriman ${rec.commodity} ke ${rec.buyer}!`, 'success');
+  };
+
   const handleDeleteOutbound = (id: string) => {
-    if (confirm("Hapus catatan pengiriman ini?")) {
-      setOutboundRecords(prev => prev.filter(r => r.id !== id));
-      showToast('Catatan barang keluar berhasil dihapus!', 'success');
-    } else {
-      showToast('Penghapusan dibatalkan.', 'info');
-    }
+    setOutboundRecords(prev => prev.filter(r => r.id !== id));
+    showToast('Catatan barang keluar berhasil dihapus!', 'success');
   };
 
   const handleAddService = (rec: ServiceRecord) => {
@@ -447,18 +446,29 @@ export default function App() {
     showToast(`Sukses mencatatkan layanan jasa poles/kipas untuk ${rec.customerName}!`, 'success');
   };
 
+  const handleUpdateService = (rec: ServiceRecord) => {
+    setServiceRecords(prev => prev.map(r => r.id === rec.id ? rec : r));
+    showToast(`Sukses memperbarui layanan jasa poles/kipas untuk ${rec.customerName}!`, 'success');
+  };
+
   const handleDeleteService = (id: string) => {
-    if (confirm("Hapus catatan jasa milling?")) {
-      setServiceRecords(prev => prev.filter(r => r.id !== id));
-      showToast('Catatan layanan jasa poles berhasil dihapus!', 'success');
-    } else {
-      showToast('Penghapusan dibatalkan.', 'info');
-    }
+    setServiceRecords(prev => prev.filter(r => r.id !== id));
+    showToast('Catatan layanan jasa poles berhasil dihapus!', 'success');
   };
 
   const handleAddDebt = (debt: DebtRecord) => {
     setDebts(prev => [debt, ...prev]);
     showToast(`Sukses mencatatkan utang kepada ${debt.supplierName} sebesar Rp ${debt.totalDebt.toLocaleString('id-ID')}!`, 'success');
+  };
+
+  const handleUpdateDebt = (debt: DebtRecord) => {
+    setDebts(prev => prev.map(d => d.id === debt.id ? debt : d));
+    showToast(`Sukses memperbarui catatan utang kepada ${debt.supplierName}!`, 'success');
+  };
+
+  const handleDeleteDebt = (id: string) => {
+    setDebts(prev => prev.filter(d => d.id !== id));
+    showToast('Catatan utang berhasil dihapus!', 'success');
   };
 
   const handlePayDebt = (id: string, amount: number) => {
@@ -493,6 +503,16 @@ export default function App() {
   const handleAddFinance = (fin: FinancialRecord) => {
     setFinances(prev => [fin, ...prev]);
     showToast(`Mutasi kas ${fin.type === 'DEBIT' ? 'Pemasukan' : 'Pengeluaran'} Rp ${fin.amount.toLocaleString('id-ID')} berhasil disimpan!`, 'success');
+  };
+
+  const handleUpdateFinance = (fin: FinancialRecord) => {
+    setFinances(prev => prev.map(f => f.id === fin.id ? fin : f));
+    showToast(`Mutasi kas ${fin.description} berhasil diperbarui!`, 'success');
+  };
+
+  const handleDeleteFinance = (id: string) => {
+    setFinances(prev => prev.filter(f => f.id !== id));
+    showToast('Catatan mutasi kas berhasil dihapus!', 'success');
   };
 
   // --- INTEGRATED METRICS CALCULATOR FOR COVER DASHBOARD ---
@@ -674,6 +694,18 @@ export default function App() {
           </button>
 
           <button
+            onClick={() => setActiveTab('LAPORAN')}
+            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+              activeTab === 'LAPORAN' 
+                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
+                : 'border-transparent text-neutral-500 hover:text-neutral-800'
+            }`}
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
+            8. LAPORAN TERPADU
+          </button>
+
+          <button
             onClick={() => setActiveTab('DATABASE')}
             className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
               activeTab === 'DATABASE' 
@@ -682,7 +714,7 @@ export default function App() {
             }`}
           >
             <Database className="w-4 h-4 text-rose-500" />
-            8. DATABASE MASTER
+            9. DATABASE MASTER
           </button>
 
         </div>
@@ -977,6 +1009,7 @@ export default function App() {
             records={inboundRecords}
             tickets={tickets}
             onAddRecord={handleAddInbound}
+            onUpdateRecord={handleUpdateInbound}
             onDeleteRecord={handleDeleteInbound}
             vehicles={vehicles}
             suppliers={suppliers}
@@ -989,6 +1022,7 @@ export default function App() {
             records={outboundRecords}
             tickets={tickets}
             onAddRecord={handleAddOutbound}
+            onUpdateRecord={handleUpdateOutbound}
             onDeleteRecord={handleDeleteOutbound}
             vehicles={vehicles}
             buyers={buyers}
@@ -1000,6 +1034,7 @@ export default function App() {
           <ServicesModule
             records={serviceRecords}
             onAddRecord={handleAddService}
+            onUpdateRecord={handleUpdateService}
             onDeleteRecord={handleDeleteService}
           />
         )}
@@ -1016,12 +1051,28 @@ export default function App() {
             finances={finances}
             employees={employees}
             onAddDebt={handleAddDebt}
+            onUpdateDebt={handleUpdateDebt}
+            onDeleteDebt={handleDeleteDebt}
             onPayDebt={handlePayDebt}
             onAddFinance={handleAddFinance}
+            onUpdateFinance={handleUpdateFinance}
+            onDeleteFinance={handleDeleteFinance}
           />
         )}
 
-        {/* VIEW 8: DATABASE MASTER */}
+        {/* VIEW 8: LAPORAN TERPADU */}
+        {activeTab === 'LAPORAN' && (
+          <ReportsModule
+            tickets={tickets}
+            inboundRecords={inboundRecords}
+            outboundRecords={outboundRecords}
+            serviceRecords={serviceRecords}
+            debts={debts}
+            finances={finances}
+          />
+        )}
+
+        {/* VIEW 9: DATABASE MASTER */}
         {activeTab === 'DATABASE' && (
           <DatabaseMasterModule
             vehicles={vehicles}

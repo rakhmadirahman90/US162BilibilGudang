@@ -6,6 +6,7 @@ import {
   EmployeeRecord, 
   CommodityRecord 
 } from '../types';
+import ConfirmModal from './ConfirmModal';
 import { 
   PlusSquare, 
   Search, 
@@ -51,6 +52,25 @@ export default function DatabaseMasterModule({
   type DbTab = 'VEHICLES' | 'SUPPLIERS' | 'BUYERS' | 'EMPLOYEES' | 'COMMODITIES';
   const [activeSubTab, setActiveSubTab] = useState<DbTab>('VEHICLES');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Confirmation Modal State
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'ADD' | 'DELETE' | 'EDIT' | 'PAY';
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'ADD',
+    onConfirm: () => {}
+  });
+
+  const closeConfirm = () => {
+    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+  };
 
   // Editing state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -133,32 +153,47 @@ export default function DatabaseMasterModule({
 
     const cleanPoliceNo = vehiclePoliceNo.trim().toUpperCase();
 
-    if (editingId) {
-      setVehicles(prev => prev.map(v => v.id === editingId ? {
-        ...v,
-        policeNo: cleanPoliceNo,
-        driverName: vehicleDriver.trim(),
-        vehicleType: vehicleType.trim(),
-        tareWeight: Number(vehicleTare)
-      } : v));
-      triggerToast(`Data Truk ${cleanPoliceNo} berhasil diperbarui!`, 'success');
-    } else {
-      // Check duplicate
-      if (vehicles.some(v => v.policeNo.toUpperCase() === cleanPoliceNo)) {
-        triggerToast(`Truk dengan nomor polisi ${cleanPoliceNo} sudah ada!`, 'warning');
-        return;
+    const executeSave = () => {
+      if (editingId) {
+        setVehicles(prev => prev.map(v => v.id === editingId ? {
+          ...v,
+          policeNo: cleanPoliceNo,
+          driverName: vehicleDriver.trim(),
+          vehicleType: vehicleType.trim(),
+          tareWeight: Number(vehicleTare)
+        } : v));
+        triggerToast(`Data Truk ${cleanPoliceNo} berhasil diperbarui!`, 'success');
+      } else {
+        // Check duplicate
+        if (vehicles.some(v => v.policeNo.toUpperCase() === cleanPoliceNo)) {
+          triggerToast(`Truk dengan nomor polisi ${cleanPoliceNo} sudah ada!`, 'warning');
+          return;
+        }
+        const newVeh: VehicleRecord = {
+          id: `veh-${Date.now()}`,
+          policeNo: cleanPoliceNo,
+          driverName: vehicleDriver.trim(),
+          vehicleType: vehicleType.trim() || 'Truk Standard',
+          tareWeight: Number(vehicleTare) || 0
+        };
+        setVehicles(prev => [newVeh, ...prev]);
+        triggerToast(`Data Truk baru ${cleanPoliceNo} berhasil didaftarkan!`, 'success');
       }
-      const newVeh: VehicleRecord = {
-        id: `veh-${Date.now()}`,
-        policeNo: cleanPoliceNo,
-        driverName: vehicleDriver.trim(),
-        vehicleType: vehicleType.trim() || 'Truk Standard',
-        tareWeight: Number(vehicleTare) || 0
-      };
-      setVehicles(prev => [newVeh, ...prev]);
-      triggerToast(`Data Truk baru ${cleanPoliceNo} berhasil didaftarkan!`, 'success');
-    }
-    handleCancel();
+      handleCancel();
+    };
+
+    setConfirmModal({
+      isOpen: true,
+      title: editingId ? 'Konfirmasi Ubah Truk' : 'Konfirmasi Pendaftaran Truk',
+      message: editingId 
+        ? `Apakah Anda yakin ingin menyimpan perubahan data untuk truk ${cleanPoliceNo}?`
+        : `Apakah Anda yakin ingin mendaftarkan data truk baru ${cleanPoliceNo}?`,
+      type: editingId ? 'EDIT' : 'ADD',
+      onConfirm: () => {
+        executeSave();
+        closeConfirm();
+      }
+    });
   };
 
   const handleEditVehicle = (v: VehicleRecord) => {
@@ -171,10 +206,17 @@ export default function DatabaseMasterModule({
   };
 
   const handleDeleteVehicle = (id: string, policeNo: string) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus truk ${policeNo} dari database?`)) {
-      setVehicles(prev => prev.filter(v => v.id !== id));
-      triggerToast(`Truk ${policeNo} telah dihapus.`, 'success');
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Konfirmasi Hapus Truk',
+      message: `Apakah Anda yakin ingin menghapus data truk ${policeNo} secara permanen dari database master?`,
+      type: 'DELETE',
+      onConfirm: () => {
+        setVehicles(prev => prev.filter(v => v.id !== id));
+        triggerToast(`Truk ${policeNo} telah dihapus.`, 'success');
+        closeConfirm();
+      }
+    });
   };
 
   // --- SUPPLIER ACTIONS ---
@@ -185,31 +227,46 @@ export default function DatabaseMasterModule({
       return;
     }
 
-    if (editingId) {
-      setSuppliers(prev => prev.map(s => s.id === editingId ? {
-        ...s,
-        name: supplierName.trim(),
-        phone: supplierPhone.trim(),
-        address: supplierAddress.trim(),
-        mainCommodity: supplierCommodity
-      } : s));
-      triggerToast(`Data Supplier ${supplierName} diperbarui!`, 'success');
-    } else {
-      if (suppliers.some(s => s.name.toLowerCase() === supplierName.trim().toLowerCase())) {
-        triggerToast(`Supplier ${supplierName} sudah ada!`, 'warning');
-        return;
+    const executeSave = () => {
+      if (editingId) {
+        setSuppliers(prev => prev.map(s => s.id === editingId ? {
+          ...s,
+          name: supplierName.trim(),
+          phone: supplierPhone.trim(),
+          address: supplierAddress.trim(),
+          mainCommodity: supplierCommodity
+        } : s));
+        triggerToast(`Data Supplier ${supplierName} diperbarui!`, 'success');
+      } else {
+        if (suppliers.some(s => s.name.toLowerCase() === supplierName.trim().toLowerCase())) {
+          triggerToast(`Supplier ${supplierName} sudah ada!`, 'warning');
+          return;
+        }
+        const newSup: SupplierRecord = {
+          id: `sup-${Date.now()}`,
+          name: supplierName.trim(),
+          phone: supplierPhone.trim(),
+          address: supplierAddress.trim(),
+          mainCommodity: supplierCommodity
+        };
+        setSuppliers(prev => [newSup, ...prev]);
+        triggerToast(`Supplier ${supplierName} berhasil didaftarkan!`, 'success');
       }
-      const newSup: SupplierRecord = {
-        id: `sup-${Date.now()}`,
-        name: supplierName.trim(),
-        phone: supplierPhone.trim(),
-        address: supplierAddress.trim(),
-        mainCommodity: supplierCommodity
-      };
-      setSuppliers(prev => [newSup, ...prev]);
-      triggerToast(`Supplier ${supplierName} berhasil didaftarkan!`, 'success');
-    }
-    handleCancel();
+      handleCancel();
+    };
+
+    setConfirmModal({
+      isOpen: true,
+      title: editingId ? 'Konfirmasi Ubah Supplier' : 'Konfirmasi Pendaftaran Supplier',
+      message: editingId 
+        ? `Apakah Anda yakin ingin menyimpan perubahan data untuk supplier ${supplierName}?`
+        : `Apakah Anda yakin ingin mendaftarkan data supplier baru ${supplierName}?`,
+      type: editingId ? 'EDIT' : 'ADD',
+      onConfirm: () => {
+        executeSave();
+        closeConfirm();
+      }
+    });
   };
 
   const handleEditSupplier = (s: SupplierRecord) => {
@@ -222,10 +279,17 @@ export default function DatabaseMasterModule({
   };
 
   const handleDeleteSupplier = (id: string, name: string) => {
-    if (confirm(`Hapus Supplier ${name} dari database?`)) {
-      setSuppliers(prev => prev.filter(s => s.id !== id));
-      triggerToast(`Supplier ${name} telah dihapus.`, 'success');
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Konfirmasi Hapus Supplier',
+      message: `Apakah Anda yakin ingin menghapus supplier ${name} secara permanen dari database master?`,
+      type: 'DELETE',
+      onConfirm: () => {
+        setSuppliers(prev => prev.filter(s => s.id !== id));
+        triggerToast(`Supplier ${name} telah dihapus.`, 'success');
+        closeConfirm();
+      }
+    });
   };
 
   // --- BUYER ACTIONS ---
@@ -236,25 +300,40 @@ export default function DatabaseMasterModule({
       return;
     }
 
-    if (editingId) {
-      setBuyers(prev => prev.map(b => b.id === editingId ? {
-        ...b,
-        name: buyerName.trim(),
-        phone: buyerPhone.trim(),
-        address: buyerAddress.trim()
-      } : b));
-      triggerToast(`Data Pembeli ${buyerName} diperbarui!`, 'success');
-    } else {
-      const newBuyer: BuyerRecord = {
-        id: `buy-${Date.now()}`,
-        name: buyerName.trim(),
-        phone: buyerPhone.trim(),
-        address: buyerAddress.trim()
-      };
-      setBuyers(prev => [newBuyer, ...prev]);
-      triggerToast(`Pembeli ${buyerName} berhasil didaftarkan!`, 'success');
-    }
-    handleCancel();
+    const executeSave = () => {
+      if (editingId) {
+        setBuyers(prev => prev.map(b => b.id === editingId ? {
+          ...b,
+          name: buyerName.trim(),
+          phone: buyerPhone.trim(),
+          address: buyerAddress.trim()
+        } : b));
+        triggerToast(`Data Pembeli ${buyerName} diperbarui!`, 'success');
+      } else {
+        const newBuyer: BuyerRecord = {
+          id: `buy-${Date.now()}`,
+          name: buyerName.trim(),
+          phone: buyerPhone.trim(),
+          address: buyerAddress.trim()
+        };
+        setBuyers(prev => [newBuyer, ...prev]);
+        triggerToast(`Pembeli ${buyerName} berhasil didaftarkan!`, 'success');
+      }
+      handleCancel();
+    };
+
+    setConfirmModal({
+      isOpen: true,
+      title: editingId ? 'Konfirmasi Ubah Pembeli' : 'Konfirmasi Pendaftaran Pembeli',
+      message: editingId 
+        ? `Apakah Anda yakin ingin menyimpan perubahan data untuk pembeli ${buyerName}?`
+        : `Apakah Anda yakin ingin mendaftarkan data pembeli baru ${buyerName}?`,
+      type: editingId ? 'EDIT' : 'ADD',
+      onConfirm: () => {
+        executeSave();
+        closeConfirm();
+      }
+    });
   };
 
   const handleEditBuyer = (b: BuyerRecord) => {
@@ -266,10 +345,17 @@ export default function DatabaseMasterModule({
   };
 
   const handleDeleteBuyer = (id: string, name: string) => {
-    if (confirm(`Hapus Pembeli / Buyer ${name} dari database?`)) {
-      setBuyers(prev => prev.filter(b => b.id !== id));
-      triggerToast(`Pembeli ${name} telah dihapus.`, 'success');
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Konfirmasi Hapus Pembeli',
+      message: `Apakah Anda yakin ingin menghapus pembeli ${name} secara permanen dari database master?`,
+      type: 'DELETE',
+      onConfirm: () => {
+        setBuyers(prev => prev.filter(b => b.id !== id));
+        triggerToast(`Pembeli ${name} telah dihapus.`, 'success');
+        closeConfirm();
+      }
+    });
   };
 
   // --- EMPLOYEE / BROKER ACTIONS ---
@@ -280,27 +366,42 @@ export default function DatabaseMasterModule({
       return;
     }
 
-    if (editingId) {
-      setEmployees(prev => prev.map(emp => emp.id === editingId ? {
-        ...emp,
-        name: empName.trim(),
-        role: empRole,
-        phone: empPhone.trim(),
-        ratePerKg: empRole === 'MAKELAR' ? Number(empCommissionRate) : undefined
-      } : emp));
-      triggerToast(`Pegawai/Makelar ${empName} berhasil diperbarui!`, 'success');
-    } else {
-      const newEmp: EmployeeRecord = {
-        id: `emp-${Date.now()}`,
-        name: empName.trim(),
-        role: empRole,
-        phone: empPhone.trim(),
-        ratePerKg: empRole === 'MAKELAR' ? Number(empCommissionRate) : undefined
-      };
-      setEmployees(prev => [newEmp, ...prev]);
-      triggerToast(`Data ${empRole === 'MAKELAR' ? 'Makelar' : 'Pegawai'} ${empName} berhasil disimpan!`, 'success');
-    }
-    handleCancel();
+    const executeSave = () => {
+      if (editingId) {
+        setEmployees(prev => prev.map(emp => emp.id === editingId ? {
+          ...emp,
+          name: empName.trim(),
+          role: empRole,
+          phone: empPhone.trim(),
+          ratePerKg: empRole === 'MAKELAR' ? Number(empCommissionRate) : undefined
+        } : emp));
+        triggerToast(`Pegawai/Makelar ${empName} berhasil diperbarui!`, 'success');
+      } else {
+        const newEmp: EmployeeRecord = {
+          id: `emp-${Date.now()}`,
+          name: empName.trim(),
+          role: empRole,
+          phone: empPhone.trim(),
+          ratePerKg: empRole === 'MAKELAR' ? Number(empCommissionRate) : undefined
+        };
+        setEmployees(prev => [newEmp, ...prev]);
+        triggerToast(`Data ${empRole === 'MAKELAR' ? 'Makelar' : 'Pegawai'} ${empName} berhasil disimpan!`, 'success');
+      }
+      handleCancel();
+    };
+
+    setConfirmModal({
+      isOpen: true,
+      title: editingId ? 'Konfirmasi Ubah Pegawai/Makelar' : 'Konfirmasi Pendaftaran Pegawai/Makelar',
+      message: editingId 
+        ? `Apakah Anda yakin ingin menyimpan perubahan data untuk pegawai/makelar ${empName}?`
+        : `Apakah Anda yakin ingin mendaftarkan data pegawai/makelar baru ${empName}?`,
+      type: editingId ? 'EDIT' : 'ADD',
+      onConfirm: () => {
+        executeSave();
+        closeConfirm();
+      }
+    });
   };
 
   const handleEditEmployee = (emp: EmployeeRecord) => {
@@ -313,10 +414,17 @@ export default function DatabaseMasterModule({
   };
 
   const handleDeleteEmployee = (id: string, name: string) => {
-    if (confirm(`Hapus ${name} dari daftar pegawai/stakeholder?`)) {
-      setEmployees(prev => prev.filter(emp => emp.id !== id));
-      triggerToast(`${name} telah dihapus.`, 'success');
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Konfirmasi Hapus Pegawai/Makelar',
+      message: `Apakah Anda yakin ingin menghapus ${name} dari daftar pegawai/makelar secara permanen?`,
+      type: 'DELETE',
+      onConfirm: () => {
+        setEmployees(prev => prev.filter(emp => emp.id !== id));
+        triggerToast(`${name} telah dihapus.`, 'success');
+        closeConfirm();
+      }
+    });
   };
 
   // --- COMMODITY ACTIONS ---
@@ -327,27 +435,42 @@ export default function DatabaseMasterModule({
       return;
     }
 
-    if (editingId) {
-      setCommodities(prev => prev.map(c => c.id === editingId ? {
-        ...c,
-        name: commodityName.trim().toUpperCase(),
-        type: commodityType,
-        moistureStandard: Number(commodityMoisture),
-        bagDeductionPercent: Number(commodityBagDeduction)
-      } : c));
-      triggerToast(`Komoditas ${commodityName} diperbarui!`, 'success');
-    } else {
-      const newCom: CommodityRecord = {
-        id: `com-${Date.now()}`,
-        name: commodityName.trim().toUpperCase(),
-        type: commodityType,
-        moistureStandard: Number(commodityMoisture) || 14.0,
-        bagDeductionPercent: Number(commodityBagDeduction) || 1.0
-      };
-      setCommodities(prev => [newCom, ...prev]);
-      triggerToast(`Komoditas ${commodityName} disimpan!`, 'success');
-    }
-    handleCancel();
+    const executeSave = () => {
+      if (editingId) {
+        setCommodities(prev => prev.map(c => c.id === editingId ? {
+          ...c,
+          name: commodityName.trim().toUpperCase(),
+          type: commodityType,
+          moistureStandard: Number(commodityMoisture),
+          bagDeductionPercent: Number(commodityBagDeduction)
+        } : c));
+        triggerToast(`Komoditas ${commodityName} diperbarui!`, 'success');
+      } else {
+        const newCom: CommodityRecord = {
+          id: `com-${Date.now()}`,
+          name: commodityName.trim().toUpperCase(),
+          type: commodityType,
+          moistureStandard: Number(commodityMoisture) || 14.0,
+          bagDeductionPercent: Number(commodityBagDeduction) || 1.0
+        };
+        setCommodities(prev => [newCom, ...prev]);
+        triggerToast(`Komoditas ${commodityName} disimpan!`, 'success');
+      }
+      handleCancel();
+    };
+
+    setConfirmModal({
+      isOpen: true,
+      title: editingId ? 'Konfirmasi Ubah Komoditas' : 'Konfirmasi Pendaftaran Komoditas',
+      message: editingId 
+        ? `Apakah Anda yakin ingin menyimpan perubahan data untuk komoditas ${commodityName.toUpperCase()}?`
+        : `Apakah Anda yakin ingin mendaftarkan data komoditas baru ${commodityName.toUpperCase()}?`,
+      type: editingId ? 'EDIT' : 'ADD',
+      onConfirm: () => {
+        executeSave();
+        closeConfirm();
+      }
+    });
   };
 
   const handleEditCommodity = (c: CommodityRecord) => {
@@ -360,10 +483,17 @@ export default function DatabaseMasterModule({
   };
 
   const handleDeleteCommodity = (id: string, name: string) => {
-    if (confirm(`Hapus jenis komoditas ${name} dari database?`)) {
-      setCommodities(prev => prev.filter(c => c.id !== id));
-      triggerToast(`Komoditas ${name} telah dihapus.`, 'success');
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Konfirmasi Hapus Komoditas',
+      message: `Apakah Anda yakin ingin menghapus komoditas ${name} secara permanen dari database master?`,
+      type: 'DELETE',
+      onConfirm: () => {
+        setCommodities(prev => prev.filter(c => c.id !== id));
+        triggerToast(`Komoditas ${name} telah dihapus.`, 'success');
+        closeConfirm();
+      }
+    });
   };
 
   return (
@@ -1011,6 +1141,16 @@ export default function DatabaseMasterModule({
           </p>
         </div>
       </div>
+
+      {/* CONFIRM MODAL OVERLAY */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type={confirmModal.type}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={closeConfirm}
+      />
 
     </div>
   );

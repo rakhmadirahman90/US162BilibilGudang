@@ -5,8 +5,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { WeighbridgeTicket, VehicleRecord, BuyerRecord, SupplierRecord } from '../types';
-import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2 } from 'lucide-react';
+import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { exportToCSV, printPDFReport } from '../utils/exportHelper';
+import ConfirmModal from './ConfirmModal';
 
 interface WeighbridgeModuleProps {
   tickets: WeighbridgeTicket[];
@@ -44,6 +46,25 @@ export default function WeighbridgeModule({
   // UI states
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Confirm Dialog State
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'ADD' | 'EDIT' | 'DELETE';
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'ADD',
+    onConfirm: () => {}
+  });
+
+  const closeConfirm = () => {
+    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+  };
 
   useEffect(() => {
     if (errorMessage) {
@@ -113,40 +134,66 @@ export default function WeighbridgeModule({
         return;
       }
 
-      const newTicket: WeighbridgeTicket = {
-        id: `ticket-${Date.now()}`,
-        ticketNo: ticketNo,
-        policeNo: policeNo.toUpperCase(),
-        goodsName: goodsName.toUpperCase(),
-        agency: agency.toUpperCase(),
-        timbang1Time: nowStr,
-        timbang1Weight: simulatorWeight,
-        timbang2Time: null,
-        timbang2Weight: 0,
-        grossWeight: simulatorWeight,
-        tareWeight: 0,
-        bagDeductionPercent: bagDeductionPercent,
-        refaksiPercent: refaksiPercent,
-        netWeight: calculateNetWeight(simulatorWeight, 0, bagDeductionPercent, refaksiPercent),
-        status: 'PENDING',
-        notes: notes
+      const executeSave = () => {
+        const newTicket: WeighbridgeTicket = {
+          id: `ticket-${Date.now()}`,
+          ticketNo: ticketNo,
+          policeNo: policeNo.toUpperCase(),
+          goodsName: goodsName.toUpperCase(),
+          agency: agency.toUpperCase(),
+          timbang1Time: nowStr,
+          timbang1Weight: simulatorWeight,
+          timbang2Time: null,
+          timbang2Weight: 0,
+          grossWeight: simulatorWeight,
+          tareWeight: 0,
+          bagDeductionPercent: bagDeductionPercent,
+          refaksiPercent: refaksiPercent,
+          netWeight: calculateNetWeight(simulatorWeight, 0, bagDeductionPercent, refaksiPercent),
+          status: 'PENDING',
+          notes: notes
+        };
+
+        onAddTicket(newTicket);
+        setSelectedTicket(newTicket);
+        setIsCreatingNew(false);
+        setErrorMessage(null);
       };
 
-      onAddTicket(newTicket);
-      setSelectedTicket(newTicket);
-      setIsCreatingNew(false);
-      setErrorMessage(null);
+      setConfirmModal({
+        isOpen: true,
+        title: "Konfirmasi Tambah Antrian Timbang 1",
+        message: `Apakah Anda yakin ingin mendaftarkan tiket timbangan baru untuk Nomor Polisi ${policeNo.toUpperCase()} dengan berat gross ${simulatorWeight.toLocaleString('id-ID')} Kg?`,
+        type: 'ADD',
+        onConfirm: () => {
+          executeSave();
+          closeConfirm();
+        }
+      });
     } else if (selectedTicket) {
       // Re-weigh 1 for existing ticket
-      const updated: WeighbridgeTicket = {
-        ...selectedTicket,
-        timbang1Time: nowStr,
-        timbang1Weight: simulatorWeight,
-        grossWeight: simulatorWeight,
-        netWeight: calculateNetWeight(simulatorWeight, selectedTicket.timbang2Weight, selectedTicket.bagDeductionPercent, selectedTicket.refaksiPercent)
+      const executeUpdate = () => {
+        const updated: WeighbridgeTicket = {
+          ...selectedTicket,
+          timbang1Time: nowStr,
+          timbang1Weight: simulatorWeight,
+          grossWeight: simulatorWeight,
+          netWeight: calculateNetWeight(simulatorWeight, selectedTicket.timbang2Weight, selectedTicket.bagDeductionPercent, selectedTicket.refaksiPercent)
+        };
+        onUpdateTicket(updated);
+        setSelectedTicket(updated);
       };
-      onUpdateTicket(updated);
-      setSelectedTicket(updated);
+
+      setConfirmModal({
+        isOpen: true,
+        title: "Konfirmasi Perubahan Timbang 1",
+        message: `Apakah Anda yakin ingin memperbarui data Timbang 1 untuk tiket #${selectedTicket.ticketNo}?`,
+        type: 'EDIT',
+        onConfirm: () => {
+          executeUpdate();
+          closeConfirm();
+        }
+      });
     }
   };
 
@@ -162,22 +209,35 @@ export default function WeighbridgeModule({
     }
 
     const nowStr = new Date().toLocaleString('id-ID', { hour12: false }).replace(/\//g, '-');
-    const updated: WeighbridgeTicket = {
-      ...selectedTicket,
-      timbang2Time: nowStr,
-      timbang2Weight: simulatorWeight,
-      tareWeight: simulatorWeight,
-      status: 'COMPLETED',
-      netWeight: calculateNetWeight(
-        selectedTicket.timbang1Weight,
-        simulatorWeight,
-        selectedTicket.bagDeductionPercent,
-        selectedTicket.refaksiPercent
-      )
+    const executeTimbang2 = () => {
+      const updated: WeighbridgeTicket = {
+        ...selectedTicket,
+        timbang2Time: nowStr,
+        timbang2Weight: simulatorWeight,
+        tareWeight: simulatorWeight,
+        status: 'COMPLETED',
+        netWeight: calculateNetWeight(
+          selectedTicket.timbang1Weight,
+          simulatorWeight,
+          selectedTicket.bagDeductionPercent,
+          selectedTicket.refaksiPercent
+        )
+      };
+      onUpdateTicket(updated);
+      setSelectedTicket(updated);
+      setErrorMessage(null);
     };
-    onUpdateTicket(updated);
-    setSelectedTicket(updated);
-    setErrorMessage(null);
+
+    setConfirmModal({
+      isOpen: true,
+      title: "Konfirmasi Selesaikan Timbang 2",
+      message: `Apakah Anda yakin ingin memproses Timbang 2 (Selesai) untuk tiket #${selectedTicket.ticketNo} dengan berat tare ${simulatorWeight.toLocaleString('id-ID')} Kg?`,
+      type: 'EDIT',
+      onConfirm: () => {
+        executeTimbang2();
+        closeConfirm();
+      }
+    });
   };
 
   // Reset indicator zero
@@ -206,6 +266,54 @@ export default function WeighbridgeModule({
     t.goodsName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.agency.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // --- EXPORT & PRINT HANDLERS ---
+  const handleExportExcel = () => {
+    const headers = [
+      'No. Tiket', 'Waktu Timbang I', 'No. Polisi', 
+      'Komoditas', 'Tujuan/Agen', 'Berat Gross (Kg)', 'Berat Tare (Kg)', 
+      'Potongan Karung (%)', 'Refaksi (%)', 'Berat Netto (Kg)', 'Status', 'Catatan'
+    ];
+    const rows = filteredTickets.map(t => [
+      t.ticketNo,
+      t.timbang1Time,
+      t.policeNo,
+      t.goodsName,
+      t.agency,
+      t.timbang1Weight.toString(),
+      t.timbang2Weight.toString(),
+      t.bagDeductionPercent.toString(),
+      t.refaksiPercent.toString(),
+      t.netWeight.toString(),
+      t.status,
+      t.notes || ''
+    ]);
+    exportToCSV(headers, rows, 'Laporan_Jembatan_Timbang');
+  };
+
+  const handlePrintPDF = () => {
+    const headers = [
+      'No. Tiket', 'No. Polisi', 'Barang', 'Agen / Mitra', 
+      'Timbang I (Gross)', 'Timbang II (Tare)', 'Netto'
+    ];
+    const rows = filteredTickets.map(t => [
+      t.ticketNo,
+      t.policeNo,
+      t.goodsName,
+      t.agency,
+      `${t.timbang1Weight.toLocaleString('id-ID')} Kg`,
+      t.timbang2Weight > 0 ? `${t.timbang2Weight.toLocaleString('id-ID')} Kg` : '-',
+      `${t.netWeight.toLocaleString('id-ID')} Kg`
+    ]);
+    const totalNetWeight = filteredTickets.reduce((sum, t) => sum + t.netWeight, 0);
+    const totalGrossWeight = filteredTickets.reduce((sum, t) => sum + t.timbang1Weight, 0);
+    const summaries = [
+      { label: 'Total Transaksi', value: `${filteredTickets.length} Tiket` },
+      { label: 'Total Berat Kotor (Gross)', value: `${totalGrossWeight.toLocaleString('id-ID')} Kg` },
+      { label: 'Total Netto Bersih', value: `${totalNetWeight.toLocaleString('id-ID')} Kg` }
+    ];
+    printPDFReport('Laporan Jembatan Timbang Seng', headers, rows, summaries);
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6" id="weighbridge-main font-sans">
@@ -602,20 +710,38 @@ export default function WeighbridgeModule({
 
         {/* 3. TICKET ARCHIVE AND LIST */}
         <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-            <h3 className="font-bold text-neutral-800 flex items-center gap-2">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+            <h3 className="font-bold text-neutral-800 flex items-center gap-2 shrink-0">
               <Scale className="text-emerald-500 w-5 h-5" />
-              Arsip Tiket Jembatan Timbang
+              Arsip Tiket Jembatan Timbang ({filteredTickets.length})
             </h3>
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-neutral-400" />
-              <input
-                type="text"
-                placeholder="Cari No. Polisi/Tiket..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs bg-neutral-50 rounded-lg border border-neutral-200 focus:outline-none focus:border-emerald-600 focus:bg-white"
-              />
+            
+            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto md:justify-end">
+              <button
+                onClick={handleExportExcel}
+                title="Unduh seluruh daftar rekap jembatan timbang ke format Microsoft Excel"
+                className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" /> Export Excel
+              </button>
+              <button
+                onClick={handlePrintPDF}
+                title="Cetak Laporan atau simpan sebagai dokumen PDF"
+                className="flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5" /> Cetak Laporan / PDF
+              </button>
+              
+              <div className="relative w-full sm:w-48 shrink-0">
+                <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-neutral-400" />
+                <input
+                  type="text"
+                  placeholder="Cari No. Polisi/Tiket..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-3 py-1.5 text-xs bg-neutral-50 rounded-lg border border-neutral-200 focus:outline-none focus:border-emerald-600 focus:bg-white font-semibold text-neutral-700"
+                />
+              </div>
             </div>
           </div>
 
@@ -682,7 +808,18 @@ export default function WeighbridgeModule({
                           <Printer className="w-3.5 h-3.5" />
                         </button>
                         <button 
-                          onClick={() => onDeleteTicket(t.id)}
+                          onClick={() => {
+                            setConfirmModal({
+                              isOpen: true,
+                              title: "Konfirmasi Hapus Tiket",
+                              message: `Apakah Anda yakin ingin menghapus tiket jembatan timbang #${t.ticketNo} (${t.policeNo}) secara permanen?`,
+                              type: 'DELETE',
+                              onConfirm: () => {
+                                onDeleteTicket(t.id);
+                                closeConfirm();
+                              }
+                            });
+                          }}
                           title="Hapus Tiket"
                           className="p-1 text-neutral-400 hover:text-red-500 transition"
                         >
@@ -847,6 +984,16 @@ export default function WeighbridgeModule({
           </div>
         )}
       </AnimatePresence>
+
+      {/* CONFIRM MODAL OVERLAY */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type={confirmModal.type}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={closeConfirm}
+      />
 
     </div>
   );

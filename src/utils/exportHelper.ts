@@ -1,0 +1,248 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
+ * Clean Utility helpers to export React table reports to Microsoft Excel (CSV with UTF-8 BOM)
+ * and trigger elegant, styled print jobs to physical printers or PDF generators.
+ */
+
+export function exportToCSV(headers: string[], rows: string[][], filename: string) {
+  // Map rows to escaped CSV cells
+  const csvContent = [
+    headers.map(h => `"${h.replace(/"/g, '""')}"`).join(','),
+    ...rows.map(row => 
+      row.map(cell => {
+        const val = cell === null || cell === undefined ? '' : String(cell);
+        // Escape quotes
+        return `"${val.replace(/"/g, '""')}"`;
+      }).join(',')
+    )
+  ].join('\n');
+
+  // Prefix with UTF-8 Byte Order Mark (BOM) so Excel respects encoded characters instantly
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${filename.replace(/[^a-zA-Z0-9_-]/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+interface SummaryItem {
+  label: string;
+  value: string;
+}
+
+export function printPDFReport(
+  reportTitle: string, 
+  headers: string[], 
+  rows: string[][], 
+  summaries?: SummaryItem[]
+) {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    alert('Pop-up terblokir! Harap izinkan pop-up untuk mencetak laporan.');
+    return;
+  }
+
+  const currentDate = new Date().toLocaleString('id-ID', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  // Calculate table rows HTML
+  const tableHeadersHTML = headers.map(h => `
+    <th style="border: 1px solid #222; padding: 8px 6px; text-transform: uppercase; font-size: 10px; background-color: #f3f4f6; text-align: left;">
+      ${h}
+    </th>
+  `).join('');
+
+  const tableRowsHTML = rows.map((row, idx) => `
+    <tr style="background-color: ${idx % 2 === 0 ? '#ffffff' : '#fafafa'};">
+      ${row.map(cell => `
+        <td style="border: 1px solid #ddd; padding: 6px 8px; font-size: 10px; color: #111;">
+          ${cell}
+        </td>
+      `).join('')}
+    </tr>
+  `).join('');
+
+  // Calculate summaries HTML
+  let summariesHTML = '';
+  if (summaries && summaries.length > 0) {
+    summariesHTML = `
+      <div style="margin-top: 20px; border: 1.5px solid #222; background-color: #fafafa; padding: 12px; border-radius: 6px; page-break-inside: avoid;">
+        <h4 style="margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase; font-family: 'Courier New', Courier, monospace; letter-spacing: 1px;">
+          RINGKASAN REKAPITULASI DATA:
+        </h4>
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px; font-family: Arial, sans-serif;">
+          <tr>
+            ${summaries.map(item => `
+              <td style="padding: 4px 8px; border-right: 1px solid #ccc; width: ${Math.round(100 / summaries.length)}%;">
+                <div style="font-size: 9px; color: #555; text-transform: uppercase; font-weight: bold;">${item.label}</div>
+                <div style="font-size: 14px; font-weight: bold; color: #111; margin-top: 2px;">${item.value}</div>
+              </td>
+            `).join('')}
+          </tr>
+        </table>
+      </div>
+    `;
+  }
+
+  // Generate full HTML
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>${reportTitle} - US BILIBILI 162</title>
+      <style>
+        @media print {
+          body {
+            background-color: #ffffff;
+            color: #000000;
+          }
+          .no-print {
+            display: none !important;
+          }
+          @page {
+            size: A4;
+            margin: 15mm;
+          }
+        }
+        body {
+          font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+          margin: 0;
+          padding: 20px;
+          color: #111;
+          background-color: #f9f9f9;
+        }
+        .container {
+          max-width: 900px;
+          margin: 0 auto;
+          background: #fff;
+          padding: 30px;
+          border: 1px solid #ddd;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        @media print {
+          body { padding: 0; }
+          .container { border: none; box-shadow: none; padding: 0; max-width: 100%; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="no-print" style="max-width: 900px; margin: 0 auto; margin-bottom: 20px; padding: 12px; background-color: #e0f2fe; border: 1px solid #bae6fd; border-radius: 8px; display: flex; justify-between: space-between; align-items: center; font-family: sans-serif;">
+        <div style="font-size: 12px; color: #0369a1; font-weight: bold;">
+          ℹ️ PRATINJAU DOKUMEN CETAK & PDF - SIAP DIUNDUH ATAU DICETAK KETIKA TOMBOL DIKANAN DIKLIK
+        </div>
+        <button onclick="window.print();" style="background-color: #0284c7; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          🖨️ CETAK / SIMPAN PDF
+        </button>
+      </div>
+
+      <div class="container">
+        
+        <!-- Kop Surat Resmi (Official Industrial Letterhead) -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px;">
+          <tr>
+            <td style="width: 80px; text-align: left; vertical-align: middle;">
+              <!-- Placeholder for logo / stylish label -->
+              <span style="display: inline-block; padding: 10px; background-color: #111; color: #fff; font-weight: bold; font-family: 'Courier New', Courier, monospace; font-size: 16px; border-radius: 4px;">
+                US162
+              </span>
+            </td>
+            <td style="text-align: left; vertical-align: middle; padding-left: 15px;">
+              <h2 style="margin: 0; font-size: 15px; letter-spacing: 1px; font-weight: 850; text-transform: uppercase;">
+                PERUSAHAAN PERGUDANGAN US BILIBILI 162
+              </h2>
+              <p style="margin: 3px 0 0 0; font-size: 9.5px; color: #333; line-height: 1.4;">
+                Gudang &amp; Jembatan Timbang Terpadu &bull; Komoditas Pertanian Beras &amp; Jagung Pipil<br/>
+                Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa, Kabupaten Pinrang, Sulawesi Selatan 91131 &bull; Telp: 085244466009
+              </p>
+            </td>
+          </tr>
+        </table>
+        
+        <!-- Double Border Line -->
+        <div style="border-top: 3px double #111; margin-top: 10px; margin-bottom: 20px;"></div>
+
+        <!-- Laporan Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
+          <div>
+            <h1 style="margin: 0; font-size: 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; text-decoration: underline;">
+              ${reportTitle}
+            </h1>
+            <p style="margin: 5px 0 0 0; font-size: 10px; color: #555;">
+              Waktu Cetak: <strong>${currentDate}</strong>
+            </p>
+          </div>
+          <div style="text-align: right;">
+            <p style="margin: 0; font-size: 9px; font-family: 'Courier New', Courier, monospace; background-color: #eee; padding: 4px 8px; border-radius: 4px;">
+              Sistem: US_Bilibili_v2.0_Secure
+            </p>
+          </div>
+        </div>
+
+        <!-- Main Data Table -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-family: sans-serif;">
+          <thead>
+            <tr>
+              ${tableHeadersHTML}
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRowsHTML}
+          </tbody>
+        </table>
+
+        <!-- Summary section -->
+        ${summariesHTML}
+
+        <!-- Signature Block at bottom (Industrial Standard) -->
+        <div style="margin-top: 40px; display: flex; justify-content: space-between; page-break-inside: avoid; font-family: sans-serif;">
+          <div style="width: 250px; text-align: center;">
+            <p style="margin: 0; font-size: 10px; color: #444;">Disetujui Oleh,</p>
+            <p style="margin: 5px 0 0 0; font-size: 10px; font-weight: bold; text-transform: uppercase;">Pimpinan / Kepala Gudang</p>
+            <div style="height: 55px; border-bottom: 1.5px solid #222; margin: 15px auto 5px auto; width: 180px;"></div>
+            <p style="margin: 0; font-size: 9px; color: #555; font-style: italic;">( H. Sudirman / Perwakilan )</p>
+          </div>
+
+          <div style="width: 250px; text-align: center;">
+            <p style="margin: 0; font-size: 10px; color: #444;">Dibuat &amp; Dilaporkan Oleh,</p>
+            <p style="margin: 5px 0 0 0; font-size: 10px; font-weight: bold; text-transform: uppercase;">Operator Sistem</p>
+            <div style="height: 55px; border-bottom: 1.5px solid #222; margin: 15px auto 5px auto; width: 180px;"></div>
+            <p style="margin: 0; font-size: 9px; color: #555; font-style: italic;">( Operator Timbangan )</p>
+          </div>
+        </div>
+
+        <!-- Print Footer with page info -->
+        <div style="margin-top: 30px; text-align: center; border-top: 1px dotted #ccc; padding-top: 10px; font-size: 8.5px; color: #777;">
+          Laporan ini diekspor secara digital melalui Terminal Timbang GSC GST-9700 US Bilibili 162. Tanggal Transaksi Berjalan Terarsip Otomatis.
+        </div>
+
+      </div>
+
+      <script>
+        // Auto trigger browser print engine when opened
+        window.addEventListener('DOMContentLoaded', () => {
+          setTimeout(() => {
+            window.print();
+          }, 450);
+        });
+      </script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}

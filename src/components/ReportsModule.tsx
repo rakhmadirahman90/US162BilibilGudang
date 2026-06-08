@@ -1,0 +1,1108 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useMemo } from 'react';
+import { 
+  WeighbridgeTicket, 
+  InboundRecord, 
+  OutboundRecord, 
+  ServiceRecord, 
+  DebtRecord, 
+  FinancialRecord 
+} from '../types';
+import { 
+  FileText, 
+  Download, 
+  Printer, 
+  Calendar, 
+  Search, 
+  Scale, 
+  ArrowDownCircle, 
+  ArrowUpCircle, 
+  Wind, 
+  DollarSign, 
+  Filter, 
+  AlertCircle,
+  Briefcase,
+  PieChart,
+  Repeat,
+  CheckCircle,
+  TrendingUp,
+  SlidersHorizontal
+} from 'lucide-react';
+import { exportToCSV, printPDFReport } from '../utils/exportHelper';
+
+interface ReportsModuleProps {
+  tickets: WeighbridgeTicket[];
+  inboundRecords: InboundRecord[];
+  outboundRecords: OutboundRecord[];
+  serviceRecords: ServiceRecord[];
+  debts: DebtRecord[];
+  finances: FinancialRecord[];
+}
+
+type ReportTabSelection = 'RINGKASAN' | 'TIMBANGAN' | 'INBOUND' | 'OUTBOUND' | 'SERVICES' | 'FINANCE';
+
+export default function ReportsModule({
+  tickets,
+  inboundRecords,
+  outboundRecords,
+  serviceRecords,
+  debts,
+  finances
+}: ReportsModuleProps) {
+  // Navigation & Sub-activity Tabs
+  const [activeSubTab, setActiveSubTab] = useState<ReportTabSelection>('RINGKASAN');
+
+  // Multi-level Filters
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [commodityFilter, setCommodityFilter] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Reset Filters Function
+  const handleResetFilters = () => {
+    setStartDate('');
+    setEndDate('');
+    setCommodityFilter('ALL');
+    setSearchQuery('');
+  };
+
+  // Helper date checker
+  const isWithinDateRange = (itemDate: string) => {
+    if (!itemDate) return true;
+    const dateStr = itemDate.substring(0, 10); // Standard YYYY-MM-DD format
+    if (startDate && dateStr < startDate) return false;
+    if (endDate && dateStr > endDate) return false;
+    return true;
+  };
+
+  // --- FILTERED COMPUTATIONS ---
+  
+  // 1. Timbangan Filters
+  const filteredTickets = useMemo(() => {
+    return tickets.filter(t => {
+      if (!isWithinDateRange(t.timbang1Time)) return false;
+      if (commodityFilter !== 'ALL' && t.goodsName !== commodityFilter) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matchesTicket = t.ticketNo.toLowerCase().includes(q);
+        const matchesPlate = t.policeNo.toLowerCase().includes(q);
+        const matchesAgency = t.agency.toLowerCase().includes(q);
+        if (!matchesTicket && !matchesPlate && !matchesAgency) return false;
+      }
+      return true;
+    });
+  }, [tickets, startDate, endDate, commodityFilter, searchQuery]);
+
+  // 2. Inbound Filter
+  const filteredInbound = useMemo(() => {
+    return inboundRecords.filter(r => {
+      if (!isWithinDateRange(r.date)) return false;
+      if (commodityFilter !== 'ALL' && r.commodity !== commodityFilter) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matchesSupplier = r.supplier.toLowerCase().includes(q);
+        const matchesPlate = r.vehicleNo.toLowerCase().includes(q);
+        const matchesTicket = r.ticketNo ? r.ticketNo.toLowerCase().includes(q) : false;
+        if (!matchesSupplier && !matchesPlate && !matchesTicket) return false;
+      }
+      return true;
+    });
+  }, [inboundRecords, startDate, endDate, commodityFilter, searchQuery]);
+
+  // 3. Outbound Filter
+  const filteredOutbound = useMemo(() => {
+    return outboundRecords.filter(r => {
+      if (!isWithinDateRange(r.date)) return false;
+      if (commodityFilter !== 'ALL' && r.commodity !== commodityFilter) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matchesBuyer = r.buyer.toLowerCase().includes(q);
+        const matchesPlate = r.vehicleNo.toLowerCase().includes(q);
+        const matchesInvoice = r.invoiceNo.toLowerCase().includes(q);
+        if (!matchesBuyer && !matchesPlate && !matchesInvoice) return false;
+      }
+      return true;
+    });
+  }, [outboundRecords, startDate, endDate, commodityFilter, searchQuery]);
+
+  // 4. Services Filter
+  const filteredServices = useMemo(() => {
+    return serviceRecords.filter(s => {
+      if (!isWithinDateRange(s.date)) return false;
+      if (commodityFilter !== 'ALL' && s.commodity !== commodityFilter) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matchesCustomer = s.customerName.toLowerCase().includes(q);
+        const matchesOperator = s.operatorName.toLowerCase().includes(q);
+        const matchesType = s.serviceType.toLowerCase().includes(q);
+        if (!matchesCustomer && !matchesOperator && !matchesType) return false;
+      }
+      return true;
+    });
+  }, [serviceRecords, startDate, endDate, commodityFilter, searchQuery]);
+
+  // 5. Finances Filter
+  const filteredFinances = useMemo(() => {
+    return finances.filter(f => {
+      if (!isWithinDateRange(f.date)) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matchesDesc = f.description.toLowerCase().includes(q);
+        const matchesCat = f.category.toLowerCase().includes(q);
+        const matchesAcc = f.bankAccount.toLowerCase().includes(q);
+        const matchesParty = f.partyName ? f.partyName.toLowerCase().includes(q) : false;
+        if (!matchesDesc && !matchesCat && !matchesAcc && !matchesParty) return false;
+      }
+      return true;
+    });
+  }, [finances, startDate, endDate, searchQuery]);
+
+  // --- EXCEL & PDF EXPORTERS ---
+
+  // Export 1. Tickets
+  const handleExportTicketsExcel = () => {
+    const headers = [
+      'No. Tiket', 'Timbangan I', 'Timbangan II', 'No. Polisi', 'Komoditas', 
+      'Mitra / Agen', 'Berat Gross (Kg)', 'Berat Tare (Kg)', 'Pot. Karung (%)', 
+      'Refaksi KA (%)', 'Berat Netto (Kg)', 'Status', 'Catatan'
+    ];
+    const rows = filteredTickets.map(t => [
+      t.ticketNo,
+      t.timbang1Time,
+      t.timbang2Time || '-',
+      t.policeNo,
+      t.goodsName,
+      t.agency,
+      t.timbang1Weight.toString(),
+      t.timbang2Weight.toString(),
+      t.bagDeductionPercent.toString(),
+      t.refaksiPercent.toString(),
+      t.netWeight.toString(),
+      t.status,
+      t.notes || ''
+    ]);
+    exportToCSV(headers, rows, 'Laporan_Arsip_Timbangan_Bilibili');
+  };
+
+  const handlePrintTicketsPDF = () => {
+    const headers = [
+      'No. Tiket', 'Waktu Timbang', 'No. Polisi', 'Komoditas', 'Agen / Mitra', 'Gross (Kg)', 'Netto (Kg)'
+    ];
+    const rows = filteredTickets.map(t => [
+      t.ticketNo,
+      t.timbang1Time.split(' ')[0],
+      t.policeNo,
+      t.goodsName,
+      t.agency,
+      t.timbang1Weight.toLocaleString('id-ID'),
+      t.netWeight.toLocaleString('id-ID')
+    ]);
+    const totalGross = filteredTickets.reduce((sum, t) => sum + t.timbang1Weight, 0);
+    const totalNet = filteredTickets.reduce((sum, t) => sum + t.netWeight, 0);
+    const summaries = [
+      { label: 'Jumlah Antrian', value: `${filteredTickets.length} Truk` },
+      { label: 'Total Tonase Gross', value: `${totalGross.toLocaleString('id-ID')} Kg` },
+      { label: 'Total Tonase Netto', value: `${totalNet.toLocaleString('id-ID')} Kg` }
+    ];
+    printPDFReport('Laporan Rekapitulasi Jembatan Timbang', headers, rows, summaries);
+  };
+
+  // Export 2. Inbound Records
+  const handleExportInboundExcel = () => {
+    const headers = [
+      'Tanggal', 'No. Tiket Ref', 'No. Polisi', 'Supplier', 'Komoditas', 
+      'Tonase Gross (Kg)', 'Tonase Tare (Kg)', 'Kadar Air (%)', 'Refaksi KA (%)', 
+      'Pot. Karung (%)', 'Tonase Netto (Kg)', 'Sektor Gudang', 'Upah Buruh (Rp)'
+    ];
+    const rows = filteredInbound.map(r => [
+      r.date,
+      r.ticketNo || '-',
+      r.vehicleNo,
+      r.supplier,
+      r.commodity,
+      r.grossWeight.toString(),
+      r.tareWeight.toString(),
+      r.moistureContent.toString(),
+      r.refaksiKaPercent.toString(),
+      r.bagDeductionPercent.toString(),
+      r.netWeight.toString(),
+      r.warehouseSection,
+      r.laborCost.toString()
+    ]);
+    exportToCSV(headers, rows, 'Laporan_Barang_Masuk_Bilibili');
+  };
+
+  const handlePrintInboundPDF = () => {
+    const headers = [
+      'Tanggal', 'No. Tiket', 'No. Polisi', 'Nama Supplier', 'Komoditas', 'Sektor Gudang', 'Netto (Kg)'
+    ];
+    const rows = filteredInbound.map(r => [
+      r.date,
+      r.ticketNo || '-',
+      r.vehicleNo,
+      r.supplier,
+      r.commodity,
+      r.warehouseSection,
+      r.netWeight.toLocaleString('id-ID')
+    ]);
+    const totalInboundNet = filteredInbound.reduce((sum, r) => sum + r.netWeight, 0);
+    const totalLabor = filteredInbound.reduce((sum, r) => sum + r.laborCost, 0);
+    const summaries = [
+      { label: 'Total Penerimaan', value: `${filteredInbound.length} Transaksi` },
+      { label: 'Total Tonase Bersih', value: `${totalInboundNet.toLocaleString('id-ID')} Kg` },
+      { label: 'Total Ongkos Buruh', value: `Rp ${totalLabor.toLocaleString('id-ID')}` }
+    ];
+    printPDFReport('Laporan Mutasi Penerimaan Barang Masuk', headers, rows, summaries);
+  };
+
+  // Export 3. Outbound Records
+  const handleExportOutboundExcel = () => {
+    const headers = [
+      'Tanggal', 'No. Invoice', 'No. Polisi', 'Pembeli (Buyer)', 'Komoditas', 
+      'Total Tonase Netto (Kg)', 'Buruh Muat (Rp)', 'Tujuan Kota', 'Status'
+    ];
+    const rows = filteredOutbound.map(r => [
+      r.date,
+      r.invoiceNo,
+      r.vehicleNo,
+      r.buyer,
+      r.commodity,
+      r.totalWeight.toString(),
+      r.loadingLaborCost.toString(),
+      r.destination,
+      r.status
+    ]);
+    exportToCSV(headers, rows, 'Laporan_Barang_Keluar_Bilibili');
+  };
+
+  const handlePrintOutboundPDF = () => {
+    const headers = [
+      'Tanggal', 'No. Invoice', 'Pembeli (Buyer)', 'Komoditas', 'Tujuan Kota', 'Status', 'Tonase (Kg)'
+    ];
+    const rows = filteredOutbound.map(r => [
+      r.date,
+      r.invoiceNo,
+      r.buyer,
+      r.commodity,
+      r.destination,
+      r.status,
+      r.totalWeight.toLocaleString('id-ID')
+    ]);
+    const totalOutboundWeight = filteredOutbound.reduce((sum, r) => sum + r.totalWeight, 0);
+    const totalOutboundLabor = filteredOutbound.reduce((sum, r) => sum + r.loadingLaborCost, 0);
+    const summaries = [
+      { label: 'Total Pengiriman', value: `${filteredOutbound.length} SJ` },
+      { label: 'Total Tonase Terkirim', value: `${totalOutboundWeight.toLocaleString('id-ID')} Kg` },
+      { label: 'Total Biaya Pemuatan', value: `Rp ${totalOutboundLabor.toLocaleString('id-ID')}` }
+    ];
+    printPDFReport('Laporan Mutasi Pengiriman Barang Keluar', headers, rows, summaries);
+  };
+
+  // Export 4. Services Ledger
+  const handleExportServicesExcel = () => {
+    const headers = [
+      'Tanggal', 'Nama Pelanggan', 'Jenis Layanan', 'Keterangan Barang', 
+      'Tonase Diproses (Kg)', 'Tarif/Kg', 'Total Jasa (Rp)', 'Status Bayar', 'Operator'
+    ];
+    const rows = filteredServices.map(s => [
+      s.date,
+      s.customerName,
+      s.serviceType,
+      s.commodity,
+      s.weight.toString(),
+      s.ratePerKg.toString(),
+      s.totalFee.toString(),
+      s.paymentStatus,
+      s.operatorName
+    ]);
+    exportToCSV(headers, rows, 'Laporan_Jasa_Poles_Kipas_Bilibili');
+  };
+
+  const handlePrintServicesPDF = () => {
+    const headers = [
+      'Tanggal', 'Nama Pelanggan', 'Jenis Jasa', 'Tonase', 'Tarif', 'Total Biaya', 'Pembayaran'
+    ];
+    const rows = filteredServices.map(s => [
+      s.date,
+      s.customerName,
+      s.serviceType,
+      `${s.weight.toLocaleString('id-ID')} Kg`,
+      `Rp ${s.ratePerKg.toLocaleString('id-ID')}`,
+      `Rp ${s.totalFee.toLocaleString('id-ID')}`,
+      s.paymentStatus === 'PAID' ? 'LUNAS' : 'BELUM BAYAR'
+    ]);
+    const totalProcessingWeight = filteredServices.reduce((sum, s) => sum + s.weight, 0);
+    const totalServiceIncome = filteredServices.reduce((sum, s) => sum + s.totalFee, 0);
+    const summaries = [
+      { label: 'Total Order Layanan', value: `${filteredServices.length} Pesanan` },
+      { label: 'Total Berat Diproses', value: `${totalProcessingWeight.toLocaleString('id-ID')} Kg` },
+      { label: 'Total Pendapatan Jasa', value: `Rp ${totalServiceIncome.toLocaleString('id-ID')}` }
+    ];
+    printPDFReport('Laporan Layanan Jasa Poles & Kipas', headers, rows, summaries);
+  };
+
+  // Export 5. General Ledger (Finance Mutasi)
+  const handleExportFinancesExcel = () => {
+    const headers = [
+      'Tanggal Catat', 'Kategori', 'Keterangan Transaksi', 'Jenis Aliran', 
+      'Jumlah Nomina (Rp)', 'Rekening / Kas', 'Mitra Pihak Kedua'
+    ];
+    const rows = filteredFinances.map(f => [
+      f.date,
+      f.category,
+      f.description,
+      f.type,
+      f.amount.toString(),
+      f.bankAccount,
+      f.partyName || '-'
+    ]);
+    exportToCSV(headers, rows, 'Laporan_Operasional_Kas_Bilibili');
+  };
+
+  const handlePrintFinancesPDF = () => {
+    const headers = [
+      'Tanggal', 'Kategori', 'Keterangan Mutasi', 'Kas / Akun', 'Masuk (Debit)', 'Keluar (Kredit)'
+    ];
+    const rows = filteredFinances.map(f => [
+      f.date,
+      f.category,
+      f.description,
+      f.bankAccount,
+      f.type === 'DEBIT' ? `Rp ${f.amount.toLocaleString('id-ID')}` : '-',
+      f.type === 'KREDIT' ? `Rp ${f.amount.toLocaleString('id-ID')}` : '-'
+    ]);
+    const totalDebit = filteredFinances.filter(f => f.type === 'DEBIT').reduce((sum, f) => sum + f.amount, 0);
+    const totalKredit = filteredFinances.filter(f => f.type === 'KREDIT').reduce((sum, f) => sum + f.amount, 0);
+    const summaries = [
+      { label: 'Banyak Aliran Kas', value: `${filteredFinances.length} Mutasi` },
+      { label: 'Total Pemasukan (Debit)', value: `Rp ${totalDebit.toLocaleString('id-ID')}` },
+      { label: 'Total Pengeluaran (Kredit)', value: `Rp ${totalKredit.toLocaleString('id-ID')}` },
+      { label: 'Selisih Laba Bersih', value: `Rp ${(totalDebit - totalKredit).toLocaleString('id-ID')}` }
+    ];
+    printPDFReport('Laporan Buku Keuangan dan Aliran Kas', headers, rows, summaries);
+  };
+
+  // --- EXECUTIVE EXECUTIVE CALCULATIONS FOR RINGKASAN VIEW ---
+  const consolidatedStats = useMemo(() => {
+    const totalInboundNet = inboundRecords.reduce((sum, r) => sum + r.netWeight, 0);
+    const totalOutboundWeight = outboundRecords.reduce((sum, r) => sum + r.totalWeight, 0);
+    
+    // Inbound commodity distribution
+    const inboundCorn = inboundRecords.filter(r => r.commodity === 'JAGUNG').reduce((sum, r) => sum + r.netWeight, 0);
+    const inboundRice = inboundRecords.filter(r => r.commodity === 'BERAS').reduce((sum, r) => sum + r.netWeight, 0);
+
+    // Services
+    const totalServiceIncome = serviceRecords.filter(s => s.paymentStatus === 'PAID').reduce((sum, s) => sum + s.totalFee, 0);
+    
+    // Finance
+    const totalDebit = finances.filter(f => f.type === 'DEBIT').reduce((sum, f) => sum + f.amount, 0);
+    const totalKredit = finances.filter(f => f.type === 'KREDIT').reduce((sum, f) => sum + f.amount, 0);
+    const totalRemainingDebts = debts.filter(d => d.status === 'BELUM_LUNAS').reduce((sum, d) => sum + d.remainingBalance, 0);
+
+    return {
+      totalTonaseMasuk: totalInboundNet,
+      totalTonaseKeluar: totalOutboundWeight,
+      tonaseCorn: inboundCorn,
+      tonaseRice: inboundRice,
+      totalLayananOrder: serviceRecords.length,
+      jasaIncome: totalServiceIncome,
+      netKasBalance: totalDebit - totalKredit,
+      sisaUtangSupplier: totalRemainingDebts,
+      totalDebit,
+      totalKredit
+    };
+  }, [inboundRecords, outboundRecords, serviceRecords, finances, debts]);
+
+  return (
+    <div className="flex flex-col gap-6" id="reports-portal-module">
+      
+      {/* HEADER SECTION WITH TITLE */}
+      <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 className="font-extrabold text-neutral-800 text-base sm:text-lg flex items-center gap-2">
+              <SlidersHorizontal className="text-emerald-600 w-5 h-5" />
+              Sistem Pelaporan Terpadu & Ekspor Digital
+            </h2>
+            <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
+              Pusat audit digital US Bilibili 162. Siapkan rekapitulasi data, saring transaksi per rentang tanggal waktu, export ke file spreadsheet Microsoft Excel (CSV) dan siapkan cetak dokumen fisik atau simpan format PDF.
+            </p>
+          </div>
+          
+          <button 
+            onClick={handleResetFilters}
+            className="self-start md:self-auto bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold px-3.5 py-1.5 rounded-lg border border-neutral-300 transition cursor-pointer"
+          >
+            Bersihkan Saringan Filter
+          </button>
+        </div>
+
+        {/* COMPREHENSIVE FILTER CONSOLE */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t border-neutral-100">
+          
+          {/* Start Date */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider font-mono flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 text-neutral-400" />
+              Mulai Tanggal
+            </label>
+            <input 
+              type="date" 
+              value={startDate}
+              onChange={e => setStartDate(e.target.value)}
+              className="w-full text-xs font-semibold px-3 py-2 bg-neutral-55 border border-neutral-250 rounded-lg text-neutral-700 focus:outline-none focus:border-emerald-600 focus:bg-white"
+            />
+          </div>
+
+          {/* End Date */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider font-mono flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 text-neutral-400" />
+              Hingga Tanggal
+            </label>
+            <input 
+              type="date" 
+              value={endDate}
+              onChange={e => setEndDate(e.target.value)}
+              className="w-full text-xs font-semibold px-3 py-2 bg-neutral-55 border border-neutral-250 rounded-lg text-neutral-700 focus:outline-none focus:border-emerald-600 focus:bg-white"
+            />
+          </div>
+
+          {/* Filter Commodity */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider font-mono flex items-center gap-1">
+              <Filter className="w-3.5 h-3.5 text-neutral-400" />
+              Saring Komoditas
+            </label>
+            <select
+              value={commodityFilter}
+              onChange={e => setCommodityFilter(e.target.value)}
+              className="w-full text-xs font-semibold px-3 py-2 bg-neutral-55 border border-neutral-250 rounded-lg text-neutral-700 focus:outline-none focus:border-emerald-600 focus:bg-white cursor-pointer"
+            >
+              <option value="ALL">📦 SEMUA KOMODITAS</option>
+              <option value="JAGUNG">🌽 JAGUNG PIPIL</option>
+              <option value="BERAS">🌾 BERAS PREMIUM</option>
+              <option value="GABAH">🌾 GABAH KERING</option>
+            </select>
+          </div>
+
+          {/* Keyword Search */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider font-mono flex items-center gap-1">
+              <Search className="w-3.5 h-3.5 text-neutral-400" />
+              Kata Kunci Pencarian
+            </label>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-neutral-400" />
+              <input 
+                type="text" 
+                placeholder="Cari Agen, No. Polisi, Plat, Mitra..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 text-xs font-semibold bg-neutral-55 border border-neutral-250 rounded-lg text-neutral-700 focus:outline-none focus:border-emerald-600 focus:bg-white"
+              />
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* HORIZONTAL REPORTS TAB NAVIGATOR */}
+      <div className="flex border-b border-neutral-200 overflow-x-auto gap-1 bg-white p-1 rounded-xl shadow-sm border">
+        <button
+          onClick={() => setActiveSubTab('RINGKASAN')}
+          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-extrabold transition cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'RINGKASAN'
+              ? 'bg-emerald-950 text-white'
+              : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-50'
+          }`}
+        >
+          <PieChart className="w-4 h-4" />
+          Ringkasan Eksekutif
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('TIMBANGAN')}
+          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-extrabold transition cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'TIMBANGAN'
+              ? 'bg-blue-900 text-white'
+              : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-50'
+          }`}
+        >
+          <Scale className="w-4 h-4" />
+          Timbangan ({filteredTickets.length})
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('INBOUND')}
+          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-extrabold transition cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'INBOUND'
+              ? 'bg-emerald-800 text-white'
+              : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-50'
+          }`}
+        >
+          <ArrowDownCircle className="w-4 h-4" />
+          Barang Masuk ({filteredInbound.length})
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('OUTBOUND')}
+          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-extrabold transition cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'OUTBOUND'
+              ? 'bg-indigo-900 text-white'
+              : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-50'
+          }`}
+        >
+          <ArrowUpCircle className="w-4 h-4" />
+          Barang Keluar ({filteredOutbound.length})
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('SERVICES')}
+          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-extrabold transition cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'SERVICES'
+              ? 'bg-sky-800 text-white'
+              : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-50'
+          }`}
+        >
+          <Wind className="w-4 h-4" />
+          Jasa Poles & Kipas ({filteredServices.length})
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('FINANCE')}
+          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-extrabold transition cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'FINANCE'
+              ? 'bg-stone-850 bg-stone-900 text-white'
+              : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-50'
+          }`}
+        >
+          <DollarSign className="w-4 h-4" />
+          Buku Kas Mutasi ({filteredFinances.length})
+        </button>
+      </div>
+
+      {/* SUB TAB VIEWS */}
+      <div className="min-h-[400px]">
+
+        {/* 1. RINGKASAN EKSEKUTIF (EXECUTIVE DIAGRAM PANEL) */}
+        {activeSubTab === 'RINGKASAN' && (
+          <div className="flex flex-col gap-6 animate-fadeIn">
+            
+            {/* Stats Overview Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              
+              <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                <div>
+                  <span className="text-[9px] font-black tracking-wider text-neutral-400 block uppercase font-mono">Total Tonase Masuk</span>
+                  <span className="text-2xl font-black text-emerald-800 font-mono mt-1 block">
+                    {(consolidatedStats.totalTonaseMasuk / 1000).toFixed(2)} <span className="text-xs text-neutral-500">Ton</span>
+                  </span>
+                  <p className="text-[10px] text-neutral-500 mt-1">Total berat netto beras, jagung yang diterima gudang.</p>
+                </div>
+                <div className="h-1 bg-emerald-100 rounded-full overflow-hidden mt-4">
+                  <div className="h-full bg-emerald-600 rounded-full" style={{ width: '70%' }}></div>
+                </div>
+              </div>
+
+              <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                <div>
+                  <span className="text-[9px] font-black tracking-wider text-neutral-400 block uppercase font-mono">Total Tonase Keluar</span>
+                  <span className="text-2xl font-black text-blue-800 font-mono mt-1 block">
+                    {(consolidatedStats.totalTonaseKeluar / 1000).toFixed(2)} <span className="text-xs text-neutral-500">Ton</span>
+                  </span>
+                  <p className="text-[10px] text-neutral-500 mt-1">Total berat pengeluaran ke pembeli/rekanan.</p>
+                </div>
+                <div className="h-1 bg-blue-100 rounded-full overflow-hidden mt-4">
+                  <div className="h-full bg-blue-600 rounded-full" style={{ width: '55%' }}></div>
+                </div>
+              </div>
+
+              <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                <div>
+                  <span className="text-[9px] font-black tracking-wider text-neutral-400 block uppercase font-mono">Net Saldo Kas & Bank</span>
+                  <span className="text-xl font-bold font-mono mt-1 block text-neutral-800">
+                    Rp {consolidatedStats.netKasBalance.toLocaleString('id-ID')}
+                  </span>
+                  <p className="text-[10px] text-neutral-300 mt-1"><span className="text-emerald-600">Inflows: Rp {consolidatedStats.totalDebit.toLocaleString()}</span></p>
+                </div>
+                <div className="h-1 bg-stone-100 rounded-full overflow-hidden mt-4">
+                  <div className="h-full bg-stone-700 rounded-full" style={{ width: '65%' }}></div>
+                </div>
+              </div>
+
+              <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                <div>
+                  <span className="text-[9px] font-black tracking-wider text-neutral-400 block uppercase font-mono">Utang Dagang Tertunggak</span>
+                  <span className="text-xl font-bold font-mono mt-1 block text-red-600">
+                    Rp {consolidatedStats.sisaUtangSupplier.toLocaleString('id-ID')}
+                  </span>
+                  <p className="text-[10px] text-neutral-500 mt-1">Kewajiban berjalan buku utang pada mitra.</p>
+                </div>
+                <div className="h-1 bg-red-105 rounded-full overflow-hidden mt-4 bg-red-100">
+                  <div className="h-full bg-red-650 rounded-full bg-red-600" style={{ width: '40%' }}></div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Custom Interactive visual bar indicators */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              {/* Commodity Ratio */}
+              <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm">
+                <h3 className="font-bold text-neutral-800 text-xs tracking-wider uppercase border-b border-neutral-100 pb-2 mb-4 flex items-center justify-between">
+                  <span>Distribusi Logistik Timbangan (Tonase Bersih)</span>
+                  <span className="text-neutral-400 font-mono text-[10px]">Perbandingan Beras vs Jagung</span>
+                </h3>
+
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <div className="flex justify-between text-xs font-semibold text-neutral-700 mb-1">
+                      <span>🌽 Jagung Pipil Basah & Kering</span>
+                      <span>{(consolidatedStats.tonaseCorn / 1000).toLocaleString('id-ID')} Ton</span>
+                    </div>
+                    <div className="h-4 bg-amber-50 rounded border border-amber-200 overflow-hidden flex">
+                      <div className="h-full bg-amber-400" style={{ width: `${Math.max(10, Math.min(100, (consolidatedStats.tonaseCorn / (consolidatedStats.totalTonaseMasuk || 1)) * 100))}%` }}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs font-semibold text-neutral-700 mb-1">
+                      <span>🌾 Beras Giling GSC</span>
+                      <span>{(consolidatedStats.tonaseRice / 1000).toLocaleString('id-ID')} Ton</span>
+                    </div>
+                    <div className="h-4 bg-emerald-50 rounded border border-emerald-200 overflow-hidden flex">
+                      <div className="h-full bg-emerald-600" style={{ width: `${Math.max(10, Math.min(100, (consolidatedStats.tonaseRice / (consolidatedStats.totalTonaseMasuk || 1)) * 100))}%` }}></div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-[10px] text-neutral-500 bg-neutral-50 p-2.5 rounded-lg border border-dashed border-neutral-200 leading-relaxed mt-2">
+                    💡 Perbandingan kontribusi berat logistik yang masuk ke jembatan timbang menunjukkan komoditas utama yang sedang terparkir atau diproses di sektor lumbung.
+                  </div>
+                </div>
+              </div>
+
+              {/* Finance Inflows Outflows */}
+              <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm">
+                <h3 className="font-bold text-neutral-800 text-xs tracking-wider uppercase border-b border-neutral-100 pb-2 mb-4 flex items-center justify-between">
+                  <span>Kinerja Aliran Dana Keuangan</span>
+                  <span className="text-neutral-400 font-mono text-[10px]">Debit vs Kredit Mutasi</span>
+                </h3>
+
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <div className="flex justify-between text-xs font-semibold text-neutral-700 mb-1 font-mono">
+                      <span>📉 Total Pengeluaran (Kredit Operasional)</span>
+                      <span>Rp {consolidatedStats.totalKredit.toLocaleString('id-ID')}</span>
+                    </div>
+                    <div className="h-3 bg-red-50 rounded overflow-hidden">
+                      <div className="h-full bg-red-500" style={{ width: `${Math.max(10, Math.min(100, (consolidatedStats.totalKredit / ((consolidatedStats.totalDebit + consolidatedStats.totalKredit) || 1)) * 100))}%` }}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs font-semibold text-neutral-700 mb-1 font-mono">
+                      <span>📈 Total Pemasukan (Debit Operasi)</span>
+                      <span>Rp {consolidatedStats.totalDebit.toLocaleString('id-ID')}</span>
+                    </div>
+                    <div className="h-3 bg-green-50 rounded overflow-hidden">
+                      <div className="h-full bg-green-600" style={{ width: `${Math.max(10, Math.min(100, (consolidatedStats.totalDebit / ((consolidatedStats.totalDebit + consolidatedStats.totalKredit) || 1)) * 100))}%` }}></div>
+                    </div>
+                  </div>
+
+                  <div className="text-[10px] text-neutral-500 bg-neutral-50 p-2.5 rounded-lg border border-dashed border-neutral-200 leading-relaxed mt-2 font-mono flex justify-between items-center">
+                    <span>Kas Berjalan Bersih (Net Margin):</span>
+                    <strong className={`text-xs ${consolidatedStats.netKasBalance >= 0 ? "text-emerald-700" : "text-red-600"}`}>
+                      Rp {consolidatedStats.netKasBalance.toLocaleString()}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Quick action info banner */}
+            <div className="bg-gradient-to-r from-[#032e5c] to-indigo-950 text-indigo-50 border border-indigo-900 rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-white/10 rounded-lg text-yellow-300">
+                  <AlertCircle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-yellow-400">Siap Cetak Dokumen Resmi</h4>
+                  <p className="text-[11px] text-indigo-200 mt-0.5">Ekstrasi laporan terfilter menggunakan Kop Surat US Bilibili 162 Resmi, lengkap dengan tanggal cetak digital dan garis tanda tangan penanggung jawab.</p>
+                </div>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <button 
+                  onClick={() => setActiveSubTab('TIMBANGAN')} 
+                  className="bg-white text-indigo-950 font-bold text-xs px-3.5 py-1.5 rounded-lg hover:bg-neutral-100 transition cursor-pointer"
+                >
+                  Ekspor Arsip
+                </button>
+              </div>
+            </div>
+
+          </div>
+        )}
+
+        {/* 2. TIMBANGAN REPORTS (WEIGHBRIDGE) */}
+        {activeSubTab === 'TIMBANGAN' && (
+          <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm animate-fadeIn">
+            
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-neutral-100 pb-3">
+              <div>
+                <span className="font-extrabold text-neutral-800 text-sm">Pratinjau Laporan Jembatan Timbang</span>
+                <p className="text-[11px] text-neutral-400 mt-0.5">Menampilkan {filteredTickets.length} baris data sesuai saringan Anda.</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleExportTicketsExcel}
+                  className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" /> Export Excel
+                </button>
+                <button
+                  onClick={handlePrintTicketsPDF}
+                  className="flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" /> Cetak Laporan / PDF
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-250">
+                    <th className="p-2 font-mono">No. Tiket</th>
+                    <th className="p-2">Waktu Timbang</th>
+                    <th className="p-2">No. Polisi</th>
+                    <th className="p-2">Komoditas</th>
+                    <th className="p-2">Agen/Mitra</th>
+                    <th className="p-2 text-right">Timbang I (Kg)</th>
+                    <th className="p-2 text-right">Timbang II (Kg)</th>
+                    <th className="p-2 text-right font-black">Netto Bersih</th>
+                    <th className="p-2 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {filteredTickets.map(t => (
+                    <tr key={t.id} className="hover:bg-neutral-50 transition-colors">
+                      <td className="p-2 font-bold text-red-700 font-mono">{t.ticketNo}</td>
+                      <td className="p-2 text-neutral-500 text-[10px]">{t.timbang1Time}</td>
+                      <td className="p-2 font-semibold text-neutral-800">{t.policeNo}</td>
+                      <td className="p-2 font-bold text-neutral-700 text-[10px]">
+                        <span className="bg-neutral-100 border border-neutral-200 px-1 py-0.5 rounded uppercase">{t.goodsName}</span>
+                      </td>
+                      <td className="p-2 text-neutral-800 font-medium">{t.agency}</td>
+                      <td className="p-2 text-right font-mono">{t.timbang1Weight.toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-right font-mono">{t.timbang2Weight > 0 ? t.timbang2Weight.toLocaleString('id-ID') : '-'}</td>
+                      <td className="p-2 text-right font-black text-emerald-600 font-mono">{t.netWeight.toLocaleString('id-ID')} Kg</td>
+                      <td className="p-2 text-center">
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
+                          t.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                        }`}>
+                          {t.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredTickets.length === 0 && (
+                    <tr>
+                      <td colSpan={9} className="p-8 text-center text-neutral-400 italic">Tidak ada transaksi timbangan yang sesuai saringan filter Anda.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        )}
+
+        {/* 3. BARANG MASUK (INBOUND) */}
+        {activeSubTab === 'INBOUND' && (
+          <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm animate-fadeIn">
+            
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-neutral-100 pb-3">
+              <div>
+                <span className="font-extrabold text-neutral-800 text-sm">Pratinjau Laporan Penerimaan Barang Masuk</span>
+                <p className="text-[11px] text-neutral-400 mt-0.5">Menampilkan {filteredInbound.length} baris log masuk gudang.</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleExportInboundExcel}
+                  className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" /> Export Excel
+                </button>
+                <button
+                  onClick={handlePrintInboundPDF}
+                  className="flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" /> Cetak Laporan / PDF
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-250">
+                    <th className="p-2">Tanggal</th>
+                    <th className="p-2 font-mono">No. Tiket Ref</th>
+                    <th className="p-2">No. Polisi</th>
+                    <th className="p-2">Nama Supplier</th>
+                    <th className="p-2">Komoditas</th>
+                    <th className="p-2 text-right">Bruto (Kg)</th>
+                    <th className="p-2 text-right">Netto (Kg)</th>
+                    <th className="p-2">Letak Sektor</th>
+                    <th className="p-2 text-right">Buruh (Rp)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {filteredInbound.map(r => (
+                    <tr key={r.id} className="hover:bg-neutral-50 transition-colors">
+                      <td className="p-2 font-semibold text-neutral-600">{r.date}</td>
+                      <td className="p-2 font-mono text-neutral-450">{r.ticketNo || '-'}</td>
+                      <td className="p-2 font-semibold text-neutral-800">{r.vehicleNo}</td>
+                      <td className="p-2 text-neutral-850 font-medium">{r.supplier}</td>
+                      <td className="p-2 text-neutral-700 font-bold text-[10px]">{r.commodity}</td>
+                      <td className="p-2 text-right font-mono">{r.grossWeight.toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-right font-black text-emerald-800 font-mono">{r.netWeight.toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-neutral-550 font-medium text-[10px]">{r.warehouseSection}</td>
+                      <td className="p-2 text-right font-mono text-neutral-650">Rp {r.laborCost.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                  {filteredInbound.length === 0 && (
+                    <tr>
+                      <td colSpan={9} className="p-8 text-center text-neutral-400 italic">Tidak ada log barang masuk yang ditemukan.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        )}
+
+        {/* 4. BARANG KELUAR (OUTBOUND) */}
+        {activeSubTab === 'OUTBOUND' && (
+          <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm animate-fadeIn">
+            
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-neutral-100 pb-3">
+              <div>
+                <span className="font-extrabold text-neutral-800 text-sm">Pratinjau Laporan Pengiriman Barang Keluar</span>
+                <p className="text-[11px] text-neutral-400 mt-0.5">Menampilkan {filteredOutbound.length} baris log surat jalan dari gudang.</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleExportOutboundExcel}
+                  className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" /> Export Excel
+                </button>
+                <button
+                  onClick={handlePrintOutboundPDF}
+                  className="flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" /> Cetak Laporan / PDF
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-250">
+                    <th className="p-2">Tanggal</th>
+                    <th className="p-2 font-mono">No. Invoice / SJ</th>
+                    <th className="p-2">No. Polisi</th>
+                    <th className="p-2">Pembeli</th>
+                    <th className="p-2">Komoditas</th>
+                    <th className="p-2 text-right">Tonase Bersih (Kg)</th>
+                    <th className="p-2">Tujuan Kota</th>
+                    <th className="p-2 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {filteredOutbound.map(r => (
+                    <tr key={r.id} className="hover:bg-neutral-50 transition-colors">
+                      <td className="p-2 text-neutral-500">{r.date}</td>
+                      <td className="p-2 font-mono text-indigo-800 font-semibold">{r.invoiceNo}</td>
+                      <td className="p-2 font-semibold text-neutral-800">{r.vehicleNo}</td>
+                      <td className="p-2 text-neutral-850 font-medium">{r.buyer}</td>
+                      <td className="p-2 text-neutral-700 font-bold text-[10px]">{r.commodity}</td>
+                      <td className="p-2 text-right font-bold text-neutral-800 font-mono">{r.totalWeight.toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-neutral-600 font-medium text-[10px]">{r.destination}</td>
+                      <td className="p-2 text-center">
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
+                          r.status === 'SHIPPED' ? 'bg-green-100 text-green-700' : 'bg-sky-100 text-sky-700'
+                        }`}>
+                          {r.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredOutbound.length === 0 && (
+                    <tr>
+                      <td colSpan={8} className="p-8 text-center text-neutral-400 italic">Tidak ada log barang keluar yang sesuai saringan filter.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        )}
+
+        {/* 5. JASA POLES & KIPAS */}
+        {activeSubTab === 'SERVICES' && (
+          <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm animate-fadeIn">
+            
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-neutral-100 pb-3">
+              <div>
+                <span className="font-extrabold text-neutral-800 text-sm">Pratinjau Order Pemrosesan Jasa Poles Kipas</span>
+                <p className="text-[11px] text-neutral-400 mt-0.5">Menampilkan {filteredServices.length} baris rekap order jasa.</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleExportServicesExcel}
+                  className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" /> Export Excel
+                </button>
+                <button
+                  onClick={handlePrintServicesPDF}
+                  className="flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" /> Cetak Laporan / PDF
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-250">
+                    <th className="p-2">Tanggal</th>
+                    <th className="p-2">Nama Pelanggan</th>
+                    <th className="p-2">Jenis Layanan</th>
+                    <th className="p-2">Komoditas</th>
+                    <th className="p-2 text-right">Berat (Kg)</th>
+                    <th className="p-2 text-right">Tarif / Kg</th>
+                    <th className="p-2 text-right font-bold">Total Nilai</th>
+                    <th className="p-2 text-center">Status Bayar</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {filteredServices.map(s => (
+                    <tr key={s.id} className="hover:bg-neutral-50 transition-colors">
+                      <td className="p-2 text-neutral-500">{s.date}</td>
+                      <td className="p-2 font-bold text-neutral-800">{s.customerName}</td>
+                      <td className="p-2 font-medium text-neutral-700 text-[10px]">{s.serviceType}</td>
+                      <td className="p-2 text-neutral-550 font-medium">{s.commodity}</td>
+                      <td className="p-2 text-right font-mono">{s.weight.toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-right font-mono">Rp {s.ratePerKg.toLocaleString()}</td>
+                      <td className="p-2 text-right font-bold text-sky-700 font-mono">Rp {s.totalFee.toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-center">
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold ${
+                          s.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                        }`}>
+                          {s.paymentStatus === 'PAID' ? 'LUNAS' : 'TUNGGAKAN'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredServices.length === 0 && (
+                    <tr>
+                      <td colSpan={8} className="p-8 text-center text-neutral-400 italic">Tidak ada order jasa yang memenuhi saringan.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        )}
+
+        {/* 6. FINANCE MUTASI DAN UTANG */}
+        {activeSubTab === 'FINANCE' && (
+          <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm animate-fadeIn">
+            
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-neutral-100 pb-3">
+              <div>
+                <span className="font-extrabold text-neutral-800 text-sm">Pratinjau Aliran Mutasi Kas Keuangan</span>
+                <p className="text-[11px] text-neutral-400 mt-0.5">Menampilkan {filteredFinances.length} baris log jurnal operasional kas.</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleExportFinancesExcel}
+                  className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" /> Export Excel
+                </button>
+                <button
+                  onClick={handlePrintFinancesPDF}
+                  className="flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" /> Cetak Laporan / PDF
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-250">
+                    <th className="p-2">Tanggal</th>
+                    <th className="p-2">Kategori</th>
+                    <th className="p-2">Keterangan Deskripsi</th>
+                    <th className="p-2">Pihak Mitra</th>
+                    <th className="p-2">Sirkuit Akun</th>
+                    <th className="p-2 text-right">Debit (Masuk)</th>
+                    <th className="p-2 text-right">Kredit (Keluar)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {filteredFinances.map(f => (
+                    <tr key={f.id} className="hover:bg-neutral-50 transition-colors">
+                      <td className="p-2 text-neutral-500">{f.date}</td>
+                      <td className="p-2 font-bold text-neutral-600 text-[10px]">{f.category}</td>
+                      <td className="p-2 font-medium text-neutral-800">{f.description}</td>
+                      <td className="p-2 text-neutral-550">{f.partyName || '-'}</td>
+                      <td className="p-2 font-medium text-[10px] text-neutral-600 font-mono">{f.bankAccount}</td>
+                      <td className="p-2 text-right text-emerald-700 font-bold font-mono">
+                        {f.type === 'DEBIT' ? `+ Rp ${f.amount.toLocaleString()}` : '-'}
+                      </td>
+                      <td className="p-2 text-right text-red-650 text-red-600 font-bold font-mono font-medium">
+                        {f.type === 'KREDIT' ? `- Rp ${f.amount.toLocaleString()}` : '-'}
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredFinances.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="p-8 text-center text-neutral-400 italic">Aktivitas pembukuan keuangan kosong pada penyaringan berkas ini.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        )}
+
+      </div>
+
+    </div>
+  );
+}

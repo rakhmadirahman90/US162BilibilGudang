@@ -6,12 +6,15 @@
 import React, { useState } from 'react';
 import { InboundRecord, WeighbridgeTicket, VehicleRecord, SupplierRecord } from '../types';
 import { mockCornMoistureRefaksi } from '../data';
-import { ArrowDownCircle, PlusCircle, Search, Calendar, Scale, Hammer, Percent, Archive } from 'lucide-react';
+import ConfirmModal from './ConfirmModal';
+import { ArrowDownCircle, PlusCircle, Search, Calendar, Scale, Hammer, Percent, Archive, Download, Printer, Edit2 } from 'lucide-react';
+import { exportToCSV, printPDFReport } from '../utils/exportHelper';
 
 interface InboundModuleProps {
   records: InboundRecord[];
   tickets: WeighbridgeTicket[];
   onAddRecord: (record: InboundRecord) => void;
+  onUpdateRecord: (record: InboundRecord) => void;
   onDeleteRecord: (id: string) => void;
   vehicles?: VehicleRecord[];
   suppliers?: SupplierRecord[];
@@ -21,12 +24,33 @@ export default function InboundModule({
   records,
   tickets,
   onAddRecord,
+  onUpdateRecord,
   onDeleteRecord,
   vehicles = [],
   suppliers = []
 }: InboundModuleProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Confirmation Modal State
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'ADD' | 'DELETE' | 'EDIT';
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'ADD',
+    onConfirm: () => {}
+  });
+
+  const closeConfirm = () => {
+    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+  };
 
   // Form states
   const [selectedTicketId, setSelectedTicketId] = useState("");
@@ -75,11 +99,12 @@ export default function InboundModule({
     const fNet = Math.round(rawNet - bagDeduction - refaksiDeduction);
 
     const tkNo = tickets.find(t => t.id === selectedTicketId)?.ticketNo;
+    const existing = records.find(r => r.id === editingId);
 
     const newRecord: InboundRecord = {
-      id: `inbound-${Date.now()}`,
-      date: new Date().toISOString().split('T')[0],
-      ticketNo: tkNo,
+      id: editingId || `inbound-${Date.now()}`,
+      date: existing ? existing.date : new Date().toISOString().split('T')[0],
+      ticketNo: tkNo || (existing ? existing.ticketNo : undefined),
       vehicleNo: vehicleNo.toUpperCase(),
       supplier: supplier.toUpperCase(),
       commodity,
@@ -94,9 +119,28 @@ export default function InboundModule({
       driverName
     };
 
-    onAddRecord(newRecord);
-    setShowAddForm(false);
-    resetForm();
+    const executeSave = () => {
+      if (editingId) {
+        onUpdateRecord(newRecord);
+      } else {
+        onAddRecord(newRecord);
+      }
+      setShowAddForm(false);
+      resetForm();
+    };
+
+    setConfirmModal({
+      isOpen: true,
+      title: editingId ? "Konfirmasi Ubah Barang Masuk" : "Konfirmasi Tambah Barang Masuk",
+      message: editingId
+        ? `Apakah Anda yakin ingin memperbarui catatan penerimaan ${commodity} dari ${supplier.toUpperCase()}?`
+        : `Apakah Anda yakin ingin mendaftarkan penerimaan komoditas ${commodity} dari ${supplier.toUpperCase()} dengan berat bersih ${fNet.toLocaleString('id-ID')} Kg?`,
+      type: editingId ? 'EDIT' : 'ADD',
+      onConfirm: () => {
+        executeSave();
+        closeConfirm();
+      }
+    });
   };
 
   const resetForm = () => {
@@ -111,6 +155,7 @@ export default function InboundModule({
     setWarehouseSection("Gudang Jagung Tengah");
     setLaborCost(350000);
     setDriverName("");
+    setEditingId(null);
   };
 
   // Filter
@@ -120,6 +165,55 @@ export default function InboundModule({
     r.commodity.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (r.ticketNo && r.ticketNo.includes(searchQuery))
   );
+
+  // --- EXPORT & PRINT HANDLERS ---
+  const handleExportExcel = () => {
+    const headers = [
+      'No. Tiket', 'Tanggal', 'No. Polisi', 'Sopir', 'Supplier', 
+      'Komoditas', 'Gross (Kg)', 'Tare (Kg)', 'Netto (Kg)', 
+      'Kadar Air (%)', 'Refaksi (%)', 'Deduction Karung (%)', 'Sektor Gudang', 'Upah Buruh'
+    ];
+    const rows = filteredRecords.map(r => [
+      r.ticketNo || '',
+      r.date,
+      r.vehicleNo,
+      r.driverName || '',
+      r.supplier,
+      r.commodity,
+      r.grossWeight.toString(),
+      r.tareWeight.toString(),
+      r.netWeight.toString(),
+      r.moistureContent.toString(),
+      r.refaksiKaPercent.toString(),
+      r.bagDeductionPercent.toString(),
+      r.warehouseSection || '',
+      r.laborCost.toString()
+    ]);
+    exportToCSV(headers, rows, 'Laporan_Barang_Masuk');
+  };
+
+  const handlePrintPDF = () => {
+    const headers = [
+      'Tanggal', 'No. Tiket', 'No. Polisi', 'Supplier', 'Komoditas', 'Sektor Gudang', 'Netto'
+    ];
+    const rows = filteredRecords.map(r => [
+      r.date,
+      r.ticketNo || '-',
+      r.vehicleNo,
+      r.supplier,
+      r.commodity,
+      r.warehouseSection || '-',
+      `${r.netWeight.toLocaleString('id-ID')} Kg`
+    ]);
+    const totalNetWeight = filteredRecords.reduce((sum, r) => sum + r.netWeight, 0);
+    const totalLabor = filteredRecords.reduce((sum, r) => sum + r.laborCost, 0);
+    const summaries = [
+      { label: 'Total Penerimaan', value: `${filteredRecords.length} Transaksi` },
+      { label: 'Total Tonase Bersih (Netto)', value: `${totalNetWeight.toLocaleString('id-ID')} Kg` },
+      { label: 'Total Ongkos Buruh Panggul', value: `Rp ${totalLabor.toLocaleString('id-ID')}` }
+    ];
+    printPDFReport('Laporan Penerimaan Barang Masuk', headers, rows, summaries);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -149,7 +243,7 @@ export default function InboundModule({
       {showAddForm && (
         <div className="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
           <h3 className="font-bold text-neutral-800 text-sm mb-4 border-b border-neutral-100 pb-2">
-            Formulir Catat Barang Masuk Baru
+            {editingId ? 'Formulir Ubah Transaksi Barang Masuk' : 'Formulir Catat Barang Masuk Baru'}
           </h3>
           <form onSubmit={handleCreateRecord} className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
             
@@ -334,7 +428,7 @@ export default function InboundModule({
                   type="submit"
                   className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg cursor-pointer"
                 >
-                  Simpan Transaksi Masuk
+                  {editingId ? 'Simpan Perubahan Transaksi' : 'Simpan Transaksi Masuk'}
                 </button>
                 <button
                   type="button"
@@ -352,17 +446,35 @@ export default function InboundModule({
 
       {/* FILTER SEARCH FIELD */}
       <div className="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span className="font-bold text-neutral-800 text-sm">Pencarian Arsip Barang Masuk</span>
-          <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" />
-            <input
-              type="text"
-              placeholder="Cari Suplier, No. Polisi, atau Jenis..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs bg-neutral-50 rounded-lg border border-neutral-200 focus:outline-none focus:border-emerald-600 focus:bg-white"
-            />
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+          <span className="font-bold text-neutral-800 text-sm shrink-0">Arsip Penerimaan Barang Masuk ({filteredRecords.length})</span>
+          
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto md:justify-end">
+            <button
+              onClick={handleExportExcel}
+              title="Unduh seluruh daftar rekap penerimaan barang masuk ke format Microsoft Excel"
+              className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5" /> Export Excel
+            </button>
+            <button
+              onClick={handlePrintPDF}
+              title="Cetak Laporan atau simpan sebagai dokumen PDF"
+              className="flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
+            >
+              <Printer className="w-3.5 h-3.5" /> Cetak Laporan / PDF
+            </button>
+
+            <div className="relative w-full sm:w-48 shrink-0">
+              <Search className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" />
+              <input
+                type="text"
+                placeholder="Cari Suplier, No. Polisi..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 text-xs bg-neutral-50 rounded-lg border border-neutral-200 focus:outline-none focus:border-emerald-600 focus:bg-white font-semibold text-neutral-700"
+              />
+            </div>
           </div>
         </div>
 
@@ -441,13 +553,47 @@ export default function InboundModule({
                       Rp {r.laborCost.toLocaleString('id-ID')}
                     </td>
                     <td className="py-2.5 px-3 text-center">
-                      <button
-                        onClick={() => onDeleteRecord(r.id)}
-                        className="text-red-400 hover:text-red-600 transition p-1 font-bold"
-                        title="Hapus Catatan"
-                      >
-                        ✕
-                      </button>
+                      <div className="flex gap-2 justify-center items-center">
+                        <button
+                          onClick={() => {
+                            setEditingId(r.id);
+                            setSelectedTicketId(tickets.find(t => t.ticketNo === r.ticketNo)?.id || "");
+                            setVehicleNo(r.vehicleNo);
+                            setSupplier(r.supplier);
+                            setCommodity(r.commodity);
+                            setGrossWeight(r.grossWeight);
+                            setTareWeight(r.tareWeight);
+                            setBagDeductionPercent(r.bagDeductionPercent);
+                            setMoistureContent(r.moistureContent);
+                            setWarehouseSection(r.warehouseSection);
+                            setLaborCost(r.laborCost);
+                            setDriverName(r.driverName || "");
+                            setShowAddForm(true);
+                          }}
+                          className="text-neutral-400 hover:text-blue-600 transition p-1 cursor-pointer"
+                          title="Ubah Catatan"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setConfirmModal({
+                              isOpen: true,
+                              title: "Konfirmasi Hapus Penerimaan",
+                              message: `Apakah Anda yakin ingin menghapus catatan penerimaan barang masuk dari ${r.supplier} (${r.netWeight.toLocaleString('id-ID')} Kg) secara permanen?`,
+                              type: 'DELETE',
+                              onConfirm: () => {
+                                onDeleteRecord(r.id);
+                                closeConfirm();
+                              }
+                            });
+                          }}
+                          className="text-neutral-400 hover:text-red-650 text-red-600 transition p-1 font-bold cursor-pointer"
+                          title="Hapus Catatan"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -463,6 +609,16 @@ export default function InboundModule({
           </table>
         </div>
       </div>
+
+      {/* CONFIRM MODAL OVERLAY */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type={confirmModal.type}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={closeConfirm}
+      />
 
     </div>
   );

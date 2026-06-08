@@ -5,21 +5,45 @@
 
 import React, { useState } from 'react';
 import { ServiceRecord } from '../types';
-import { Wind, Trash, User, Search, Play, Plus, DollarSign, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Wind, Trash, User, Search, Play, Plus, DollarSign, CheckCircle2, AlertCircle, Download, Printer, Edit2 } from 'lucide-react';
+import ConfirmModal from './ConfirmModal';
+import { exportToCSV, printPDFReport } from '../utils/exportHelper';
 
 interface ServicesModuleProps {
   records: ServiceRecord[];
   onAddRecord: (record: ServiceRecord) => void;
+  onUpdateRecord: (record: ServiceRecord) => void;
   onDeleteRecord: (id: string) => void;
 }
 
 export default function ServicesModule({
   records,
   onAddRecord,
+  onUpdateRecord,
   onDeleteRecord
 }: ServicesModuleProps) {
   const [showForm, setShowForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Confirmation Modal State
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'ADD' | 'DELETE' | 'EDIT';
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'ADD',
+    onConfirm: () => {}
+  });
+
+  const closeConfirm = () => {
+    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+  };
 
   // Form states
   const [customerName, setCustomerName] = useState("");
@@ -49,9 +73,11 @@ export default function ServicesModule({
       return;
     }
 
+    const existing = records.find(r => r.id === editingId);
+
     const newRecord: ServiceRecord = {
-      id: `service-${Date.now()}`,
-      date: new Date().toISOString().split('T')[0],
+      id: editingId || `service-${Date.now()}`,
+      date: existing ? existing.date : new Date().toISOString().split('T')[0],
       customerName: customerName.toUpperCase(),
       serviceType,
       commodity,
@@ -62,9 +88,28 @@ export default function ServicesModule({
       operatorName
     };
 
-    onAddRecord(newRecord);
-    setShowForm(false);
-    resetForm();
+    const executeSave = () => {
+      if (editingId) {
+        onUpdateRecord(newRecord);
+      } else {
+        onAddRecord(newRecord);
+      }
+      setShowForm(false);
+      resetForm();
+    };
+
+    setConfirmModal({
+      isOpen: true,
+      title: editingId ? "Konfirmasi Ubah Layanan Jasa" : "Konfirmasi Tambah Layanan Jasa",
+      message: editingId
+        ? `Apakah Anda yakin ingin memperbarui catatan layanan jasa ${serviceType} untuk pelanggan ${customerName.toUpperCase()}?`
+        : `Apakah Anda yakin mendaftarkan jasa ${serviceType} untuk pelanggan ${customerName.toUpperCase()} dengan total biaya Rp ${(weight * ratePerKg).toLocaleString('id-ID')}?`,
+      type: editingId ? 'EDIT' : 'ADD',
+      onConfirm: () => {
+        executeSave();
+        closeConfirm();
+      }
+    });
   };
 
   const resetForm = () => {
@@ -75,6 +120,7 @@ export default function ServicesModule({
     setRatePerKg(150);
     setPaymentStatus("PAID");
     setOperatorName("Wahyu & Tim");
+    setEditingId(null);
   };
 
   const filteredServices = records.filter(s =>
@@ -82,6 +128,49 @@ export default function ServicesModule({
     s.commodity.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.serviceType.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // --- EXPORT & PRINT HANDLERS ---
+  const handleExportExcel = () => {
+    const headers = [
+      'Tanggal', 'Pelanggan', 'Jenis Layanan', 'Keterangan Barang', 
+      'Berat (Kg)', 'Tarif / Kg (Rp)', 'Total Biaya Jasa (Rp)', 'Operator', 'Status Bayar'
+    ];
+    const rows = filteredServices.map(s => [
+      s.date,
+      s.customerName,
+      s.serviceType,
+      s.commodity,
+      s.weight.toString(),
+      s.ratePerKg.toString(),
+      s.totalFee.toString(),
+      s.operatorName,
+      s.paymentStatus
+    ]);
+    exportToCSV(headers, rows, 'Laporan_Jasa_Poles_Kipas');
+  };
+
+  const handlePrintPDF = () => {
+    const headers = [
+      'Tanggal', 'Pelanggan', 'Layanan', 'Komoditas', 'Beban', 'Tarif / Kg', 'Total Jasa'
+    ];
+    const rows = filteredServices.map(s => [
+      s.date,
+      s.customerName,
+      s.serviceType,
+      s.commodity,
+      `${s.weight.toLocaleString('id-ID')} Kg`,
+      `Rp ${s.ratePerKg.toLocaleString('id-ID')}`,
+      `Rp ${s.totalFee.toLocaleString('id-ID')}`
+    ]);
+    const totalWeight = filteredServices.reduce((sum, s) => sum + s.weight, 0);
+    const totalCost = filteredServices.reduce((sum, s) => sum + s.totalFee, 0);
+    const summaries = [
+      { label: 'Total Pesanan Jasa', value: `${filteredServices.length} Order` },
+      { label: 'Total Tonase Diproses', value: `${totalWeight.toLocaleString('id-ID')} Kg` },
+      { label: 'Total Pendapatan Jasa', value: `Rp ${totalCost.toLocaleString('id-ID')}` }
+    ];
+    printPDFReport('Laporan Layanan Jasa Poles & Kipas', headers, rows, summaries);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -110,7 +199,7 @@ export default function ServicesModule({
       {showForm && (
         <div className="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
           <h3 className="font-bold text-neutral-800 text-sm mb-4 border-b border-neutral-100 pb-2">
-            Formulir Jasa Poles & Kipas Baru
+            {editingId ? 'Formulir Ubah Transaksi Jasa Poles & Kipas' : 'Formulir Jasa Poles & Kipas Baru'}
           </h3>
           <form onSubmit={handleCreateService} className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
             
@@ -224,7 +313,7 @@ export default function ServicesModule({
                   type="submit"
                   className="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-bold py-2 rounded-lg cursor-pointer"
                 >
-                  Simpan Jasa Poles
+                  {editingId ? 'Simpan Perubahan Jasa' : 'Simpan Jasa Poles'}
                 </button>
                 <button
                   type="button"
@@ -242,17 +331,35 @@ export default function ServicesModule({
 
       {/* FILTER SEARCH OR VIEW TABLE */}
       <div className="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
-          <span className="font-bold text-neutral-800 text-sm">Pencarian Arsip Poles & Kipas</span>
-          <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" />
-            <input
-              type="text"
-              placeholder="Cari Pelanggan, atau Jenis..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs bg-neutral-50 rounded-lg border border-neutral-200 focus:outline-none focus:border-sky-600 focus:bg-white"
-            />
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3 mb-4">
+          <span className="font-bold text-neutral-800 text-sm shrink-0">Arsip Poles & Kipas ({filteredServices.length})</span>
+          
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto md:justify-end">
+            <button
+              onClick={handleExportExcel}
+              title="Unduh seluruh rekap jasa poles kipas ke Microsoft Excel"
+              className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5" /> Export Excel
+            </button>
+            <button
+              onClick={handlePrintPDF}
+              title="Cetak Laporan atau simpan sebagai dokumen PDF"
+              className="flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
+            >
+              <Printer className="w-3.5 h-3.5" /> Cetak Laporan / PDF
+            </button>
+
+            <div className="relative w-full sm:w-48 shrink-0">
+              <Search className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" />
+              <input
+                type="text"
+                placeholder="Cari Pelanggan..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 text-xs bg-neutral-50 rounded-lg border border-neutral-200 focus:outline-none focus:border-sky-600 focus:bg-white font-semibold text-neutral-700"
+              />
+            </div>
           </div>
         </div>
 
@@ -297,13 +404,43 @@ export default function ServicesModule({
                     </span>
                   </td>
                   <td className="py-2.5 px-3 text-center">
-                    <button
-                      onClick={() => onDeleteRecord(s.id)}
-                      className="text-neutral-400 hover:text-red-500 transition"
-                      title="Hapus"
-                    >
-                      <Trash className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex gap-2 justify-center items-center">
+                      <button
+                        onClick={() => {
+                          setEditingId(s.id);
+                          setCustomerName(s.customerName);
+                          setServiceType(s.serviceType);
+                          setCommodity(s.commodity);
+                          setWeight(s.weight);
+                          setRatePerKg(s.ratePerKg);
+                          setPaymentStatus(s.paymentStatus);
+                          setOperatorName(s.operatorName);
+                          setShowForm(true);
+                        }}
+                        className="text-neutral-400 hover:text-blue-600 transition p-1 cursor-pointer"
+                        title="Ubah Catatan"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setConfirmModal({
+                            isOpen: true,
+                            title: "Konfirmasi Hapus Layanan Jasa",
+                            message: `Apakah Anda yakin ingin menghapus catatan layanan jasa ${s.serviceType} untuk ${s.customerName} secara permanen?`,
+                            type: 'DELETE',
+                            onConfirm: () => {
+                              onDeleteRecord(s.id);
+                              closeConfirm();
+                            }
+                          });
+                        }}
+                        className="text-neutral-400 hover:text-red-500 transition cursor-pointer"
+                        title="Hapus"
+                      >
+                        <Trash className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -318,6 +455,16 @@ export default function ServicesModule({
           </table>
         </div>
       </div>
+
+      {/* CONFIRM MODAL OVERLAY */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type={confirmModal.type}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={closeConfirm}
+      />
 
     </div>
   );

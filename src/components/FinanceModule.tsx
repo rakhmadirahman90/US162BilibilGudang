@@ -5,15 +5,21 @@
 
 import React, { useState } from 'react';
 import { DebtRecord, FinancialRecord, EmployeeRecord } from '../types';
-import { Landmark, PlusCircle, Search, Calendar, ChevronRight, Users, Scale, CreditCard, DollarSign } from 'lucide-react';
+import { Landmark, PlusCircle, Search, Calendar, ChevronRight, Users, Scale, CreditCard, DollarSign, Download, Printer, Edit2, Trash2 } from 'lucide-react';
+import ConfirmModal from './ConfirmModal';
+import { exportToCSV, printPDFReport } from '../utils/exportHelper';
 
 interface FinanceModuleProps {
   debts: DebtRecord[];
   finances: FinancialRecord[];
   employees: EmployeeRecord[];
   onAddDebt: (record: DebtRecord) => void;
+  onUpdateDebt: (record: DebtRecord) => void;
+  onDeleteDebt: (id: string) => void;
   onPayDebt: (id: string, amount: number) => void;
   onAddFinance: (record: FinancialRecord) => void;
+  onUpdateFinance: (record: FinancialRecord) => void;
+  onDeleteFinance: (id: string) => void;
 }
 
 export default function FinanceModule({
@@ -21,10 +27,116 @@ export default function FinanceModule({
   finances,
   employees,
   onAddDebt,
+  onUpdateDebt,
+  onDeleteDebt,
   onPayDebt,
-  onAddFinance
+  onAddFinance,
+  onUpdateFinance,
+  onDeleteFinance
 }: FinanceModuleProps) {
   const [activeSubTab, setActiveSubTab] = useState<'UTANG' | 'MAKELAR' | 'MUTASI'>('UTANG');
+  const [editingDebtId, setEditingDebtId] = useState<string | null>(null);
+  const [editingFinId, setEditingFinId] = useState<string | null>(null);
+
+  // Confirmation Modal State
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'ADD' | 'DELETE' | 'EDIT' | 'PAY';
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'ADD',
+    onConfirm: () => {}
+  });
+
+  const closeConfirm = () => {
+    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+  };
+
+  // --- EXPORT & PRINT HANDLERS ---
+  const handleExportDebtExcel = () => {
+    const headers = [
+      'Tanggal Terbit', 'Supplier', 'Rincian Transaksi', 'Total Utang (Rp)', 'Jumlah Dibayar (Rp)', 'Sisa Sisa Saldo (Rp)', 'Status'
+    ];
+    const rows = debts.map(d => [
+      d.date,
+      d.supplierName,
+      d.description,
+      d.totalDebt.toString(),
+      d.paidAmount.toString(),
+      d.remainingBalance.toString(),
+      d.status
+    ]);
+    exportToCSV(headers, rows, 'Buku_Utang_Supplier_US162');
+  };
+
+  const handlePrintDebtPDF = () => {
+    const headers = [
+      'Tanggal Terbit', 'Nama Supplier', 'Rincian Transaksi', 'Total Utang', 'Total Terbayar', 'Sisa Saldo', 'Status'
+    ];
+    const rows = debts.map(d => [
+      d.date,
+      d.supplierName,
+      d.description,
+      `Rp ${d.totalDebt.toLocaleString('id-ID')}`,
+      `Rp ${d.paidAmount.toLocaleString('id-ID')}`,
+      `Rp ${d.remainingBalance.toLocaleString('id-ID')}`,
+      d.status === 'LUNAS' ? 'LUNAS' : 'SISA UTANG'
+    ]);
+    const totalDebt = debts.reduce((sum, d) => sum + d.totalDebt, 0);
+    const totalPaid = debts.reduce((sum, d) => sum + d.paidAmount, 0);
+    const totalRemaining = debts.reduce((sum, d) => sum + d.remainingBalance, 0);
+    const summaries = [
+      { label: 'Total Transaksi Utang', value: `${debts.length} Pihak` },
+      { label: 'Total Utang Kumulatif', value: `Rp ${totalDebt.toLocaleString('id-ID')}` },
+      { label: 'Total Rekening Terbayar', value: `Rp ${totalPaid.toLocaleString('id-ID')}` },
+      { label: 'Sisa Saldo Terutang', value: `Rp ${totalRemaining.toLocaleString('id-ID')}` }
+    ];
+    printPDFReport('Laporan Buku Utang Aliansi Tani', headers, rows, summaries);
+  };
+
+  const handleExportFinanceExcel = () => {
+    const headers = [
+      'Tanggal Catat', 'Kategori', 'Uraian Mutasi', 'Pihak Mitra', 'Saluran Rekening', 'Debit (Rp)', 'Kredit (Rp)'
+    ];
+    const rows = finances.map(f => [
+      f.date,
+      f.category,
+      f.description,
+      f.partyName || '',
+      f.bankAccount,
+      f.type === 'DEBIT' ? f.amount.toString() : '0',
+      f.type === 'KREDIT' ? f.amount.toString() : '0'
+    ]);
+    exportToCSV(headers, rows, 'Laporan_Mutasi_Kas_Gudang');
+  };
+
+  const handlePrintFinancePDF = () => {
+    const headers = [
+      'Tanggal', 'Kategori', 'Uraian Mutasi', 'Saluran Rekening', 'Masuk (Debit)', 'Keluar (Kredit)'
+    ];
+    const rows = finances.map(f => [
+      f.date,
+      f.category,
+      f.description,
+      f.bankAccount,
+      f.type === 'DEBIT' ? `Rp ${f.amount.toLocaleString('id-ID')}` : '-',
+      f.type === 'KREDIT' ? `Rp ${f.amount.toLocaleString('id-ID')}` : '-'
+    ]);
+    const totalDebit = finances.filter(f => f.type === 'DEBIT').reduce((sum, f) => sum + f.amount, 0);
+    const totalKredit = finances.filter(f => f.type === 'KREDIT').reduce((sum, f) => sum + f.amount, 0);
+    const summaries = [
+      { label: 'Total Transaksi Mutasi', value: `${finances.length} Alur` },
+      { label: 'Total Dana Masuk (Debit)', value: `Rp ${totalDebit.toLocaleString('id-ID')}` },
+      { label: 'Total Dana Keluar (Kredit)', value: `Rp ${totalKredit.toLocaleString('id-ID')}` },
+      { label: 'Selisih Net Saldo Bersih', value: `Rp ${(totalDebit - totalKredit).toLocaleString('id-ID')}` }
+    ];
+    printPDFReport('Buku Mutasi Kas & Saluran Rekening', headers, rows, summaries);
+  };
   
   // Payment dynamic states
   const [payingDebtId, setPayingDebtId] = useState<string | null>(null);
@@ -70,10 +182,113 @@ export default function FinanceModule({
       amount: finAmount,
       bankAccount: finBank
     };
-    onAddFinance(newFin);
-    setShowFinForm(false);
-    setFinDesc("");
-    setFinParty("");
+
+    const executeAddFinance = () => {
+      onAddFinance(newFin);
+      setShowFinForm(false);
+      setFinDesc("");
+      setFinParty("");
+    };
+
+    setConfirmModal({
+      isOpen: true,
+      title: "Konfirmasi Tambah Transaksi Mutasi",
+      message: `Apakah Anda yakin ingin menambahkan transaksi mutasi ${finType === 'DEBIT' ? 'Pemasukan (Debit)' : 'Pengeluaran (Kredit)'} sebesar Rp ${finAmount.toLocaleString('id-ID')} untuk '${finDesc}'?`,
+      type: 'ADD',
+      onConfirm: () => {
+        executeAddFinance();
+        closeConfirm();
+      }
+    });
+  };
+
+  // --- HANDLERS ---
+  const handleSaveDebt = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supplierName.trim() || !debtDesc.trim()) {
+      (window as any).__showToast?.("Gagal: Harap lengkapi nama suplier & perincian utang!", "error");
+      return;
+    }
+
+    const existing = debts.find(d => d.id === editingDebtId);
+    const newDebt: DebtRecord = {
+      id: editingDebtId || `debt-${Date.now()}`,
+      date: existing ? existing.date : new Date().toISOString().split('T')[0],
+      supplierName: supplierName.toUpperCase(),
+      description: debtDesc,
+      totalDebt: debtAmount,
+      paidAmount: existing ? existing.paidAmount : 0,
+      remainingBalance: existing ? (debtAmount - existing.paidAmount) : debtAmount,
+      status: existing ? (debtAmount - existing.paidAmount <= 0 ? 'LUNAS' : 'BELUM_LUNAS') : 'BELUM_LUNAS'
+    };
+
+    const executeSave = () => {
+      if (editingDebtId) {
+        onUpdateDebt(newDebt);
+      } else {
+        onAddDebt(newDebt);
+      }
+      setShowDebtForm(false);
+      setSupplierName("");
+      setDebtDesc("");
+      setEditingDebtId(null);
+    };
+
+    setConfirmModal({
+      isOpen: true,
+      title: editingDebtId ? "Konfirmasi Ubah Utang" : "Konfirmasi Pencatatan Utang",
+      message: editingDebtId
+        ? `Apakah Anda yakin ingin memperbarui catatan utang kepada ${supplierName.toUpperCase()}?`
+        : `Apakah Anda yakin ingin mencatatkan kewajiban utang baru kepada supplier ${supplierName.toUpperCase()} sebesar Rp ${debtAmount.toLocaleString('id-ID')}?`,
+      type: editingDebtId ? 'EDIT' : 'ADD',
+      onConfirm: () => {
+        executeSave();
+        closeConfirm();
+      }
+    });
+  };
+
+  const handleSaveFinance = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!finDesc.trim()) {
+      (window as any).__showToast?.("Gagal: Harap tulis deskripsi mutasi!", "error");
+      return;
+    }
+    const newFin: FinancialRecord = {
+      id: editingFinId || `fin-${Date.now()}`,
+      date: finances.find(f => f.id === editingFinId)?.date || new Date().toISOString().split('T')[0],
+      type: finType,
+      category: finCategory,
+      description: finDesc,
+      partyName: finParty,
+      amount: finAmount,
+      bankAccount: finBank
+    };
+
+    const executeSave = () => {
+      if (editingFinId) {
+        onUpdateFinance(newFin);
+      } else {
+        onAddFinance(newFin);
+      }
+      setShowFinForm(false);
+      setFinDesc("");
+      setFinParty("");
+      setEditingFinId(null);
+    };
+
+    setConfirmModal({
+      isOpen: true,
+      title: editingFinId ? "Konfirmasi Ubah Mutasi" : "Konfirmasi Tambah Transaksi Mutasi",
+      message: editingFinId
+        ? `Apakah Anda yakin ingin memperbarui catatan mutasi transaksi '${finDesc}'?`
+        : `Apakah Anda yakin ingin menambahkan transaksi mutasi ${finType === 'DEBIT' ? 'Pemasukan (Debit)' : 'Pengeluaran (Kredit)'} sebesar Rp ${finAmount.toLocaleString('id-ID')} untuk '${finDesc}'?`,
+      type: editingFinId ? 'EDIT' : 'ADD',
+      onConfirm: () => {
+        executeSave();
+        closeConfirm();
+      }
+    });
   };
 
   // Handles recording broker payment as expense
@@ -90,36 +305,44 @@ export default function FinanceModule({
       amount: calculatedCommission,
       bankAccount: 'Kas Gudang Tunai'
     };
-    onAddFinance(newFin);
-    (window as any).__showToast?.(`Komisi Makelar ${activeBroker.name} sebesar Rp ${calculatedCommission.toLocaleString('id-ID')} berhasil dicatat dalam Buku Mutasi!`, "success");
-  };
 
-  const handleCreateDebt = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!supplierName.trim() || !debtDesc.trim()) {
-      (window as any).__showToast?.("Gagal: Harap lengkapi nama suplier & perincian utang!", "error");
-      return;
-    }
-    const newDebt: DebtRecord = {
-      id: `debt-${Date.now()}`,
-      date: new Date().toISOString().split('T')[0],
-      supplierName: supplierName.toUpperCase(),
-      description: debtDesc,
-      totalDebt: debtAmount,
-      paidAmount: 0,
-      remainingBalance: debtAmount,
-      status: 'BELUM_LUNAS'
+    const executePayBroker = () => {
+      onAddFinance(newFin);
+      (window as any).__showToast?.(`Komisi Makelar ${activeBroker.name} sebesar Rp ${calculatedCommission.toLocaleString('id-ID')} berhasil dicatat dalam Buku Mutasi!`, "success");
     };
-    onAddDebt(newDebt);
-    setShowDebtForm(false);
-    setSupplierName("");
-    setDebtDesc("");
+
+    setConfirmModal({
+      isOpen: true,
+      title: "Konfirmasi Bayar Komisi Makelar",
+      message: `Apakah Anda yakin ingin membayar komisi makelar untuk ${activeBroker.name} sebesar Rp ${calculatedCommission.toLocaleString('id-ID')}?`,
+      type: 'PAY',
+      onConfirm: () => {
+        executePayBroker();
+        closeConfirm();
+      }
+    });
   };
 
   const triggerDebtPaymentSubmit = (debtId: string) => {
     if (payAmount <= 0) return;
-    onPayDebt(debtId, payAmount);
-    setPayingDebtId(null);
+    const debtItem = debts.find(d => d.id === debtId);
+    const supplier = debtItem ? debtItem.supplierName : '';
+
+    const executePayDebt = () => {
+      onPayDebt(debtId, payAmount);
+      setPayingDebtId(null);
+    };
+
+    setConfirmModal({
+      isOpen: true,
+      title: "Konfirmasi Cicilan Utang",
+      message: `Apakah Anda yakin ingin melakukan pembayaran cicilan utang kepada ${supplier} sebesar Rp ${payAmount.toLocaleString('id-ID')}?`,
+      type: 'PAY',
+      onConfirm: () => {
+        executePayDebt();
+        closeConfirm();
+      }
+    });
   };
 
   return (
@@ -173,20 +396,36 @@ export default function FinanceModule({
               </p>
             </div>
             
-            <button
-              onClick={() => setShowDebtForm(!showDebtForm)}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg flex items-center gap-1 cursor-pointer"
-            >
-              <PlusCircle className="w-3.5 h-3.5" />
-              {showDebtForm ? 'Sembunyikan form' : 'Catat Utang Baru'}
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={handleExportDebtExcel}
+                title="Ekspor buku utang ke Excel"
+                className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" /> Export Excel
+              </button>
+              <button
+                onClick={handlePrintDebtPDF}
+                title="Cetak buku utang / PDF"
+                className="flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5" /> Cetak / PDF
+              </button>
+              <button
+                onClick={() => setShowDebtForm(!showDebtForm)}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg flex items-center gap-1 cursor-pointer shadow"
+              >
+                <PlusCircle className="w-3.5 h-3.5" />
+                {showDebtForm ? 'Tutup Form' : 'Catat Utang Baru'}
+              </button>
+            </div>
           </div>
 
           {/* Form write debt */}
           {showDebtForm && (
             <div className="bg-white border border-neutral-200 shadow-sm rounded-xl p-5">
               <h4 className="font-bold text-neutral-800 text-xs mb-3">Tambah Catatan Utang Baru</h4>
-              <form onSubmit={handleCreateDebt} className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+              <form onSubmit={handleSaveDebt} className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
                 <div>
                   <label className="block text-neutral-600 mb-1">Nama Petani / Suplier</label>
                   <input
@@ -221,7 +460,7 @@ export default function FinanceModule({
                     type="submit"
                     className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg cursor-pointer"
                   >
-                    Simpan Buku Utang
+                    {editingDebtId ? 'Simpan Perubahan' : 'Simpan Buku Utang'}
                   </button>
                 </div>
               </form>
@@ -241,7 +480,7 @@ export default function FinanceModule({
                     <th className="text-right py-2.5 px-3">Jumlah Dibayar (Rp)</th>
                     <th className="text-right py-2.5 px-3">Sisa Utang (Sald)</th>
                     <th className="text-center py-2.5 px-3 font-semibold">Status</th>
-                    <th className="text-center py-2.5 px-3">Cicil Bayar</th>
+                    <th className="text-center py-2.5 px-3">Cicil Bayar / Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-100">
@@ -266,33 +505,64 @@ export default function FinanceModule({
                         </span>
                       </td>
                       <td className="py-2.5 px-3 text-center">
-                        {d.status === 'BELUM_LUNAS' ? (
-                          payingDebtId === d.id ? (
-                            <div className="flex items-center gap-1.5 justify-center" onClick={(e) => e.stopPropagation()}>
-                              <input
-                                type="number"
-                                value={payAmount}
-                                onChange={(e) => setPayAmount(parseInt(e.target.value) || 0)}
-                                className="bg-neutral-50 border border-neutral-300 text-red-600 font-bold p-1 rounded font-mono text-xs w-28 text-center"
-                              />
+                        <div className="flex gap-2 justify-center items-center">
+                          {d.status === 'BELUM_LUNAS' && (
+                            payingDebtId === d.id ? (
+                              <div className="flex items-center gap-1.5 justify-center" onClick={(e) => e.stopPropagation()}>
+                                <input
+                                  type="number"
+                                  value={payAmount}
+                                  onChange={(e) => setPayAmount(parseInt(e.target.value) || 0)}
+                                  className="bg-neutral-50 border border-neutral-300 text-red-600 font-bold p-1 rounded font-mono text-xs w-28 text-center"
+                                />
+                                <button
+                                  onClick={() => triggerDebtPaymentSubmit(d.id)}
+                                  className="bg-emerald-600 text-white font-bold p-1 rounded hover:bg-emerald-500 text-[10px]"
+                                >
+                                  OK
+                                </button>
+                              </div>
+                            ) : (
                               <button
-                                onClick={() => triggerDebtPaymentSubmit(d.id)}
-                                className="bg-emerald-600 text-white font-bold p-1 rounded hover:bg-emerald-500 text-[10px]"
+                                onClick={() => { setPayingDebtId(d.id); setPayAmount(d.remainingBalance); }}
+                                className="text-xs bg-[#e4f0fd] hover:bg-[#cbe3fd] text-blue-700 font-bold px-2 py-1 rounded transition"
                               >
-                                OK
+                                Bayar
                               </button>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => { setPayingDebtId(d.id); setPayAmount(d.remainingBalance); }}
-                              className="text-xs bg-[#e4f0fd] hover:bg-[#cbe3fd] text-blue-700 font-bold px-2 py-1 rounded transition"
-                            >
-                              Bayar Cicilan
-                            </button>
-                          )
-                        ) : (
-                          <span className="text-green-500 text-xs font-semibold">Tuntas</span>
-                        )}
+                            )
+                          )}
+                          <button
+                            onClick={() => {
+                              setEditingDebtId(d.id);
+                              setSupplierName(d.supplierName);
+                              setDebtDesc(d.description);
+                              setDebtAmount(d.totalDebt);
+                              setShowDebtForm(true);
+                            }}
+                            className="text-neutral-400 hover:text-blue-600 transition p-1 cursor-pointer"
+                            title="Ubah Utang"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setConfirmModal({
+                                isOpen: true,
+                                title: "Konfirmasi Hapus Utang",
+                                message: `Apakah Anda yakin ingin menghapus catatan utang kepada ${d.supplierName}?`,
+                                type: 'DELETE',
+                                onConfirm: () => {
+                                  onDeleteDebt(d.id);
+                                  closeConfirm();
+                                }
+                              });
+                            }}
+                            className="text-neutral-400 hover:text-red-650 text-red-600 transition p-1 font-bold cursor-pointer"
+                            title="Hapus Utang"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -434,20 +704,36 @@ export default function FinanceModule({
               </p>
             </div>
 
-            <button
-              onClick={() => setShowFinForm(!showFinForm)}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg flex items-center gap-1 cursor-pointer"
-            >
-              <PlusCircle className="w-3.5 h-3.5" />
-              {showFinForm ? 'Sembunyikan Form' : 'Catat Operasional Operatif'}
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={handleExportFinanceExcel}
+                title="Ekspor buku mutasi ke Excel"
+                className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" /> Export Excel
+              </button>
+              <button
+                onClick={handlePrintFinancePDF}
+                title="Cetak buku mutasi / PDF"
+                className="flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5" /> Cetak / PDF
+              </button>
+              <button
+                onClick={() => setShowFinForm(!showFinForm)}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg flex items-center gap-1 cursor-pointer shadow"
+              >
+                <PlusCircle className="w-3.5 h-3.5" />
+                {showFinForm ? 'Tutup Form' : 'Catat Operasional Operatif'}
+              </button>
+            </div>
           </div>
 
           {/* Form input mutasi */}
           {showFinForm && (
             <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm">
               <h4 className="font-bold text-neutral-800 text-xs mb-3">Catat Finansial Mutasi Kas</h4>
-              <form onSubmit={handleCreateFinance} className="grid grid-cols-1 md:grid-cols-5 gap-3.5 text-xs">
+              <form onSubmit={handleSaveFinance} className="grid grid-cols-1 md:grid-cols-5 gap-3.5 text-xs">
                 
                 <div>
                   <label className="block text-neutral-600 mb-1">Arah Kas</label>
@@ -515,7 +801,7 @@ export default function FinanceModule({
                       type="submit"
                       className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 rounded-lg cursor-pointer"
                     >
-                      SIMPAN
+                      {editingFinId ? 'SIMPAN' : 'SIMPAN'}
                     </button>
                   </div>
                 </div>
@@ -536,7 +822,7 @@ export default function FinanceModule({
                     <th className="py-2.5 px-3">Sasaran Pihak Terlibat</th>
                     <th className="py-2.5 px-3">Rekening Pembayaran</th>
                     <th className="text-right py-2.5 px-3">Pemasukan (+) (De)</th>
-                    <th className="text-right py-2.5 px-3">Pengeluaran (-) (Kr)</th>
+                    <th className="text-center py-2.5 px-3">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-100 font-medium">
@@ -569,6 +855,16 @@ export default function FinanceModule({
           </div>
         </div>
       )}
+
+      {/* CONFIRM MODAL OVERLAY */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type={confirmModal.type}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={closeConfirm}
+      />
 
     </div>
   );
