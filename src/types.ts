@@ -1,0 +1,105 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+export interface WeighbridgeTicket {
+  id: string;
+  ticketNo: string;
+  policeNo: string;
+  goodsName: string; // e.g., 'BERAS', 'JAGUNG', 'GABAH', 'AMPAZ'
+  agency: string;    // Client or destination (e.g., 'UCU POLES')
+  timbang1Time: string;
+  timbang1Weight: number; // Gross weight in kg
+  timbang2Time: string;
+  timbang2Weight: number; // Tare weight in kg (usually empty/0 on ticket first creation)
+  grossWeight: number;
+  tareWeight: number;
+  bagDeductionPercent: number; // Pot. Krg %
+  refaksiPercent: number;      // Refaksi % (e.g., moisture deduction)
+  netWeight: number;           // Net weight in kg after deductions
+  status: 'PENDING' | 'COMPLETED';
+  notes?: string;
+}
+
+export interface InboundRecord {
+  id: string;
+  date: string;
+  ticketNo?: string; // Reference to Weighbridge Ticket
+  vehicleNo: string;
+  supplier: string;
+  commodity: 'BERAS' | 'JAGUNG' | 'GABAH' | 'LAINNYA';
+  grossWeight: number;
+  tareWeight: number;
+  refaksiKaPercent: number; // Kadar Air Refaksi %
+  bagDeductionPercent: number; // Potongan Karung %
+  netWeight: number;
+  moistureContent: number; // KA % (Moisture content e.g. 14.5)
+  warehouseSection: string; // Location in warehouse, e.g. 'Sektor Timur', 'Gudang Tengah'
+  laborCost: number; // Biaya buruh panggul
+  driverName?: string;
+}
+
+export interface OutboundRecord {
+  id: string;
+  date: string;
+  ticketNo?: string; // Reference to Weighbridge Ticket
+  vehicleNo: string;
+  buyer: string;
+  commodity: 'BERAS' | 'JAGUNG' | 'GABAH' | 'LAINNYA';
+  totalWeight: number;
+  loadingLaborCost: number; // Biaya buruh muat
+  destination: string;
+  invoiceNo: string;
+  status: 'LOADING' | 'SHIPPED';
+}
+
+export interface ServiceRecord {
+  id: string;
+  date: string;
+  customerName: string;
+  serviceType: 'POLES' | 'KIPAS' | 'POLES & KIPAS';
+  commodity: string;
+  weight: number; // in kg
+  ratePerKg: number; // e.g., Rp 150/kg
+  totalFee: number;
+  paymentStatus: 'UNPAID' | 'PAID';
+  operatorName: string;
+}
+
+export interface DebtRecord {
+  id: string;
+  date: string;
+  supplierName: string;
+  description: string; // e.g., 'Pembelian Jagung 14 Ton'
+  totalDebt: number; // Total Utang
+  paidAmount: number; // Sudah Di-bayar
+  remainingBalance: number; // Sisa Utang
+  status: 'BELUM_LUNAS' | 'LUNAS';
+}
+
+export interface FinancialRecord {
+  id: string;
+  date: string;
+  type: 'DEBIT' | 'KREDIT';
+  category: 'OPERASIONAL' | 'GAJI_KARYAWAN' | 'BURUH' | 'MAKELAR' | 'TIMBANGAN' | 'POLES_KIPAS' | 'LAINNYA';
+  description: string;
+  partyName?: string; // employee or broker name or shipper
+  amount: number;
+  bankAccount: string; // e.g. 'Mandiri 162-xxx' or 'Kas Tunai'
+}
+
+export interface EmployeeRecord {
+  id: string;
+  name: string;
+  role: 'KARYAWAN' | 'BURUH' | 'MAKELAR';
+  phone?: string;
+  ratePerKg?: number; // specially for brokers standard commissions (e.g. 50 Rp/kg) or labor loaders
+}
+
+export interface CornMoistureRule {
+  moistureMin: number;
+  moistureMax: number;
+  refaksiPercent: number; // Weight deduction discount %
+  priceDiscountPerKg: number; // Price refund Rp deduction per kg
+}
