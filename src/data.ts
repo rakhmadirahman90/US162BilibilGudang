@@ -352,3 +352,16 @@ export const initialCommodities: CommodityRecord[] = [
   { id: "com-5", name: "AMPAZ JAGUNG FLOUR", type: "LAINNYA", moistureStandard: 12.0, bagDeductionPercent: 0.0 }
 ];
 
+export const initialRiceStockRecords: RiceStockRecord[] = [
+  { id: "rice-1", date: "2026-05-01", policeNo: "DD 8506 SU", description: "H IWAN", itemName: "BERAS", price: 13250, colly: 0, inWeight: 10000, outWeight: 0 },
+  { id: "rice-2", date: "2026-05-04", policeNo: "DW 8824 MS", description: "ALEX", itemName: "BERAS", price: 13300, colly: 0, inWeight: 8050, outWeight: 0 },
+  { id: "rice-3", date: "2026-05-04", policeNo: "-", description: "Keluar", itemName: "BERAS", price: 0, colly: 0, inWeight: 0, outWeight: 18050 },
+  { id: "rice-4", date: "2026-05-06", policeNo: "DD 8107 ET", description: "H IWAN", itemName: "BERAS", price: 13200, colly: 100, inWeight: 10010, outWeight: 0 },
+  { id: "rice-5", date: "2026-05-12", policeNo: "DP 8205 DA", description: "P UNGGUL", itemName: "BERAS", price: 13500, colly: 100, inWeight: 10550, outWeight: 0 },
+  { id: "rice-6", date: "2026-05-12", policeNo: "DP 8633 DH", description: "P UNGGUL", itemName: "BERAS", price: 13500, colly: 100, inWeight: 10530, outWeight: 0 },
+  { id: "rice-7", date: "2026-05-12", policeNo: "-", description: "BIDADARI", itemName: "BERAS", price: 0, colly: 0, inWeight: 0, outWeight: 23150 },
+  { id: "rice-8", date: "2026-05-16", policeNo: "DD 8605 SU", description: "ALEX", itemName: "BERAS", price: 13475, colly: 200, inWeight: 10030, outWeight: 0 },
+  { id: "rice-9", date: "2026-05-17", policeNo: "DD 8605 SU", description: "ALEX", itemName: "BERAS", price: 13475, colly: 200, inWeight: 10040, outWeight: 0 },
+  { id: "rice-10", date: "2026-05-18", policeNo: "DD 8506 SU", description: "ANTI", itemName: "BERAS", price: 13500, colly: 0, inWeight: 10050, outWeight: 0 }
+];
+

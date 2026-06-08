@@ -128,6 +128,18 @@ export interface CommodityRecord {
   bagDeductionPercent: number;
 }
 
+export interface RiceStockRecord {
+  id: string;
+  date: string;
+  policeNo: string;
+  description: string;
+  itemName: string;
+  price: number;
+  colly: number;
+  inWeight: number; // Masuk
+  outWeight: number; // Keluar
+}
+
 export interface CornMoistureRule {
   moistureMin: number;
   moistureMax: number;

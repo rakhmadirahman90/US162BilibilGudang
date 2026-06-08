@@ -17,7 +17,8 @@ import {
   VehicleRecord,
   SupplierRecord,
   BuyerRecord,
-  CommodityRecord
+  CommodityRecord,
+  RiceStockRecord
 } from './types';
 import { 
   initialWeighbridgeTickets, 
@@ -30,7 +31,8 @@ import {
   initialVehicles,
   initialSuppliers,
   initialBuyers,
-  initialCommodities
+  initialCommodities,
+  initialRiceStockRecords
 } from './data';
 
 // Import our modular subcomponents
@@ -42,6 +44,7 @@ import MoistureRefaksiModule from './components/MoistureRefaksiModule';
 import FinanceModule from './components/FinanceModule';
 import ReportsModule from './components/ReportsModule';
 import DatabaseMasterModule from './components/DatabaseMasterModule';
+import RiceStockModule from './components/RiceStockModule';
 
 // Brand Assets
 import bilibiliLogo from './assets/images/bilibili_logo_1780925186692.png';
@@ -286,8 +289,13 @@ export default function App() {
     return saved ? JSON.parse(saved) : initialCommodities;
   });
 
+  const [riceStockRecords, setRiceStockRecords] = useState<RiceStockRecord[]>(() => {
+    const saved = localStorage.getItem('bilibili_rice_stock_v2');
+    return saved ? JSON.parse(saved) : initialRiceStockRecords;
+  });
+
   // Active navigational tab
-  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE' | 'LAPORAN' | 'DATABASE'>('DASHBOARD');
+  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE' | 'STOK_BERAS' | 'LAPORAN' | 'DATABASE'>('DASHBOARD');
 
   // Premium customizable active theme state with LocalStorage persistence
   const [activeThemeId, setActiveThemeId] = useState<string>(() => {
@@ -386,6 +394,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('bilibili_commodities', JSON.stringify(commodities));
   }, [commodities]);
+
+  useEffect(() => {
+    localStorage.setItem('bilibili_rice_stock_v2', JSON.stringify(riceStockRecords));
+  }, [riceStockRecords]);
 
   // --- COMPONENT ACTION CALLBACKS ---
   const handleAddTicket = (tk: WeighbridgeTicket) => {
@@ -513,6 +525,21 @@ export default function App() {
   const handleDeleteFinance = (id: string) => {
     setFinances(prev => prev.filter(f => f.id !== id));
     showToast('Catatan mutasi kas berhasil dihapus!', 'success');
+  };
+
+  const handleAddRiceStock = (rec: RiceStockRecord) => {
+    setRiceStockRecords(prev => [rec, ...prev]);
+    showToast('Sukses menyimpan data stok beras!', 'success');
+  };
+
+  const handleUpdateRiceStock = (rec: RiceStockRecord) => {
+    setRiceStockRecords(prev => prev.map(r => r.id === rec.id ? rec : r));
+    showToast('Sukses memperbarui data stok beras!', 'success');
+  };
+
+  const handleDeleteRiceStock = (id: string) => {
+    setRiceStockRecords(prev => prev.filter(r => r.id !== id));
+    showToast('Catatan stok beras berhasil dihapus!', 'success');
   };
 
   // --- INTEGRATED METRICS CALCULATOR FOR COVER DASHBOARD ---
@@ -691,6 +718,18 @@ export default function App() {
           >
             <DollarSign className="w-4 h-4 text-emerald-600" />
             7. UTANG & MUTASI KAS
+          </button>
+
+          <button
+            onClick={() => setActiveTab('STOK_BERAS')}
+            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+              activeTab === 'STOK_BERAS' 
+                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
+                : 'border-transparent text-neutral-500 hover:text-neutral-800'
+            }`}
+          >
+            <Package className="w-4 h-4 text-emerald-600" />
+            8. STOK BERAS
           </button>
 
           <button
@@ -1085,6 +1124,16 @@ export default function App() {
             setEmployees={setEmployees}
             commodities={commodities}
             setCommodities={setCommodities}
+          />
+        )}
+
+        {/* VIEW 10: STOK BERAS */}
+        {activeTab === 'STOK_BERAS' && (
+          <RiceStockModule
+            records={riceStockRecords}
+            onAddRecord={handleAddRiceStock}
+            onUpdateRecord={handleUpdateRiceStock}
+            onDeleteRecord={handleDeleteRiceStock}
           />
         )}
 
