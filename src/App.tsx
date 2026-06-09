@@ -82,6 +82,8 @@ import {
   Database,
   Settings as SettingsIcon,
   Calendar,
+  Activity,
+  TrendingDown,
 } from 'lucide-react';
 
 // Define professional industrial & agricultural application themes
@@ -335,6 +337,9 @@ export default function App() {
 
   // Active navigational tab
   const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE' | 'STOK_BERAS' | 'LAPORAN' | 'DATABASE'>('DASHBOARD');
+  
+  // Dashboard tab feed selections
+  const [dashFeedTab, setDashFeedTab] = useState<'WEIGH' | 'INBOUND' | 'OUTBOUND' | 'SERVICES' | 'FINANCE'>('WEIGH');
 
   // --- SETTINGS STATE ---
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -704,7 +709,7 @@ export default function App() {
           <div className="flex flex-wrap items-center gap-3.5 text-xs font-sans">
             
             {/* Real-time clock & Date */}
-            <div className={`hidden sm:flex px-3 py-1.5 rounded border items-center gap-2 font-mono text-[11px] transition-all duration-300 ${theme.statusBoxBg} ${theme.statusBoxBorder}`}>
+            <div className={`flex px-2.5 py-1 sm:px-3 sm:py-1.5 rounded border items-center gap-2 font-mono text-[11px] transition-all duration-300 ${theme.statusBoxBg} ${theme.statusBoxBorder}`}>
               <Clock className="w-3.5 h-3.5 text-yellow-300 animate-spin-slow" />
               <div className="flex flex-col items-start leading-tight">
                 <span className="text-[9px] opacity-70 uppercase tracking-tighter">
@@ -754,15 +759,6 @@ export default function App() {
 
             {/* Active connection point */}
             <div className="hidden md:flex items-center gap-4 border-l border-white/20 pl-4 ml-2">
-              <div className="flex flex-col items-end">
-                <p className="text-[10px] font-bold text-yellow-350 tracking-tighter uppercase leading-none font-sans">
-                  {new Date().toLocaleDateString('id-ID', { weekday: 'long' })}
-                </p>
-                <p className="text-[11px] font-black text-white leading-none font-mono tracking-tight mt-0.5">
-                  {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase()}
-                </p>
-              </div>
-              <div className="h-6 w-[1px] bg-white/10 hidden lg:block"></div>
               <div className="flex items-center gap-1.5 font-mono text-[11px] text-emerald-250">
                 <span className="text-white/60 uppercase">System:</span>
                 <span className="text-green-400 font-bold flex items-center gap-1">
@@ -939,13 +935,12 @@ export default function App() {
         
         {/* VIEW 1: DASHBOARD OVERVIEW */}
         {activeTab === 'DASHBOARD' && (
-          <div className="flex flex-col gap-8">
-            
+          <div className="flex flex-col gap-6" id="dashboard-console-panel">
             {/* Hero Brand Welcome Banner */}
-            <div className={`bg-gradient-to-r ${theme.heroGradient} text-white rounded-2xl p-6 shadow-md border ${theme.headerBorder} flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative transition-all duration-300`}>
+            <div id="dash-hero-container" className={`bg-gradient-to-r ${theme.heroGradient} text-white rounded-2xl p-5 sm:p-6 shadow-md border ${theme.headerBorder} flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative transition-all duration-300`}>
               <div className="absolute right-0 top-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-2xl pointer-events-none"></div>
-              <div className="flex flex-col md:flex-row items-center gap-5 text-center md:text-left z-10">
-                <div className="w-20 h-20 rounded-full overflow-hidden border-3 border-yellow-400 bg-white shadow-xl shrink-0 flex items-center justify-center">
+              <div className="flex flex-col md:flex-row items-center gap-5 text-center md:text-left z-10 font-sans">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-3 border-yellow-400 bg-white shadow-xl shrink-0 flex items-center justify-center">
                   <img
                     src={bilibiliLogo}
                     alt="Logo US Bilibili 162"
@@ -954,235 +949,658 @@ export default function App() {
                   />
                 </div>
                 <div>
-                  <h2 className={`text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r ${theme.heroTextGradient} tracking-tight transition-all duration-300`}>
-                    {t.warehouseHeader} - {t.gudangBilibili}
+                  <h2 className={`text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r ${theme.heroTextGradient} tracking-tight transition-all duration-300`}>
+                    {t.warehouseHeader} - {t.gudangBilibili || 'US Bilibili 162'}
                   </h2>
-                  <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 mt-1">
-                    <p className="text-sm text-white/90 font-medium">
-                      {t.systemStatus}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1 justify-center md:justify-start">
+                    <p className="text-xs sm:text-sm text-white/90 font-medium">
+                      {t.systemStatus || 'Sistem Informasi Pergudangan Terpadu'}
                     </p>
-                    <span className="hidden md:inline text-white/30">•</span>
-                    <p className="text-xs text-yellow-350 font-bold font-mono uppercase tracking-widest flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
+                    <span className="hidden sm:inline text-white/30">•</span>
+                    <p className="text-[11px] sm:text-xs text-yellow-350 font-bold font-mono uppercase tracking-widest flex items-center justify-center gap-1">
+                      <Calendar className="w-3 h-3 text-yellow-300" />
                       {new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
                   </div>
-                  <p className="text-xs text-white/70 font-mono mt-2 flex items-center justify-center md:justify-start gap-2">
-                    <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    {t.pinrangLocation}
+                  <p className="text-xs text-white/70 font-mono mt-1.5 flex items-center justify-center md:justify-start gap-1.5">
+                    <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+                    {t.pinrangLocation || 'Kabupaten Pinrang, Sulawesi Selatan'}
                   </p>
                 </div>
               </div>
-              <div className="flex gap-2.5 flex-wrap justify-center z-10">
+              <div className="flex gap-2 flex-wrap justify-center z-10 w-full md:w-auto">
                 <button
+                  id="btn-shortcut-timbang"
                   onClick={() => setActiveTab('TIMBANG')}
-                  className="bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg active:scale-95 transition-all shadow-md cursor-pointer hover:bg-emerald-600"
+                  className="bg-emerald-600 text-white font-bold text-xs px-4 py-2.5 rounded-lg active:scale-95 transition-all shadow hover:bg-emerald-500 cursor-pointer flex-1 sm:flex-initial text-center justify-center flex items-center gap-1"
                 >
-                  {t.newWeighing}
+                  <Scale className="w-3.5 h-3.5" />
+                  {t.newWeighing || 'Timbang Baru'}
                 </button>
                 <button
-                  onClick={() => setActiveTab('FINANCE')}
-                  className="bg-white/10 hover:bg-white/20 text-white border border-white/25 font-bold text-xs px-4 py-2.5 rounded-lg active:scale-95 transition-all cursor-pointer"
+                  id="btn-shortcut-inbound"
+                  onClick={() => setActiveTab('MASUK')}
+                  className="bg-yellow-450 hover:bg-yellow-400 text-emerald-950 font-bold text-xs px-4 py-2.5 rounded-lg active:scale-95 transition-all cursor-pointer flex-1 sm:flex-initial text-center justify-center flex items-center gap-1"
                 >
-                  {t.cashMutation}
+                  <ArrowDownCircle className="w-3.5 h-3.5" />
+                  {t.recordInbound || 'Barang Masuk'}
                 </button>
               </div>
-            </div>
+            </div>   
             
-            {/* Realtime stock metric grid */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Realtime Core KPI Metrics Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="dash-kpi-metrics-grid">
               
-              {/* Corn Stock */}
-              <div className="bg-white border border-neutral-200 p-5 rounded-xl shadow-sm flex items-center justify-between">
+              {/* Corn Stock Card */}
+              <div id="card-metric-corn" className="bg-white border border-neutral-200 p-4.5 rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-between group">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono">{t.cornStock}</span>
-                  <span className="text-2xl font-black text-amber-650 font-mono tracking-tight">
-                    {cornStockBalance.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} <span className="text-xs text-neutral-400">{t.kgNetto}</span>
+                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.cornStock || 'Stok Jagung Silo'}</span>
+                  <span className="text-xl sm:text-2xl font-black text-amber-650 font-mono tracking-tight">
+                    {cornStockBalance.toLocaleString('id-ID')} <span className="text-xs text-neutral-400 font-normal">{t.kgNetto || 'Kg'}</span>
                   </span>
-                  <span className="text-[9px] text-[#2ebd1d]">In: {totalInboundCorn.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} | Out: {totalOutboundCorn.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</span>
+                  <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1">
+                    <span className="text-[#10b981] font-semibold">In: {totalInboundCorn.toLocaleString('id-ID')}</span>
+                    <span className="text-neutral-300">|</span>
+                    <span className="text-red-500 font-semibold">Out: {totalOutboundCorn.toLocaleString('id-ID')}</span>
+                  </div>
                 </div>
-                <div className="w-11 h-11 bg-amber-50 rounded-lg flex items-center justify-center border border-amber-100">
+                <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center border border-amber-100 group-hover:scale-110 transition duration-300 shrink-0">
                   <Package className="text-amber-500 w-5 h-5" />
                 </div>
               </div>
 
-              {/* Rice Stock */}
-              <div className="bg-white border border-neutral-200 p-5 rounded-xl shadow-sm flex items-center justify-between">
+              {/* Rice Stock Card */}
+              <div id="card-metric-rice" className="bg-white border border-neutral-200 p-4.5 rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-between group">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono">{t.riceStockLabel}</span>
-                  <span className="text-2xl font-black text-emerald-800 font-mono tracking-tight">
-                    {riceStockBalance.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} <span className="text-xs text-neutral-400">{t.kgNetto}</span>
+                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.riceStockLabel || 'Stok Beras Gudang'}</span>
+                  <span className="text-xl sm:text-2xl font-black text-emerald-800 font-mono tracking-tight">
+                    {riceStockBalance.toLocaleString('id-ID')} <span className="text-xs text-neutral-400 font-normal">{t.kgNetto || 'Kg'}</span>
                   </span>
-                  <span className="text-[9px] text-neutral-500">In: {totalInboundRice.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} | Out: {totalOutboundRice.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</span>
+                  <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1">
+                    <span className="text-[#10b981] font-semibold">In: {totalInboundRice.toLocaleString('id-ID')}</span>
+                    <span className="text-neutral-300">|</span>
+                    <span className="text-red-500 font-semibold">Out: {totalOutboundRice.toLocaleString('id-ID')}</span>
+                  </div>
                 </div>
-                <div className="w-11 h-11 bg-emerald-50 rounded-lg flex items-center justify-center border border-emerald-100">
+                <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center border border-emerald-100 group-hover:scale-110 transition duration-300 shrink-0">
                   <Package className="text-emerald-600 w-5 h-5" />
                 </div>
               </div>
 
-              {/* Total Jasa Pipil / Poles */}
-              <div className="bg-white border border-neutral-200 p-5 rounded-xl shadow-sm flex items-center justify-between">
+              {/* Active Weighbridge Queue Card */}
+              <div 
+                id="card-metric-weighbridge" 
+                onClick={() => setActiveTab('TIMBANG')}
+                className="bg-white border border-neutral-200 p-4.5 rounded-xl shadow-sm hover:shadow hover:border-blue-300 transition-all flex items-center justify-between group cursor-pointer"
+              >
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono">{t.totalServiceBilling}</span>
-                  <span className="text-xl font-bold text-sky-700 font-mono tracking-tight">
-                    Rp {totalServiceFeePaid.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}
+                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">Antrean Jembatan Timbang</span>
+                  <span className="text-xl sm:text-2xl font-black text-blue-800 font-mono tracking-tight flex items-center gap-1.5">
+                    {tickets.filter(t => t.status === 'PENDING').length} <span className="text-[9px] text-[#2563eb] font-bold bg-blue-50 px-1.5 py-0.5 rounded leading-none">Truk</span>
                   </span>
-                  <span className="text-[10px] text-red-500 font-bold">{t.unpaid}: Rp {totalServiceFeeUnpaid.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</span>
+                  <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1">
+                    <span className="text-emerald-600 font-bold">Selesai: {tickets.filter(t => t.status === 'COMPLETED').length}</span>
+                    <span className="text-neutral-300">•</span>
+                    <span className="text-blue-600 font-medium">Buka Unit Timbang</span>
+                  </div>
                 </div>
-                <div className="w-11 h-11 bg-sky-50 rounded-lg flex items-center justify-center border border-sky-100">
-                  <Wind className="text-sky-500 w-5 h-5" />
+                <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center border border-blue-100 group-hover:scale-110 transition duration-300 shrink-0">
+                  <Scale className="text-blue-600 w-5 h-5 animate-pulse" />
                 </div>
               </div>
 
-              {/* Cash Mutasi Balance */}
-              <div className="bg-white border border-neutral-200 p-5 rounded-xl shadow-sm flex items-center justify-between">
+              {/* Financial & Net Kas Card */}
+              <div id="card-metric-cash" className="bg-white border border-neutral-200 p-4.5 rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-between group">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono">{t.cashBalance}</span>
-                  <span className={`text-xl font-black font-mono tracking-tight ${netKasBalance >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                    Rp {netKasBalance.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}
+                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.cashBalance || 'Kas & Keuangan Tunai'}</span>
+                  <span className={`text-lg sm:text-xl font-black font-mono tracking-tight ${netKasBalance >= 0 ? 'text-emerald-700' : 'text-red-500'}`}>
+                    Rp {netKasBalance.toLocaleString('id-ID')}
                   </span>
-                  <span className="text-[10px] text-neutral-500">{t.supplierDebt}: Rp {totalOutstandingDebts.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</span>
+                  <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1">
+                    <span className="text-orange-650 font-bold font-mono text-[9px] text-red-500">{t.supplierDebt || 'Hutang AP'}: Rp {totalOutstandingDebts.toLocaleString('id-ID')}</span>
+                  </div>
                 </div>
-                <div className="w-11 h-11 bg-emerald-50 rounded-lg flex items-center justify-center border border-emerald-100">
-                  <DollarSign className="text-emerald-605 w-5 h-5" />
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center border group-hover:scale-110 transition duration-300 shrink-0 ${netKasBalance >= 0 ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'}`}>
+                  <DollarSign className={`w-5 h-5 ${netKasBalance >= 0 ? 'text-emerald-600' : 'text-red-552'}`} />
                 </div>
               </div>
 
             </div>
 
-            {/* Quick action grid cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-              {/* Column 1: Jembatan Timbang CRT Link */}
-              <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-3 border-b border-neutral-100 pb-2">
-                    <div className="p-1 rounded bg-[#e4f0fd] text-blue-700">
-                      <Scale className="w-4 h-4" />
+            {/* Middle Section: Double Column Operations Console */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6" id="dashboard-operational-details">
+              
+              {/* Column 1: Capacity Gauges & Logistic Flows Chart (7 Cols) */}
+              <div className="lg:col-span-7 flex flex-col gap-6">
+                
+                {/* Physical Silo & Storage Capacities */}
+                <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm" id="storage-utilization-panel">
+                  <h3 className="font-bold text-neutral-800 text-xs sm:text-sm mb-4 uppercase tracking-wider flex items-center gap-2 border-b border-neutral-100 pb-2 font-sans">
+                    <Database className="text-amber-500 w-4 h-4 sm:w-5 sm:h-5" />
+                    Kapasitas Fisik Fasilitas & Silo Silase
+                  </h3>
+                  
+                  <div className="flex flex-col gap-4">
+                    {/* Silo 1 - Corn */}
+                    <div>
+                      <div className="flex justify-between text-xs font-semibold text-neutral-600 mb-1">
+                        <span className="flex items-center gap-1 font-sans text-neutral-700">🌽 Silo Jagung Utama (Maks. 55.000 Kg)</span>
+                        <span className="font-mono text-neutral-800">{cornStockBalance.toLocaleString('id-ID')} Kg ({Math.min(100, Math.round((cornStockBalance / 55000) * 100)) || 0}%)</span>
+                      </div>
+                      <div className="w-full bg-neutral-100 h-3 rounded-full overflow-hidden border border-neutral-200">
+                        <div 
+                          className="bg-gradient-to-r from-amber-400 to-amber-600 h-full rounded-full transition-all duration-700"
+                          style={{ width: `${Math.min(100, Math.round((cornStockBalance / 55000) * 100))}%` }}
+                        ></div>
+                      </div>
                     </div>
-                    <span className="font-bold text-xs text-[#0a2345] uppercase">{t.weighbridge}</span>
+
+                    {/* Warehouse B - Rice */}
+                    <div>
+                      <div className="flex justify-between text-xs font-semibold text-neutral-600 mb-1">
+                        <span className="flex items-center gap-1 font-sans text-neutral-700">🌾 Gudang Beras Utama (Maks. 110.000 Kg)</span>
+                        <span className="font-mono text-neutral-800">{riceStockBalance.toLocaleString('id-ID')} Kg ({Math.min(100, Math.round((riceStockBalance / 110000) * 100)) || 0}%)</span>
+                      </div>
+                      <div className="w-full bg-neutral-100 h-3 rounded-full overflow-hidden border border-neutral-200">
+                        <div 
+                          className="bg-gradient-to-r from-emerald-400 to-emerald-600 h-full rounded-full transition-all duration-700"
+                          style={{ width: `${Math.min(100, Math.round((riceStockBalance / 110000) * 100))}%` }}
+                        ></div>
+                      </div>
+                    </div>
+
+                    {/* Poles, Kipasan, & Gas Dryer Lane */}
+                    <div>
+                      {(() => {
+                        const activeProcessingKg = serviceRecords.reduce((acc, s) => acc + s.weight, 0);
+                        const percent = Math.min(100, Math.round((activeProcessingKg / 40000) * 100)) || 0;
+                        return (
+                          <>
+                            <div className="flex justify-between text-xs font-semibold text-neutral-600 mb-1">
+                              <span className="flex items-center gap-1 font-sans text-neutral-700">⚙️ Unit Poles & Dryer Gas (Beban Kumulatif)</span>
+                              <span className="font-mono text-neutral-800">{activeProcessingKg.toLocaleString('id-ID')} Kg ({percent}%)</span>
+                            </div>
+                            <div className="w-full bg-neutral-100 h-3 rounded-full overflow-hidden border border-neutral-200">
+                              <div 
+                                className="bg-gradient-to-r from-sky-400 to-sky-600 h-full rounded-full transition-all duration-700"
+                                style={{ width: `${percent}%` }}
+                              ></div>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
                   </div>
-                  <p className="text-xs text-neutral-500 leading-relaxed">
-                    {t.truckWeighbridgeDesc}
-                  </p>
                 </div>
-                <button
-                  onClick={() => setActiveTab('TIMBANG')}
-                  className="mt-6 bg-[#0a2245] hover:bg-slate-800 text-white font-bold text-xs py-2 rounded-lg cursor-pointer flex items-center justify-center gap-1.5 transition"
-                >
-                  <Truck className="w-4 h-4" />
-                  {t.openWeighbridge}
-                </button>
+
+                {/* Logistic Flow Trends - Custom SVG Chart */}
+                <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm" id="cargo-volume-trends">
+                  <div className="flex items-center justify-between mb-4 border-b border-neutral-100 pb-2">
+                    <h3 className="font-bold text-neutral-800 text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 font-sans">
+                      <Activity className="text-emerald-600 w-4 h-4 sm:w-5 sm:h-5" />
+                      Arus Aktivitas Muatan Barang (5 Hari Terakhir)
+                    </h3>
+                    <div className="flex gap-3 text-[10px] font-mono">
+                      <span className="flex items-center gap-1 font-medium">
+                        <span className="inline-block w-2.5 h-2.5 bg-emerald-500 rounded"></span> Inbound
+                      </span>
+                      <span className="flex items-center gap-1 font-medium">
+                        <span className="inline-block w-2.5 h-2.5 bg-sky-500 rounded"></span> Outbound
+                      </span>
+                    </div>
+                  </div>
+
+                  {(() => {
+                    const getCargoFlowData = () => {
+                      const list = [];
+                      for (let i = 4; i >= 0; i--) {
+                        const d = new Date();
+                        d.setDate(d.getDate() - i);
+                        const key = d.toISOString().split('T')[0];
+                        
+                        const inSum = inboundRecords.filter(r => r.date === key).reduce((acc, r) => acc + r.netWeight, 0);
+                        const outSum = outboundRecords.filter(r => r.date === key).reduce((acc, r) => acc + r.totalWeight, 0);
+                        
+                        const labelParts = key.split('-');
+                        const label = labelParts.length === 3 ? `${labelParts[2]}/${labelParts[1]}` : key;
+                        list.push({ date: key, label, inbound: inSum, outbound: outSum });
+                      }
+                      return list;
+                    };
+                    const chartData = getCargoFlowData();
+                    const maxVal = Math.max(...chartData.map(d => Math.max(d.inbound, d.outbound)), 4000);
+
+                    return (
+                      <div className="relative pt-4">
+                        <div className="w-full h-44 sm:h-52 flex items-end justify-between px-2 sm:px-6 relative border-b border-neutral-200">
+                          <div className="absolute left-0 right-0 top-0 h-full flex flex-col justify-between pointer-events-none text-[8px] sm:text-[9px] font-mono text-neutral-400">
+                            <div className="border-t border-dashed border-neutral-200 w-full pt-1">{(maxVal).toLocaleString('id-ID')} Kg</div>
+                            <div className="border-t border-dashed border-neutral-200 w-full pt-1">{(maxVal * 0.75).toLocaleString('id-ID')} Kg</div>
+                            <div className="border-t border-dashed border-neutral-200 w-full pt-1">{(maxVal * 0.5).toLocaleString('id-ID')} Kg</div>
+                            <div className="border-t border-dashed border-neutral-200 w-full pt-1">{(maxVal * 0.25).toLocaleString('id-ID')} Kg</div>
+                          </div>
+
+                          {chartData.map((d, index) => {
+                            const inPct = maxVal > 0 ? (d.inbound / maxVal) * 90 : 0;
+                            const outPct = maxVal > 0 ? (d.outbound / maxVal) * 90 : 0;
+                            return (
+                              <div key={index} className="flex flex-col items-center flex-1 h-full justify-end z-10 px-1 sm:px-4">
+                                <div className="flex items-end gap-1.5 w-full justify-center h-full pb-1">
+                                  <div className="group/bar relative flex flex-col items-center justify-end w-4 sm:w-6 transition-all">
+                                    <div className="absolute -top-7 scale-0 group-hover/bar:scale-100 bg-[#122345] text-white font-mono text-[9px] px-1.5 py-0.5 rounded shadow z-40 whitespace-nowrap transition duration-200 leading-none">
+                                      {d.inbound.toLocaleString('id-ID')} Kg
+                                    </div>
+                                    <div 
+                                      className="bg-gradient-to-t from-emerald-600 to-emerald-400 hover:opacity-90 w-full rounded-t transition-all shadow-sm duration-500"
+                                      style={{ height: `${Math.max(3, inPct)}%` }}
+                                    ></div>
+                                  </div>
+
+                                  <div className="group/bar relative flex flex-col items-center justify-end w-4 sm:w-6 transition-all">
+                                    <div className="absolute -top-7 scale-0 group-hover/bar:scale-100 bg-[#122345] text-white font-mono text-[9px] px-1.5 py-0.5 rounded shadow z-40 whitespace-nowrap transition duration-200 leading-none">
+                                      {d.outbound.toLocaleString('id-ID')} Kg
+                                    </div>
+                                    <div 
+                                      className="bg-gradient-to-t from-sky-600 to-sky-400 hover:opacity-90 w-full rounded-t transition-all shadow-sm duration-500"
+                                      style={{ height: `${Math.max(3, outPct)}%` }}
+                                    ></div>
+                                  </div>
+                                </div>
+                                <span className="text-[10px] mt-1.5 font-bold font-mono text-neutral-500 leading-none">{d.label}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+
               </div>
 
-              {/* Column 2: Inbound links */}
-              <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-3 border-b border-neutral-100 pb-2">
-                    <div className="p-1 rounded bg-emerald-50 text-emerald-700">
-                      <ArrowDownCircle className="w-4 h-4" />
-                    </div>
-                    <span className="font-bold text-xs text-emerald-800 uppercase">1. {t.inbound}</span>
-                  </div>
-                  <p className="text-xs text-neutral-500 leading-relaxed">
-                    {t.inboundDesc}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setActiveTab('MASUK')}
-                  className="mt-6 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2 rounded-lg cursor-pointer flex items-center justify-center gap-1.5 transition"
-                >
-                  <ArrowDownCircle className="w-4 h-4" />
-                  {t.recordInbound}
-                </button>
-              </div>
+              {/* Column 2: System Warnings & Pending Invoices (5 Cols) */}
+              <div className="lg:col-span-5 flex flex-col gap-6" id="dashboard-critical-alerts">
+                
+                {/* Pending Services Fees & Receivables */}
+                <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm" id="receives-logs-alert">
+                  <h3 className="font-bold text-red-700 text-xs sm:text-sm mb-3 uppercase tracking-wider flex items-center gap-2 border-b border-neutral-100 pb-2 font-sans">
+                    <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-650 animate-pulse" />
+                    Penagihan & Kewajiban Finansial Aktif
+                  </h3>
 
-              {/* Column 3: Processing link */}
-              <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm flex flex-col justify-between block">
-                <div>
-                  <div className="flex items-center gap-2 mb-3 border-b border-neutral-100 pb-2">
-                    <div className="p-1 rounded bg-sky-50 text-sky-700">
-                      <Wind className="w-4 h-4" />
+                  <div className="flex flex-col gap-3.5">
+                    <div>
+                      <p className="text-[10px] uppercase font-mono font-bold text-orange-600 mb-1.5 flex justify-between">
+                        <span>⚠️ Kewajiban Utang Pembelian (Supplier AP)</span>
+                        <span className="underline hover:text-orange-700 cursor-pointer text-[10px]" onClick={() => setActiveTab('FINANCE')}>Kelola Keuangan</span>
+                      </p>
+
+                      {debts.filter(d => d.remainingBalance > 0).length === 0 ? (
+                        <p className="text-neutral-400 text-xs italic bg-neutral-50 p-2 rounded">Semua Utang Supplier Sudah Lunas.</p>
+                      ) : (
+                        <div className="flex flex-col gap-1.5">
+                          {debts.filter(d => d.remainingBalance > 0).slice(0, 2).map(d => (
+                            <div key={d.id} className="bg-orange-50 border border-orange-100 rounded-lg p-2 flex justify-between items-center text-xs">
+                              <div>
+                                <span className="font-bold text-[#b45309]">{d.supplierName}</span>
+                                <p className="text-[10px] text-neutral-500 font-mono mt-0.5">{d.description}</p>
+                              </div>
+                              <div className="text-right">
+                                <span className="font-mono font-black text-red-700">Rp {d.remainingBalance.toLocaleString('id-ID')}</span>
+                                <p className="text-[9px] text-neutral-500 leading-none">Sisa Tagihan</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    <span className="font-bold text-xs text-sky-800 uppercase">3. {t.services}</span>
+
+                    <div>
+                      <p className="text-[10px] uppercase font-mono font-bold text-blue-700 mb-1.5 flex justify-between">
+                        <span>💰 Piutang Jasa Poles/Kipas Belum Diambil</span>
+                        <span className="underline hover:text-blue-800 cursor-pointer text-[10px]" onClick={() => setActiveTab('SERVICES')}>Kelola Jasa</span>
+                      </p>
+
+                      {serviceRecords.filter(s => s.paymentStatus === 'UNPAID').length === 0 ? (
+                        <p className="text-neutral-400 text-xs italic bg-neutral-50 p-2 rounded">Semua Tagihan Jasa Poles Lunas.</p>
+                      ) : (
+                        <div className="flex flex-col gap-1.5">
+                          {serviceRecords.filter(s => s.paymentStatus === 'UNPAID').slice(0, 2).map(s => (
+                            <div key={s.id} className="bg-blue-50 border border-blue-100 rounded-lg p-2 flex justify-between items-center text-xs">
+                              <div>
+                                <span className="font-bold text-sky-950">{s.customerName}</span>
+                                <p className="text-[10px] text-neutral-500 mt-0.5 font-mono">{s.serviceType} | {s.weight.toLocaleString('id-ID')} Kg</p>
+                              </div>
+                              <div className="text-right">
+                                <span className="font-mono font-black text-sky-850">Rp {s.totalFee.toLocaleString('id-ID')}</span>
+                                <p className="text-[9px] text-[#cc6114] font-medium leading-none">Belum Bayar</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-xs text-neutral-500 leading-relaxed">
-                    {t.processingDesc}
-                  </p>
                 </div>
-                <button
-                  onClick={() => setActiveTab('SERVICES')}
-                  className="mt-6 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs py-2 rounded-lg cursor-pointer flex items-center justify-center gap-1.5 transition"
-                >
-                  <Wind className="w-3.5 h-3.5" />
-                  {t.openServices}
-                </button>
+
+                {/* Calibration checklist & system control status block */}
+                <div className="bg-emerald-950 text-emerald-100 rounded-xl p-5 border border-emerald-900 shadow">
+                  <h4 className="font-black text-xs text-yellow-350 tracking-wider uppercase mb-2 font-mono">Pemeriksaan Jembatan Timbang</h4>
+                  <ul className="text-xs text-emerald-200 flex flex-col gap-2 mt-1">
+                    <li className="flex items-start gap-1.5 leading-snug">
+                      <span className="text-yellow-400 font-bold">✔</span>
+                      <span><strong>Load Cell GST-9700</strong>: Terkoneksi (Kalibrasi sensor nol-beban aktif)</span>
+                    </li>
+                    <li className="flex items-start gap-1.5 leading-snug">
+                      <span className="text-yellow-400 font-bold">✔</span>
+                      <span><strong>Printer Kertas LX-310</strong>: Siap cetak (Fungsionalitas cetak tiket 3-rangkap aktif)</span>
+                    </li>
+                    <li className="flex items-start gap-1.5 leading-snug">
+                      <span className="text-yellow-300 font-bold">✔</span>
+                      <span><strong>Integrasi Kadar Air</strong>: Potongan refaksi basah jagung otomatis terpasang</span>
+                    </li>
+                  </ul>
+                  <button 
+                    onClick={() => setActiveTab('REFAKSI')}
+                    className="mt-4 w-full bg-[#bfef30] text-emerald-950 font-black text-xs hover:bg-[#dfe40c] px-4 py-2 rounded-lg transition"
+                  >
+                    Buka Panduan Potongan Refaksi KA
+                  </button>
+                </div>
+
               </div>
 
             </div>
 
-            {/* Recent weighing transactions timeline */}
-            <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm">
-              <h3 className="font-bold text-neutral-800 text-sm mb-4 flex items-center gap-2 border-b border-neutral-100 pb-2">
-                <Clock className="text-emerald-600 w-5 h-5" />
-                {t.weighingQueueTitle} ({new Date().toISOString().split('T')[0]})
-              </h3>
+            {/* LOWER SECTION: Integrated Database Live Activity Portals (5 Tabs list) */}
+            <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm" id="integrated-records-pushed">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-100 pb-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <Activity className="text-emerald-700 w-5 h-5 shrink-0 animate-pulse" />
+                  <div>
+                    <h3 className="font-black text-neutral-800 text-sm sm:text-base leading-tight">Portal Aktivitas Gudang & Timbangan Terpadu</h3>
+                    <p className="text-[10px] text-neutral-500 font-mono">Arsip data diperbarui otomatis seiring perubahan transaksi di lapangan</p>
+                  </div>
+                </div>
+                
+                {/* Horizontal custom scrollable tab filter list inside feed */}
+                <div className="flex gap-1.5 overflow-x-auto whitespace-nowrap custom-scrollbar pb-1.5 sm:pb-0">
+                  <button 
+                    id="dash-feed-tab-weigh"
+                    onClick={() => setDashFeedTab('WEIGH')}
+                    className={`px-3 py-1.5 text-xs rounded-full font-bold cursor-pointer transition ${dashFeedTab === 'WEIGH' ? 'bg-[#0a2245] text-white shadow-sm' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'}`}
+                  >
+                    Jembatan Timbang
+                  </button>
+                  <button 
+                    id="dash-feed-tab-inbound"
+                    onClick={() => setDashFeedTab('INBOUND')}
+                    className={`px-3 py-1.5 text-xs rounded-full font-bold cursor-pointer transition ${dashFeedTab === 'INBOUND' ? 'bg-[#10b981] text-white shadow-sm' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'}`}
+                  >
+                    Inbound (Barang Masuk)
+                  </button>
+                  <button 
+                    id="dash-feed-tab-outbound"
+                    onClick={() => setDashFeedTab('OUTBOUND')}
+                    className={`px-3 py-1.5 text-xs rounded-full font-bold cursor-pointer transition ${dashFeedTab === 'OUTBOUND' ? 'bg-[#3b82f6] text-white shadow-sm' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'}`}
+                  >
+                    Outbound (Barang Keluar)
+                  </button>
+                  <button 
+                    id="dash-feed-tab-services"
+                    onClick={() => setDashFeedTab('SERVICES')}
+                    className={`px-3 py-1.5 text-xs rounded-full font-bold cursor-pointer transition ${dashFeedTab === 'SERVICES' ? 'bg-[#0ea5e9] text-white shadow-sm' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'}`}
+                  >
+                    Layanan Jasa Poles
+                  </button>
+                  <button 
+                    id="dash-feed-tab-finance"
+                    onClick={() => setDashFeedTab('FINANCE')}
+                    className={`px-3 py-1.5 text-xs rounded-full font-bold cursor-pointer transition ${dashFeedTab === 'FINANCE' ? 'bg-amber-600 text-white shadow-sm' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'}`}
+                  >
+                    Arus Kas & Buku Besar
+                  </button>
+                </div>
+              </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-neutral-600">
-                  <thead className="bg-[#122345] text-[#afcbff] font-mono tracking-wider font-semibold uppercase">
-                    <tr>
-                      <th className="py-2.5 px-3">{t.ticketNo}</th>
-                      <th className="py-2.5 px-3">{t.policeNo}</th>
-                      <th className="py-2.5 px-3">{t.goods}</th>
-                      <th className="py-2.5 px-3">{t.supplierOrMitra}</th>
-                      <th className="py-2.5 px-3 text-right">{t.weighing1Gross}</th>
-                      <th className="py-2.5 px-3 text-right">{t.weighing2Tare}</th>
-                      <th className="py-2.5 px-3 text-right">{t.netWeightDashboard}</th>
-                      <th className="py-2.5 px-3 text-center">{t.status}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-neutral-150">
-                    {tickets.slice(0, 3).map(tk => (
-                      <tr key={tk.id} className="hover:bg-neutral-50 transition-colors">
-                        <td className="py-2.5 px-3 font-bold font-mono text-[#a03010]">{tk.ticketNo}</td>
-                        <td className="py-2.5 px-3 font-semibold text-neutral-800">{tk.policeNo}</td>
-                        <td className="py-2.5 px-3 font-bold">
-                          <span className="bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded text-[10px]">
-                            {tk.goodsName}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-3 text-neutral-800 font-medium">{tk.agency}</td>
-                        <td className="text-right py-2.5 px-3 font-mono">{(tk.timbang1Weight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg</td>
-                        <td className="text-right py-2.5 px-3 font-mono text-orange-600 font-semibold">
-                          {(tk.timbang2Weight ?? 0) > 0 ? `${(tk.timbang2Weight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg` : '- -'}
-                        </td>
-                        <td className="text-right py-2.5 px-3 font-black text-emerald-600 font-mono">
-                          {(tk.netWeight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg
-                        </td>
-                        <td className="py-2.5 px-3 text-center">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            tk.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700 animate-pulse'
-                          }`}>
-                            {tk.status === 'COMPLETED' ? t.completedStatus : t.waitingStatus}
-                          </span>
-                        </td>
+              {/* Data tables container with responsive scrolls, styled beautifully */}
+              <div className="overflow-x-auto custom-scrollbar border border-neutral-100 rounded-lg">
+                
+                {/* A. WEIGHBRIDGE SUB GRID */}
+                {dashFeedTab === 'WEIGH' && (
+                  <table className="w-full text-left text-xs text-neutral-600 min-w-[750px] font-sans">
+                    <thead className="bg-[#122345] text-[#afcbff] font-mono tracking-wider font-semibold uppercase">
+                      <tr>
+                        <th className="py-2.5 px-3">No. Tiket</th>
+                        <th className="py-2.5 px-3">No. Polisi</th>
+                        <th className="py-2.5 px-3">Komoditas / Muatan</th>
+                        <th className="py-2.5 px-3">Supplier / Agen</th>
+                        <th className="py-2.5 px-3 text-right">Berat Timbang 1 (Gross)</th>
+                        <th className="py-2.5 px-3 text-right">Berat Timbang 2 (Tare)</th>
+                        <th className="py-2.5 px-3 text-right">Netto Bersih</th>
+                        <th className="py-2.5 px-3 text-center">Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-150">
+                      {tickets.length === 0 ? (
+                        <tr><td colSpan={8} className="text-center py-6 text-neutral-400 italic">Belum ada catatan timbangan.</td></tr>
+                      ) : (
+                        tickets.slice(0, 5).map(tk => (
+                          <tr key={tk.id} className="hover:bg-neutral-50 transition-colors">
+                            <td className="py-2.5 px-3 font-bold font-mono text-[#a03010]">{tk.ticketNo}</td>
+                            <td className="py-2.5 px-3 font-semibold text-neutral-800">{tk.policeNo}</td>
+                            <td className="py-2.5 px-3">
+                              <span className="bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded text-[10px] font-bold">
+                                {tk.goodsName}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 text-neutral-800 font-medium">{tk.agency}</td>
+                            <td className="text-right py-2.5 px-3 font-mono">{(tk.timbang1Weight ?? 0).toLocaleString('id-ID')} Kg</td>
+                            <td className="text-right py-2.5 px-3 font-mono text-orange-600 font-semibold">
+                              {(tk.timbang2Weight ?? 0) > 0 ? `${(tk.timbang2Weight ?? 0).toLocaleString('id-ID')} Kg` : '- -'}
+                            </td>
+                            <td className="text-right py-2.5 px-3 font-black text-emerald-600 font-mono">
+                              {(tk.netWeight ?? 0).toLocaleString('id-ID')} Kg
+                            </td>
+                            <td className="py-2.5 px-3 text-center">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                tk.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-yellow-50 text-yellow-750 animate-pulse border border-yellow-250'
+                              }`}>
+                                {tk.status === 'COMPLETED' ? 'COMPLETED' : 'PENDING'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                )}
+
+                {/* B. INBOUND SUB GRID */}
+                {dashFeedTab === 'INBOUND' && (
+                  <table className="w-full text-left text-xs text-neutral-600 min-w-[750px] font-sans">
+                    <thead className="bg-[#0f766e] text-teal-100 font-mono tracking-wider font-semibold uppercase">
+                      <tr>
+                        <th className="py-2.5 px-3">Tanggal Datang</th>
+                        <th className="py-2.5 px-3">No. Tiket</th>
+                        <th className="py-2.5 px-3">No. Polisi</th>
+                        <th className="py-2.5 px-3">Pemasok / Supplier</th>
+                        <th className="py-2.5 px-3 text-right">Netto</th>
+                        <th className="py-2.5 px-3 text-center">Kadar Air (KA)</th>
+                        <th className="py-2.5 px-3">Sektor Gudang</th>
+                        <th className="py-2.5 px-3 text-right">Nilai Total</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-150">
+                      {inboundRecords.length === 0 ? (
+                        <tr><td colSpan={8} className="text-center py-6 text-neutral-400 italic">Belum ada catatan barang masuk.</td></tr>
+                      ) : (
+                        inboundRecords.slice(0, 5).map(r => (
+                          <tr key={r.id} className="hover:bg-neutral-50 transition-colors">
+                            <td className="py-2.5 px-3 font-mono">{r.date}</td>
+                            <td className="py-2.5 px-3 font-mono font-semibold text-neutral-700">{r.ticketNo || '-'}</td>
+                            <td className="py-2.5 px-3 font-bold text-neutral-800">{r.vehicleNo}</td>
+                            <td className="py-2.5 px-3 text-neutral-800 font-semibold">{r.supplier}</td>
+                            <td className="text-right py-2.5 px-3 font-black text-emerald-700 font-mono">{r.netWeight.toLocaleString('id-ID')} Kg</td>
+                            <td className="py-2.5 px-3 text-center">
+                              <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${r.moistureContent > 16.0 ? 'bg-red-100 text-red-650 font-bold' : 'bg-green-50 text-green-700 font-bold border border-green-200 px-1 py-0.5'}`}>
+                                {r.moistureContent}%
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 text-neutral-500 font-medium">{r.warehouseSection}</td>
+                            <td className="text-right py-2.5 px-3 font-black font-mono text-neutral-800">Rp {r.totalPrice.toLocaleString('id-ID')}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                )}
+
+                {/* C. OUTBOUND SUB GRID */}
+                {dashFeedTab === 'OUTBOUND' && (
+                  <table className="w-full text-left text-xs text-neutral-600 min-w-[750px] font-sans">
+                    <thead className="bg-[#1d4ed8] text-blue-100 font-mono tracking-wider font-semibold uppercase">
+                      <tr>
+                        <th className="py-2.5 px-3">Tanggal Kirim</th>
+                        <th className="py-2.5 px-3">No. Invoice</th>
+                        <th className="py-2.5 px-3">No. Polisi</th>
+                        <th className="py-2.5 px-3">Pelanggan / Buyer</th>
+                        <th className="py-2.5 px-3">Komoditas</th>
+                        <th className="py-2.5 px-3 text-right">Berat Kirim (Netto)</th>
+                        <th className="py-2.5 px-3">Tujuan Pengiriman</th>
+                        <th className="py-2.5 px-3 text-center">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-150">
+                      {outboundRecords.length === 0 ? (
+                        <tr><td colSpan={8} className="text-center py-6 text-neutral-400 italic">Belum ada catatan barang keluar.</td></tr>
+                      ) : (
+                        outboundRecords.slice(0, 5).map(r => (
+                          <tr key={r.id} className="hover:bg-neutral-50 transition-colors">
+                            <td className="py-2.5 px-3 font-mono">{r.date}</td>
+                            <td className="py-2.5 px-3 font-mono font-bold text-neutral-700">{r.invoiceNo}</td>
+                            <td className="py-2.5 px-3 text-neutral-800 font-semibold">{r.vehicleNo}</td>
+                            <td className="py-2.5 px-3 text-neutral-800 font-bold">{r.buyer}</td>
+                            <td className="py-2.5 px-3 font-semibold text-neutral-700">{r.commodity}</td>
+                            <td className="text-right py-2.5 px-3 font-black text-blue-750 font-mono">{r.totalWeight.toLocaleString('id-ID')} Kg</td>
+                            <td className="py-2.5 px-3 text-neutral-500 font-medium">{r.destination}</td>
+                            <td className="py-2.5 px-3 text-center">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${r.status === 'SHIPPED' ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700'}`}>
+                                {r.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                )}
+
+                {/* D. SERVICES SUB GRID */}
+                {dashFeedTab === 'SERVICES' && (
+                  <table className="w-full text-left text-xs text-neutral-600 min-w-[750px] font-sans">
+                    <thead className="bg-[#0369a1] text-sky-100 font-mono tracking-wider font-semibold uppercase">
+                      <tr>
+                        <th className="py-2.5 px-3">Tanggal Proses</th>
+                        <th className="py-2.5 px-3">Nama Petani / Customer</th>
+                        <th className="py-2.5 px-3">Jenis Layanan</th>
+                        <th className="py-2.5 px-3">Bahan Komoditas</th>
+                        <th className="py-2.5 px-3 text-right">Berat Basah (Kg)</th>
+                        <th className="py-2.5 px-3 text-right">Tarif / Kg</th>
+                        <th className="py-2.5 px-3 text-right">Biaya Total</th>
+                        <th className="py-2.5 px-3 text-center">Pembayaran</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-150">
+                      {serviceRecords.length === 0 ? (
+                        <tr><td colSpan={8} className="text-center py-6 text-neutral-400 italic">Belum ada layanan jasa poles/dryer dicatatkan.</td></tr>
+                      ) : (
+                        serviceRecords.slice(0, 5).map(s => (
+                          <tr key={s.id} className="hover:bg-neutral-50 transition-colors">
+                            <td className="py-2.5 px-3 font-mono">{s.date}</td>
+                            <td className="py-2.5 px-3 text-neutral-800 font-bold">{s.customerName}</td>
+                            <td className="py-2.5 px-3">
+                              <span className="bg-sky-50 text-sky-700 px-1.5 py-0.5 rounded text-[10px] font-bold">{s.serviceType}</span>
+                            </td>
+                            <td className="py-2.5 px-3 font-medium text-neutral-600">{s.commodity}</td>
+                            <td className="text-right py-2.5 px-3 font-mono">{s.weight.toLocaleString('id-ID')} Kg</td>
+                            <td className="text-right py-2.5 px-3 font-mono">Rp {s.ratePerKg}</td>
+                            <td className="text-right py-2.5 px-3 font-black text-sky-800 font-mono">Rp {s.totalFee.toLocaleString('id-ID')}</td>
+                            <td className="py-2.5 px-3 text-center">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${s.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-650'}`}>
+                                {s.paymentStatus}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                )}
+
+                {/* E. FINANCIAL MUTATIONS LEDGER SUB GRID */}
+                {dashFeedTab === 'FINANCE' && (
+                  <table className="w-full text-left text-xs text-neutral-600 min-w-[750px] font-sans">
+                    <thead className="bg-[#9a3412] text-orange-100 font-mono tracking-wider font-semibold uppercase">
+                      <tr>
+                        <th className="py-2.5 px-3">Tanggal Catat</th>
+                        <th className="py-2.5 px-3">Jenis Arus</th>
+                        <th className="py-2.5 px-3">Kategori</th>
+                        <th className="py-2.5 px-3">Keterangan Transaksi</th>
+                        <th className="py-2.5 px-3">Pihak Terkait</th>
+                        <th className="py-2.5 px-3 text-right">Nilai Mutasi</th>
+                        <th className="py-2.5 px-3">Akun Buku Kas</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-150">
+                      {finances.length === 0 ? (
+                        <tr><td colSpan={7} className="text-center py-6 text-neutral-400 italic">Belum ada mutasi keuangan dicatatkan.</td></tr>
+                      ) : (
+                        finances.slice(0, 5).map(f => (
+                          <tr key={f.id} className="hover:bg-neutral-50 transition-colors">
+                            <td className="py-2.5 px-3 font-mono">{f.date}</td>
+                            <td className="py-2.5 px-3">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                                f.type === 'DEBIT' ? 'bg-green-100 text-green-700' : 'bg-rose-100 text-rose-700'
+                              }`}>
+                                {f.type === 'DEBIT' ? '📥 DEBIT' : '📤 KREDIT'}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 font-bold text-neutral-700 text-[10px]">{f.category}</td>
+                            <td className="py-2.5 px-3 text-neutral-800 font-medium">{f.description}</td>
+                            <td className="py-2.5 px-3 text-neutral-600 font-semibold">{f.partyName || '-'}</td>
+                            <td className={`text-right py-2.5 px-3 font-black font-mono ${f.type === 'DEBIT' ? 'text-emerald-700' : 'text-rose-700'}`}>
+                              Rp {f.amount.toLocaleString('id-ID')}
+                            </td>
+                            <td className="py-2.5 px-3 font-mono text-neutral-500">{f.bankAccount}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                )}
+
               </div>
-              <div className="text-center mt-3 pt-3 border-t border-neutral-100">
+
+              {/* View entire archives link */}
+              <div className="text-center mt-4 pt-3 border-t border-neutral-100 flex justify-between items-center text-xs">
+                <span className="text-neutral-400 font-medium font-mono text-[11px]">Memperlihatkan hingga 5 transaksi terbaru per kelompok kategori</span>
                 <button
-                  onClick={() => setActiveTab('TIMBANG')}
-                  className="text-xs text-blue-600 hover:text-blue-500 font-bold transition flex items-center justify-center gap-1 mx-auto"
+                  onClick={() => {
+                    if (dashFeedTab === 'WEIGH') setActiveTab('TIMBANG');
+                    else if (dashFeedTab === 'INBOUND') setActiveTab('MASUK');
+                    else if (dashFeedTab === 'OUTBOUND') setActiveTab('KELUAR');
+                    else if (dashFeedTab === 'SERVICES') setActiveTab('SERVICES');
+                    else if (dashFeedTab === 'FINANCE') setActiveTab('FINANCE');
+                  }}
+                  className="text-[#0a2245] hover:text-[#0f386c] font-black transition flex items-center justify-center gap-1 cursor-pointer bg-neutral-100 hover:bg-neutral-200 px-3.5 py-1.5 rounded-lg border border-neutral-200 text-xs"
                 >
-                  {t.viewAllArchives} <ChevronRight className="w-4 h-4" />
+                  Buka Portal Lengkap Arus Utama <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
 
-            {/* Quick instruction guide about user photos */}
+            {/* Storage Calibration Banner */}
             <div className="bg-emerald-950 text-emerald-100 p-5 rounded-xl border border-emerald-900 shadow flex flex-col md:flex-row items-center gap-4 justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-yellow-400 bg-white shadow-md shrink-0 flex items-center justify-center">
