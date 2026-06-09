@@ -343,6 +343,65 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
   printWindow.document.close();
 }
 
+export function printServiceSlip(record: ServiceRecord) {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    alert('Pop-up terblokir! Harap izinkan pop-up untuk mencetak slip.');
+    return;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Resi Jasa #${record.id.slice(-6)}</title>
+      <style>
+        @media print {
+          @page { size: 80mm auto; margin: 0; }
+          body { -webkit-print-color-adjust: exact; margin: 0; padding: 2mm; }
+        }
+        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 0mm; line-height: 1.25; font-weight: bold; }
+        .slip { width: 100%; max-width: 80mm; }
+        .border-dashed { border-top: 2px dashed #000; margin: 4px 0; }
+        .font-bold { font-weight: bold; }
+        .text-center { text-align: center; }
+        .flex { display: flex; justify-content: space-between; width: 100%; }
+        .mt-2 { margin-top: 4px; }
+      </style>
+    </head>
+    <body onload="window.print(); window.close();">
+      <div class="slip">
+        <div class="text-center font-bold" style="font-size: 14pt;">GUDANG US BILIBILI 162</div>
+        <div class="text-center" style="font-size: 11pt;">JASA LAYANAN</div>
+        <div class="border-dashed"></div>
+        <div class="flex" style="font-size: 11pt;"><span>No. ID:</span><span>${record.id.slice(-6)}</span><span>Tgl:</span><span>${record.date}</span></div>
+        <div class="border-dashed"></div>
+        <div class="flex" style="font-size: 11pt;"><span>Pelanggan:</span><span>${record.customerName}</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>Layanan:</span><span>${record.serviceType}</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>Komoditas:</span><span>${record.commodity}</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>Status:</span><span>${record.paymentStatus}</span></div>
+        <div class="border-dashed"></div>
+        <div class="flex" style="font-size: 11pt;"><span>Berat:</span><span>${record.weight.toLocaleString('id-ID')} kg</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>Tarif/kg:</span><span>Rp ${record.ratePerKg.toLocaleString('id-ID')}</span></div>
+        <div class="border-dashed"></div>
+        <div class="flex font-bold" style="font-size: 13pt;"><span>TOTAL:</span><span>Rp ${record.totalFee.toLocaleString('id-ID')}</span></div>
+        <div class="border-dashed"></div>
+        <div class="flex mt-2" style="font-size: 11pt;">
+          <div class="text-center">Penimbang,</div>
+          <div class="text-center">Petugas/Staff,</div>
+        </div>
+        <div style="height: 60px;"></div>
+        <div class="flex" style="font-size: 11pt;">
+          <div class="text-center">( .................... )</div>
+          <div class="text-center">( .................... )</div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
 export function printSlip(ticket: WeighbridgeTicket) {
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
@@ -436,3 +495,4 @@ export function printSlip(ticket: WeighbridgeTicket) {
   `);
   printWindow.document.close();
 }
+

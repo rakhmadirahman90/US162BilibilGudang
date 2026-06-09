@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { ServiceRecord } from '../types';
 import { Wind, Trash, User, Search, Play, Plus, DollarSign, CheckCircle2, AlertCircle, Download, Printer, Edit2 } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
-import { exportToCSV, printPDFReport } from '../utils/exportHelper';
+import { exportToCSV, printPDFReport, printServiceSlip } from '../utils/exportHelper';
 
 interface ServicesModuleProps {
   records: ServiceRecord[];
@@ -408,6 +408,13 @@ export default function ServicesModule({
                   </td>
                   <td className="py-2.5 px-3 text-center">
                     <div className="flex gap-2 justify-center items-center">
+                      <button
+                        onClick={() => printServiceSlip(s)}
+                        className="text-neutral-400 hover:text-sky-600 transition p-1 cursor-pointer"
+                        title="Cetak Resi"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                      </button>
                       <button
                         onClick={() => {
                           setEditingId(s.id);
