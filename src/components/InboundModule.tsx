@@ -8,7 +8,7 @@ import { InboundRecord, WeighbridgeTicket, VehicleRecord, SupplierRecord } from 
 import { mockCornMoistureRefaksi } from '../data';
 import ConfirmModal from './ConfirmModal';
 import { ArrowDownCircle, PlusCircle, Search, Calendar, Scale, Hammer, Percent, Archive, Download, Printer, Edit2 } from 'lucide-react';
-import { exportToCSV, printPDFReport } from '../utils/exportHelper';
+import { exportToCSV, printPDFReport, printCombinedSlip } from '../utils/exportHelper';
 
 interface InboundModuleProps {
   records: InboundRecord[];
@@ -554,6 +554,16 @@ export default function InboundModule({
                     </td>
                     <td className="py-2.5 px-3 text-center">
                       <div className="flex gap-2 justify-center items-center">
+                        <button
+                          onClick={() => {
+                            const ticket = tickets.find(t => t.ticketNo === r.ticketNo);
+                            printCombinedSlip(r, ticket);
+                          }}
+                          className="text-neutral-400 hover:text-emerald-600 transition p-1 cursor-pointer"
+                          title="Cetak Resi Terpadu"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                        </button>
                         <button
                           onClick={() => {
                             setEditingId(r.id);

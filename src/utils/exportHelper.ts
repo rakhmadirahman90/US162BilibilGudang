@@ -268,6 +268,70 @@ export function printPDFReport(
   printWindow.document.close();
 }
 
+export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTicket | undefined) {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    alert('Pop-up terblokir! Harap izinkan pop-up untuk mencetak slip.');
+    return;
+  }
+
+  const bruto = record.grossWeight;
+  const tara = record.tareWeight;
+  const net = record.netWeight;
+  const potKrg = (bruto * record.bagDeductionPercent) / 100;
+  const potRefaksi = (bruto * record.refaksiKaPercent) / 100;
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Resi Terpadu #${record.ticketNo || record.id.slice(-6)}</title>
+      <style>
+        @media print {
+          @page { size: 80mm auto; margin: 0; }
+          body { -webkit-print-color-adjust: exact; margin: 0; padding: 2mm; }
+        }
+        body { font-family: 'Courier New', Courier, monospace; font-size: 10pt; color: #000; margin: 0; padding: 5px; line-height: 1.2; font-weight: 600; }
+        .slip { width: 100%; max-width: 300px; }
+        .border-dashed { border-top: 1px dashed #000; margin: 4px 0; }
+        .font-bold { font-weight: bold; }
+        .text-center { text-align: center; }
+        .flex { display: flex; justify-content: space-between; width: 100%; }
+        .mt-2 { margin-top: 5px; }
+      </style>
+    </head>
+    <body onload="window.print(); window.close();">
+      <div class="slip">
+        <div style="border-top: 2px dashed #000; border-bottom: 2px dashed #000; padding: 5px 0;">
+          <div class="flex"><span>No. Tb:</span><span>${record.ticketNo || '-'}</span><span>Tgl:</span><span>${record.date}</span></div>
+        </div>
+        <div class="border-dashed"></div>
+        <div class="flex"><span>No. Polisi:</span><span>${record.vehicleNo}</span></div>
+        <div class="flex"><span>Nama Barang:</span><span>${record.commodity}</span></div>
+        <div class="flex"><span>Agen/Tujuan:</span><span>${record.supplier}</span></div>
+        <div class="flex"><span>Jml. krg:</span><span>${record.bagDeductionPercent}%</span></div>
+        <div class="border-dashed"></div>
+        <div class="flex"><span></span><span class="font-bold">JAM</span><span class="font-bold">BERAT</span></div>
+        <div class="border-dashed"></div>
+        <div class="flex"><span>Timbang-1:</span><span>${ticket?.timbang1Time || '-'}</span><span>${bruto.toLocaleString('id-ID')} kg</span></div>
+        <div class="flex"><span>Timbang-2:</span><span>${ticket?.timbang2Time || '-'}</span><span>${tara.toLocaleString('id-ID')} kg</span></div>
+        <div class="border-dashed"></div>
+        <div class="flex"><span>BRUTO:</span><span>${bruto.toLocaleString('id-ID')} kg</span></div>
+        <div class="flex"><span>POT. KRG:</span><span>${potKrg.toLocaleString('id-ID')} kg</span></div>
+        <div class="flex"><span>REFAKSI:</span><span>${potRefaksi.toLocaleString('id-ID')} kg</span></div>
+        <div class="border-dashed"></div>
+        <div class="flex font-bold" style="font-size: 11pt;"><span>NETTO:</span><span>${net.toLocaleString('id-ID')} kg</span></div>
+        <div class="border-dashed"></div>
+        <div class="mt-2 text-center">Penimbang,</div>
+        <div style="height: 50px;"></div>
+        <div class="text-center">( .................... )</div>
+      </div>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
 export function printSlip(ticket: WeighbridgeTicket) {
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
