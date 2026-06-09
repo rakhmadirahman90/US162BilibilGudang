@@ -123,7 +123,7 @@ export const APP_THEMES: AppTheme[] = [
     accentText: 'text-emerald-800',
     btnPrimaryBg: 'bg-emerald-600',
     btnPrimaryHover: 'hover:bg-emerald-500',
-    footerBg: 'bg-neutral-800',
+    footerBg: 'bg-emerald-950',
     footerBorder: 'border-neutral-700',
   },
   {
@@ -175,7 +175,7 @@ export const APP_THEMES: AppTheme[] = [
     accentText: 'text-orange-800',
     btnPrimaryBg: 'bg-orange-600',
     btnPrimaryHover: 'hover:bg-orange-500',
-    footerBg: 'bg-stone-950',
+    footerBg: 'bg-stone-900',
     footerBorder: 'border-stone-900',
   },
   {
@@ -227,7 +227,7 @@ export const APP_THEMES: AppTheme[] = [
     accentText: 'text-slate-800',
     btnPrimaryBg: 'bg-slate-700',
     btnPrimaryHover: 'hover:bg-slate-600',
-    footerBg: 'bg-slate-900',
+    footerBg: 'bg-slate-800',
     footerBorder: 'border-slate-800',
   }
 ];
