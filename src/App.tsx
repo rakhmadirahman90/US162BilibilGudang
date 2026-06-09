@@ -68,7 +68,8 @@ import {
   CheckCircle,
   Clock,
   ChevronRight,
-  Database
+  Database,
+  Settings as SettingsIcon,
 } from 'lucide-react';
 
 // Define professional industrial & agricultural application themes
@@ -296,6 +297,14 @@ export default function App() {
 
   // Active navigational tab
   const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE' | 'STOK_BERAS' | 'LAPORAN' | 'DATABASE'>('DASHBOARD');
+
+  // --- SETTINGS STATE ---
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [printerName, setPrinterName] = useState(() => localStorage.getItem('bilibili_printer_name') || 'EPSON LX-310');
+
+  useEffect(() => {
+    localStorage.setItem('bilibili_printer_name', printerName);
+  }, [printerName]);
 
   // Premium customizable active theme state with LocalStorage persistence
   const [activeThemeId, setActiveThemeId] = useState<string>(() => {
@@ -618,6 +627,15 @@ export default function App() {
               </select>
             </div>
 
+            {/* Printer Settings Button */}
+            <button
+              onClick={() => setShowSettingsModal(true)}
+              className={`p-1.5 rounded-lg border transition-all ${theme.statusBoxBg} ${theme.statusBoxBorder} text-white hover:text-yellow-300`}
+              title="Setting Printer"
+            >
+              <SettingsIcon className="w-4 h-4" />
+            </button>
+
             {/* Active connection point */}
             <div className="hidden md:flex items-center gap-1.5 font-mono text-[11px] text-emerald-250">
               <span className="text-white/60">STATUS:</span>
@@ -631,6 +649,36 @@ export default function App() {
 
         </div>
       </header>
+
+      {/* --- SETTINGS MODAL --- */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <SettingsIcon className="w-5 h-5" /> Pengaturan Printer
+            </h2>
+            <div className="space-y-4">
+              <label className="block text-sm font-medium text-neutral-700">Nama Printer (Default)</label>
+              <input 
+                value={printerName} 
+                onChange={(e) => setPrinterName(e.target.value)}
+                className="w-full border p-2 rounded-lg text-sm"
+              />
+              <p className="text-[10px] text-neutral-500 italic">
+                Catatan: Web browser tidak mengizinkan pemilihan printer otomatis tanpa dialog. Pengaturan ini hanya berguna untuk referensi sistem.
+              </p>
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button 
+                onClick={() => setShowSettingsModal(false)}
+                className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-bold"
+              >
+                Simpan & Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* TABS SELECTOR RAILS */}
       <div className="bg-white border-b border-neutral-200 shadow-sm sticky top-[69px] z-30 overflow-x-auto whitespace-nowrap">
