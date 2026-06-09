@@ -251,12 +251,12 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
                   <td className="py-2.5 px-3 font-bold text-neutral-800">{r.policeNo}</td>
                   <td className="py-2.5 px-3">{r.description}</td>
                   <td className="py-2.5 px-3">{r.itemName}</td>
-                  <td className="py-2.5 px-3 font-mono text-right">Rp {r.price.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
-                  <td className="py-2.5 px-3 text-right">{r.colly.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
-                  <td className="py-2.5 px-3 font-bold text-emerald-600 text-right">{r.inWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
-                  <td className="py-2.5 px-3 font-bold text-red-600 text-right">{r.outWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
+                  <td className="py-2.5 px-3 font-mono text-right">Rp {(r.price ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
+                  <td className="py-2.5 px-3 text-right">{(r.colly ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
+                  <td className="py-2.5 px-3 font-bold text-emerald-600 text-right">{(r.inWeight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
+                  <td className="py-2.5 px-3 font-bold text-red-600 text-right">{(r.outWeight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
                   <td className="py-2.5 px-3 font-mono text-right">Rp {(r.totalTransaksi || 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
-                  <td className="py-2.5 px-3 font-black text-neutral-900 font-mono text-right">{r.runningTotal.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
+                  <td className="py-2.5 px-3 font-black text-neutral-900 font-mono text-right">{(r.runningTotal ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
                   <td className="py-2.5 px-3 text-center">
                     <div className="flex gap-2 justify-center">
                       <button onClick={() => setPreviewRecord(r)} className="text-neutral-400 hover:text-sky-600 transition cursor-pointer" title="Cetak Resi">
@@ -338,15 +338,15 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
                   </div>
                   <div className="flex justify-between">
                     <span>MASUK :</span>
-                    <span className="font-bold text-emerald-600">{previewRecord.inWeight.toLocaleString('id-ID')} Kg</span>
+                    <span className="font-bold text-emerald-600">{(previewRecord.inWeight ?? 0).toLocaleString('id-ID')} Kg</span>
                   </div>
                   <div className="flex justify-between">
                     <span>KELUAR :</span>
-                    <span className="font-bold text-red-600">{previewRecord.outWeight.toLocaleString('id-ID')} Kg</span>
+                    <span className="font-bold text-red-600">{(previewRecord.outWeight ?? 0).toLocaleString('id-ID')} Kg</span>
                   </div>
                   <div className="flex justify-between font-bold border-t border-neutral-200 mt-1 pt-1">
                     <span>JUMLAH COLLY :</span>
-                    <span>{previewRecord.colly.toLocaleString('id-ID')}</span>
+                    <span>{(previewRecord.colly ?? 0).toLocaleString('id-ID')}</span>
                   </div>
                 </div>
 

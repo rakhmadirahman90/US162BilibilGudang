@@ -1153,12 +1153,12 @@ export default function App() {
                           </span>
                         </td>
                         <td className="py-2.5 px-3 text-neutral-800 font-medium">{tk.agency}</td>
-                        <td className="text-right py-2.5 px-3 font-mono">{tk.timbang1Weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg</td>
+                        <td className="text-right py-2.5 px-3 font-mono">{(tk.timbang1Weight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg</td>
                         <td className="text-right py-2.5 px-3 font-mono text-orange-600 font-semibold">
-                          {tk.timbang2Weight > 0 ? `${tk.timbang2Weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg` : '- -'}
+                          {(tk.timbang2Weight ?? 0) > 0 ? `${(tk.timbang2Weight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg` : '- -'}
                         </td>
                         <td className="text-right py-2.5 px-3 font-black text-emerald-600 font-mono">
-                          {tk.netWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg
+                          {(tk.netWeight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg
                         </td>
                         <td className="py-2.5 px-3 text-center">
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${

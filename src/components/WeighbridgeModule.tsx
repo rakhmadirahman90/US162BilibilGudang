@@ -628,7 +628,7 @@ export default function WeighbridgeModule({
                 <div className="border-t border-[#2d4d8c]/60 my-1 pt-1">
                   <div className="flex justify-between items-center text-xs text-[#a0c5fc]">
                     <span>{t.weigh1Label}</span>
-                    <span className="text-emerald-400">{selectedTicket ? `${selectedTicket.timbang1Weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg` : '0 kg'}</span>
+                    <span className="text-emerald-400">{selectedTicket ? `${(selectedTicket.timbang1Weight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg` : '0 kg'}</span>
                   </div>
                   <div className="text-[10px] text-neutral-400 mt-0.5">
                     ({selectedTicket ? selectedTicket.timbang1Time : '-'})
@@ -639,7 +639,7 @@ export default function WeighbridgeModule({
                   <div className="flex justify-between items-center text-xs text-[#a0c5fc]">
                     <span>{t.weigh2Label}</span>
                     <span className="text-orange-400">
-                      {selectedTicket && selectedTicket.timbang2Time ? `${selectedTicket.timbang2Weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg` : '-'}
+                      {selectedTicket && selectedTicket.timbang2Time ? `${(selectedTicket.timbang2Weight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg` : '-'}
                     </span>
                   </div>
                   <div className="text-[10px] text-neutral-400 mt-0.5">
@@ -653,7 +653,7 @@ export default function WeighbridgeModule({
                 <div className="flex items-center justify-between">
                   <span className="text-[#a0c5fc]">{t.grossWeightLabel}</span>
                   <div className="text-right">
-                    <span className="text-yellow-300 font-bold">{selectedTicket ? selectedTicket.grossWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '0'}</span>
+                    <span className="text-yellow-300 font-bold">{selectedTicket ? (selectedTicket.grossWeight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '0'}</span>
                     <span className="text-neutral-400 text-xs ml-1">kg</span>
                   </div>
                 </div>
@@ -661,7 +661,7 @@ export default function WeighbridgeModule({
                 <div className="flex items-center justify-between">
                   <span className="text-[#a0c5fc]">{t.tareWeightLabel}</span>
                   <div className="text-right">
-                    <span className="text-[#efefef]">{selectedTicket ? selectedTicket.tareWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '0'}</span>
+                    <span className="text-[#efefef]">{selectedTicket ? (selectedTicket.tareWeight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '0'}</span>
                     <span className="text-neutral-400 text-xs ml-1">kg</span>
                   </div>
                 </div>
@@ -705,7 +705,7 @@ export default function WeighbridgeModule({
                 <div className="flex items-center justify-between pt-1">
                   <span className="text-[#a0c5fc] font-bold text-sm">{t.netWeightLabel}</span>
                   <div className="text-right">
-                    <span className="text-green-400 font-extrabold text-xl font-mono">{selectedTicket ? computedNet.toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '0'}</span>
+                    <span className="text-green-400 font-extrabold text-xl font-mono">{selectedTicket ? (computedNet ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '0'}</span>
                     <span className="text-green-400 text-xs ml-1">kg</span>
                   </div>
                 </div>
@@ -873,15 +873,15 @@ export default function WeighbridgeModule({
                       </span>
                     </td>
                     <td className="py-2.5 px-3 text-neutral-800">{ticket.agency}</td>
-                    <td className="text-right py-2.5 px-3 font-mono">{ticket.timbang1Weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
+                    <td className="text-right py-2.5 px-3 font-mono">{(ticket.timbang1Weight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
                     <td className="text-right py-2.5 px-3 font-mono text-orange-600">
-                      {ticket.timbang2Weight > 0 ? ticket.timbang2Weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '-'}
+                      {(ticket.timbang2Weight ?? 0) > 0 ? (ticket.timbang2Weight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '-'}
                     </td>
                     <td className="text-right py-2.5 px-3 font-bold font-mono text-emerald-600">
                       {(ticket.timbang2Weight > 0 
                         ? calculateNetWeight(ticket.timbang1Weight, ticket.timbang2Weight, ticket.bagDeductionPercent, ticket.refaksiPercent) 
                         : ticket.timbang1Weight
-                      ).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}
+                       ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}
                     </td>
                     <td className="text-center py-2.5 px-3">
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${

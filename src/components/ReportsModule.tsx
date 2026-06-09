@@ -876,10 +876,10 @@ export default function ReportsModule({
                       <td className="p-2 font-semibold text-neutral-800">{r.vehicleNo}</td>
                       <td className="p-2 text-neutral-850 font-medium">{r.supplier}</td>
                       <td className="p-2 text-neutral-700 font-bold text-[10px]">{r.commodity}</td>
-                      <td className="p-2 text-right font-mono">{r.grossWeight.toLocaleString('id-ID')}</td>
-                      <td className="p-2 text-right font-black text-emerald-800 font-mono">{r.netWeight.toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-right font-mono">{(r.grossWeight ?? 0).toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-right font-black text-emerald-800 font-mono">{(r.netWeight ?? 0).toLocaleString('id-ID')}</td>
                       <td className="p-2 text-neutral-550 font-medium text-[10px]">{r.warehouseSection}</td>
-                      <td className="p-2 text-right font-mono text-neutral-650">Rp {r.laborCost.toLocaleString()}</td>
+                      <td className="p-2 text-right font-mono text-neutral-650">Rp {(r.laborCost ?? 0).toLocaleString()}</td>
                     </tr>
                   ))}
                   {filteredInbound.length === 0 && (
@@ -1012,9 +1012,9 @@ export default function ReportsModule({
                       <td className="p-2 font-bold text-neutral-800">{s.customerName}</td>
                       <td className="p-2 font-medium text-neutral-700 text-[10px]">{s.serviceType}</td>
                       <td className="p-2 text-neutral-550 font-medium">{s.commodity}</td>
-                      <td className="p-2 text-right font-mono">{s.weight.toLocaleString('id-ID')}</td>
-                      <td className="p-2 text-right font-mono">Rp {s.ratePerKg.toLocaleString()}</td>
-                      <td className="p-2 text-right font-bold text-sky-700 font-mono">Rp {s.totalFee.toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-right font-mono">{(s.weight ?? 0).toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-right font-mono">Rp {(s.ratePerKg ?? 0).toLocaleString()}</td>
+                      <td className="p-2 text-right font-bold text-sky-700 font-mono">Rp {(s.totalFee ?? 0).toLocaleString('id-ID')}</td>
                       <td className="p-2 text-center">
                         <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold ${
                           s.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'

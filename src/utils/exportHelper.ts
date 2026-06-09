@@ -670,11 +670,11 @@ export function printOutboundSlip(record: OutboundRecord, staffName: string = "A
         
         <div class="netto-row">
           <span class="netto-label">TOTAL BERAT :</span>
-          <span class="netto-val">${record.totalWeight.toLocaleString('id-ID')} kg</span>
+          <span class="netto-val">${(record.totalWeight ?? 0).toLocaleString('id-ID')} kg</span>
         </div>
         <div class="flex">
           <span class="label">Upah Buruh :</span>
-          <span class="value">Rp ${record.loadingLaborCost.toLocaleString('id-ID')}</span>
+          <span class="value">Rp ${(record.loadingLaborCost ?? 0).toLocaleString('id-ID')}</span>
         </div>
         
         <div class="divider-line"></div>
@@ -755,11 +755,11 @@ export function printRiceStockSlip(record: RiceStockRecord, staffName: string = 
         
         <div class="flex">
           <span class="label-heavy">Masuk :</span>
-          <span class="value-heavy" style="color: #059669;">${record.inWeight.toLocaleString('id-ID')} kg</span>
+          <span class="value-heavy" style="color: #059669;">${(record.inWeight ?? 0).toLocaleString('id-ID')} kg</span>
         </div>
         <div class="flex">
           <span class="label-heavy">Keluar :</span>
-          <span class="value-heavy" style="color: #dc2626;">${record.outWeight.toLocaleString('id-ID')} kg</span>
+          <span class="value-heavy" style="color: #dc2626;">${(record.outWeight ?? 0).toLocaleString('id-ID')} kg</span>
         </div>
         
         <div class="divider-line"></div>
@@ -854,18 +854,18 @@ export function printServiceSlip(record: ServiceRecord, staffName: string = "Asm
         
         <div class="flex">
           <span class="label">Berat Jasa :</span>
-          <span class="value">${record.weight.toLocaleString('id-ID')} kg</span>
+          <span class="value">${(record.weight ?? 0).toLocaleString('id-ID')} kg</span>
         </div>
         <div class="flex">
           <span class="label">Tarif Per kg:</span>
-          <span class="value">Rp ${record.ratePerKg.toLocaleString('id-ID')}</span>
+          <span class="value">Rp ${(record.ratePerKg ?? 0).toLocaleString('id-ID')}</span>
         </div>
         
         <div class="divider-line"></div>
         
         <div class="netto-row">
           <span class="netto-label">TOTAL TARIF :</span>
-          <span class="netto-val">Rp ${record.totalFee.toLocaleString('id-ID')}</span>
+          <span class="netto-val">Rp ${(record.totalFee ?? 0).toLocaleString('id-ID')}</span>
         </div>
         
         <div class="divider-line"></div>

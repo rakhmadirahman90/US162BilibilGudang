@@ -192,9 +192,9 @@ export default function ServicesModule({
       s.customerName,
       s.serviceType,
       s.commodity,
-      `${s.weight.toLocaleString('id-ID')} Kg`,
-      `Rp ${s.ratePerKg.toLocaleString('id-ID')}`,
-      `Rp ${s.totalFee.toLocaleString('id-ID')}`
+      `${(s.weight ?? 0).toLocaleString('id-ID')} Kg`,
+      `Rp ${(s.ratePerKg ?? 0).toLocaleString('id-ID')}`,
+      `Rp ${(s.totalFee ?? 0).toLocaleString('id-ID')}`
     ]);
     const totalWeight = filteredServices.reduce((sum, s) => sum + s.weight, 0);
     const totalCost = filteredServices.reduce((sum, s) => sum + s.totalFee, 0);
@@ -438,10 +438,10 @@ export default function ServicesModule({
                     </span>
                   </td>
                   <td className="py-2.5 px-3 text-neutral-600 font-medium">{s.commodity}</td>
-                  <td className="text-right py-2.5 px-3 font-bold font-mono">{s.weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg</td>
-                  <td className="text-right py-2.5 px-3 font-mono text-neutral-500">Rp {s.ratePerKg.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
+                  <td className="text-right py-2.5 px-3 font-bold font-mono">{(s.weight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg</td>
+                  <td className="text-right py-2.5 px-3 font-mono text-neutral-500">Rp {(s.ratePerKg ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
                   <td className="text-right py-2.5 px-3 font-extrabold font-mono text-blue-600 bg-sky-50/20">
-                    Rp {s.totalFee.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}
+                    Rp {(s.totalFee ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}
                   </td>
                   <td className="py-2.5 px-3 text-neutral-500 italic text-[11px]">{s.operatorName}</td>
                   <td className="py-2.5 px-3 text-center">
@@ -588,15 +588,15 @@ export default function ServicesModule({
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-neutral-500">BERAT BARANG :</span>
-                    <span className="font-black text-neutral-800">{previewRecord.weight.toLocaleString('id-ID')} KG</span>
+                    <span className="font-black text-neutral-800">{(previewRecord.weight ?? 0).toLocaleString('id-ID')} KG</span>
                   </div>
                   <div className="flex justify-between items-center mt-2 pt-2 border-t border-neutral-100">
                     <span className="font-bold text-neutral-500">TARIF / KG :</span>
-                    <span className="font-bold">Rp {previewRecord.ratePerKg.toLocaleString('id-ID')}</span>
+                    <span className="font-bold">Rp {(previewRecord.ratePerKg ?? 0).toLocaleString('id-ID')}</span>
                   </div>
                   <div className="flex justify-between items-center mt-1">
                     <span className="font-bold text-neutral-500 text-[11px]">TOTAL TAGIHAN :</span>
-                    <span className="font-black text-blue-600 text-[12px]">Rp {previewRecord.totalFee.toLocaleString('id-ID')}</span>
+                    <span className="font-black text-blue-600 text-[12px]">Rp {(previewRecord.totalFee ?? 0).toLocaleString('id-ID')}</span>
                   </div>
                 </div>
 

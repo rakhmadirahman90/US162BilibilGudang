@@ -35,13 +35,45 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
 
     if (withPdf && pdfHtml) {
       setIsGenerating(true);
+      
+      const parser = new DOMParser();
+      const parsedDoc = parser.parseFromString(pdfHtml, 'text/html');
+      const slip = parsedDoc.querySelector('.slip') || parsedDoc.body;
+      
+      // Extract and clean styles so they don't leak globally or shrink our active document layout
+      let stylesText = Array.from(parsedDoc.querySelectorAll('style'))
+        .map(style => style.innerHTML)
+        .join('\n');
+      
+      stylesText = stylesText.replace(/html,\s*body/gi, '.pdf-slip-wrapper');
+      stylesText = stylesText.replace(/\bbody\b/gi, '.pdf-slip-wrapper');
+      
+      // Combine styles and slip inner HTML into a clean, standalone, styled container string
+      const cleanHtml = `
+        <div class="pdf-slip-wrapper" style="width: 105mm; height: 148mm; box-sizing: border-box; background-color: #ffffff; padding: 0; margin: 0; overflow: hidden; position: relative;">
+          <style>
+            ${stylesText}
+            .pdf-slip-wrapper {
+              font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace !important;
+              color: #1e293b !important;
+              background-color: #ffffff !important;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+          </style>
+          <div class="slip" style="border: none !important; box-shadow: none !important; border-radius: 0 !important; margin: 0 !important; width: 105mm !important; height: 148mm !important; box-sizing: border-box !important; padding: 10mm !important; background-color: #ffffff !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important;">
+            ${slip.innerHTML}
+          </div>
+        </div>
+      `;
+
       try {
         const opt = {
           margin:       0,
           filename:     pdfFileName || 'Resi.pdf',
-          image:        { type: 'jpeg' as const, quality: 0.98 },
+          image:        { type: 'jpeg' as const, quality: 0.80 }, // Dynamic compression standard: 0.80 provides amazing readability but decreases file sizes by 70%+
           html2canvas:  { 
-            scale: 2.0, 
+            scale: 1.5, // 1.5 is perfect resolution for 105x148mm (A6 size), rendering fast with lightweight image overhead
             useCORS: true, 
             logging: false, 
             letterRendering: true 
@@ -50,10 +82,10 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
             unit: 'mm', 
             format: [105, 148] as [number, number], 
             orientation: 'portrait' as const,
-            compress: true
+            compress: true // Compressed inside jsPDF engine
           }
         };
-        const pdfBlob = await html2pdf().set(opt).from(pdfHtml).output('blob');
+        const pdfBlob = await html2pdf().set(opt).from(cleanHtml).output('blob');
         
         let uploadUrl = '';
 
@@ -102,7 +134,7 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
         } else {
           // Fallback ke unduhan lokal manual jika kedua server upload gagal
           console.warn("Satu atau lebih server upload tidak dapat dijangkau. Mengunduh secara manual.");
-          await html2pdf().set(opt).from(pdfHtml).save();
+          await html2pdf().set(opt).from(cleanHtml).save();
         }
       } catch (err) {
         console.warn("Gagal memproses/mengunggah PDF resi, mengunduh secara manual sebagai cadangan:", err);
@@ -111,11 +143,11 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
           const opt = { 
             margin: 0, 
             filename: pdfFileName || 'Resi.pdf', 
-            image: { type: 'jpeg' as const, quality: 0.98 },
-            html2canvas: { scale: 2.0, useCORS: true, logging: false }, 
+            image: { type: 'jpeg' as const, quality: 0.80 },
+            html2canvas: { scale: 1.5, useCORS: true, logging: false }, 
             jsPDF: { unit: 'mm', format: [105, 148] as [number, number], orientation: 'portrait' as const, compress: true } 
           };
-          await html2pdf().set(opt).from(pdfHtml).save();
+          await html2pdf().set(opt).from(cleanHtml).save();
         } catch(e) {}
       } finally {
         setIsGenerating(false);

@@ -142,7 +142,7 @@ export default function OutboundModule({
       title: editingId ? "Konfirmasi Ubah Barang Keluar" : "Konfirmasi Tambah Barang Keluar",
       message: editingId
         ? `Apakah Anda yakin ingin memperbarui catatan pengiriman komoditas ${commodity} kepada ${buyer.toUpperCase()}?`
-        : `Apakah Anda yakin ingin mendaftarkan pengiriman komoditas ${commodity} kepada ${buyer.toUpperCase()} dengan berat bersih ${totalWeight.toLocaleString('id-ID')} Kg?`,
+        : `Apakah Anda yakin ingin mendaftarkan pengiriman komoditas ${commodity} kepada ${buyer.toUpperCase()} dengan berat bersih ${(totalWeight ?? 0).toLocaleString('id-ID')} Kg?`,
       type: editingId ? 'EDIT' : 'ADD',
       onConfirm: () => {
         executeSave();
@@ -202,7 +202,7 @@ export default function OutboundModule({
       r.buyer,
       r.commodity,
       r.destination || '-',
-      `${r.totalWeight.toLocaleString('id-ID')} Kg`
+      `${(r.totalWeight ?? 0).toLocaleString('id-ID')} Kg`
     ]);
     const totalWeight = filteredRecords.reduce((sum, r) => sum + r.totalWeight, 0);
     const totalLabor = filteredRecords.reduce((sum, r) => sum + r.loadingLaborCost, 0);
@@ -260,7 +260,7 @@ export default function OutboundModule({
                   <option value="">-- Input Manual --</option>
                   {tickets.map(t => (
                     <option key={t.id} value={t.id}>
-                      Tiket {t.ticketNo} ({t.policeNo}) - Net {t.netWeight.toLocaleString()} Kg
+                      Tiket {t.ticketNo} ({t.policeNo}) - Net {(t.netWeight ?? 0).toLocaleString()} Kg
                     </option>
                   ))}
                 </select>
@@ -482,7 +482,7 @@ export default function OutboundModule({
                     </span>
                   </td>
                   <td className="text-right py-2.5 px-3 font-bold font-mono text-emerald-600">
-                    {r.totalWeight.toLocaleString()} kg
+                    {(r.totalWeight ?? 0).toLocaleString()} kg
                   </td>
                   <td className="py-2.5 px-3 text-neutral-600 italic">
                     <div className="flex items-center gap-1">
@@ -491,7 +491,7 @@ export default function OutboundModule({
                     </div>
                   </td>
                   <td className="text-right py-2.5 px-3 font-mono text-neutral-700">
-                    Rp {r.loadingLaborCost.toLocaleString('id-ID')}
+                    Rp {(r.loadingLaborCost ?? 0).toLocaleString('id-ID')}
                   </td>
                   <td className="py-2.5 px-3 text-center">
                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
@@ -645,7 +645,7 @@ export default function OutboundModule({
                   </div>
                   <div className="flex justify-between items-center mt-2">
                     <span className="font-bold text-neutral-500">TOTAL BERAT :</span>
-                    <span className="font-black text-emerald-600 text-[12px]">{previewRecord.totalWeight.toLocaleString('id-ID')} KG</span>
+                    <span className="font-black text-emerald-600 text-[12px]">{(previewRecord.totalWeight ?? 0).toLocaleString('id-ID')} KG</span>
                   </div>
                 </div>
 

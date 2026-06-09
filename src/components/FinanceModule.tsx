@@ -501,9 +501,9 @@ export default function FinanceModule({
                       </td>
                       <td className="py-2.5 px-3 font-bold text-neutral-800">{d.supplierName}</td>
                       <td className="py-2.5 px-3 text-neutral-600">{d.description}</td>
-                      <td className="text-right py-2.5 px-3 font-bold font-mono">Rp {d.totalDebt.toLocaleString('id-ID')}</td>
-                      <td className="text-right py-2.5 px-3 text-emerald-600 font-bold font-mono">Rp {d.paidAmount.toLocaleString('id-ID')}</td>
-                      <td className="text-right py-2.5 px-3 font-black font-mono text-red-600">Rp {d.remainingBalance.toLocaleString('id-ID')}</td>
+                      <td className="text-right py-2.5 px-3 font-bold font-mono">Rp {(d.totalDebt ?? 0).toLocaleString('id-ID')}</td>
+                      <td className="text-right py-2.5 px-3 text-emerald-600 font-bold font-mono">Rp {(d.paidAmount ?? 0).toLocaleString('id-ID')}</td>
+                      <td className="text-right py-2.5 px-3 font-black font-mono text-red-600">Rp {(d.remainingBalance ?? 0).toLocaleString('id-ID')}</td>
                       <td className="text-center py-2.5 px-3">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
                           d.status === 'LUNAS' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700 animate-pulse'
@@ -862,10 +862,10 @@ export default function FinanceModule({
                         <td className="py-2.5 px-3 font-semibold text-neutral-700">{f.bankAccount}</td>
                         
                         <td className="text-right py-2.5 px-3 font-mono font-bold text-green-600">
-                          {isDebit ? `+Rp ${f.amount.toLocaleString('id-ID')}` : '-'}
+                          {isDebit ? `+Rp ${(f.amount ?? 0).toLocaleString('id-ID')}` : '-'}
                         </td>
                         <td className="text-right py-2.5 px-3 font-mono font-bold text-red-600">
-                          {!isDebit ? `-Rp ${f.amount.toLocaleString('id-ID')}` : '-'}
+                          {!isDebit ? `-Rp ${(f.amount ?? 0).toLocaleString('id-ID')}` : '-'}
                         </td>
                       </tr>
                     );

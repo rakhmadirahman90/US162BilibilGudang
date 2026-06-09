@@ -167,7 +167,7 @@ export default function InboundModule({
       title: editingId ? "Konfirmasi Ubah Barang Masuk" : "Konfirmasi Tambah Barang Masuk",
       message: editingId
         ? `Apakah Anda yakin ingin memperbarui catatan penerimaan ${commodity} dari ${supplier.toUpperCase()}?`
-        : `Apakah Anda yakin ingin mendaftarkan penerimaan komoditas ${commodity} dari ${supplier.toUpperCase()} dengan berat bersih ${fNet.toLocaleString('id-ID')} Kg?`,
+        : `Apakah Anda yakin ingin mendaftarkan penerimaan komoditas ${commodity} dari ${supplier.toUpperCase()} dengan berat bersih ${(fNet ?? 0).toLocaleString('id-ID')} Kg?`,
       type: editingId ? 'EDIT' : 'ADD',
       onConfirm: () => {
         executeSave();
@@ -237,7 +237,7 @@ export default function InboundModule({
       r.supplier,
       r.commodity,
       r.warehouseSection || '-',
-      `${r.netWeight.toLocaleString('id-ID')} Kg`
+      `${(r.netWeight ?? 0).toLocaleString('id-ID')} Kg`
     ]);
     const totalNetWeight = filteredRecords.reduce((sum, r) => sum + r.netWeight, 0);
     const totalLabor = filteredRecords.reduce((sum, r) => sum + r.laborCost, 0);
@@ -294,7 +294,7 @@ export default function InboundModule({
                   <option value="">-- Manual Tanpa Tiket Timbang --</option>
                   {tickets.map(t => (
                     <option key={t.id} value={t.id}>
-                      Tiket {t.ticketNo} ({t.policeNo}) - Net {t.netWeight.toLocaleString()} Kg
+                      Tiket {t.ticketNo} ({t.policeNo}) - Net {(t.netWeight ?? 0).toLocaleString()} Kg
                     </option>
                   ))}
                 </select>
@@ -570,8 +570,8 @@ export default function InboundModule({
                       </span>
                     </td>
                     <td className="text-right py-2.5 px-3 font-mono text-neutral-500">
-                      <div>{r.grossWeight.toLocaleString()} kg G</div>
-                      <div className="text-[10px]">{r.tareWeight.toLocaleString()} kg T</div>
+                      <div>{(r.grossWeight ?? 0).toLocaleString()} kg G</div>
+                      <div className="text-[10px]">{(r.tareWeight ?? 0).toLocaleString()} kg T</div>
                     </td>
                     <td className="text-center py-2.5 px-3">
                       <div className="font-semibold text-indigo-700">{r.moistureContent.toFixed(1)}%</div>
@@ -582,7 +582,7 @@ export default function InboundModule({
                       )}
                     </td>
                     <td className="text-right py-2.5 px-3 font-extrabold font-mono text-emerald-600">
-                      {r.netWeight.toLocaleString()} kg
+                      {(r.netWeight ?? 0).toLocaleString()} kg
                     </td>
                     <td className="py-2.5 px-3 text-neutral-500 text-[11px]">
                       <div className="flex items-center gap-1">
@@ -591,7 +591,7 @@ export default function InboundModule({
                       </div>
                     </td>
                     <td className="text-right py-2.5 px-3 font-mono text-neutral-700">
-                      Rp {r.laborCost.toLocaleString('id-ID')}
+                      Rp {(r.laborCost ?? 0).toLocaleString('id-ID')}
                     </td>
                     <td className="py-2.5 px-3 text-center">
                       <div className="flex gap-2 justify-center items-center">
@@ -644,7 +644,7 @@ export default function InboundModule({
                             setConfirmModal({
                               isOpen: true,
                               title: "Konfirmasi Hapus Penerimaan",
-                              message: `Apakah Anda yakin ingin menghapus catatan penerimaan barang masuk dari ${r.supplier} (${r.netWeight.toLocaleString('id-ID')} Kg) secara permanen?`,
+                              message: `Apakah Anda yakin ingin menghapus catatan penerimaan barang masuk dari ${r.supplier} (${(r.netWeight ?? 0).toLocaleString('id-ID')} Kg) secara permanen?`,
                               type: 'DELETE',
                               onConfirm: () => {
                                 onDeleteRecord(r.id);
@@ -740,23 +740,23 @@ export default function InboundModule({
                 <div className="border-t border-neutral-200 pt-2 space-y-1">
                   <div className="flex justify-between">
                     <span>BERAT BRUTO :</span>
-                    <span className="font-bold">{previewRecord.grossWeight.toLocaleString('id-ID')} Kg</span>
+                    <span className="font-bold">{(previewRecord.grossWeight ?? 0).toLocaleString('id-ID')} Kg</span>
                   </div>
                   <div className="flex justify-between">
                     <span>BERAT TARA :</span>
-                    <span className="font-bold">{previewRecord.tareWeight.toLocaleString('id-ID')} Kg</span>
+                    <span className="font-bold">{(previewRecord.tareWeight ?? 0).toLocaleString('id-ID')} Kg</span>
                   </div>
                   <div className="flex justify-between text-neutral-500">
                     <span>Pot. Karung ({previewRecord.bagDeductionPercent}%) :</span>
-                    <span>-{( (previewRecord.grossWeight - previewRecord.tareWeight) * (previewRecord.bagDeductionPercent/100) ).toFixed(0)} Kg</span>
+                    <span>-{( ( (previewRecord.grossWeight ?? 0) - (previewRecord.tareWeight ?? 0) ) * (previewRecord.bagDeductionPercent/100) ).toFixed(0)} Kg</span>
                   </div>
                   <div className="flex justify-between text-neutral-500">
                     <span>Refaksi KA ({previewRecord.refaksiKaPercent}%) :</span>
-                    <span>-{( (previewRecord.grossWeight - previewRecord.tareWeight) * (previewRecord.refaksiKaPercent/100) ).toFixed(0)} Kg</span>
+                    <span>-{( ( (previewRecord.grossWeight ?? 0) - (previewRecord.tareWeight ?? 0) ) * (previewRecord.refaksiKaPercent/100) ).toFixed(0)} Kg</span>
                   </div>
                   <div className="flex justify-between font-black text-emerald-700 text-[11px] border-t border-neutral-200 mt-1 pt-1">
                     <span>BERAT NETTO :</span>
-                    <span>{previewRecord.netWeight.toLocaleString('id-ID')} KG</span>
+                    <span>{(previewRecord.netWeight ?? 0).toLocaleString('id-ID')} KG</span>
                   </div>
                 </div>
 
