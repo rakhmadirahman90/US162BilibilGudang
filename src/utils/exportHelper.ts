@@ -9,6 +9,7 @@
  */
 
 import { WeighbridgeTicket, OutboundRecord, RiceStockRecord, InboundRecord, ServiceRecord } from '../types';
+import { formatReceiptDate } from './format';
 
 export function exportToCSV(headers: string[], rows: string[][], filename: string) {
   // Map rows to escaped CSV cells
@@ -265,7 +266,7 @@ export function printPDFReport(
   printWindow.document.close();
 }
 
-export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTicket | undefined) {
+export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTicket | undefined, staffName: string = "Asma") {
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
     alert('Pop-up terblokir! Harap izinkan pop-up untuk mencetak slip.');
@@ -306,7 +307,7 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
           TELP - 085244466009
         </div>
         <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>No. Tb:</span><span>${record.ticketNo || '-'}</span><span>Tgl:</span><span>${record.date}</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>No. Tb:</span><span>${record.ticketNo || '-'}</span><span>Tgl:</span><span>${formatReceiptDate(record.date)}</span></div>
         <div class="border-dashed"></div>
         <div class="flex" style="font-size: 11pt;"><span>No. Polisi:</span><span>${record.vehicleNo}</span></div>
         <div class="flex" style="font-size: 11pt;"><span>Nama Barang:</span><span>${record.commodity}</span></div>
@@ -332,8 +333,8 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
         </div>
         <div style="height: 40px;"></div>
         <div class="flex" style="font-size: 11pt; justify-content: center; gap: 20px;">
-          <div class="text-center" style="width: 100px; border-top: 1px solid #000;"></div>
-          <div class="text-center" style="width: 100px; border-top: 1px solid #000;"></div>
+          <div class="text-center" style="width: 120px; border-top: 1px solid #000;">( SOPIR )</div>
+          <div class="text-center" style="width: 120px; border-top: 1px solid #000;">${staffName}</div>
         </div>
       </div>
     </body>
@@ -342,7 +343,7 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
   printWindow.document.close();
 }
 
-export function printOutboundSlip(record: OutboundRecord) {
+export function printOutboundSlip(record: OutboundRecord, staffName: string = "Asma") {
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
     alert('Pop-up terblokir! Harap izinkan pop-up untuk mencetak slip.');
@@ -379,7 +380,7 @@ export function printOutboundSlip(record: OutboundRecord) {
         <div class="border-dashed"></div>
         <div class="text-center" style="font-size: 11pt;">RESIDENSI PENGIRIMAN</div>
         <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>Invoice:</span><span>${record.invoiceNo}</span><span>Tgl:</span><span>${record.date}</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>Invoice:</span><span>${record.invoiceNo}</span><span>Tgl:</span><span>${formatReceiptDate(record.date)}</span></div>
         <div class="border-dashed"></div>
         <div class="flex" style="font-size: 11pt;"><span>Pembeli:</span><span>${record.buyer}</span></div>
         <div class="flex" style="font-size: 11pt;"><span>No Pol:</span><span>${record.vehicleNo}</span></div>
@@ -395,8 +396,8 @@ export function printOutboundSlip(record: OutboundRecord) {
         </div>
         <div style="height: 40px;"></div>
         <div class="flex" style="font-size: 11pt; justify-content: center; gap: 20px;">
-          <div class="text-center" style="width: 100px; border-top: 1px solid #000;"></div>
-          <div class="text-center" style="width: 100px; border-top: 1px solid #000;"></div>
+          <div class="text-center" style="width: 120px; border-top: 1px solid #000;">( SOPIR )</div>
+          <div class="text-center" style="width: 120px; border-top: 1px solid #000;">${staffName}</div>
         </div>
       </div>
     </body>
@@ -405,7 +406,7 @@ export function printOutboundSlip(record: OutboundRecord) {
   printWindow.document.close();
 }
 
-export function printRiceStockSlip(record: RiceStockRecord) {
+export function printRiceStockSlip(record: RiceStockRecord, staffName: string = "Asma") {
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
     alert('Pop-up terblokir! Harap izinkan pop-up untuk mencetak slip.');
@@ -442,7 +443,7 @@ export function printRiceStockSlip(record: RiceStockRecord) {
         <div class="border-dashed"></div>
         <div class="text-center" style="font-size: 11pt;">RESIDENSI STOK</div>
         <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>ID:</span><span>${record.id.slice(-6)}</span><span>Tgl:</span><span>${record.date}</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>ID:</span><span>${record.id.slice(-6)}</span><span>Tgl:</span><span>${formatReceiptDate(record.date)}</span></div>
         <div class="border-dashed"></div>
         <div class="flex" style="font-size: 11pt;"><span>No Pol:</span><span>${record.policeNo}</span></div>
         <div class="flex" style="font-size: 11pt;"><span>Barang:</span><span>${record.itemName}</span></div>
@@ -456,8 +457,8 @@ export function printRiceStockSlip(record: RiceStockRecord) {
         </div>
         <div style="height: 40px;"></div>
         <div class="flex" style="font-size: 11pt; justify-content: center; gap: 20px;">
-          <div class="text-center" style="width: 100px; border-top: 1px solid #000;"></div>
-          <div class="text-center" style="width: 100px; border-top: 1px solid #000;"></div>
+          <div class="text-center" style="width: 120px; border-top: 1px solid #000;">( SOPIR )</div>
+          <div class="text-center" style="width: 120px; border-top: 1px solid #000;">${staffName}</div>
         </div>
       </div>
     </body>
@@ -466,7 +467,7 @@ export function printRiceStockSlip(record: RiceStockRecord) {
   printWindow.document.close();
 }
 
-export function printServiceSlip(record: ServiceRecord) {
+export function printServiceSlip(record: ServiceRecord, staffName: string = "Asma") {
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
     alert('Pop-up terblokir! Harap izinkan pop-up untuk mencetak slip.');
@@ -503,7 +504,7 @@ export function printServiceSlip(record: ServiceRecord) {
         <div class="border-dashed"></div>
         <div class="text-center" style="font-size: 11pt;">JASA LAYANAN</div>
         <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>No. ID:</span><span>${record.id.slice(-6)}</span><span>Tgl:</span><span>${record.date}</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>No. ID:</span><span>${record.id.slice(-6)}</span><span>Tgl:</span><span>${formatReceiptDate(record.date)}</span></div>
         <div class="border-dashed"></div>
         <div class="flex" style="font-size: 11pt;"><span>Pelanggan:</span><span>${record.customerName}</span></div>
         <div class="flex" style="font-size: 11pt;"><span>Layanan:</span><span>${record.serviceType}</span></div>
@@ -521,8 +522,8 @@ export function printServiceSlip(record: ServiceRecord) {
         </div>
         <div style="height: 40px;"></div>
         <div class="flex" style="font-size: 11pt; justify-content: center; gap: 20px;">
-          <div class="text-center" style="width: 100px; border-top: 1px solid #000;"></div>
-          <div class="text-center" style="width: 100px; border-top: 1px solid #000;"></div>
+          <div class="text-center" style="width: 120px; border-top: 1px solid #000;">( PELANGGAN )</div>
+          <div class="text-center" style="width: 120px; border-top: 1px solid #000;">${staffName}</div>
         </div>
       </div>
     </body>
@@ -531,7 +532,7 @@ export function printServiceSlip(record: ServiceRecord) {
   printWindow.document.close();
 }
 
-export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Wahyu & Tim") {
+export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Asma") {
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
     alert('Pop-up terblokir! Harap izinkan pop-up untuk mencetak slip.');
@@ -574,6 +575,7 @@ export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Wahyu 
           TELP - 085244466009
         </div>
         <div class="border-t"></div>
+        <div class="flex"><span>Tanggal   :</span><span class="font-bold">${formatReceiptDate(ticket.timbang1Time || ticket.timbang2Time)}</span></div>
         <div class="flex"><span>No. Tiket :</span><span class="font-bold">${ticket.ticketNo}</span></div>
         <div class="flex"><span>No. Polisi:</span><span class="font-bold">${ticket.policeNo}</span></div>
         <div class="flex"><span>Mitra/Agen:</span><span class="font-bold">${ticket.agency}</span></div>
@@ -602,13 +604,13 @@ export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Wahyu 
         </div>
         
         <div class="flex mt-4" style="font-size: 8pt; justify-content: center; gap: 10px;">
-          <div class="text-center" style="width: 90px;">Penimbang</div>
-          <div class="text-center" style="width: 90px;">Petugas/Staff</div>
+          <div class="text-center" style="width: 110px;">Penimbang</div>
+          <div class="text-center" style="width: 110px;">Petugas/Staff</div>
         </div>
         <div style="height: 40px;"></div>
         <div class="flex" style="font-size: 8pt; justify-content: center; gap: 10px;">
-          <div class="text-center" style="width: 90px; border-top: 1px solid #000;">( Sopir )</div>
-          <div class="text-center" style="width: 90px; border-top: 1px solid #000;">${staffName}</div>
+          <div class="text-center" style="width: 110px; border-top: 1px solid #000;">( Sopir )</div>
+          <div class="text-center" style="width: 110px; border-top: 1px solid #000;">${staffName}</div>
         </div>
         
         <div class="text-center mt-4" style="font-size: 7pt;">
@@ -622,3 +624,25 @@ export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Wahyu 
   printWindow.document.close();
 }
 
+/**
+ * Executes a print function but intercepts the window.open flow to extract the HTML 
+ * string instead of showing a popup, allowing us to generate PDFs silently.
+ */
+export function getHTMLForPDF(printFunc: Function, ...args: any[]): string {
+  let htmlResult = "";
+  const originalOpen = window.open;
+  window.open = function() {
+    return {
+      document: {
+        write: (html: string) => { htmlResult += html; },
+        close: () => {}
+      }
+    } as any;
+  } as any;
+  try {
+    printFunc(...args);
+  } finally {
+    window.open = originalOpen;
+  }
+  return htmlResult;
+}

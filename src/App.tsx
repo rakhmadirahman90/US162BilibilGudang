@@ -21,7 +21,9 @@ import {
   RiceStockRecord,
   BankRecord,
   BrokerRecord,
-  LocationRecord
+  LocationRecord,
+  CustomerRecord,
+  FinanceCategoryRecord
 } from './types';
 import { 
   initialWeighbridgeTickets, 
@@ -38,7 +40,9 @@ import {
   initialRiceStockRecords,
   initialBankAccounts,
   initialBrokers,
-  initialStorageLocations
+  initialStorageLocations,
+  initialCustomers,
+  initialFinanceCategories
 } from './data';
 
 // Import our modular subcomponents
@@ -77,6 +81,7 @@ import {
   ChevronRight,
   Database,
   Settings as SettingsIcon,
+  Calendar,
 } from 'lucide-react';
 
 // Define professional industrial & agricultural application themes
@@ -318,6 +323,16 @@ export default function App() {
     return saved ? JSON.parse(saved) : initialStorageLocations;
   });
 
+  const [customers, setCustomers] = useState<CustomerRecord[]>(() => {
+    const saved = localStorage.getItem('bilibili_customers');
+    return saved ? JSON.parse(saved) : initialCustomers;
+  });
+
+  const [financeCategories, setFinanceCategories] = useState<FinanceCategoryRecord[]>(() => {
+    const saved = localStorage.getItem('bilibili_finance_categories');
+    return saved ? JSON.parse(saved) : initialFinanceCategories;
+  });
+
   // Active navigational tab
   const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE' | 'STOK_BERAS' | 'LAPORAN' | 'DATABASE'>('DASHBOARD');
 
@@ -452,6 +467,14 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('bilibili_locations', JSON.stringify(locations));
   }, [locations]);
+
+  useEffect(() => {
+    localStorage.setItem('bilibili_customers', JSON.stringify(customers));
+  }, [customers]);
+
+  useEffect(() => {
+    localStorage.setItem('bilibili_finance_categories', JSON.stringify(financeCategories));
+  }, [financeCategories]);
 
   // --- COMPONENT ACTION CALLBACKS ---
   const handleAddTicket = (tk: WeighbridgeTicket) => {
@@ -730,12 +753,23 @@ export default function App() {
             </button>
 
             {/* Active connection point */}
-            <div className="hidden md:flex items-center gap-1.5 font-mono text-[11px] text-emerald-250">
-              <span className="text-white/60">STATUS:</span>
-              <span className="text-green-400 font-bold flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse"></span>
-                {t.online}
-              </span>
+            <div className="hidden md:flex items-center gap-4 border-l border-white/20 pl-4 ml-2">
+              <div className="flex flex-col items-end">
+                <p className="text-[10px] font-bold text-yellow-350 tracking-tighter uppercase leading-none font-sans">
+                  {new Date().toLocaleDateString('id-ID', { weekday: 'long' })}
+                </p>
+                <p className="text-[11px] font-black text-white leading-none font-mono tracking-tight mt-0.5">
+                  {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase()}
+                </p>
+              </div>
+              <div className="h-6 w-[1px] bg-white/10 hidden lg:block"></div>
+              <div className="flex items-center gap-1.5 font-mono text-[11px] text-emerald-250">
+                <span className="text-white/60 uppercase">System:</span>
+                <span className="text-green-400 font-bold flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse"></span>
+                  {t.online}
+                </span>
+              </div>
             </div>
 
           </div>
@@ -923,9 +957,16 @@ export default function App() {
                   <h2 className={`text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r ${theme.heroTextGradient} tracking-tight transition-all duration-300`}>
                     {t.warehouseHeader} - {t.gudangBilibili}
                   </h2>
-                  <p className="text-sm text-white/90 font-medium mt-1">
-                    {t.systemStatus}
-                  </p>
+                  <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 mt-1">
+                    <p className="text-sm text-white/90 font-medium">
+                      {t.systemStatus}
+                    </p>
+                    <span className="hidden md:inline text-white/30">•</span>
+                    <p className="text-xs text-yellow-350 font-bold font-mono uppercase tracking-widest flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    </p>
+                  </div>
                   <p className="text-xs text-white/70 font-mono mt-2 flex items-center justify-center md:justify-start gap-2">
                     <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                     {t.pinrangLocation}
@@ -1180,6 +1221,7 @@ export default function App() {
             vehicles={vehicles}
             buyers={buyers}
             suppliers={suppliers}
+            employees={employees}
           />
         )}
 
@@ -1193,6 +1235,7 @@ export default function App() {
             onDeleteRecord={handleDeleteInbound}
             vehicles={vehicles}
             suppliers={suppliers}
+            employees={employees}
           />
         )}
 
@@ -1206,6 +1249,7 @@ export default function App() {
             onDeleteRecord={handleDeleteOutbound}
             vehicles={vehicles}
             buyers={buyers}
+            employees={employees}
           />
         )}
 
@@ -1213,6 +1257,8 @@ export default function App() {
         {activeTab === 'SERVICES' && (
           <ServicesModule
             records={serviceRecords}
+            employees={employees}
+            customers={customers}
             onAddRecord={handleAddService}
             onUpdateRecord={handleUpdateService}
             onDeleteRecord={handleDeleteService}
@@ -1230,6 +1276,8 @@ export default function App() {
             debts={debts}
             finances={finances}
             employees={employees}
+            banks={banks}
+            categories={financeCategories}
             onAddDebt={handleAddDebt}
             onUpdateDebt={handleUpdateDebt}
             onDeleteDebt={handleDeleteDebt}
@@ -1271,6 +1319,10 @@ export default function App() {
             setBrokers={setBrokers}
             locations={locations}
             setLocations={setLocations}
+            customers={customers}
+            setCustomers={setCustomers}
+            financeCategories={financeCategories}
+            setFinanceCategories={setFinanceCategories}
           />
         )}
 
@@ -1278,6 +1330,7 @@ export default function App() {
         {activeTab === 'STOK_BERAS' && (
           <RiceStockModule
             records={riceStockRecords}
+            employees={employees}
             onAddRecord={handleAddRiceStock}
             onUpdateRecord={handleUpdateRiceStock}
             onDeleteRecord={handleDeleteRiceStock}

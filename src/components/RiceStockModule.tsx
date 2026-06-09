@@ -1,23 +1,49 @@
 import React, { useState } from 'react';
-import { RiceStockRecord } from '../types';
-import { Package, PlusCircle, Search, Calendar, Download, Printer, Edit2, Trash2, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { RiceStockRecord, EmployeeRecord } from '../types';
+import { motion, AnimatePresence } from 'motion/react';
 import { useLanguage } from '../i18n/LanguageContext';
 import ConfirmModal from './ConfirmModal';
-import { exportToCSV, printPDFReport, printRiceStockSlip } from '../utils/exportHelper';
-import { formatNumberInput, parseNumberInput } from '../utils/format';
+import WhatsAppModal from './WhatsAppModal';
+import { exportToCSV, printPDFReport, printRiceStockSlip, getHTMLForPDF } from '../utils/exportHelper';
+import { buildRiceStockWAText, sendWhatsAppMessage } from '../utils/whatsappHelper';
+import { formatNumberInput, parseNumberInput, formatReceiptDate } from '../utils/format';
+import { Package, PlusCircle, Search, Calendar, Download, Printer, Edit2, Trash2, ArrowUpCircle, ArrowDownCircle, X, MessageCircle } from 'lucide-react';
 
 interface RiceStockModuleProps {
   records: RiceStockRecord[];
+  employees?: EmployeeRecord[];
   onAddRecord: (record: RiceStockRecord) => void;
   onUpdateRecord: (record: RiceStockRecord) => void;
   onDeleteRecord: (id: string) => void;
 }
 
-export default function RiceStockModule({ records, onAddRecord, onUpdateRecord, onDeleteRecord }: RiceStockModuleProps) {
+export default function RiceStockModule({ records, employees = [], onAddRecord, onUpdateRecord, onDeleteRecord }: RiceStockModuleProps) {
   const { t, language } = useLanguage();
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [previewRecord, setPreviewRecord] = useState<RiceStockRecord | null>(null);
+
+  // WhatsApp Modal State
+  const [waModalConfig, setWaModalConfig] = useState<{
+    isOpen: boolean;
+    defaultText: string;
+    record: RiceStockRecord | null;
+    pdfHtml?: string;
+    pdfFileName?: string;
+  }>({
+    isOpen: false,
+    defaultText: '',
+    record: null
+  });
+
+  const [staffName, setStaffName] = useState<string>(() => {
+    return localStorage.getItem('bilibili_staff_name') || "Asma";
+  });
+
+  React.useEffect(() => {
+    localStorage.setItem('bilibili_staff_name', staffName);
+  }, [staffName]);
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     title: string;
@@ -233,8 +259,17 @@ export default function RiceStockModule({ records, onAddRecord, onUpdateRecord, 
                   <td className="py-2.5 px-3 font-black text-neutral-900 font-mono text-right">{r.runningTotal.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
                   <td className="py-2.5 px-3 text-center">
                     <div className="flex gap-2 justify-center">
-                      <button onClick={() => printRiceStockSlip(r)} className="text-neutral-400 hover:text-sky-600 transition" title="Cetak Resi">
+                      <button onClick={() => setPreviewRecord(r)} className="text-neutral-400 hover:text-sky-600 transition cursor-pointer" title="Cetak Resi">
                         <Printer className="w-3.5 h-3.5" />
+                      </button>
+                      <button onClick={() => setWaModalConfig({ 
+                        isOpen: true, 
+                        defaultText: buildRiceStockWAText(r), 
+                        record: r,
+                        pdfHtml: getHTMLForPDF(printRiceStockSlip, r, staffName),
+                        pdfFileName: `Resi_Stok_Beras_${r.date}.pdf`
+                      })} className="text-neutral-400 hover:text-emerald-600 transition cursor-pointer" title="Kirim Resi via WA">
+                        <MessageCircle className="w-3.5 h-3.5" />
                       </button>
                       <button onClick={() => handleEdit(r)} className="text-neutral-400 hover:text-blue-600 transition">
                         <Edit2 className="w-3.5 h-3.5" />
@@ -250,6 +285,128 @@ export default function RiceStockModule({ records, onAddRecord, onUpdateRecord, 
           </table>
         </div>
       </div>
+
+      {/* RECEIPT PREVIEW MODAL */}
+      <AnimatePresence>
+        {previewRecord && (
+          <div className="fixed inset-0 bg-neutral-900/60 flex items-center justify-center p-4 z-50 overflow-y-auto">
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white border border-neutral-300 rounded-xl p-6 w-full max-w-md shadow-2xl relative"
+            >
+              <div className="flex justify-between items-start border-b border-neutral-100 pb-3 mb-4">
+                <span className="font-bold text-neutral-800 flex items-center gap-1.5 uppercase text-xs tracking-widest">
+                  <Printer className="text-emerald-600 w-4 h-4" />
+                  Pratinjau Bukti Stok
+                </span>
+                <button 
+                  onClick={() => setPreviewRecord(null)}
+                  className="p-1 hover:bg-neutral-100 rounded-lg text-neutral-400 hover:text-neutral-600 transition"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="bg-neutral-50 p-4 border border-dashed border-neutral-300 rounded font-mono text-[10px] text-neutral-800 leading-relaxed shadow-inner">
+                <div className="text-center border-b border-neutral-300 pb-2 mb-3">
+                  <div className="font-bold text-xs tracking-widest text-emerald-950">CV. BILIBILI 162</div>
+                  <div className="text-[8px] opacity-70">Jalan Poros Pinrang-Polman KM. 12</div>
+                  <div className="text-[8px] opacity-70">Desa Bilibili, Kec. Suppa, Kab. Pinrang</div>
+                </div>
+
+                <div className="space-y-1 mb-3">
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">Tanggal :</span>
+                    <span className="font-bold">{formatReceiptDate(previewRecord.date)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">No. Polisi :</span>
+                    <span className="font-bold">{previewRecord.policeNo}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">Keterangan :</span>
+                    <span className="font-bold">{previewRecord.description}</span>
+                  </div>
+                </div>
+
+                <div className="border-t border-neutral-200 pt-2 space-y-1">
+                  <div className="flex justify-between">
+                    <span>NAMA ITEM :</span>
+                    <span className="font-black">{previewRecord.itemName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>MASUK :</span>
+                    <span className="font-bold text-emerald-600">{previewRecord.inWeight.toLocaleString('id-ID')} Kg</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>KELUAR :</span>
+                    <span className="font-bold text-red-600">{previewRecord.outWeight.toLocaleString('id-ID')} Kg</span>
+                  </div>
+                  <div className="flex justify-between font-bold border-t border-neutral-200 mt-1 pt-1">
+                    <span>JUMLAH COLLY :</span>
+                    <span>{previewRecord.colly.toLocaleString('id-ID')}</span>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-4 text-center text-[9px]">
+                  <div>
+                    <p className="mb-2">Staff 162</p>
+                    <input
+                      list="ricestock-staff-list"
+                      value={staffName}
+                      onChange={(e) => setStaffName(e.target.value)}
+                      className="w-full text-center bg-white border border-neutral-200 rounded py-1 px-1 font-bold focus:outline-none focus:border-emerald-500"
+                    />
+                    <datalist id="ricestock-staff-list">
+                      {employees.filter(e => e.role === 'PETUGAS' || e.role === 'KARYAWAN').map(e => (
+                        <option key={e.id} value={e.name} />
+                      ))}
+                    </datalist>
+                  </div>
+                  <div>
+                    <p className="mb-8">Penerima / Driver</p>
+                    <p className="border-t border-neutral-400 pt-1 font-bold">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</p>
+                  </div>
+                </div>
+
+                <div className="text-center mt-4 opacity-50 italic text-[7px]">
+                  * Terimakasih atas kerjasamanya *<br/>
+                  Aplikasi Stok Beras CV. Bilibili 162
+                </div>
+              </div>
+
+              <div className="mt-4 flex gap-2">
+                <button 
+                  onClick={() => {
+                    printRiceStockSlip(previewRecord, staffName);
+                    setPreviewRecord(null);
+                  }}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1.5 shadow"
+                >
+                  <Printer className="w-3.5 h-3.5" /> CETAK SLIP
+                </button>
+                <button 
+                  onClick={() => setPreviewRecord(null)}
+                  className="flex-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold py-2 rounded-lg"
+                >
+                  TUTUP
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <WhatsAppModal
+        isOpen={waModalConfig.isOpen}
+        onClose={() => setWaModalConfig({ ...waModalConfig, isOpen: false })}
+        defaultText={waModalConfig.defaultText}
+        onSend={(phone, text) => sendWhatsAppMessage(phone, text)}
+        pdfHtml={waModalConfig.pdfHtml}
+        pdfFileName={waModalConfig.pdfFileName}
+      />
     </div>
   );
 }

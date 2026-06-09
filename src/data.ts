@@ -401,3 +401,22 @@ export const initialStorageLocations: LocationRecord[] = [
   { id: 'loc-5', name: 'Area Dryer & Poles', type: 'DRYER', capacityKg: 0 }
 ];
 
+export const initialCustomers: CustomerRecord[] = [
+  { id: 'cus-1', name: 'Agen UCU POLES', phone: '0812-3344-5566', address: 'Suppa' },
+  { id: 'cus-2', name: 'CV Prima Rasa', phone: '0852-1122-3344', address: 'Pinrang' },
+  { id: 'cus-3', name: 'H. Mustamin', phone: '0813-9900-1122', address: 'Lanrisang' }
+];
+
+export const initialFinanceCategories: FinanceCategoryRecord[] = [
+  { id: 'fcat-1', name: 'OPERASIONAL', type: 'KREDIT' },
+  { id: 'fcat-2', name: 'GAJI_KARYAWAN', type: 'KREDIT' },
+  { id: 'fcat-3', name: 'BURUH', type: 'KREDIT' },
+  { id: 'fcat-4', name: 'MAKELAR', type: 'KREDIT' },
+  { id: 'fcat-5', name: 'TIMBANGAN', type: 'DEBIT' },
+  { id: 'fcat-6', name: 'POLES_KIPAS', type: 'DEBIT' },
+  { id: 'fcat-7', name: 'PENJUALAN_BARANG', type: 'DEBIT' },
+  { id: 'fcat-8', name: 'PEMBELIAN_STOK', type: 'KREDIT' },
+  { id: 'fcat-9', name: 'LISTRIK_BBM', type: 'KREDIT' },
+  { id: 'fcat-10', name: 'LAINNYA', type: 'BOTH' }
+];
+

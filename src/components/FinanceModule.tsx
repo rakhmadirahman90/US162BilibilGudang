@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { DebtRecord, FinancialRecord, EmployeeRecord } from '../types';
+import { DebtRecord, FinancialRecord, EmployeeRecord, BankRecord, FinanceCategoryRecord } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import { Landmark, PlusCircle, Search, Calendar, ChevronRight, Users, Scale, CreditCard, DollarSign, Download, Printer, Edit2, Trash2 } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
@@ -15,6 +15,8 @@ interface FinanceModuleProps {
   debts: DebtRecord[];
   finances: FinancialRecord[];
   employees: EmployeeRecord[];
+  banks?: BankRecord[];
+  categories?: FinanceCategoryRecord[];
   onAddDebt: (record: DebtRecord) => void;
   onUpdateDebt: (record: DebtRecord) => void;
   onDeleteDebt: (id: string) => void;
@@ -28,6 +30,8 @@ export default function FinanceModule({
   debts,
   finances,
   employees,
+  banks = [],
+  categories = [],
   onAddDebt,
   onUpdateDebt,
   onDeleteDebt,
@@ -754,16 +758,23 @@ export default function FinanceModule({
                   <label className="block text-neutral-600 mb-1">Golongan Kategori</label>
                   <select
                     value={finCategory}
-                    onChange={(e) => setFinCategory(e.target.value as any)}
+                    onChange={(e) => setFinCategory(e.target.value)}
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white"
                   >
-                    <option value="OPERASIONAL">OPERASIONAL TIAP HARI</option>
-                    <option value="GAJI_KARYAWAN">GAJI KARYAWAN TETAP</option>
-                    <option value="BURUH">UPAH BURUH PANGGUL</option>
-                    <option value="MAKELAR">KOMISI MAKELAR JUAL</option>
-                    <option value="TIMBANGAN">ONGKOS JASA TIMBANGAN</option>
-                    <option value="POLES_KIPAS">PENERIMAAN JASA MILLING</option>
-                    <option value="LAINNYA">PENGELUARAN LAIN-LAIN</option>
+                    {categories.filter(c => c.type === finType || c.type === 'BOTH').map(c => (
+                      <option key={c.id} value={c.name}>{c.name}</option>
+                    ))}
+                    {categories.length === 0 && (
+                      <>
+                        <option value="OPERASIONAL">OPERASIONAL</option>
+                        <option value="GAJI_KARYAWAN">GAJI KARYAWAN</option>
+                        <option value="BURUH">UPAH BURUH</option>
+                        <option value="MAKELAR">KOMISI MAKELAR</option>
+                        <option value="TIMBANGAN">JASA TIMBANGAN</option>
+                        <option value="POLES_KIPAS">JASA MILLING</option>
+                        <option value="LAINNYA">LAIN-LAIN</option>
+                      </>
+                    )}
                   </select>
                 </div>
 
@@ -785,9 +796,16 @@ export default function FinanceModule({
                     onChange={(e) => setFinBank(e.target.value)}
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white"
                   >
-                    <option value="Kas Gudang Tunai">Kas Gudang Tunai (Laci Pas)</option>
-                    <option value="Mandiri Bilibili 162">Mandiri Bilibili 162 (028-xx)</option>
-                    <option value="BRI Rekening Usaha">BRI Kantor Pos Gilingan</option>
+                    {banks.map(b => (
+                      <option key={b.id} value={b.accountName}>{b.accountName} ({b.bankName})</option>
+                    ))}
+                    {banks.length === 0 && (
+                      <>
+                        <option value="Kas Gudang Tunai">Kas Gudang Tunai (Laci Pas)</option>
+                        <option value="Mandiri Bilibili 162">Mandiri Bilibili 162 (028-xx)</option>
+                        <option value="BRI Rekening Usaha">BRI Kantor Pos Gilingan</option>
+                      </>
+                    )}
                   </select>
                 </div>
 

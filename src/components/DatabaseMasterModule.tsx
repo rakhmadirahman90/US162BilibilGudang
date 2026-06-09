@@ -47,6 +47,10 @@ interface DatabaseMasterModuleProps {
   setBrokers: React.Dispatch<React.SetStateAction<BrokerRecord[]>>;
   locations: LocationRecord[];
   setLocations: React.Dispatch<React.SetStateAction<LocationRecord[]>>;
+  customers: CustomerRecord[];
+  setCustomers: React.Dispatch<React.SetStateAction<CustomerRecord[]>>;
+  financeCategories: FinanceCategoryRecord[];
+  setFinanceCategories: React.Dispatch<React.SetStateAction<FinanceCategoryRecord[]>>;
 }
 
 export default function DatabaseMasterModule({
@@ -65,11 +69,15 @@ export default function DatabaseMasterModule({
   brokers,
   setBrokers,
   locations,
-  setLocations
+  setLocations,
+  customers,
+  setCustomers,
+  financeCategories,
+  setFinanceCategories
 }: DatabaseMasterModuleProps) {
   const { t, language } = useLanguage();
   // Tabs for the database master
-  type DbTab = 'VEHICLES' | 'SUPPLIERS' | 'BUYERS' | 'EMPLOYEES' | 'COMMODITIES' | 'BANKS' | 'BROKERS' | 'LOCATIONS';
+  type DbTab = 'VEHICLES' | 'SUPPLIERS' | 'BUYERS' | 'EMPLOYEES' | 'COMMODITIES' | 'BANKS' | 'BROKERS' | 'LOCATIONS' | 'CUSTOMERS' | 'FINANCE_CATS';
   const [activeSubTab, setActiveSubTab] = useState<DbTab>('VEHICLES');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -143,6 +151,15 @@ export default function DatabaseMasterModule({
   const [locType, setLocType] = useState<'SILO' | 'FLOOR' | 'DRYER' | 'POLISHING'>('SILO');
   const [locCapacity, setLocCapacity] = useState<number>(0);
 
+  // Customer (Services)
+  const [cusName, setCusName] = useState('');
+  const [cusPhone, setCusPhone] = useState('');
+  const [cusAddress, setCusAddress] = useState('');
+
+  // Finance Category
+  const [fCatName, setFCatName] = useState('');
+  const [fCatType, setFCatType] = useState<'DEBIT' | 'KREDIT' | 'BOTH'>('BOTH');
+
   // Handler helpers
   const triggerToast = (msg: string, type: 'success' | 'error' | 'info' | 'warning' = 'success') => {
     (window as any).__showToast?.(msg, type);
@@ -192,6 +209,13 @@ export default function DatabaseMasterModule({
     setLocName('');
     setLocType('SILO');
     setLocCapacity(0);
+
+    setCusName('');
+    setCusPhone('');
+    setCusAddress('');
+
+    setFCatName('');
+    setFCatType('BOTH');
   };
 
   // --- VEHICLE ACTIONS ---
@@ -734,6 +758,95 @@ export default function DatabaseMasterModule({
     });
   };
 
+  // --- CUSTOMER ACTIONS ---
+  const handleSaveCustomer = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cusName.trim()) return triggerToast('Nama Pelanggan wajib diisi!', 'error');
+    const executeSave = () => {
+      if (editingId) {
+        setCustomers(prev => prev.map(c => c.id === editingId ? { ...c, name: cusName.trim(), phone: cusPhone.trim(), address: cusAddress.trim() } : c));
+        triggerToast(`Pelanggan ${cusName} diperbarui!`, 'success');
+      } else {
+        setCustomers(prev => [{ id: `cus-${Date.now()}`, name: cusName.trim(), phone: cusPhone.trim(), address: cusAddress.trim() }, ...prev]);
+        triggerToast(`Pelanggan ${cusName} ditambahkan!`, 'success');
+      }
+      handleCancel();
+    };
+    setConfirmModal({
+      isOpen: true,
+      title: editingId ? 'Simpan Pelanggan' : 'Tambah Pelanggan',
+      message: `Lanjutkan proses ${editingId ? 'edit' : 'tambah'} pelanggan ${cusName}?`,
+      type: editingId ? 'EDIT' : 'ADD',
+      onConfirm: () => { executeSave(); closeConfirm(); }
+    });
+  };
+
+  const handleEditCustomer = (c: CustomerRecord) => {
+    setEditingId(c.id);
+    setCusName(c.name);
+    setCusPhone(c.phone || '');
+    setCusAddress(c.address || '');
+    setIsAddingNew(false);
+  };
+
+  const handleDeleteCustomer = (id: string, name: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hapus Pelanggan',
+      message: `Hapus pelanggan ${name} dari sistem?`,
+      type: 'DELETE',
+      onConfirm: () => {
+        setCustomers(prev => prev.filter(c => c.id !== id));
+        triggerToast(`Pelanggan ${name} dihapus.`, 'success');
+        closeConfirm();
+      }
+    });
+  };
+
+  // --- FINANCE CATEGORY ACTIONS ---
+  const handleSaveFinanceCategory = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fCatName.trim()) return triggerToast('Nama Kategori wajib diisi!', 'error');
+    const executeSave = () => {
+      if (editingId) {
+        setFinanceCategories(prev => prev.map(c => c.id === editingId ? { ...c, name: fCatName.trim().toUpperCase(), type: fCatType } : c));
+        triggerToast(`Kategori ${fCatName} diperbarui!`, 'success');
+      } else {
+        setFinanceCategories(prev => [{ id: `fcat-${Date.now()}`, name: fCatName.trim().toUpperCase(), type: fCatType }, ...prev]);
+        triggerToast(`Kategori ${fCatName} ditambahkan!`, 'success');
+      }
+      handleCancel();
+    };
+    setConfirmModal({
+      isOpen: true,
+      title: editingId ? 'Simpan Kategori' : 'Tambah Kategori',
+      message: `Lanjutkan simpan kategori keuangan ${fCatName}?`,
+      type: editingId ? 'EDIT' : 'ADD',
+      onConfirm: () => { executeSave(); closeConfirm(); }
+    });
+  };
+
+  const handleEditFinanceCategory = (c: FinanceCategoryRecord) => {
+    setEditingId(c.id);
+    setFCatName(c.name);
+    setFCatType(c.type);
+    setIsAddingNew(false);
+  };
+
+  const handleDeleteFinanceCategory = (id: string, name: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hapus Kategori',
+      message: `Hapus kategori ${name}? Mutasi lama mungkin terpengaruh.`,
+      type: 'DELETE',
+      onConfirm: () => {
+        setFinanceCategories(prev => prev.filter(c => c.id !== id));
+        triggerToast(`Kategori ${name} dihapus.`, 'success');
+        closeConfirm();
+      }
+    });
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-md border border-neutral-100 overflow-hidden font-sans">
       
@@ -862,6 +975,30 @@ export default function DatabaseMasterModule({
         >
           <MapPin className="w-3.5 h-3.5" />
           📍 Lokasi / Sektor Gudang ({locations.length})
+        </button>
+
+        <button
+          onClick={() => { setActiveSubTab('CUSTOMERS'); setSearchQuery(''); handleCancel(); }}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            activeSubTab === 'CUSTOMERS'
+              ? 'bg-rose-900 text-white shadow-sm'
+              : 'text-neutral-600 hover:bg-neutral-100'
+          }`}
+        >
+          <Users className="w-3.5 h-3.5" />
+          👥 Pelanggan Jasa ({customers.length})
+        </button>
+
+        <button
+          onClick={() => { setActiveSubTab('FINANCE_CATS'); setSearchQuery(''); handleCancel(); }}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            activeSubTab === 'FINANCE_CATS'
+              ? 'bg-rose-900 text-white shadow-sm'
+              : 'text-neutral-600 hover:bg-neutral-100'
+          }`}
+        >
+          <Layers className="w-3.5 h-3.5" />
+          📊 Kategori Keuangan ({financeCategories.length})
         </button>
       </div>
 
@@ -1296,6 +1433,82 @@ export default function DatabaseMasterModule({
               </form>
             )}
 
+            {/* Form: CUSTOMERS */}
+            {activeSubTab === 'CUSTOMERS' && (
+              <form onSubmit={handleSaveCustomer} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Nama Pelanggan Jasa</label>
+                  <input
+                    type="text"
+                    required
+                    value={cusName}
+                    onChange={(e) => setCusName(e.target.value)}
+                    className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-bold focus:border-indigo-500 outline-none text-neutral-800"
+                    placeholder="Contoh: CV Prima Rasa"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">No. HP / WhatsApp</label>
+                  <input
+                    type="text"
+                    value={cusPhone}
+                    onChange={(e) => setCusPhone(e.target.value)}
+                    className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs focus:border-indigo-500 outline-none text-neutral-800"
+                    placeholder="0812-xxxx-xxxx"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Alamat / Wilayah</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={cusAddress}
+                      onChange={(e) => setCusAddress(e.target.value)}
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs focus:border-indigo-500 outline-none text-neutral-800"
+                      placeholder="Pinrang / Sidrap"
+                    />
+                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
+                      <Check className="w-3.5 h-3.5" /> SIMPAN
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+
+            {/* Form: FINANCE_CATS */}
+            {activeSubTab === 'FINANCE_CATS' && (
+              <form onSubmit={handleSaveFinanceCategory} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Nama Kategori Keuangan</label>
+                  <input
+                    type="text"
+                    required
+                    value={fCatName}
+                    onChange={(e) => setFCatName(e.target.value.toUpperCase())}
+                    className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-bold uppercase focus:border-indigo-500 outline-none text-neutral-800"
+                    placeholder="Contoh: LISTRIK & BBM"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Jenis Mutasi Terkait</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={fCatType}
+                      onChange={(e) => setFCatType(e.target.value as any)}
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-2 py-2 text-xs font-semibold focus:border-indigo-500 outline-none text-neutral-800"
+                    >
+                      <option value="DEBIT">PEMASUKAN (DEBIT)</option>
+                      <option value="KREDIT">PENGELUARAN (KREDIT)</option>
+                      <option value="BOTH">DUA-DUANYA (BOTH)</option>
+                    </select>
+                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
+                      <Check className="w-3.5 h-3.5" /> SIMPAN
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+
           </div>
         )}
 
@@ -1673,6 +1886,93 @@ export default function DatabaseMasterModule({
                         </button>
                         <button 
                           onClick={() => handleDeleteLocation(l.id, l.name)}
+                          className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* GRID: CUSTOMERS */}
+        {activeSubTab === 'CUSTOMERS' && (
+          <div className="overflow-x-auto rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                  <th className="p-3 font-semibold">Nama Pelanggan</th>
+                  <th className="p-3 font-semibold">HP / WA</th>
+                  <th className="p-3 font-semibold">Alamat / Wilayah</th>
+                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-150">
+                {customers
+                  .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(c => (
+                    <tr key={c.id} className="hover:bg-slate-50 text-neutral-800">
+                      <td className="p-3 font-extrabold text-indigo-900 uppercase">{c.name}</td>
+                      <td className="p-3 font-mono text-neutral-600">{c.phone || '-'}</td>
+                      <td className="p-3 font-semibold text-neutral-700 italic">{c.address || '-'}</td>
+                      <td className="p-3 text-center flex items-center justify-center gap-1.5">
+                        <button 
+                          onClick={() => handleEditCustomer(c)}
+                          className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteCustomer(c.id, c.name)}
+                          className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* GRID: FINANCE_CATS */}
+        {activeSubTab === 'FINANCE_CATS' && (
+          <div className="overflow-x-auto rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                  <th className="p-3 font-semibold">Nama Kategori</th>
+                  <th className="p-3 font-semibold text-center">Tipe Mutasi</th>
+                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-150">
+                {financeCategories
+                  .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(c => (
+                    <tr key={c.id} className="hover:bg-slate-50 text-neutral-800">
+                      <td className="p-3 font-extrabold text-indigo-900">{c.name}</td>
+                      <td className="p-3 text-center">
+                        <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black tracking-tighter ${
+                          c.type === 'DEBIT' ? 'bg-green-100 text-green-700' :
+                          c.type === 'KREDIT' ? 'bg-red-100 text-red-750' : 'bg-blue-100 text-blue-700'
+                        }`}>
+                          {c.type === 'DEBIT' ? 'MASUK' : c.type === 'KREDIT' ? 'KELUAR' : 'CAMPUR'}
+                        </span>
+                      </td>
+                      <td className="p-3 text-center flex items-center justify-center gap-1.5">
+                        <button 
+                          onClick={() => handleEditFinanceCategory(c)}
+                          className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteFinanceCategory(c.id, c.name)}
                           className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />

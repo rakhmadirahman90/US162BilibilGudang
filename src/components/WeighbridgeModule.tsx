@@ -5,12 +5,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { WeighbridgeTicket, VehicleRecord, BuyerRecord, SupplierRecord } from '../types';
-import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2, Edit3, Download, Clock, ChevronRight, Truck, Save, XCircle } from 'lucide-react';
+import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2, Edit3, Download, Clock, ChevronRight, Truck, Save, XCircle, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { exportToCSV, printPDFReport, printSlip } from '../utils/exportHelper';
-import { formatNumberInput, parseNumberInput } from '../utils/format';
+import { exportToCSV, printPDFReport, printSlip, getHTMLForPDF } from '../utils/exportHelper';
+import { buildWeighbridgeWAText, sendWhatsAppMessage } from '../utils/whatsappHelper';
+import { formatNumberInput, parseNumberInput, formatReceiptDate } from '../utils/format';
 import ConfirmModal from './ConfirmModal';
+import WhatsAppModal from './WhatsAppModal';
 
 interface WeighbridgeModuleProps {
   tickets: WeighbridgeTicket[];
@@ -20,6 +22,7 @@ interface WeighbridgeModuleProps {
   vehicles?: VehicleRecord[];
   buyers?: BuyerRecord[];
   suppliers?: SupplierRecord[];
+  employees?: EmployeeRecord[];
 }
 
 export default function WeighbridgeModule({
@@ -29,7 +32,8 @@ export default function WeighbridgeModule({
   onDeleteTicket,
   vehicles = [],
   buyers = [],
-  suppliers = []
+  suppliers = [],
+  employees = []
 }: WeighbridgeModuleProps) {
   const { t, language } = useLanguage();
   
@@ -66,6 +70,19 @@ export default function WeighbridgeModule({
     onConfirm: () => {}
   });
 
+  // WhatsApp Modal State
+  const [waModalConfig, setWaModalConfig] = useState<{
+    isOpen: boolean;
+    defaultText: string;
+    record: WeighbridgeTicket | null;
+    pdfHtml?: string;
+    pdfFileName?: string;
+  }>({
+    isOpen: false,
+    defaultText: '',
+    record: null
+  });
+
   const closeConfirm = () => {
     setConfirmModal(prev => ({ ...prev, isOpen: false }));
   };
@@ -80,7 +97,7 @@ export default function WeighbridgeModule({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editingTicketId, setEditingTicketId] = useState<string | null>(null);
   const [staffName, setStaffName] = useState<string>(() => {
-    return localStorage.getItem('bilibili_staff_name') || "Wahyu & Tim";
+    return localStorage.getItem('bilibili_staff_name') || "Asma";
   });
 
   useEffect(() => {
@@ -462,14 +479,11 @@ export default function WeighbridgeModule({
         {/* Terminal Header */}
         <div className="bg-neutral-900 border border-neutral-800 text-white rounded-xl overflow-hidden shadow-2xl flex flex-col">
           <div className="bg-[#121c32] px-4 py-2 border-b border-[#254271] flex justify-between items-center">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
               <div className="w-2.5 h-2.5 rounded-full bg-[#3bbfc6]" />
-              <span className="font-mono text-xs text-[#8cbef6] font-bold tracking-widest font-mono">
+              <span className="font-mono text-xs text-[#8cbef6] font-bold tracking-widest uppercase">
                 {t.weighingAppTitle}
               </span>
-            </div>
-            <div className="text-right text-[11px] font-mono text-[#8cbef6]">
-              {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
             </div>
           </div>
 
@@ -735,7 +749,14 @@ export default function WeighbridgeModule({
                     onChange={(e) => setStaffName(e.target.value)}
                     className="bg-[#122345] border border-[#2d4d8c] text-emerald-400 font-bold px-3 py-1 text-xs rounded outline-none focus:border-emerald-500"
                     placeholder="Nama Staff..."
+                    list="master-staff"
                   />
+                  <datalist id="master-staff">
+                    <option value="Asma" />
+                    {employees.filter(e => e.role === 'PETUGAS' || e.role === 'KARYAWAN').map(e => (
+                      <option key={e.id} value={e.name}>{e.role}</option>
+                    ))}
+                  </datalist>
                 </div>
 
                 {isEditing && (
@@ -897,6 +918,19 @@ export default function WeighbridgeModule({
                           <Printer className="w-3.5 h-3.5" />
                         </button>
                         <button 
+                          onClick={() => setWaModalConfig({ 
+                            isOpen: true, 
+                            defaultText: buildWeighbridgeWAText(ticket), 
+                            record: ticket,
+                            pdfHtml: getHTMLForPDF(printSlip, ticket, staffName),
+                            pdfFileName: `Resi_Timbang_${ticket.ticketNo}.pdf`
+                          })} 
+                          title="Kirim Tiket via WA"
+                          className="p-1 text-neutral-400 hover:text-emerald-600 transition"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                        </button>
+                        <button 
                           onClick={() => {
                             setConfirmModal({
                               isOpen: true,
@@ -964,6 +998,10 @@ export default function WeighbridgeModule({
                   <div className="text-[9px] mt-0.5">{t.thermalSlipPhone}</div>
                 </div>
 
+                <div className="flex justify-between">
+                  <span>Tanggal :</span>
+                  <span className="font-bold font-mono">{formatReceiptDate(printTicket.timbang1Time || printTicket.timbang2Time)}</span>
+                </div>
                 <div className="flex justify-between">
                   <span>No. Tiket :</span>
                   <span className="font-bold font-mono">{printTicket.ticketNo}</span>
@@ -1084,6 +1122,14 @@ export default function WeighbridgeModule({
         onCancel={closeConfirm}
       />
 
+      <WhatsAppModal
+        isOpen={waModalConfig.isOpen}
+        onClose={() => setWaModalConfig({ ...waModalConfig, isOpen: false })}
+        defaultText={waModalConfig.defaultText}
+        onSend={(phone, text) => sendWhatsAppMessage(phone, text)}
+        pdfHtml={waModalConfig.pdfHtml}
+        pdfFileName={waModalConfig.pdfFileName}
+      />
     </div>
   );
 }

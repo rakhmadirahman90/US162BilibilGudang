@@ -4,15 +4,20 @@
  */
 
 import React, { useState } from 'react';
-import { formatNumberInput, parseNumberInput } from '../utils/format';
+import { formatNumberInput, parseNumberInput, formatReceiptDate } from '../utils/format';
 import { ServiceRecord } from '../types';
-import { Wind, Trash, User, Search, Play, Plus, DollarSign, CheckCircle2, AlertCircle, Download, Printer, Edit2 } from 'lucide-react';
+import { Wind, Trash, User, Search, Play, Plus, DollarSign, CheckCircle2, AlertCircle, Download, Printer, Edit2, X, MessageCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useLanguage } from '../i18n/LanguageContext';
 import ConfirmModal from './ConfirmModal';
-import { exportToCSV, printPDFReport, printServiceSlip } from '../utils/exportHelper';
+import WhatsAppModal from './WhatsAppModal';
+import { exportToCSV, printPDFReport, printServiceSlip, getHTMLForPDF } from '../utils/exportHelper';
+import { buildServiceWAText, sendWhatsAppMessage } from '../utils/whatsappHelper';
 
 interface ServicesModuleProps {
   records: ServiceRecord[];
+  employees?: EmployeeRecord[];
+  customers?: CustomerRecord[];
   onAddRecord: (record: ServiceRecord) => void;
   onUpdateRecord: (record: ServiceRecord) => void;
   onDeleteRecord: (id: string) => void;
@@ -20,6 +25,8 @@ interface ServicesModuleProps {
 
 export default function ServicesModule({
   records,
+  employees = [],
+  customers = [],
   onAddRecord,
   onUpdateRecord,
   onDeleteRecord
@@ -28,6 +35,28 @@ export default function ServicesModule({
   const [showForm, setShowForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [previewRecord, setPreviewRecord] = useState<ServiceRecord | null>(null);
+
+  // WhatsApp Modal State
+  const [waModalConfig, setWaModalConfig] = useState<{
+    isOpen: boolean;
+    defaultText: string;
+    record: ServiceRecord | null;
+    pdfHtml?: string;
+    pdfFileName?: string;
+  }>({
+    isOpen: false,
+    defaultText: '',
+    record: null
+  });
+
+  const [staffName, setStaffName] = useState<string>(() => {
+    return localStorage.getItem('bilibili_staff_name') || "Asma";
+  });
+
+  React.useEffect(() => {
+    localStorage.setItem('bilibili_staff_name', staffName);
+  }, [staffName]);
 
   // Confirmation Modal State
   const [confirmModal, setConfirmModal] = useState<{
@@ -55,7 +84,7 @@ export default function ServicesModule({
   const [weight, setWeight] = useState(10000);
   const [ratePerKg, setRatePerKg] = useState(150); // standard rate is Rp 150 per kg
   const [paymentStatus, setPaymentStatus] = useState<'UNPAID' | 'PAID'>('PAID');
-  const [operatorName, setOperatorName] = useState("Wahyu & Tim");
+  const [operatorName, setOperatorName] = useState("Asma");
 
   // Dynamically set standard rate when service moves
   const handleServiceTypeChange = (type: 'POLES' | 'KIPAS' | 'POLES & KIPAS' | 'DRYER') => {
@@ -124,7 +153,7 @@ export default function ServicesModule({
     setWeight(10000);
     setRatePerKg(150);
     setPaymentStatus("PAID");
-    setOperatorName("Wahyu & Tim");
+    setOperatorName("Asma");
     setEditingId(null);
   };
 
@@ -216,9 +245,15 @@ export default function ServicesModule({
                   type="text"
                   placeholder="Contoh: Agen UCU POLES, IDA, dll"
                   value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
+                  onChange={(e) => setCustomerName(e.target.value.toUpperCase())}
                   className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-sky-500 font-semibold"
+                  list="master-customers"
                 />
+                <datalist id="master-customers">
+                  {customers.map(c => (
+                    <option key={c.id} value={c.name}>{c.phone || c.address}</option>
+                  ))}
+                </datalist>
               </div>
 
               <div>
@@ -284,7 +319,14 @@ export default function ServicesModule({
                   value={operatorName}
                   onChange={(e) => setOperatorName(e.target.value)}
                   className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
+                  list="master-operators"
                 />
+                <datalist id="master-operators">
+                  <option value="Asma" />
+                  {employees.filter(e => e.role === 'KARYAWAN' || e.role === 'PETUGAS').map(e => (
+                    <option key={e.id} value={e.name}>{e.role}</option>
+                  ))}
+                </datalist>
               </div>
             </div>
 
@@ -412,11 +454,26 @@ export default function ServicesModule({
                   <td className="py-2.5 px-3 text-center">
                     <div className="flex gap-2 justify-center items-center">
                       <button
-                        onClick={() => printServiceSlip(s)}
+                        onClick={() => setPreviewRecord(s)}
                         className="text-neutral-400 hover:text-sky-600 transition p-1 cursor-pointer"
                         title="Cetak Resi"
                       >
                         <Printer className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setWaModalConfig({ 
+                            isOpen: true, 
+                            defaultText: buildServiceWAText(s), 
+                            record: s,
+                            pdfHtml: getHTMLForPDF(printServiceSlip, s, staffName),
+                            pdfFileName: `Resi_Jasa_${s.id.substring(0,8)}.pdf`
+                          });
+                        }}
+                        className="text-neutral-400 hover:text-emerald-600 transition p-1 cursor-pointer"
+                        title="Kirim Nota via WA"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => {
@@ -479,6 +536,125 @@ export default function ServicesModule({
         onCancel={closeConfirm}
       />
 
+      {/* RECEIPT PREVIEW MODAL */}
+      <AnimatePresence>
+        {previewRecord && (
+          <div className="fixed inset-0 bg-neutral-900/60 flex items-center justify-center p-4 z-50 overflow-y-auto">
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white border border-neutral-300 rounded-xl p-6 w-full max-w-md shadow-2xl relative"
+            >
+              <div className="flex justify-between items-start border-b border-neutral-100 pb-3 mb-4">
+                <span className="font-bold text-neutral-800 flex items-center gap-1.5 uppercase text-xs tracking-widest">
+                  <Printer className="text-blue-500 w-4 h-4" />
+                  Pratinjau Resi Layanan Jasa
+                </span>
+                <button 
+                  onClick={() => setPreviewRecord(null)}
+                  className="p-1 hover:bg-neutral-100 rounded-lg text-neutral-400 hover:text-neutral-600 transition"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="bg-neutral-50 p-4 border border-dashed border-neutral-300 rounded font-mono text-[10px] text-neutral-800 leading-relaxed shadow-inner">
+                <div className="text-center border-b border-neutral-300 pb-2 mb-3">
+                  <div className="font-bold text-xs tracking-widest text-emerald-950">CV. BILIBILI 162</div>
+                  <div className="text-[8px] opacity-70">Jalan Poros Pinrang-Polman KM. 12</div>
+                  <div className="text-[8px] opacity-70">Desa Bilibili, Kec. Suppa, Kab. Pinrang</div>
+                </div>
+
+                <div className="space-y-1 mb-3">
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">Tanggal :</span>
+                    <span className="font-bold">{formatReceiptDate(previewRecord.date)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">Pelanggan :</span>
+                    <span className="font-bold">{previewRecord.customerName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">Komoditas :</span>
+                    <span className="font-bold">{previewRecord.commodity}</span>
+                  </div>
+                </div>
+
+                <div className="border-y border-neutral-200 py-3 my-2 bg-white/50 px-2 rounded">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="font-bold text-neutral-500">JENIS LAYANAN :</span>
+                    <span className="font-black text-neutral-800">{previewRecord.serviceType}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-neutral-500">BERAT BARANG :</span>
+                    <span className="font-black text-neutral-800">{previewRecord.weight.toLocaleString('id-ID')} KG</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-2 pt-2 border-t border-neutral-100">
+                    <span className="font-bold text-neutral-500">TARIF / KG :</span>
+                    <span className="font-bold">Rp {previewRecord.ratePerKg.toLocaleString('id-ID')}</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="font-bold text-neutral-500 text-[11px]">TOTAL TAGIHAN :</span>
+                    <span className="font-black text-blue-600 text-[12px]">Rp {previewRecord.totalFee.toLocaleString('id-ID')}</span>
+                  </div>
+                </div>
+
+                <div className="flex justify-center mt-3">
+                   <span className={`px-4 py-1 rounded-full text-[9px] font-black tracking-widest ${
+                     previewRecord.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                   }`}>
+                     {previewRecord.paymentStatus === 'PAID' ? 'LUNAS / PAID' : 'BELUM LUNAS'}
+                   </span>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-4 text-center text-[9px]">
+                  <div>
+                    <p className="mb-8">Staff 162</p>
+                    <p className="border-t border-neutral-400 pt-1 font-bold">{staffName}</p>
+                  </div>
+                  <div>
+                    <p className="mb-8">Pelanggan</p>
+                    <p className="border-t border-neutral-400 pt-1 font-bold">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</p>
+                  </div>
+                </div>
+
+                <div className="text-center mt-4 opacity-50 italic text-[7px]">
+                  * Terimakasih atas kerjasamanya *<br/>
+                  Aplikasi Jasa Poles Bilibili v1.0
+                </div>
+              </div>
+
+              <div className="mt-4 flex gap-2">
+                <button 
+                  onClick={() => {
+                    printServiceSlip(previewRecord, staffName);
+                    setPreviewRecord(null);
+                  }}
+                  className="flex-1 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1.5 shadow"
+                >
+                  <Printer className="w-3.5 h-3.5" /> CETAK RESI
+                </button>
+                <button 
+                  onClick={() => setPreviewRecord(null)}
+                  className="flex-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold py-2 rounded-lg"
+                >
+                  TUTUP
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <WhatsAppModal
+        isOpen={waModalConfig.isOpen}
+        onClose={() => setWaModalConfig({ ...waModalConfig, isOpen: false })}
+        defaultText={waModalConfig.defaultText}
+        onSend={(phone, text) => sendWhatsAppMessage(phone, text)}
+        pdfHtml={waModalConfig.pdfHtml}
+        pdfFileName={waModalConfig.pdfFileName}
+      />
     </div>
   );
 }

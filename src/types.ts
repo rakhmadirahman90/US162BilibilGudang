@@ -84,7 +84,7 @@ export interface FinancialRecord {
   id: string;
   date: string;
   type: 'DEBIT' | 'KREDIT';
-  category: 'OPERASIONAL' | 'GAJI_KARYAWAN' | 'BURUH' | 'MAKELAR' | 'TIMBANGAN' | 'POLES_KIPAS' | 'LAINNYA';
+  category: string; // Dynamic category from master data
   description: string;
   partyName?: string; // employee or broker name or shipper
   amount: number;
@@ -94,7 +94,7 @@ export interface FinancialRecord {
 export interface EmployeeRecord {
   id: string;
   name: string;
-  role: 'KARYAWAN' | 'BURUH' | 'MAKELAR';
+  role: 'KARYAWAN' | 'BURUH' | 'MAKELAR' | 'PETUGAS';
   phone?: string;
   ratePerKg?: number; // specially for brokers standard commissions (e.g. 50 Rp/kg) or labor loaders
 }
@@ -105,6 +105,19 @@ export interface VehicleRecord {
   driverName: string;
   vehicleType: string;
   tareWeight: number;
+}
+
+export interface CustomerRecord {
+  id: string;
+  name: string;
+  phone?: string;
+  address?: string;
+}
+
+export interface FinanceCategoryRecord {
+  id: string;
+  name: string;
+  type: 'DEBIT' | 'KREDIT' | 'BOTH';
 }
 
 export interface SupplierRecord {

@@ -4,13 +4,16 @@
  */
 
 import React, { useState } from 'react';
-import { InboundRecord, WeighbridgeTicket, VehicleRecord, SupplierRecord } from '../types';
+import { InboundRecord, WeighbridgeTicket, VehicleRecord, SupplierRecord, EmployeeRecord } from '../types';
 import { mockCornMoistureRefaksi } from '../data';
 import { useLanguage } from '../i18n/LanguageContext';
 import ConfirmModal from './ConfirmModal';
-import { ArrowDownCircle, PlusCircle, Search, Calendar, Scale, Hammer, Percent, Archive, Download, Printer, Edit2 } from 'lucide-react';
-import { exportToCSV, printPDFReport, printCombinedSlip } from '../utils/exportHelper';
-import { formatNumberInput, parseNumberInput } from '../utils/format';
+import WhatsAppModal from './WhatsAppModal';
+import { ArrowDownCircle, PlusCircle, Search, Calendar, Scale, Hammer, Percent, Archive, Download, Printer, Edit2, X, MessageCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { exportToCSV, printPDFReport, printCombinedSlip, getHTMLForPDF } from '../utils/exportHelper';
+import { buildInboundWAText, sendWhatsAppMessage } from '../utils/whatsappHelper';
+import { formatNumberInput, parseNumberInput, formatReceiptDate } from '../utils/format';
 
 interface InboundModuleProps {
   records: InboundRecord[];
@@ -20,6 +23,7 @@ interface InboundModuleProps {
   onDeleteRecord: (id: string) => void;
   vehicles?: VehicleRecord[];
   suppliers?: SupplierRecord[];
+  employees?: EmployeeRecord[];
 }
 
 export default function InboundModule({
@@ -29,12 +33,22 @@ export default function InboundModule({
   onUpdateRecord,
   onDeleteRecord,
   vehicles = [],
-  suppliers = []
+  suppliers = [],
+  employees = []
 }: InboundModuleProps) {
   const { t, language } = useLanguage();
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [previewRecord, setPreviewRecord] = useState<InboundRecord | null>(null);
+  
+  const [staffName, setStaffName] = useState<string>(() => {
+    return localStorage.getItem('bilibili_staff_name') || "Asma";
+  });
+
+  React.useEffect(() => {
+    localStorage.setItem('bilibili_staff_name', staffName);
+  }, [staffName]);
 
   // Confirmation Modal State
   const [confirmModal, setConfirmModal] = useState<{
@@ -49,6 +63,19 @@ export default function InboundModule({
     message: '',
     type: 'ADD',
     onConfirm: () => {}
+  });
+
+  // WhatsApp Modal State
+  const [waModalConfig, setWaModalConfig] = useState<{
+    isOpen: boolean;
+    defaultText: string;
+    record: InboundRecord | null;
+    pdfHtml?: string;
+    pdfFileName?: string;
+  }>({
+    isOpen: false,
+    defaultText: '',
+    record: null
   });
 
   const closeConfirm = () => {
@@ -569,14 +596,27 @@ export default function InboundModule({
                     <td className="py-2.5 px-3 text-center">
                       <div className="flex gap-2 justify-center items-center">
                         <button
-                          onClick={() => {
-                            const ticket = tickets.find(t => t.ticketNo === r.ticketNo);
-                            printCombinedSlip(r, ticket);
-                          }}
+                          onClick={() => setPreviewRecord(r)}
                           className="text-neutral-400 hover:text-emerald-600 transition p-1 cursor-pointer"
                           title="Cetak Resi Terpadu"
                         >
                           <Printer className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            const tk = tickets.find(t => t.ticketNo === r.ticketNo);
+                            setWaModalConfig({ 
+                              isOpen: true, 
+                              defaultText: buildInboundWAText(r, tk), 
+                              record: r,
+                              pdfHtml: getHTMLForPDF(printCombinedSlip, r, tk, staffName),
+                              pdfFileName: `Resi_Penerimaan_${r.ticketNo || r.id.substring(0,8)}.pdf`
+                            });
+                          }}
+                          className="text-neutral-400 hover:text-emerald-600 transition p-1 cursor-pointer"
+                          title="Kirim ke WA"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => {
@@ -642,6 +682,141 @@ export default function InboundModule({
         type={confirmModal.type}
         onConfirm={confirmModal.onConfirm}
         onCancel={closeConfirm}
+      />
+
+      {/* RECEIPT PREVIEW MODAL */}
+      <AnimatePresence>
+        {previewRecord && (
+          <div className="fixed inset-0 bg-neutral-900/60 flex items-center justify-center p-4 z-50 overflow-y-auto">
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white border border-neutral-300 rounded-xl p-6 w-full max-w-md shadow-2xl relative"
+            >
+              <div className="flex justify-between items-start border-b border-neutral-100 pb-3 mb-4">
+                <span className="font-bold text-neutral-800 flex items-center gap-1.5 uppercase text-xs tracking-widest">
+                  <Printer className="text-emerald-600 w-4 h-4" />
+                  Pratinjau Resi Penerimaan
+                </span>
+                <button 
+                  onClick={() => setPreviewRecord(null)}
+                  className="p-1 hover:bg-neutral-100 rounded-lg text-neutral-400 hover:text-neutral-600 transition"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="bg-neutral-50 p-4 border border-dashed border-neutral-300 rounded font-mono text-[10px] text-neutral-800 leading-relaxed shadow-inner">
+                <div className="text-center border-b border-neutral-300 pb-2 mb-3">
+                  <div className="font-bold text-xs tracking-widest text-emerald-950">CV. BILIBILI 162</div>
+                  <div className="text-[8px] opacity-70">Jalan Poros Pinrang-Polman KM. 12</div>
+                  <div className="text-[8px] opacity-70">Desa Bilibili, Kec. Suppa, Kab. Pinrang</div>
+                </div>
+
+                <div className="space-y-1 mb-3">
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">Tanggal :</span>
+                    <span className="font-bold">{formatReceiptDate(previewRecord.date)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">No. Tiket/Ref :</span>
+                    <span className="font-bold">{previewRecord.ticketNo || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">No. Polisi :</span>
+                    <span className="font-bold">{previewRecord.vehicleNo}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">Suplier :</span>
+                    <span className="font-bold">{previewRecord.supplier}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">Komoditas :</span>
+                    <span className="font-bold">{previewRecord.commodity}</span>
+                  </div>
+                </div>
+
+                <div className="border-t border-neutral-200 pt-2 space-y-1">
+                  <div className="flex justify-between">
+                    <span>BERAT BRUTO :</span>
+                    <span className="font-bold">{previewRecord.grossWeight.toLocaleString('id-ID')} Kg</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>BERAT TARA :</span>
+                    <span className="font-bold">{previewRecord.tareWeight.toLocaleString('id-ID')} Kg</span>
+                  </div>
+                  <div className="flex justify-between text-neutral-500">
+                    <span>Pot. Karung ({previewRecord.bagDeductionPercent}%) :</span>
+                    <span>-{( (previewRecord.grossWeight - previewRecord.tareWeight) * (previewRecord.bagDeductionPercent/100) ).toFixed(0)} Kg</span>
+                  </div>
+                  <div className="flex justify-between text-neutral-500">
+                    <span>Refaksi KA ({previewRecord.refaksiKaPercent}%) :</span>
+                    <span>-{( (previewRecord.grossWeight - previewRecord.tareWeight) * (previewRecord.refaksiKaPercent/100) ).toFixed(0)} Kg</span>
+                  </div>
+                  <div className="flex justify-between font-black text-emerald-700 text-[11px] border-t border-neutral-200 mt-1 pt-1">
+                    <span>BERAT NETTO :</span>
+                    <span>{previewRecord.netWeight.toLocaleString('id-ID')} KG</span>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-4 text-center text-[9px]">
+                  <div>
+                    <p className="mb-2">Staff 162</p>
+                    <input
+                      list="inbound-staff-list"
+                      value={staffName}
+                      onChange={(e) => setStaffName(e.target.value)}
+                      className="w-full text-center bg-white border border-neutral-200 rounded py-1 px-1 font-bold focus:outline-none focus:border-emerald-500"
+                    />
+                    <datalist id="inbound-staff-list">
+                      {employees.filter(e => e.role === 'PETUGAS' || e.role === 'KARYAWAN').map(e => (
+                        <option key={e.id} value={e.name} />
+                      ))}
+                    </datalist>
+                  </div>
+                  <div>
+                    <p className="mb-8">Sopir / Pembawa</p>
+                    <p className="border-t border-neutral-400 pt-1 font-bold">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</p>
+                  </div>
+                </div>
+
+                <div className="text-center mt-4 opacity-50 italic text-[7px]">
+                  * Terimakasih atas kerjasamanya *<br/>
+                  Aplikasi Timbangan GSC GST-9700 v2.0
+                </div>
+              </div>
+
+              <div className="mt-4 flex gap-2">
+                <button 
+                  onClick={() => {
+                    const tk = tickets.find(t => t.ticketNo === previewRecord.ticketNo);
+                    printCombinedSlip(previewRecord, tk, staffName);
+                    setPreviewRecord(null);
+                  }}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1.5 shadow"
+                >
+                  <Printer className="w-3.5 h-3.5" /> CETAK SLIP
+                </button>
+                <button 
+                  onClick={() => setPreviewRecord(null)}
+                  className="flex-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold py-2 rounded-lg"
+                >
+                  TUTUP
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <WhatsAppModal
+        isOpen={waModalConfig.isOpen}
+        onClose={() => setWaModalConfig({ ...waModalConfig, isOpen: false })}
+        defaultText={waModalConfig.defaultText}
+        onSend={(phone, text) => sendWhatsAppMessage(phone, text)}
+        pdfHtml={waModalConfig.pdfHtml}
+        pdfFileName={waModalConfig.pdfFileName}
       />
 
     </div>
