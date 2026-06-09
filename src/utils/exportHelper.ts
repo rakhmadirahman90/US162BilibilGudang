@@ -289,15 +289,15 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
       <style>
         @media print {
           @page { size: 80mm auto; margin: 0; }
-          body { -webkit-print-color-adjust: exact; margin: 0; padding: 2mm; }
+          body { -webkit-print-color-adjust: exact; margin: 0; padding: 0; }
         }
-        body { font-family: 'Courier New', Courier, monospace; font-size: 10pt; color: #000; margin: 0; padding: 5px; line-height: 1.2; font-weight: 600; }
-        .slip { width: 100%; max-width: 300px; }
-        .border-dashed { border-top: 1px dashed #000; margin: 4px 0; }
+        body { font-family: 'Courier New', Courier, monospace; font-size: 9pt; color: #000; margin: 0; padding: 2mm; line-height: 1.1; }
+        .slip { width: 100%; max-width: 80mm; }
+        .border-dashed { border-top: 1px dashed #000; margin: 2px 0; }
         .font-bold { font-weight: bold; }
         .text-center { text-align: center; }
         .flex { display: flex; justify-content: space-between; width: 100%; }
-        .mt-2 { margin-top: 5px; }
+        .mt-2 { margin-top: 2px; }
       </style>
     </head>
     <body onload="window.print(); window.close();">
