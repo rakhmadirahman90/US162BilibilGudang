@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { formatNumberInput, parseNumberInput } from '../utils/format';
 import { ServiceRecord } from '../types';
 import { Wind, Trash, User, Search, Play, Plus, DollarSign, CheckCircle2, AlertCircle, Download, Printer, Edit2 } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
@@ -249,9 +250,9 @@ export default function ServicesModule({
               <div>
                 <label className="block text-neutral-600 mb-1">Total Berat Barang Diproses (Kg)</label>
                 <input
-                  type="number"
-                  value={weight}
-                  onChange={(e) => setWeight(parseInt(e.target.value) || 0)}
+                  type="text"
+                  value={formatNumberInput(weight)}
+                  onChange={(e) => setWeight(parseNumberInput(e.target.value))}
                   className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-sky-500 font-mono text-sm"
                 />
               </div>
@@ -260,9 +261,9 @@ export default function ServicesModule({
                 <div>
                   <label className="block text-neutral-600 mb-1">Tarif (Rp per Kg)</label>
                   <input
-                    type="number"
-                    value={ratePerKg}
-                    onChange={(e) => setRatePerKg(parseInt(e.target.value) || 0)}
+                    type="text"
+                    value={formatNumberInput(ratePerKg)}
+                    onChange={(e) => setRatePerKg(parseNumberInput(e.target.value))}
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
                   />
                 </div>

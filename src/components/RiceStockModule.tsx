@@ -3,6 +3,7 @@ import { RiceStockRecord } from '../types';
 import { Package, PlusCircle, Search, Calendar, Download, Printer, Edit2, Trash2 } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import { exportToCSV, printPDFReport, printRiceStockSlip } from '../utils/exportHelper';
+import { formatNumberInput, parseNumberInput } from '../utils/format';
 
 interface RiceStockModuleProps {
   records: RiceStockRecord[];
@@ -74,6 +75,12 @@ export default function RiceStockModule({ records, onAddRecord, onUpdateRecord, 
 
   const handleSaveRecord = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!date || !policeNo || !itemName) {
+      (window as any).__showToast?.("Mohon lengkapi formulir stok!", "error");
+      return;
+    }
+    
     const newRecord: RiceStockRecord = {
       id: editingId || `rice-${Date.now()}`,
       date,
@@ -92,6 +99,7 @@ export default function RiceStockModule({ records, onAddRecord, onUpdateRecord, 
       } else {
         onAddRecord(newRecord);
       }
+      (window as any).__showToast?.(`Sukses ${editingId ? 'memperbarui' : 'menyimpan'} data stok beras!`, 'success');
       setShowAddForm(false);
       resetForm();
     };
@@ -158,19 +166,19 @@ export default function RiceStockModule({ records, onAddRecord, onUpdateRecord, 
             </div>
             <div>
               <label>Harga (Rp)</label>
-              <input type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} className="w-full border p-2 rounded" />
+              <input type="text" value={formatNumberInput(price)} onChange={(e) => setPrice(parseNumberInput(e.target.value))} className="w-full border p-2 rounded" />
             </div>
             <div>
               <label>Colly</label>
-              <input type="number" value={colly} onChange={(e) => setColly(Number(e.target.value))} className="w-full border p-2 rounded" />
+              <input type="text" value={formatNumberInput(colly)} onChange={(e) => setColly(parseNumberInput(e.target.value))} className="w-full border p-2 rounded" />
             </div>
             <div>
               <label>Masuk (Kg)</label>
-              <input type="number" value={inWeight} onChange={(e) => setInWeight(Number(e.target.value))} className="w-full border p-2 rounded" />
+              <input type="text" value={formatNumberInput(inWeight)} onChange={(e) => setInWeight(parseNumberInput(e.target.value))} className="w-full border p-2 rounded" />
             </div>
             <div>
               <label>Keluar (Kg)</label>
-              <input type="number" value={outWeight} onChange={(e) => setOutWeight(Number(e.target.value))} className="w-full border p-2 rounded" />
+              <input type="text" value={formatNumberInput(outWeight)} onChange={(e) => setOutWeight(parseNumberInput(e.target.value))} className="w-full border p-2 rounded" />
             </div>
             <div className="col-span-3 flex justify-end gap-2">
               <button type="submit" className="bg-emerald-600 text-white px-4 py-2 rounded">Simpan</button>

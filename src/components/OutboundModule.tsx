@@ -304,9 +304,9 @@ export default function OutboundModule({
               <div>
                 <label className="block text-neutral-600 mb-1">Total Berat Cargo Muat (Kg)</label>
                 <input
-                  type="number"
-                  value={totalWeight}
-                  onChange={(e) => setTotalWeight(parseInt(e.target.value) || 0)}
+                  type="text"
+                  value={formatNumberInput(totalWeight)}
+                  onChange={(e) => setTotalWeight(parseNumberInput(e.target.value))}
                   className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
                 />
               </div>
@@ -331,9 +331,9 @@ export default function OutboundModule({
                 <div>
                   <label className="block text-neutral-600 mb-1">Upah Buruh Pemuat (Muat Karung) (Rp)</label>
                   <input
-                    type="number"
-                    value={loadingLaborCost}
-                    onChange={(e) => setLoadingLaborCost(parseInt(e.target.value) || 0)}
+                    type="text"
+                    value={formatNumberInput(loadingLaborCost)}
+                    onChange={(e) => setLoadingLaborCost(parseNumberInput(e.target.value))}
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
                   />
                 </div>

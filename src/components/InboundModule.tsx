@@ -9,6 +9,7 @@ import { mockCornMoistureRefaksi } from '../data';
 import ConfirmModal from './ConfirmModal';
 import { ArrowDownCircle, PlusCircle, Search, Calendar, Scale, Hammer, Percent, Archive, Download, Printer, Edit2 } from 'lucide-react';
 import { exportToCSV, printPDFReport, printCombinedSlip } from '../utils/exportHelper';
+import { formatNumberInput, parseNumberInput } from '../utils/format';
 
 interface InboundModuleProps {
   records: InboundRecord[];
@@ -360,18 +361,18 @@ export default function InboundModule({
                 <div>
                   <label className="block text-neutral-600 mb-1">Berat Bruto (Kg)</label>
                   <input
-                    type="number"
-                    value={grossWeight}
-                    onChange={(e) => setGrossWeight(parseInt(e.target.value) || 0)}
+                    type="text"
+                    value={formatNumberInput(grossWeight)}
+                    onChange={(e) => setGrossWeight(parseNumberInput(e.target.value))}
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
                   />
                 </div>
                 <div>
                   <label className="block text-neutral-600 mb-1">Berat Tara (Kg)</label>
                   <input
-                    type="number"
-                    value={tareWeight}
-                    onChange={(e) => setTareWeight(parseInt(e.target.value) || 0)}
+                    type="text"
+                    value={formatNumberInput(tareWeight)}
+                    onChange={(e) => setTareWeight(parseNumberInput(e.target.value))}
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
                   />
                 </div>
@@ -381,20 +382,18 @@ export default function InboundModule({
                 <div>
                   <label className="block text-neutral-600 mb-1">Potongan Karung (%)</label>
                   <input
-                    type="number"
-                    step="0.1"
-                    value={bagDeductionPercent}
-                    onChange={(e) => setBagDeductionPercent(parseFloat(e.target.value) || 0)}
+                    type="text"
+                    value={formatNumberInput(bagDeductionPercent)}
+                    onChange={(e) => setBagDeductionPercent(parseNumberInput(e.target.value))}
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
                   />
                 </div>
                 <div>
                   <label className="block text-neutral-600 mb-1">Kadar Air (KA %)</label>
                   <input
-                    type="number"
-                    step="0.1"
-                    value={moistureContent}
-                    onChange={(e) => setMoistureContent(parseFloat(e.target.value) || 0)}
+                    type="text"
+                    value={formatNumberInput(moistureContent)}
+                    onChange={(e) => setMoistureContent(parseNumberInput(e.target.value))}
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
                   />
                 </div>
@@ -419,18 +418,18 @@ export default function InboundModule({
                 <div>
                   <label className="block text-neutral-600 mb-1">Biaya Buruh Panggul Bongkar (Rp)</label>
                   <input
-                    type="number"
-                    value={laborCost}
-                    onChange={(e) => setLaborCost(parseInt(e.target.value) || 0)}
+                    type="text"
+                    value={formatNumberInput(laborCost)}
+                    onChange={(e) => setLaborCost(parseNumberInput(e.target.value))}
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
                   />
                 </div>
                 <div>
                   <label className="block text-neutral-600 mb-1">Harga Satuan (Rp/Kg)</label>
                   <input
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(parseInt(e.target.value) || 0)}
+                    type="text"
+                    value={formatNumberInput(price)}
+                    onChange={(e) => setPrice(parseNumberInput(e.target.value))}
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
                   />
                 </div>

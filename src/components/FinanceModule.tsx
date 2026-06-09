@@ -8,6 +8,7 @@ import { DebtRecord, FinancialRecord, EmployeeRecord } from '../types';
 import { Landmark, PlusCircle, Search, Calendar, ChevronRight, Users, Scale, CreditCard, DollarSign, Download, Printer, Edit2, Trash2 } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import { exportToCSV, printPDFReport } from '../utils/exportHelper';
+import { formatNumberInput, parseNumberInput } from '../utils/format';
 
 interface FinanceModuleProps {
   debts: DebtRecord[];
@@ -449,9 +450,9 @@ export default function FinanceModule({
                 <div>
                   <label className="block text-neutral-600 mb-1">Jumlah Nilai Utang (Rp)</label>
                   <input
-                    type="number"
-                    value={debtAmount}
-                    onChange={(e) => setDebtAmount(parseInt(e.target.value) || 0)}
+                    type="text"
+                    value={formatNumberInput(debtAmount)}
+                    onChange={(e) => setDebtAmount(parseNumberInput(e.target.value))}
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
                   />
                 </div>
@@ -510,9 +511,9 @@ export default function FinanceModule({
                             payingDebtId === d.id ? (
                               <div className="flex items-center gap-1.5 justify-center" onClick={(e) => e.stopPropagation()}>
                                 <input
-                                  type="number"
-                                  value={payAmount}
-                                  onChange={(e) => setPayAmount(parseInt(e.target.value) || 0)}
+                                  type="text"
+                                  value={formatNumberInput(payAmount)}
+                                  onChange={(e) => setPayAmount(parseNumberInput(e.target.value))}
                                   className="bg-neutral-50 border border-neutral-300 text-red-600 font-bold p-1 rounded font-mono text-xs w-28 text-center"
                                 />
                                 <button
@@ -606,9 +607,9 @@ export default function FinanceModule({
               <div>
                 <label className="block text-neutral-600 mb-1">Total Hasil Berat Netto Timbangan (Kg)</label>
                 <input
-                  type="number"
-                  value={brokerCargoWeight}
-                  onChange={(e) => setBrokerCargoWeight(parseInt(e.target.value) || 0)}
+                  type="text"
+                  value={formatNumberInput(brokerCargoWeight)}
+                  onChange={(e) => setBrokerCargoWeight(parseNumberInput(e.target.value))}
                   className="w-full bg-neutral-50 border border-neutral-300 rounded p-2 font-mono text-sm font-semibold"
                 />
               </div>
@@ -792,9 +793,9 @@ export default function FinanceModule({
                   <label className="block text-neutral-600 mb-1">Jumlah Nilai (Rp)</label>
                   <div className="flex gap-2">
                     <input
-                      type="number"
-                      value={finAmount}
-                      onChange={(e) => setFinAmount(parseInt(e.target.value) || 0)}
+                      type="text"
+                      value={formatNumberInput(finAmount)}
+                      onChange={(e) => setFinAmount(parseNumberInput(e.target.value))}
                       className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 font-mono"
                     />
                     <button

@@ -8,6 +8,7 @@ import { WeighbridgeTicket, VehicleRecord, BuyerRecord, SupplierRecord } from '.
 import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { exportToCSV, printPDFReport, printSlip } from '../utils/exportHelper';
+import { formatNumberInput, parseNumberInput } from '../utils/format';
 import ConfirmModal from './ConfirmModal';
 
 interface WeighbridgeModuleProps {
@@ -255,7 +256,7 @@ export default function WeighbridgeModule({
   // Handle manual input in indicator
   const handleCustomWeightSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const nr = parseInt(customSimulatorInput) || 0;
+    const nr = parseNumberInput(customSimulatorInput);
     setSimulatorWeight(nr);
   };
 
@@ -347,8 +348,8 @@ export default function WeighbridgeModule({
             <label className="block text-xs font-mono text-neutral-400 mb-1">SIMULATOR BERAT AKTIF (KG)</label>
             <form onSubmit={handleCustomWeightSubmit} className="flex gap-2">
               <input 
-                type="number"
-                value={customSimulatorInput}
+                type="text"
+                value={formatNumberInput(customSimulatorInput)}
                 onChange={(e) => setCustomSimulatorInput(e.target.value)}
                 className="bg-neutral-900 border border-neutral-600 text-red-400 font-mono text-center text-lg rounded px-2 py-1 flex-1 focus:outline-none focus:border-red-500"
               />
