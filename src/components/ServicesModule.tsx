@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { formatNumberInput, parseNumberInput } from '../utils/format';
 import { ServiceRecord } from '../types';
 import { Wind, Trash, User, Search, Play, Plus, DollarSign, CheckCircle2, AlertCircle, Download, Printer, Edit2 } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
 import ConfirmModal from './ConfirmModal';
 import { exportToCSV, printPDFReport, printServiceSlip } from '../utils/exportHelper';
 
@@ -23,6 +24,7 @@ export default function ServicesModule({
   onUpdateRecord,
   onDeleteRecord
 }: ServicesModuleProps) {
+  const { t, language } = useLanguage();
   const [showForm, setShowForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -182,7 +184,7 @@ export default function ServicesModule({
         <div>
           <h2 className="text-xl font-extrabold text-neutral-800 flex items-center gap-2">
             <Wind className="text-blue-500 w-6 h-6 animate-pulse" />
-            Layanan Jasa Poles & Kipas (3. JASA POLES & KIPAS 2026)
+            {t.servicesTitle}
           </h2>
           <p className="text-xs text-neutral-500 mt-1">
             Mencatat pendapatan pemrosesan poles beras, pembersihan blower kipas jagung pipil, dan cetak invoice jasa panggilingan.
@@ -194,7 +196,7 @@ export default function ServicesModule({
           className="bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs px-4 py-2.5 rounded-lg flex items-center gap-1.5 shadow transition cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          {showForm ? 'Sembunyikan Form' : 'Catat Jasa Pemrosesan'}
+          {showForm ? t.close : t.recordNew}
         </button>
       </div>
 
@@ -394,17 +396,17 @@ export default function ServicesModule({
                     </span>
                   </td>
                   <td className="py-2.5 px-3 text-neutral-600 font-medium">{s.commodity}</td>
-                  <td className="text-right py-2.5 px-3 font-bold font-mono">{s.weight.toLocaleString('id-ID')} Kg</td>
-                  <td className="text-right py-2.5 px-3 font-mono text-neutral-500">Rp {s.ratePerKg}</td>
+                  <td className="text-right py-2.5 px-3 font-bold font-mono">{s.weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg</td>
+                  <td className="text-right py-2.5 px-3 font-mono text-neutral-500">Rp {s.ratePerKg.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
                   <td className="text-right py-2.5 px-3 font-extrabold font-mono text-blue-600 bg-sky-50/20">
-                    Rp {s.totalFee.toLocaleString('id-ID')}
+                    Rp {s.totalFee.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}
                   </td>
                   <td className="py-2.5 px-3 text-neutral-500 italic text-[11px]">{s.operatorName}</td>
                   <td className="py-2.5 px-3 text-center">
                     <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
                       s.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                     }`}>
-                      {s.paymentStatus === 'PAID' ? 'LUNAS (PAID)' : 'BELUM BAYAR'}
+                      {s.paymentStatus === 'PAID' ? t.paidStatus : t.unpaidStatus}
                     </span>
                   </td>
                   <td className="py-2.5 px-3 text-center">

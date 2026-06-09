@@ -14,7 +14,8 @@ import {
   VehicleRecord,
   SupplierRecord,
   BuyerRecord,
-  CommodityRecord
+  CommodityRecord,
+  RiceStockRecord
 } from './types';
 
 // Standard Corn Moisture Deduction (Refaksi KA Jagung) Table lookup helper
@@ -124,7 +125,9 @@ export const initialInboundRecords: InboundRecord[] = [
     moistureContent: 16.8,
     warehouseSection: "Sektor Tengah (Silo Jagung)",
     laborCost: 450000,
-    driverName: "Anto"
+    driverName: "Anto",
+    price: 3600,
+    totalPrice: 35568000
   },
   {
     id: "inbound-2",
@@ -141,7 +144,9 @@ export const initialInboundRecords: InboundRecord[] = [
     moistureContent: 13.5,
     warehouseSection: "Kavling Gabah Basah 1",
     laborCost: 280000,
-    driverName: "Dudi"
+    driverName: "Dudi",
+    price: 5200,
+    totalPrice: 28974400
   },
   {
     id: "inbound-3",
@@ -158,7 +163,9 @@ export const initialInboundRecords: InboundRecord[] = [
     moistureContent: 15.8,
     warehouseSection: "Sektor Barat (Gudang B)",
     laborCost: 500000,
-    driverName: "Kamal"
+    driverName: "Kamal",
+    price: 3500,
+    totalPrice: 37492000
   }
 ];
 

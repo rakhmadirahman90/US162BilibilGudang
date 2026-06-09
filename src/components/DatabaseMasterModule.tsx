@@ -6,6 +6,7 @@ import {
   EmployeeRecord, 
   CommodityRecord 
 } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
 import ConfirmModal from './ConfirmModal';
 import { 
   PlusSquare, 
@@ -48,6 +49,7 @@ export default function DatabaseMasterModule({
   commodities,
   setCommodities
 }: DatabaseMasterModuleProps) {
+  const { t, language } = useLanguage();
   // Tabs for the database master
   type DbTab = 'VEHICLES' | 'SUPPLIERS' | 'BUYERS' | 'EMPLOYEES' | 'COMMODITIES';
   const [activeSubTab, setActiveSubTab] = useState<DbTab>('VEHICLES');
@@ -504,7 +506,7 @@ export default function DatabaseMasterModule({
         <div>
           <h2 className="text-lg font-extrabold tracking-tight flex items-center gap-2">
             <Database className="w-5 h-5 text-rose-400 animate-pulse" />
-            DATABASE MASTER SYSTEM &bull; US BILIBILI 162
+            {t.databaseTitle}
           </h2>
           <p className="text-[11px] text-indigo-200 mt-1 uppercase font-mono tracking-wider font-semibold">
             Pusat Pengelolaan Data Master Otomatis (Anti-Manual Input)

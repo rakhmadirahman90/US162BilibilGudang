@@ -12,6 +12,7 @@ import {
   DebtRecord, 
   FinancialRecord 
 } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
 import { 
   FileText, 
   Download, 
@@ -53,6 +54,7 @@ export default function ReportsModule({
   debts,
   finances
 }: ReportsModuleProps) {
+  const { t } = useLanguage();
   // Navigation & Sub-activity Tabs
   const [activeSubTab, setActiveSubTab] = useState<ReportTabSelection>('RINGKASAN');
 
@@ -426,7 +428,7 @@ export default function ReportsModule({
           <div>
             <h2 className="font-extrabold text-neutral-800 text-base sm:text-lg flex items-center gap-2">
               <SlidersHorizontal className="text-emerald-600 w-5 h-5" />
-              Sistem Pelaporan Terpadu & Ekspor Digital
+              {t.reportsTitle}
             </h2>
             <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
               Pusat audit digital US Bilibili 162. Siapkan rekapitulasi data, saring transaksi per rentang tanggal waktu, export ke file spreadsheet Microsoft Excel (CSV) dan siapkan cetak dokumen fisik atau simpan format PDF.

@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import { DebtRecord, FinancialRecord, EmployeeRecord } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
 import { Landmark, PlusCircle, Search, Calendar, ChevronRight, Users, Scale, CreditCard, DollarSign, Download, Printer, Edit2, Trash2 } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import { exportToCSV, printPDFReport } from '../utils/exportHelper';
@@ -35,6 +36,7 @@ export default function FinanceModule({
   onUpdateFinance,
   onDeleteFinance
 }: FinanceModuleProps) {
+  const { t, language } = useLanguage();
   const [activeSubTab, setActiveSubTab] = useState<'UTANG' | 'MAKELAR' | 'MUTASI'>('UTANG');
   const [editingDebtId, setEditingDebtId] = useState<string | null>(null);
   const [editingFinId, setEditingFinId] = useState<string | null>(null);
@@ -359,7 +361,7 @@ export default function FinanceModule({
               : 'text-neutral-500 hover:text-neutral-800'
           }`}
         >
-          📂 2. UTANG 2026
+          📂 {t.financeTitle.split('&')[0].trim()}
         </button>
         <button
           onClick={() => setActiveSubTab('MAKELAR')}
@@ -369,7 +371,7 @@ export default function FinanceModule({
               : 'text-neutral-500 hover:text-neutral-800'
           }`}
         >
-          📂 9. BURUH & MAKELAR
+          📂 {t.brokerEmployees || 'BURUH & MAKELAR'}
         </button>
         <button
           onClick={() => setActiveSubTab('MUTASI')}
@@ -379,45 +381,45 @@ export default function FinanceModule({
               : 'text-neutral-500 hover:text-neutral-800'
           }`}
         >
-          📂 7. MUTASI REKENING 162
+          📂 {t.cashMutation || 'MUTASI KAS'}
         </button>
       </div>
 
-      {/* TAB 1: UTANG 2026 */}
+      {/* TAB 1: UTANG */}
       {activeSubTab === 'UTANG' && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
             <div>
               <h3 className="font-bold text-neutral-800 text-sm flex items-center gap-1.5">
                 <CreditCard className="text-emerald-600 w-4.5 h-4.5" />
-                Catatan Utang Aliansi Tani (2. UTANG 2026)
+                {t.debtsArchivesTitle}
               </h3>
               <p className="text-xs text-neutral-500 mt-0.5">
-                Catatan utang US Bilibili kepada suplier luar / petani pengirim biji jagung dan beras yang belum lunas dibayar.
+                {t.debtsSubTitle}
               </p>
             </div>
             
             <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={handleExportDebtExcel}
-                title="Ekspor buku utang ke Excel"
+                title={t.exportExcel}
                 className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5" /> Export Excel
+                <Download className="w-3.5 h-3.5" /> {t.exportExcel}
               </button>
               <button
                 onClick={handlePrintDebtPDF}
-                title="Cetak buku utang / PDF"
+                title={t.printReportsPDF}
                 className="flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
               >
-                <Printer className="w-3.5 h-3.5" /> Cetak / PDF
+                <Printer className="w-3.5 h-3.5" /> {t.printReportsPDF}
               </button>
               <button
                 onClick={() => setShowDebtForm(!showDebtForm)}
                 className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg flex items-center gap-1 cursor-pointer shadow"
               >
                 <PlusCircle className="w-3.5 h-3.5" />
-                {showDebtForm ? 'Tutup Form' : 'Catat Utang Baru'}
+                {showDebtForm ? t.closeFormLabel : t.recordNewDebtLabel}
               </button>
             </div>
           </div>
@@ -698,34 +700,34 @@ export default function FinanceModule({
             <div>
               <h3 className="font-bold text-neutral-800 text-sm flex items-center gap-2">
                 <Landmark className="text-emerald-605 w-5 h-5" />
-                Mutasi Rekening Bank & Kas Tunai (7. MUTASI REKENING 2026)
+                {t.financeEntryTitle}
               </h3>
               <p className="text-xs text-neutral-500 mt-0.5">
-                Aliran dana keluar-masuk kas gudang US Bilibili 162 untuk kelancaran pengerjaan palka biji dan beras.
+                {t.financeSubTitle}
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={handleExportFinanceExcel}
-                title="Ekspor buku mutasi ke Excel"
+                title={t.exportExcel}
                 className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5" /> Export Excel
+                <Download className="w-3.5 h-3.5" /> {t.exportExcel}
               </button>
               <button
                 onClick={handlePrintFinancePDF}
-                title="Cetak buku mutasi / PDF"
+                title={t.printReportsPDF}
                 className="flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
               >
-                <Printer className="w-3.5 h-3.5" /> Cetak / PDF
+                <Printer className="w-3.5 h-3.5" /> {t.printReportsPDF}
               </button>
               <button
                 onClick={() => setShowFinForm(!showFinForm)}
                 className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg flex items-center gap-1 cursor-pointer shadow"
               >
                 <PlusCircle className="w-3.5 h-3.5" />
-                {showFinForm ? 'Tutup Form' : 'Catat Operasional Operatif'}
+                {showFinForm ? t.closeFormLabel : t.recordNewFinanceLabel}
               </button>
             </div>
           </div>

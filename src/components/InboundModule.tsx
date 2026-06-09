@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { InboundRecord, WeighbridgeTicket, VehicleRecord, SupplierRecord } from '../types';
 import { mockCornMoistureRefaksi } from '../data';
+import { useLanguage } from '../i18n/LanguageContext';
 import ConfirmModal from './ConfirmModal';
 import { ArrowDownCircle, PlusCircle, Search, Calendar, Scale, Hammer, Percent, Archive, Download, Printer, Edit2 } from 'lucide-react';
 import { exportToCSV, printPDFReport, printCombinedSlip } from '../utils/exportHelper';
@@ -30,6 +31,7 @@ export default function InboundModule({
   vehicles = [],
   suppliers = []
 }: InboundModuleProps) {
+  const { t, language } = useLanguage();
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -228,7 +230,7 @@ export default function InboundModule({
         <div>
           <h2 className="text-xl font-extrabold text-neutral-800 flex items-center gap-2">
             <ArrowDownCircle className="text-emerald-600 w-6 h-6" />
-            Penerimaan Barang Masuk (1. BARANG MASUK 2026)
+            {t.inboundTitle}
           </h2>
           <p className="text-xs text-neutral-500 mt-1">
             Mengelola penerimaan komoditas jagung, beras, atau gabah dari suplier luar dan petani.
@@ -240,7 +242,7 @@ export default function InboundModule({
           className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-4 py-2.5 rounded-lg flex items-center gap-1.5 shadow transition cursor-pointer"
         >
           <PlusCircle className="w-4 h-4" />
-          {showAddForm ? 'Tutup Formulir' : 'Catat Barang Masuk'}
+          {showAddForm ? t.close : t.recordNew}
         </button>
       </div>
 
@@ -459,7 +461,7 @@ export default function InboundModule({
       {/* FILTER SEARCH FIELD */}
       <div className="bg-white border border-neutral-200 shadow-sm rounded-xl p-4">
         <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-          <span className="font-bold text-neutral-800 text-sm shrink-0">Arsip Penerimaan Barang Masuk ({filteredRecords.length})</span>
+          <span className="font-bold text-neutral-800 text-sm shrink-0">{t.archives} {t.inboundTitle} ({filteredRecords.length})</span>
           
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto md:justify-end">
             <button

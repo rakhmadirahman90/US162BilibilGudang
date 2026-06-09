@@ -5,8 +5,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { WeighbridgeTicket, VehicleRecord, BuyerRecord, SupplierRecord } from '../types';
-import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2, Download } from 'lucide-react';
+import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2, Download, Clock, ChevronRight, Truck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useLanguage } from '../i18n/LanguageContext';
 import { exportToCSV, printPDFReport, printSlip } from '../utils/exportHelper';
 import { formatNumberInput, parseNumberInput } from '../utils/format';
 import ConfirmModal from './ConfirmModal';
@@ -30,6 +31,8 @@ export default function WeighbridgeModule({
   buyers = [],
   suppliers = []
 }: WeighbridgeModuleProps) {
+  const { t, language } = useLanguage();
+  
   // Simulator State
   const [simulatorWeight, setSimulatorWeight] = useState<number>(3560);
   const [customSimulatorInput, setCustomSimulatorInput] = useState<string>("3560");
@@ -127,11 +130,11 @@ export default function WeighbridgeModule({
     
     if (isCreatingNew) {
       if (!policeNo.trim() || policeNo === "DP ") {
-        setErrorMessage("Nomor Polisi harus diisi!");
+        setErrorMessage(t.errorPlateRequired);
         return;
       }
       if (!agency.trim()) {
-        setErrorMessage("Agen / Tujuan harus diisi!");
+        setErrorMessage(t.errorAgencyRequired);
         return;
       }
 
@@ -163,8 +166,8 @@ export default function WeighbridgeModule({
 
       setConfirmModal({
         isOpen: true,
-        title: "Konfirmasi Tambah Antrian Timbang 1",
-        message: `Apakah Anda yakin ingin mendaftarkan tiket timbangan baru untuk Nomor Polisi ${policeNo.toUpperCase()} dengan berat gross ${simulatorWeight.toLocaleString('id-ID')} Kg?`,
+        title: t.confirmAddTimbang1,
+        message: `Apakah Anda yakin ingin mendaftarkan tiket timbangan baru untuk Nomor Polisi ${policeNo.toUpperCase()} dengan berat gross ${simulatorWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg?`,
         type: 'ADD',
         onConfirm: () => {
           executeSave();
@@ -187,7 +190,7 @@ export default function WeighbridgeModule({
 
       setConfirmModal({
         isOpen: true,
-        title: "Konfirmasi Perubahan Timbang 1",
+        title: t.confirmEditTimbang1,
         message: `Apakah Anda yakin ingin memperbarui data Timbang 1 untuk tiket #${selectedTicket.ticketNo}?`,
         type: 'EDIT',
         onConfirm: () => {
@@ -201,15 +204,15 @@ export default function WeighbridgeModule({
   // Trigger Weigh II (Tare Weight Input - completing shipment weight transaction)
   const handleTimbang2 = () => {
     if (!selectedTicket) {
-      setErrorMessage("Pilih tiket aktif terlebih dahulu!");
+      setErrorMessage(t.errorSelectTicket);
       return;
     }
     if (selectedTicket.status === 'COMPLETED') {
-      setErrorMessage("Tiket sudah selesai ditimbang 2!");
+      setErrorMessage(t.errorAlreadyCompleted);
       return;
     }
 
-    const nowStr = new Date().toLocaleString('id-ID', { hour12: false }).replace(/\//g, '-');
+    const nowStr = new Date().toLocaleString(language === 'id' ? 'id-ID' : 'en-US', { hour12: false }).replace(/\//g, '-');
     const executeTimbang2 = () => {
       const updated: WeighbridgeTicket = {
         ...selectedTicket,
@@ -231,8 +234,8 @@ export default function WeighbridgeModule({
 
     setConfirmModal({
       isOpen: true,
-      title: "Konfirmasi Selesaikan Timbang 2",
-      message: `Apakah Anda yakin ingin memproses Timbang 2 (Selesai) untuk tiket #${selectedTicket.ticketNo} dengan berat tare ${simulatorWeight.toLocaleString('id-ID')} Kg?`,
+      title: t.confirmCompleteTimbang2,
+      message: `Apakah Anda yakin ingin memproses Timbang 2 (Selesai) untuk tiket #${selectedTicket.ticketNo} dengan berat tare ${simulatorWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg?`,
       type: 'EDIT',
       onConfirm: () => {
         executeTimbang2();
@@ -324,16 +327,16 @@ export default function WeighbridgeModule({
         <div className="bg-neutral-800 border-4 border-neutral-700 rounded-xl p-4 shadow-xl text-white">
           <div className="flex justify-between items-center border-b border-neutral-700 pb-2 mb-3">
             <span className="font-mono text-sm tracking-wider font-bold text-neutral-400">GSC GST-9700</span>
-            <span className="text-xs bg-red-600 font-bold px-2 py-0.5 rounded animate-pulse">WEIGHING INDICATOR</span>
+            <span className="text-xs bg-red-600 font-bold px-2 py-0.5 rounded animate-pulse">{t.weighingIndicator}</span>
           </div>
 
           {/* LED Display screen */}
           <div className="bg-black border-2 border-neutral-900 rounded-lg p-6 flex flex-col items-end relative overflow-hidden shadow-inner my-2">
             <div className="absolute top-2 left-3 flex gap-2">
               <span className={`w-2 h-2 rounded-full ${simulatorWeight > 0 ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,1)]' : 'bg-red-950'}`}></span>
-              <span className="text-[9px] font-mono text-neutral-500">STABLE</span>
+              <span className="text-[9px] font-mono text-neutral-500">{t.stable}</span>
               <span className={`w-2 h-2 rounded-full ${simulatorWeight === 0 ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,1)]' : 'bg-green-950'}`}></span>
-              <span className="text-[9px] font-mono text-neutral-500">ZERO</span>
+              <span className="text-[9px] font-mono text-neutral-500">{t.zero}</span>
             </div>
             
             {/* LARGE SEVEN SEGMENT RESEMBLANCE */}
@@ -345,7 +348,7 @@ export default function WeighbridgeModule({
 
           {/* Controls to Mock physical setup weights for the computer */}
           <div className="mt-4">
-            <label className="block text-xs font-mono text-neutral-400 mb-1">SIMULATOR BERAT AKTIF (KG)</label>
+            <label className="block text-xs font-mono text-neutral-400 mb-1 font-bold">{t.activeWeightSimulator}</label>
             <form onSubmit={handleCustomWeightSubmit} className="flex gap-2">
               <input 
                 type="text"
@@ -357,7 +360,7 @@ export default function WeighbridgeModule({
                 type="submit" 
                 className="bg-red-700 hover:bg-red-600 font-mono px-3 py-1 text-sm rounded font-bold transition"
               >
-                APPLY
+                {t.apply}
               </button>
             </form>
           </div>
@@ -379,13 +382,13 @@ export default function WeighbridgeModule({
             <button onClick={() => applySimulatorPreset(3900)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1 rounded text-xs">
               3,900 kg (Empty)
             </button>
-            <button onClick={resetZero} className="bg-neutral-950 hover:bg-neutral-900 text-red-500 font-bold border border-red-950 font-mono py-1 rounded text-xs">
-              ZERO SCALE
+            <button onClick={resetZero} className="bg-neutral-950 hover:bg-neutral-900 text-red-500 font-bold border border-red-950 font-mono py-1 rounded text-xs leading-none">
+              {t.zeroScale}
             </button>
           </div>
 
           <p className="text-[10px] font-mono text-neutral-400 italic text-center mt-3 bg-neutral-900 px-2 py-1 rounded">
-            💡 Gunakan tombol di atas untuk mensimulasikan berat truk di timbangan fisik, lalu catat datanya di komputer.
+            💡 {t.simulatorInstruction}
           </p>
         </div>
 
@@ -393,7 +396,7 @@ export default function WeighbridgeModule({
         <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm">
           <h3 className="font-bold text-sm text-neutral-800 mb-3 flex items-center gap-1.5 border-b border-neutral-100 pb-2">
             <Scale className="text-emerald-500 w-4 h-4" />
-            Tombol Operasional
+            {t.operationalButtons}
           </h3>
           <div className="flex flex-col gap-2">
             <button
@@ -405,7 +408,7 @@ export default function WeighbridgeModule({
               }`}
             >
               <PlusCircle className="w-4 h-4" />
-              Mulai Timbang Baru
+              {t.startNewWeighing}
             </button>
 
             <button
@@ -414,7 +417,7 @@ export default function WeighbridgeModule({
               className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg text-sm flex items-center justify-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <FileText className="w-4 h-4" />
-              {isCreatingNew ? "Simpan Timbang I (Gross / Masuk)" : "Re-Weigh Timbang I"}
+              {isCreatingNew ? t.saveWeighing1 : t.reweigh1}
             </button>
 
             <button
@@ -423,7 +426,7 @@ export default function WeighbridgeModule({
               className="w-full bg-orange-600 hover:bg-orange-500 text-white font-semibold py-2.5 rounded-lg text-sm flex items-center justify-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <Check className="w-4 h-4" />
-              Selesai Timbang II (Tare / Keluar)
+              {t.completeWeighing2}
             </button>
           </div>
         </div>
@@ -438,7 +441,7 @@ export default function WeighbridgeModule({
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-[#3bbfc6]" />
               <span className="font-mono text-xs text-[#8cbef6] font-bold tracking-widest font-mono">
-                APLIKASI JEMBATAN TIMBANG - US BILIBILI 162
+                {t.weighingAppTitle}
               </span>
             </div>
             <div className="text-right text-[11px] font-mono text-[#8cbef6]">
@@ -455,18 +458,18 @@ export default function WeighbridgeModule({
             {/* Header labels */}
             <div className="flex justify-between items-start border-b border-[#2d4d8c] pb-2 mb-4">
               <div>
-                <div className="text-xs text-[#a0c5fc]">YA TEKNIK, MAKASSAR</div>
-                <div className="text-xs text-[#a0c5fc]">TRANSAKSI TIMBANGAN</div>
+                <div className="text-xs text-[#a0c5fc]">{t.techSupport}</div>
+                <div className="text-xs text-[#a0c5fc]">{t.weighingTransaction}</div>
               </div>
               <div className="text-right">
-                <div className="text-xs text-[#a0c5fc]">APLIKASI JEMBATAN TIMBANG</div>
+                <div className="text-xs text-[#a0c5fc]">{t.weighingAppTitle}</div>
                 <div className="text-xs text-[#a0c5fc]">Rec #: <span className="text-yellow-300">{selectedTicket ? selectedTicket.ticketNo : '000000'} / 19813</span></div>
               </div>
             </div>
 
             {/* Display Indicator in the terminal */}
             <div className="bg-neutral-950 border border-[#2d4d8c] p-3 rounded mb-4 flex justify-between items-center relative">
-              <span className="text-[#a0c5fc] text-xs">BERAT TIMBANGAN SAAT INI</span>
+              <span className="text-[#a0c5fc] text-xs">{t.currentWeight}</span>
               <div className="text-right flex items-baseline gap-2">
                 <span className="text-green-400 font-mono text-4xl font-black relative z-10 font-mono">
                   {simulatorWeight.toLocaleString('id-ID')}
@@ -478,7 +481,7 @@ export default function WeighbridgeModule({
               {simulatorWeight > 42000 && (
                 <div className="absolute inset-0 bg-neutral-900/90 flex items-center justify-center border border-red-500 z-20">
                   <span className="bg-red-950 text-red-500 border border-red-500 text-xs px-4 py-1.5 font-bold animate-pulse">
-                    ⚠️ OUT OF RANGE / OVERWEIGHT
+                    {t.overweightWarning}
                   </span>
                 </div>
               )}
@@ -490,7 +493,7 @@ export default function WeighbridgeModule({
               {/* Left Column Fields */}
               <div className="flex flex-col gap-3">
                 <div className="flex items-center">
-                  <span className="w-32 text-[#a0c5fc] inline-block">Nomor</span>
+                  <span className="w-32 text-[#a0c5fc] inline-block">{t.ticketNumberLabel}</span>
                   <span className="mr-2 text-[#a0c5fc]">:</span>
                   {isCreatingNew ? (
                     <input 
@@ -505,7 +508,7 @@ export default function WeighbridgeModule({
                 </div>
 
                 <div className="flex items-center">
-                  <span className="w-32 text-[#a0c5fc] inline-block">No. Polisi</span>
+                  <span className="w-32 text-[#a0c5fc] inline-block">{t.plateNumberLabel}</span>
                   <span className="mr-2 text-[#a0c5fc]">:</span>
                   {isCreatingNew ? (
                     <>
@@ -536,7 +539,7 @@ export default function WeighbridgeModule({
                 </div>
 
                 <div className="flex items-center">
-                  <span className="w-32 text-[#a0c5fc] inline-block">Nama Barang</span>
+                  <span className="w-32 text-[#a0c5fc] inline-block">{t.goodsNameLabel}</span>
                   <span className="mr-2 text-[#a0c5fc]">:</span>
                   {isCreatingNew ? (
                     <select 
@@ -556,7 +559,7 @@ export default function WeighbridgeModule({
                 </div>
 
                 <div className="flex items-center">
-                  <span className="w-32 text-[#a0c5fc] inline-block">Agen/Tujuan</span>
+                  <span className="w-32 text-[#a0c5fc] inline-block">{t.agencyLabel}</span>
                   <span className="mr-2 text-[#a0c5fc]">:</span>
                   {isCreatingNew ? (
                     <>
@@ -584,8 +587,8 @@ export default function WeighbridgeModule({
 
                 <div className="border-t border-[#2d4d8c]/60 my-1 pt-1">
                   <div className="flex justify-between items-center text-xs text-[#a0c5fc]">
-                    <span>TIMBANG I</span>
-                    <span className="text-emerald-400">{selectedTicket ? `${selectedTicket.timbang1Weight.toLocaleString('id-ID')} kg` : '0 kg'}</span>
+                    <span>{t.weigh1Label}</span>
+                    <span className="text-emerald-400">{selectedTicket ? `${selectedTicket.timbang1Weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg` : '0 kg'}</span>
                   </div>
                   <div className="text-[10px] text-neutral-400 mt-0.5">
                     ({selectedTicket ? selectedTicket.timbang1Time : '-'})
@@ -594,9 +597,9 @@ export default function WeighbridgeModule({
 
                 <div className="pt-0.5">
                   <div className="flex justify-between items-center text-xs text-[#a0c5fc]">
-                    <span>TIMBANG II</span>
+                    <span>{t.weigh2Label}</span>
                     <span className="text-orange-400">
-                      {selectedTicket && selectedTicket.timbang2Time ? `${selectedTicket.timbang2Weight.toLocaleString('id-ID')} kg` : '-'}
+                      {selectedTicket && selectedTicket.timbang2Time ? `${selectedTicket.timbang2Weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg` : '-'}
                     </span>
                   </div>
                   <div className="text-[10px] text-neutral-400 mt-0.5">
@@ -608,23 +611,23 @@ export default function WeighbridgeModule({
               {/* Right Column Fields */}
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-[#a0c5fc]">Berat Bruto</span>
+                  <span className="text-[#a0c5fc]">{t.grossWeightLabel}</span>
                   <div className="text-right">
-                    <span className="text-yellow-300 font-bold">{selectedTicket ? selectedTicket.grossWeight.toLocaleString('id-ID') : '0'}</span>
+                    <span className="text-yellow-300 font-bold">{selectedTicket ? selectedTicket.grossWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '0'}</span>
                     <span className="text-neutral-400 text-xs ml-1">kg</span>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-[#a0c5fc]">Berat Tara</span>
+                  <span className="text-[#a0c5fc]">{t.tareWeightLabel}</span>
                   <div className="text-right">
-                    <span className="text-[#efefef]">{selectedTicket ? selectedTicket.tareWeight.toLocaleString('id-ID') : '0'}</span>
+                    <span className="text-[#efefef]">{selectedTicket ? selectedTicket.tareWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '0'}</span>
                     <span className="text-neutral-400 text-xs ml-1">kg</span>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between border-b border-[#2d4d8c]/60 pb-1.5">
-                  <span className="text-[#a0c5fc]">Pot. Krg %</span>
+                  <span className="text-[#a0c5fc]">{t.bagDeductionLabel}</span>
                   <div className="flex items-center">
                     {isCreatingNew ? (
                       <input 
@@ -642,7 +645,7 @@ export default function WeighbridgeModule({
                 </div>
 
                 <div className="flex items-center justify-between border-b border-[#2d4d8c]/60 pb-1.5">
-                  <span className="text-[#a0c5fc]">Refaksi %</span>
+                  <span className="text-[#a0c5fc]">{t.refaksiLabel}</span>
                   <div className="flex items-center">
                     {isCreatingNew ? (
                       <input 
@@ -660,25 +663,25 @@ export default function WeighbridgeModule({
                 </div>
 
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-[#a0c5fc] font-bold text-sm">Berat NETTO</span>
+                  <span className="text-[#a0c5fc] font-bold text-sm">{t.netWeightLabel}</span>
                   <div className="text-right">
-                    <span className="text-green-400 font-extrabold text-xl font-mono">{selectedTicket ? computedNet.toLocaleString('id-ID') : '0'}</span>
+                    <span className="text-green-400 font-extrabold text-xl font-mono">{selectedTicket ? computedNet.toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '0'}</span>
                     <span className="text-green-400 text-xs ml-1">kg</span>
                   </div>
                 </div>
 
                 <div className="mt-2">
-                  <span className="text-xs text-[#a0c5fc] block mb-1">Catatan :</span>
+                  <span className="text-xs text-[#a0c5fc] block mb-1">{t.notesLabel} :</span>
                   {isCreatingNew ? (
                     <textarea 
                       value={notes} 
                       onChange={(e) => setNotes(e.target.value)}
                       className="bg-[#122345] border border-[#2d4d8c] text-[#efefef] p-1.5 rounded text-xs w-full h-12 outline-none focus:border-yellow-400 resize-none"
-                      placeholder="Masukkan catatan timbang..."
+                      placeholder={t.notesPlaceholder}
                     />
                   ) : (
                     <p className="text-xs text-neutral-300 italic max-h-12 overflow-y-auto bg-[#1a2b4b]/80 p-1 rounded border border-[#2d4d8c]/30">
-                      {selectedTicket?.notes || 'Tidak ada catatan'}
+                      {selectedTicket?.notes || t.noNotes}
                     </p>
                   )}
                 </div>
@@ -714,7 +717,7 @@ export default function WeighbridgeModule({
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
             <h3 className="font-bold text-neutral-800 flex items-center gap-2 shrink-0">
               <Scale className="text-emerald-500 w-5 h-5" />
-              Arsip Tiket Jembatan Timbang ({filteredTickets.length})
+              {t.ticketArchiveTitle} ({filteredTickets.length})
             </h3>
             
             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto md:justify-end">
@@ -723,21 +726,21 @@ export default function WeighbridgeModule({
                 title="Unduh seluruh daftar rekap jembatan timbang ke format Microsoft Excel"
                 className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5" /> Export Excel
+                <Download className="w-3.5 h-3.5" /> {t.exportExcel}
               </button>
               <button
                 onClick={handlePrintPDF}
                 title="Cetak Laporan atau simpan sebagai dokumen PDF"
                 className="flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
               >
-                <Printer className="w-3.5 h-3.5" /> Cetak Laporan / PDF
+                <Printer className="w-3.5 h-3.5" /> {t.printReportsPDF}
               </button>
               
               <div className="relative w-full sm:w-48 shrink-0">
                 <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-neutral-400" />
                 <input
                   type="text"
-                  placeholder="Cari No. Polisi/Tiket..."
+                  placeholder={t.searchTicketPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-9 pr-3 py-1.5 text-xs bg-neutral-50 rounded-lg border border-neutral-200 focus:outline-none focus:border-emerald-600 focus:bg-white font-semibold text-neutral-700"
@@ -750,59 +753,59 @@ export default function WeighbridgeModule({
             <table className="w-full text-left text-xs text-neutral-600">
               <thead className="bg-neutral-50 text-neutral-500 font-semibold uppercase tracking-wider border-b border-neutral-200">
                 <tr>
-                  <th className="py-2.5 px-3">No. Tiket</th>
-                  <th className="py-2.5 px-3">No. Polisi</th>
-                  <th className="py-2.5 px-3">Barang</th>
-                  <th className="py-2.5 px-3">Agen / Mitra</th>
-                  <th className="text-right py-2.5 px-3">Timbang I (Kg)</th>
-                  <th className="text-right py-2.5 px-3">Timbang II (Kg)</th>
-                  <th className="text-right py-2.5 px-3">Netto (Kg)</th>
-                  <th className="text-center py-2.5 px-3">Status</th>
-                  <th className="text-center py-2.5 px-3">Aksi</th>
+                  <th className="py-2.5 px-3">{t.ticketNoHeader}</th>
+                  <th className="py-2.5 px-3">{t.plateNoHeader}</th>
+                  <th className="py-2.5 px-3">{t.goodsHeader}</th>
+                  <th className="py-2.5 px-3">{t.agencyHeader}</th>
+                  <th className="text-right py-2.5 px-3">{t.weigh1KgHeader}</th>
+                  <th className="text-right py-2.5 px-3">{t.weigh2KgHeader}</th>
+                  <th className="text-right py-2.5 px-3">{t.netKgHeader}</th>
+                  <th className="text-center py-2.5 px-3">{t.statusHeader}</th>
+                  <th className="text-center py-2.5 px-3">{t.actionHeader}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100">
-                {filteredTickets.map((t) => (
+                {filteredTickets.map((ticket) => (
                   <tr 
-                    key={t.id}
-                    onClick={() => { setSelectedTicket(t); setIsCreatingNew(false); }}
+                    key={ticket.id}
+                    onClick={() => { setSelectedTicket(ticket); setIsCreatingNew(false); }}
                     className={`hover:bg-neutral-50 transition-colors cursor-pointer ${
-                      selectedTicket?.id === t.id ? 'bg-emerald-50/50 font-medium text-neutral-900 border-l-2 border-emerald-500' : ''
+                      selectedTicket?.id === ticket.id ? 'bg-emerald-50/50 font-medium text-neutral-900 border-l-2 border-emerald-500' : ''
                     }`}
                   >
                     <td className="py-2.5 px-3 font-mono text-emerald-700 font-semibold">
-                      {t.ticketNo}
+                      {ticket.ticketNo}
                     </td>
                     <td className="py-2.5 px-3 font-semibold text-neutral-800">
-                      {t.policeNo}
+                      {ticket.policeNo}
                     </td>
                     <td className="py-2.5 px-3">
                       <span className="bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded text-[10px] font-bold">
-                        {t.goodsName}
+                        {ticket.goodsName}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 text-neutral-800">{t.agency}</td>
-                    <td className="text-right py-2.5 px-3 font-mono">{t.timbang1Weight.toLocaleString('id-ID')}</td>
+                    <td className="py-2.5 px-3 text-neutral-800">{ticket.agency}</td>
+                    <td className="text-right py-2.5 px-3 font-mono">{ticket.timbang1Weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
                     <td className="text-right py-2.5 px-3 font-mono text-orange-600">
-                      {t.timbang2Weight > 0 ? t.timbang2Weight.toLocaleString('id-ID') : '-'}
+                      {ticket.timbang2Weight > 0 ? ticket.timbang2Weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '-'}
                     </td>
                     <td className="text-right py-2.5 px-3 font-bold font-mono text-emerald-600">
-                      {(t.timbang2Weight > 0 
-                        ? calculateNetWeight(t.timbang1Weight, t.timbang2Weight, t.bagDeductionPercent, t.refaksiPercent) 
-                        : t.timbang1Weight
-                      ).toLocaleString('id-ID')}
+                      {(ticket.timbang2Weight > 0 
+                        ? calculateNetWeight(ticket.timbang1Weight, ticket.timbang2Weight, ticket.bagDeductionPercent, ticket.refaksiPercent) 
+                        : ticket.timbang1Weight
+                      ).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}
                     </td>
                     <td className="text-center py-2.5 px-3">
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        t.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700 animate-pulse'
+                        ticket.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700 animate-pulse'
                       }`}>
-                        {t.status === 'COMPLETED' ? 'SELESAI' : 'MENUNGGU II'}
+                        {ticket.status === 'COMPLETED' ? t.completedBadge : t.waitingBadge}
                       </span>
                     </td>
                     <td className="py-2.5 px-3" onClick={(e) => e.stopPropagation()}>
                       <div className="flex gap-2 justify-center">
                         <button 
-                          onClick={() => setPrintTicket(t)} 
+                          onClick={() => setPrintTicket(ticket)} 
                           title="Cetak Tiket"
                           className="p-1 text-neutral-400 hover:text-emerald-600 transition"
                         >
@@ -813,10 +816,10 @@ export default function WeighbridgeModule({
                             setConfirmModal({
                               isOpen: true,
                               title: "Konfirmasi Hapus Tiket",
-                              message: `Apakah Anda yakin ingin menghapus tiket jembatan timbang #${t.ticketNo} (${t.policeNo}) secara permanen?`,
+                              message: `Apakah Anda yakin ingin menghapus tiket jembatan timbang #${ticket.ticketNo} (${ticket.policeNo}) secara permanen?`,
                               type: 'DELETE',
                               onConfirm: () => {
-                                onDeleteTicket(t.id);
+                                onDeleteTicket(ticket.id);
                                 closeConfirm();
                               }
                             });
@@ -833,7 +836,7 @@ export default function WeighbridgeModule({
                 {filteredTickets.length === 0 && (
                   <tr>
                     <td colSpan={9} className="text-center py-6 text-neutral-400 italic">
-                      Tidak ada tiket timbangan ditemukan.
+                      {t.noTicketsFound}
                     </td>
                   </tr>
                 )}
@@ -857,7 +860,7 @@ export default function WeighbridgeModule({
               <div className="flex justify-between items-start border-b border-neutral-100 pb-3 mb-4">
                 <span className="font-bold text-neutral-800 flex items-center gap-1.5">
                   <Printer className="text-emerald-600 w-5 h-5" />
-                  Pratinjau Cetak Slip Timbangan
+                  {t.printSlipPreview}
                 </span>
                 <button 
                   onClick={() => setPrintTicket(null)}
@@ -870,10 +873,10 @@ export default function WeighbridgeModule({
               {/* Realistic thermal slip slip paper component */}
               <div className="bg-neutral-50 p-4 border border-dashed border-neutral-300 rounded font-mono text-[11px] text-neutral-800 leading-relaxed shadow-inner">
                 <div className="text-center border-b border-neutral-300 pb-2 mb-2">
-                  <div className="font-bold text-sm tracking-widest text-emerald-950">GUDANG US BILIBILI 162</div>
-                  <div className="text-[9px]">Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa</div>
-                  <div className="text-[9px]">Kabupaten Pinrang, Sulawesi Selatan 91131</div>
-                  <div className="text-[9px] mt-0.5">TELP - 085244466009</div>
+                  <div className="font-bold text-sm tracking-widest text-emerald-950">{t.thermalSlipHeader}</div>
+                  <div className="text-[9px]">{t.thermalSlipAddress}</div>
+                  <div className="text-[9px]">{t.thermalSlipCity}</div>
+                  <div className="text-[9px] mt-0.5">{t.thermalSlipPhone}</div>
                 </div>
 
                 <div className="flex justify-between">
@@ -896,16 +899,16 @@ export default function WeighbridgeModule({
                 <div className="border-t border-neutral-300 my-2 pt-2" />
 
                 <div className="flex justify-between font-bold">
-                  <span>TIMBANG I (Masuk)</span>
-                  <span>{printTicket.timbang1Weight.toLocaleString('id-ID')} Kg</span>
+                  <span>{t.weigh1Label} ({language === 'id' ? 'Masuk' : 'Inbound'})</span>
+                  <span>{printTicket.timbang1Weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg</span>
                 </div>
                 <div className="text-[10px] text-neutral-500 text-right">
                   {printTicket.timbang1Time}
                 </div>
 
                 <div className="flex justify-between font-bold mt-1">
-                  <span>TIMBANG II (Keluar)</span>
-                  <span>{printTicket.timbang2Weight > 0 ? `${printTicket.timbang2Weight.toLocaleString('id-ID')} Kg` : '- -'}</span>
+                  <span>{t.weigh2Label} ({language === 'id' ? 'Keluar' : 'Outbound'})</span>
+                  <span>{printTicket.timbang2Weight > 0 ? `${printTicket.timbang2Weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg` : '- -'}</span>
                 </div>
                 {printTicket.timbang2Time && (
                   <div className="text-[10px] text-neutral-500 text-right">
@@ -916,12 +919,12 @@ export default function WeighbridgeModule({
                 <div className="border-t border-neutral-300 my-2 pt-2" />
 
                 <div className="flex justify-between">
-                  <span>BERAT BRUTO :</span>
-                  <span>{(printTicket.timbang1Weight).toLocaleString('id-ID')} kg</span>
+                  <span>{t.grossWeightLabel.toUpperCase()} :</span>
+                  <span>{(printTicket.timbang1Weight).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>POTONGAN TARA :</span>
-                  <span>{printTicket.tareWeight.toLocaleString('id-ID')} kg</span>
+                  <span>{t.tareWeightLabel.toUpperCase()} :</span>
+                  <span>{printTicket.tareWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg</span>
                 </div>
                 <div className="flex justify-between text-neutral-600">
                   <span>Pot. Karung ({printTicket.bagDeductionPercent.toFixed(2)}%):</span>
@@ -935,8 +938,8 @@ export default function WeighbridgeModule({
                 <div className="border-b-2 border-double border-neutral-400 my-2" />
 
                 <div className="flex justify-between font-extrabold text-sm text-emerald-950">
-                  <span>BERAT NETTO :</span>
-                  <span>{calculateNetWeight(printTicket.timbang1Weight, printTicket.timbang2Weight, printTicket.bagDeductionPercent, printTicket.refaksiPercent).toLocaleString('id-ID')} KG</span>
+                  <span>{t.netWeightLabel.toUpperCase()} :</span>
+                  <span>{calculateNetWeight(printTicket.timbang1Weight, printTicket.timbang2Weight, printTicket.bagDeductionPercent, printTicket.refaksiPercent).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} KG</span>
                 </div>
 
                 {printTicket.notes && (

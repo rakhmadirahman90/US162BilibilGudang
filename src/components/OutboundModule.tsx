@@ -6,8 +6,10 @@
 import React, { useState } from 'react';
 import { OutboundRecord, WeighbridgeTicket, VehicleRecord, BuyerRecord } from '../types';
 import { ArrowUpCircle, PlusCircle, Search, Calendar, FileText, Scale, Landmark, UserCheck, Download, Printer, Edit2 } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
 import ConfirmModal from './ConfirmModal';
 import { exportToCSV, printPDFReport, printOutboundSlip } from '../utils/exportHelper';
+import { formatNumberInput, parseNumberInput } from '../utils/format';
 
 
 interface OutboundModuleProps {
@@ -29,6 +31,7 @@ export default function OutboundModule({
   vehicles = [],
   buyers = []
 }: OutboundModuleProps) {
+  const { t, language } = useLanguage();
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -192,7 +195,7 @@ export default function OutboundModule({
         <div>
           <h2 className="text-xl font-extrabold text-neutral-800 flex items-center gap-2">
             <ArrowUpCircle className="text-blue-600 w-6 h-6" />
-            Pengiriman Barang Keluar (12. BARANG KELUAR)
+            {t.outboundTitle}
           </h2>
           <p className="text-xs text-neutral-500 mt-1">
             Mengelola logistik pengiriman komoditas keluar, pencatatan invoice penjualan beras/jagung, dan biaya upah buruh muat.
@@ -204,7 +207,7 @@ export default function OutboundModule({
           className="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-4 py-2.5 rounded-lg flex items-center gap-1.5 shadow transition cursor-pointer"
         >
           <PlusCircle className="w-4 h-4" />
-          {showAddForm ? 'Tutup Formulir' : 'Catat Barang Keluar'}
+          {showAddForm ? t.close : t.recordNew}
         </button>
       </div>
 

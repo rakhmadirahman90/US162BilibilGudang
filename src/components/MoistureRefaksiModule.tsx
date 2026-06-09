@@ -5,9 +5,11 @@
 
 import React, { useState } from 'react';
 import { mockCornMoistureRefaksi } from '../data';
+import { useLanguage } from '../i18n/LanguageContext';
 import { Percent, Droplet, HelpCircle, ArrowRight, Table, AlertTriangle, Calculator } from 'lucide-react';
 
 export default function MoistureRefaksiModule() {
+  const { t, language } = useLanguage();
   const [moisture, setMoisture] = useState<number>(15.5);
   const [baseWeight, setBaseWeight] = useState<number>(10000); // 10 Tons
   const [pricePerKg, setPricePerKg] = useState<number>(4500); // Rp 4,500/kg
@@ -40,7 +42,7 @@ export default function MoistureRefaksiModule() {
         <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm">
           <h3 className="font-bold text-neutral-800 text-sm mb-4 flex items-center gap-2 border-b border-neutral-100 pb-2">
             <Calculator className="text-amber-500 w-5 h-5 animate-bounce" />
-            Simulator Kalkulator Refaksi KA Jagung
+            {t.moistureTitle}
           </h3>
 
           <div className="flex flex-col gap-4 text-xs text-neutral-600">
@@ -155,7 +157,7 @@ export default function MoistureRefaksiModule() {
               <Table className="text-indigo-500 w-5 h-5" />
               Tabel Kebijakan Potongan KA Gudang (162 Refaksi)
             </h3>
-            <span className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-bold font-mono">TA_2025/2026</span>
+            <span className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-bold font-mono">TA</span>
           </div>
 
           <p className="text-xs text-neutral-500 mb-3 leading-relaxed">

@@ -176,19 +176,16 @@ export function printPDFReport(
         <!-- Kop Surat Resmi (Official Industrial Letterhead) -->
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px;">
           <tr>
-            <td style="width: 80px; text-align: left; vertical-align: middle;">
-              <!-- Placeholder for logo / stylish label -->
-              <span style="display: inline-block; padding: 10px; background-color: #111; color: #fff; font-weight: bold; font-family: 'Courier New', Courier, monospace; font-size: 16px; border-radius: 4px;">
-                US162
-              </span>
+            <td style="width: 100px; text-align: left; vertical-align: middle;">
+              <img src="/src/assets/images/bilibili_logo_1780925186692.png" alt="US Bilibili 162" style="width: 80px; height: auto;" />
             </td>
             <td style="text-align: left; vertical-align: middle; padding-left: 15px;">
-              <h2 style="margin: 0; font-size: 15px; letter-spacing: 1px; font-weight: 850; text-transform: uppercase;">
-                PERUSAHAAN PERGUDANGAN US BILIBILI 162
+              <h2 style="margin: 0; font-size: 16px; letter-spacing: 0.5px; font-weight: 900; text-transform: uppercase;">
+                GUDANG & JEMBATAN TIMBANG US BILIBILI 162
               </h2>
-              <p style="margin: 3px 0 0 0; font-size: 9.5px; color: #333; line-height: 1.4;">
-                Gudang &amp; Jembatan Timbang Terpadu &bull; Komoditas Pertanian Beras &amp; Jagung Pipil<br/>
-                Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa, Kabupaten Pinrang, Sulawesi Selatan 91131 &bull; Telp: 085244466009
+              <p style="margin: 4px 0 0 0; font-size: 10px; color: #111; line-height: 1.4;">
+                <span style="font-weight: bold;">Alamat:</span> Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa, Kab. Pinrang, Sulawesi Selatan 91131<br/>
+                <span style="font-weight: bold;">Kontak:</span> 085244466009
               </p>
             </td>
           </tr>
@@ -333,10 +330,10 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
           <div class="text-center">Penimbang,</div>
           <div class="text-center">Petugas/Staff,</div>
         </div>
-        <div style="height: 60px;"></div>
-        <div class="flex" style="font-size: 11pt;">
-          <div class="text-center">( .................... )</div>
-          <div class="text-center">( .................... )</div>
+        <div style="height: 40px;"></div>
+        <div class="flex" style="font-size: 11pt; justify-content: center; gap: 20px;">
+          <div class="text-center" style="width: 100px; border-top: 1px solid #000;"></div>
+          <div class="text-center" style="width: 100px; border-top: 1px solid #000;"></div>
         </div>
       </div>
     </body>
@@ -396,10 +393,10 @@ export function printOutboundSlip(record: OutboundRecord) {
           <div class="text-center">Penimbang,</div>
           <div class="text-center">Petugas/Staff,</div>
         </div>
-        <div style="height: 60px;"></div>
-        <div class="flex" style="font-size: 11pt;">
-          <div class="text-center">( .................... )</div>
-          <div class="text-center">( .................... )</div>
+        <div style="height: 40px;"></div>
+        <div class="flex" style="font-size: 11pt; justify-content: center; gap: 20px;">
+          <div class="text-center" style="width: 100px; border-top: 1px solid #000;"></div>
+          <div class="text-center" style="width: 100px; border-top: 1px solid #000;"></div>
         </div>
       </div>
     </body>
@@ -457,10 +454,10 @@ export function printRiceStockSlip(record: RiceStockRecord) {
           <div class="text-center">Penimbang,</div>
           <div class="text-center">Petugas/Staff,</div>
         </div>
-        <div style="height: 60px;"></div>
-        <div class="flex" style="font-size: 11pt;">
-          <div class="text-center">( .................... )</div>
-          <div class="text-center">( .................... )</div>
+        <div style="height: 40px;"></div>
+        <div class="flex" style="font-size: 11pt; justify-content: center; gap: 20px;">
+          <div class="text-center" style="width: 100px; border-top: 1px solid #000;"></div>
+          <div class="text-center" style="width: 100px; border-top: 1px solid #000;"></div>
         </div>
       </div>
     </body>
@@ -522,10 +519,10 @@ export function printServiceSlip(record: ServiceRecord) {
           <div class="text-center">Penimbang,</div>
           <div class="text-center">Petugas/Staff,</div>
         </div>
-        <div style="height: 60px;"></div>
-        <div class="flex" style="font-size: 11pt;">
-          <div class="text-center">( .................... )</div>
-          <div class="text-center">( .................... )</div>
+        <div style="height: 40px;"></div>
+        <div class="flex" style="font-size: 11pt; justify-content: center; gap: 20px;">
+          <div class="text-center" style="width: 100px; border-top: 1px solid #000;"></div>
+          <div class="text-center" style="width: 100px; border-top: 1px solid #000;"></div>
         </div>
       </div>
     </body>
@@ -604,17 +601,14 @@ export function printSlip(ticket: WeighbridgeTicket) {
           Catatan: ${ticket.notes || '-'}
         </div>
         
-        <div class="flex mt-4" style="font-size: 8pt; justify-content: space-around;">
-          <div class="text-center" style="width: 45%;">Penimbang (162)</div>
-          <div class="text-center" style="width: 45%;">Sopir</div>
+        <div class="flex mt-4" style="font-size: 8pt; justify-content: center; gap: 10px;">
+          <div class="text-center" style="width: 90px;">Penimbang</div>
+          <div class="text-center" style="width: 90px;">Petugas/Staff</div>
         </div>
-        <div class="flex" style="height: 50px; justify-content: space-around;">
-          <div style="width: 45%;"></div>
-          <div style="width: 45%;"></div>
-        </div>
-        <div class="flex" style="font-size: 8pt; justify-content: space-around;">
-          <div class="text-center" style="width: 45%; border-top: 1px solid #000;">( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</div>
-          <div class="text-center" style="width: 45%; border-top: 1px solid #000;">( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</div>
+        <div style="height: 40px;"></div>
+        <div class="flex" style="font-size: 8pt; justify-content: center; gap: 10px;">
+          <div class="text-center" style="width: 90px; border-top: 1px solid #000;"></div>
+          <div class="text-center" style="width: 90px; border-top: 1px solid #000;"></div>
         </div>
         
         <div class="text-center mt-4" style="font-size: 7pt;">

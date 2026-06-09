@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useLanguage } from '../i18n/LanguageContext';
 import { 
   AlertTriangle, 
   Trash2, 
@@ -32,10 +33,11 @@ export default function ConfirmModal({
   message,
   type = 'ADD',
   confirmText,
-  cancelText = 'Batal',
+  cancelText,
   onConfirm,
   onCancel
 }: ConfirmModalProps) {
+  const { t } = useLanguage();
   
   // Custom theme variables based on action types
   const getThemeConfig = () => {
@@ -45,7 +47,7 @@ export default function ConfirmModal({
           iconBg: 'bg-rose-50 border-rose-250 border text-rose-600',
           icon: <Trash2 className="w-6 h-6" />,
           confirmBtn: 'bg-rose-600 hover:bg-rose-700 text-white focus:ring-rose-500',
-          defaultConfirmText: 'Ya, Hapus Data',
+          defaultConfirmText: t.confirmDeleteBtn,
           borderAccent: 'border-l-4 border-l-rose-500'
         };
       case 'EDIT':
@@ -53,7 +55,7 @@ export default function ConfirmModal({
           iconBg: 'bg-amber-50 border-amber-250 border text-amber-600',
           icon: <Edit className="w-6 h-6" />,
           confirmBtn: 'bg-amber-600 hover:bg-amber-700 text-white focus:ring-amber-500',
-          defaultConfirmText: 'Ya, Simpan Perubahan',
+          defaultConfirmText: t.confirmEdit,
           borderAccent: 'border-l-4 border-l-amber-500'
         };
       case 'PAY':
@@ -61,7 +63,7 @@ export default function ConfirmModal({
           iconBg: 'bg-indigo-50 border-indigo-250 border text-indigo-600',
           icon: <CreditCard className="w-6 h-6" />,
           confirmBtn: 'bg-indigo-600 hover:bg-indigo-700 text-white focus:ring-indigo-500',
-          defaultConfirmText: 'Ya, Bayar Cicilan',
+          defaultConfirmText: t.confirmPay,
           borderAccent: 'border-l-4 border-l-indigo-500'
         };
       case 'WARNING':
@@ -69,7 +71,7 @@ export default function ConfirmModal({
           iconBg: 'bg-yellow-50 border-yellow-250 border text-yellow-600',
           icon: <AlertTriangle className="w-6 h-6" />,
           confirmBtn: 'bg-yellow-600 hover:bg-yellow-750 text-neutral-900 font-extrabold focus:ring-yellow-500',
-          defaultConfirmText: 'Ya, Lanjutkan',
+          defaultConfirmText: t.confirmOk,
           borderAccent: 'border-l-4 border-l-yellow-500'
         };
       case 'ADD':
@@ -78,7 +80,7 @@ export default function ConfirmModal({
           iconBg: 'bg-emerald-50 border-emerald-250 border text-emerald-600',
           icon: <PlusCircle className="w-6 h-6" />,
           confirmBtn: 'bg-emerald-600 hover:bg-emerald-700 text-white focus:ring-emerald-500',
-          defaultConfirmText: 'Ya, Tambahkan Data',
+          defaultConfirmText: t.confirmAdd,
           borderAccent: 'border-l-4 border-l-emerald-500'
         };
     }
@@ -86,6 +88,7 @@ export default function ConfirmModal({
 
   const themeConfig = getThemeConfig();
   const actualConfirmText = confirmText || themeConfig.defaultConfirmText;
+  const actualCancelText = cancelText || t.cancel;
 
   return (
     <AnimatePresence>
@@ -136,7 +139,7 @@ export default function ConfirmModal({
             {/* Banner/Notice */}
             <div className="bg-neutral-50 px-5 py-3 border-t border-neutral-150 flex items-center gap-1.5 text-[10px] text-neutral-500 font-mono">
               <CheckCircle2 className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
-              <span>Aksi ini memerlukan konfirmasi otorisasi operator sebelum dieksekusi.</span>
+              <span>{t.actionAuthorization}</span>
             </div>
 
             {/* BUTTON BAR */}
@@ -146,7 +149,7 @@ export default function ConfirmModal({
                 onClick={onCancel}
                 className="bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold px-4 py-2.5 rounded-xl border border-neutral-250 transition cursor-pointer"
               >
-                {cancelText}
+                {actualCancelText}
               </button>
               <button
                 type="button"

@@ -45,6 +45,7 @@ import FinanceModule from './components/FinanceModule';
 import ReportsModule from './components/ReportsModule';
 import DatabaseMasterModule from './components/DatabaseMasterModule';
 import RiceStockModule from './components/RiceStockModule';
+import { useLanguage } from './i18n/LanguageContext';
 
 // Brand Assets
 import bilibiliLogo from './assets/images/bilibili_logo_1780925186692.png';
@@ -234,6 +235,7 @@ export const APP_THEMES: AppTheme[] = [
 ];
 
 export default function App() {
+  const { language, setLanguage, t } = useLanguage();
   // --- STATE WITH LOCALSTORAGE PERSISTENCE ---
   const [tickets, setTickets] = useState<WeighbridgeTicket[]>(() => {
     const saved = localStorage.getItem('bilibili_tickets');
@@ -380,7 +382,7 @@ export default function App() {
     setActiveThemeId(themeId);
     const selected = APP_THEMES.find(t => t.id === themeId);
     if (selected) {
-      showToast(`Tema visual berhasil diubah ke: ${selected.emoji} ${selected.name}`, 'info');
+      showToast(`${t.themeChanged} ${selected.emoji} ${selected.name}`, 'info');
     }
   };
 
@@ -411,7 +413,7 @@ export default function App() {
   // --- COMPONENT ACTION CALLBACKS ---
   const handleAddTicket = (tk: WeighbridgeTicket) => {
     setTickets(prev => [tk, ...prev]);
-    showToast(`Berhasil mencatatkan Timbang I (#${tk.ticketNo} - ${tk.policeNo})!`, 'success');
+    showToast(`${t.saveWeighbridgeSuccess} (#${tk.ticketNo} - ${tk.policeNo})!`, 'success');
   };
 
   const handleUpdateTicket = (updatedTk: WeighbridgeTicket) => {
@@ -419,8 +421,8 @@ export default function App() {
     const isComp = updatedTk.status === 'COMPLETED';
     showToast(
       isComp 
-        ? `Berhasil menyelesaikan Timbang II (#${updatedTk.ticketNo} - ${updatedTk.policeNo}). Status: SELESAI TIMBANG!`
-        : `Berhasil memperbarui info tiket (#${updatedTk.ticketNo} - ${updatedTk.policeNo})!`, 
+        ? `${t.completedStatus} (#${updatedTk.ticketNo} - ${updatedTk.policeNo}).`
+        : `${t.updateWeighbridgeSuccess} (#${updatedTk.ticketNo} - ${updatedTk.policeNo})!`, 
       'success'
     );
   };
@@ -429,7 +431,7 @@ export default function App() {
     const target = tickets.find(t => t.id === id);
     const label = target ? `#${target.ticketNo}` : '';
     setTickets(prev => prev.filter(t => t.id !== id));
-    showToast(`Sukses menghapus tiket timbangan ${label}!`, 'success');
+    showToast(`${t.deleteWeighbridgeSuccess} ${label}!`, 'success');
   };
 
   const handleAddInbound = (rec: InboundRecord) => {
@@ -568,17 +570,17 @@ export default function App() {
 
   const handleAddRiceStock = (rec: RiceStockRecord) => {
     setRiceStockRecords(prev => [rec, ...prev]);
-    showToast('Sukses menyimpan data stok beras!', 'success');
+    showToast(t.successSaveStock, 'success');
   };
 
   const handleUpdateRiceStock = (rec: RiceStockRecord) => {
     setRiceStockRecords(prev => prev.map(r => r.id === rec.id ? rec : r));
-    showToast('Sukses memperbarui data stok beras!', 'success');
+    showToast(t.successUpdateStock, 'success');
   };
 
   const handleDeleteRiceStock = (id: string) => {
     setRiceStockRecords(prev => prev.filter(r => r.id !== id));
-    showToast('Catatan stok beras berhasil dihapus!', 'success');
+    showToast(t.deleteSuccessGeneral, 'success');
   };
 
   // --- INTEGRATED METRICS CALCULATOR FOR COVER DASHBOARD ---
@@ -621,13 +623,13 @@ export default function App() {
             </div>
             <div>
               <h1 className="font-extrabold tracking-tight text-base sm:text-lg flex items-center gap-1.5 font-sans">
-                US BILIBILI 162
+                {t.warehouseHeader}
                 <span className={`text-[10px] border rounded px-1.5 py-0.5 font-bold transition-all duration-300 ${theme.headerBadgeBg} ${theme.headerBadgeText} ${theme.headerBadgeBorder}`}>
-                  GUDANG PUSAT 🌽
+                  {t.centralWarehouse}
                 </span>
               </h1>
               <p className="text-[10px] opacity-80 font-mono">
-                Sistem Informasi Pergudangan & Jembatan Timbang GSC GST-9700
+                {t.systemStatus}
               </p>
             </div>
           </div>
@@ -643,7 +645,7 @@ export default function App() {
 
             {/* Premium Theme Selector Picker Dropdown */}
             <div className="relative flex items-center gap-1">
-              <span className="text-[10px] text-white/70 font-bold font-mono tracking-wider mr-1 hidden lg:inline">TEMA:</span>
+              <span className="text-[10px] text-white/70 font-bold font-mono tracking-wider mr-1 hidden lg:inline">{t.theme}:</span>
               <select
                 value={activeThemeId}
                 onChange={(e) => handleThemeChange(e.target.value)}
@@ -654,6 +656,19 @@ export default function App() {
                     {t.emoji} {t.name}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            {/* Language Switcher */}
+            <div className="relative flex items-center gap-1">
+              <span className="text-[10px] text-white/70 font-bold font-mono tracking-wider mr-1 hidden lg:inline">LANG:</span>
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as any)}
+                className={`text-[11px] font-bold px-2 py-1.5 rounded-lg border focus:outline-none transition-all cursor-pointer shadow-sm ${theme.statusBoxBg} ${theme.statusBoxBorder} text-white hover:brightness-110`}
+              >
+                <option value="id" className="text-neutral-900 font-bold font-sans">🇮🇩 ID</option>
+                <option value="en" className="text-neutral-900 font-bold font-sans">🇺🇸 EN</option>
               </select>
             </div>
 
@@ -671,7 +686,7 @@ export default function App() {
               <span className="text-white/60">STATUS:</span>
               <span className="text-green-400 font-bold flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse"></span>
-                ONLINE
+                {t.online}
               </span>
             </div>
 
@@ -685,17 +700,17 @@ export default function App() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
             <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-              <SettingsIcon className="w-5 h-5" /> Pengaturan Printer
+              <SettingsIcon className="w-5 h-5" /> {t.printerSettings}
             </h2>
             <div className="space-y-4">
-              <label className="block text-sm font-medium text-neutral-700">Nama Printer (Default)</label>
+              <label className="block text-sm font-medium text-neutral-700">{t.printerNameLabel}</label>
               <input 
                 value={printerName} 
                 onChange={(e) => setPrinterName(e.target.value)}
                 className="w-full border p-2 rounded-lg text-sm"
               />
               <p className="text-[10px] text-neutral-500 italic">
-                Catatan: Web browser tidak mengizinkan pemilihan printer otomatis tanpa dialog. Pengaturan ini hanya berguna untuk referensi sistem.
+                {t.printerNotice}
               </p>
             </div>
             <div className="mt-6 flex justify-end">
@@ -703,7 +718,7 @@ export default function App() {
                 onClick={() => setShowSettingsModal(false)}
                 className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-bold"
               >
-                Simpan & Tutup
+                {t.saveAndClose}
               </button>
             </div>
           </div>
@@ -723,7 +738,7 @@ export default function App() {
             }`}
           >
             <LayoutDashboard className="w-4 h-4" />
-            1. PANEL UTAMA (DASHBOARD)
+            1. {t.dashboard}
           </button>
  
           <button
@@ -735,7 +750,7 @@ export default function App() {
             }`}
           >
             <Scale className="w-4 h-4 text-blue-500" />
-            2. JEMBATAN TIMBANG
+            2. {t.weighbridge}
           </button>
  
           <button
@@ -747,7 +762,7 @@ export default function App() {
             }`}
           >
             <ArrowDownCircle className="w-4 h-4 text-emerald-600" />
-            3. BARANG MASUK
+            3. {t.inbound}
           </button>
  
           <button
@@ -759,7 +774,7 @@ export default function App() {
             }`}
           >
             <ArrowUpCircle className="w-4 h-4 text-blue-600" />
-            4. BARANG KELUAR
+            4. {t.outbound}
           </button>
  
           <button
@@ -771,7 +786,7 @@ export default function App() {
             }`}
           >
             <Wind className="w-4 h-4 text-sky-500" />
-            5. JASA POLES, KIPAS & DRYER
+            5. {t.services}
           </button>
  
           <button
@@ -783,7 +798,7 @@ export default function App() {
             }`}
           >
             <Percent className="w-4 h-4 text-amber-500" />
-            6. REFAKSI KA JAGUNG
+            6. {t.moisture}
           </button>
  
           <button
@@ -795,9 +810,9 @@ export default function App() {
             }`}
           >
             <DollarSign className="w-4 h-4 text-emerald-600" />
-            7. UTANG & MUTASI KAS
+            7. {t.finance}
           </button>
-
+ 
           <button
             onClick={() => setActiveTab('STOK_BERAS')}
             className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
@@ -807,9 +822,9 @@ export default function App() {
             }`}
           >
             <Package className="w-4 h-4 text-emerald-600" />
-            8. STOK BERAS
+            8. {t.riceStock}
           </button>
-
+ 
           <button
             onClick={() => setActiveTab('LAPORAN')}
             className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
@@ -819,9 +834,9 @@ export default function App() {
             }`}
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
-            8. LAPORAN TERPADU
+            9. {t.reports}
           </button>
-
+ 
           <button
             onClick={() => setActiveTab('DATABASE')}
             className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
@@ -831,7 +846,7 @@ export default function App() {
             }`}
           >
             <Database className="w-4 h-4 text-rose-500" />
-            9. DATABASE MASTER
+            10. {t.database}
           </button>
 
         </div>
@@ -858,14 +873,14 @@ export default function App() {
                 </div>
                 <div>
                   <h2 className={`text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r ${theme.heroTextGradient} tracking-tight transition-all duration-300`}>
-                    US BILIBILI 162 - GUDANG BILIBILI
+                    {t.warehouseHeader} - {t.gudangBilibili}
                   </h2>
                   <p className="text-sm text-white/90 font-medium mt-1">
-                    Sistem Manajemen Pergudangan Terpadu & Jembatan Timbang Digital
+                    {t.systemStatus}
                   </p>
                   <p className="text-xs text-white/70 font-mono mt-2 flex items-center justify-center md:justify-start gap-2">
                     <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    Terminal Timbang GSC GST-9700 &bull; Kabupaten Pinrang, Sulawesi Selatan
+                    {t.pinrangLocation}
                   </p>
                 </div>
               </div>
@@ -874,13 +889,13 @@ export default function App() {
                   onClick={() => setActiveTab('TIMBANG')}
                   className="bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg active:scale-95 transition-all shadow-md cursor-pointer hover:bg-emerald-600"
                 >
-                  🚚 Timbangan Baru
+                  {t.newWeighing}
                 </button>
                 <button
                   onClick={() => setActiveTab('FINANCE')}
                   className="bg-white/10 hover:bg-white/20 text-white border border-white/25 font-bold text-xs px-4 py-2.5 rounded-lg active:scale-95 transition-all cursor-pointer"
                 >
-                  📊 Mutasi Kas Rekening
+                  {t.cashMutation}
                 </button>
               </div>
             </div>
@@ -891,11 +906,11 @@ export default function App() {
               {/* Corn Stock */}
               <div className="bg-white border border-neutral-200 p-5 rounded-xl shadow-sm flex items-center justify-between">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono">STOCK JAGUNG GUDANG 🌽</span>
+                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono">{t.cornStock}</span>
                   <span className="text-2xl font-black text-amber-650 font-mono tracking-tight">
-                    {cornStockBalance.toLocaleString('id-ID')} <span className="text-xs text-neutral-400">Kg Netto</span>
+                    {cornStockBalance.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} <span className="text-xs text-neutral-400">{t.kgNetto}</span>
                   </span>
-                  <span className="text-[9px] text-[#2ebd1d]">In: {totalInboundCorn.toLocaleString()} | Out: {totalOutboundCorn.toLocaleString()}</span>
+                  <span className="text-[9px] text-[#2ebd1d]">In: {totalInboundCorn.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} | Out: {totalOutboundCorn.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</span>
                 </div>
                 <div className="w-11 h-11 bg-amber-50 rounded-lg flex items-center justify-center border border-amber-100">
                   <Package className="text-amber-500 w-5 h-5" />
@@ -905,11 +920,11 @@ export default function App() {
               {/* Rice Stock */}
               <div className="bg-white border border-neutral-200 p-5 rounded-xl shadow-sm flex items-center justify-between">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono">STOCK BERAS MASUK 🌾</span>
+                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono">{t.riceStockLabel}</span>
                   <span className="text-2xl font-black text-emerald-800 font-mono tracking-tight">
-                    {riceStockBalance.toLocaleString('id-ID')} <span className="text-xs text-neutral-400">Kg Netto</span>
+                    {riceStockBalance.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} <span className="text-xs text-neutral-400">{t.kgNetto}</span>
                   </span>
-                  <span className="text-[9px] text-neutral-500">In: {totalInboundRice.toLocaleString()} | Out: {totalOutboundRice.toLocaleString()}</span>
+                  <span className="text-[9px] text-neutral-500">In: {totalInboundRice.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} | Out: {totalOutboundRice.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</span>
                 </div>
                 <div className="w-11 h-11 bg-emerald-50 rounded-lg flex items-center justify-center border border-emerald-100">
                   <Package className="text-emerald-600 w-5 h-5" />
@@ -919,11 +934,11 @@ export default function App() {
               {/* Total Jasa Pipil / Poles */}
               <div className="bg-white border border-neutral-200 p-5 rounded-xl shadow-sm flex items-center justify-between">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono">TOTAL BILLING JASA POLES 🌪️</span>
+                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono">{t.totalServiceBilling}</span>
                   <span className="text-xl font-bold text-sky-700 font-mono tracking-tight">
-                    Rp {totalServiceFeePaid.toLocaleString('id-ID')}
+                    Rp {totalServiceFeePaid.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}
                   </span>
-                  <span className="text-[10px] text-red-500 font-bold">Unpaid: Rp {totalServiceFeeUnpaid.toLocaleString('id-ID')}</span>
+                  <span className="text-[10px] text-red-500 font-bold">{t.unpaid}: Rp {totalServiceFeeUnpaid.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</span>
                 </div>
                 <div className="w-11 h-11 bg-sky-50 rounded-lg flex items-center justify-center border border-sky-100">
                   <Wind className="text-sky-500 w-5 h-5" />
@@ -933,11 +948,11 @@ export default function App() {
               {/* Cash Mutasi Balance */}
               <div className="bg-white border border-neutral-200 p-5 rounded-xl shadow-sm flex items-center justify-between">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono">SALDO KAS & MANDIRI 💳</span>
+                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono">{t.cashBalance}</span>
                   <span className={`text-xl font-black font-mono tracking-tight ${netKasBalance >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                    Rp {netKasBalance.toLocaleString('id-ID')}
+                    Rp {netKasBalance.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}
                   </span>
-                  <span className="text-[10px] text-neutral-500">Utang Supplier: Rp {totalOutstandingDebts.toLocaleString('id-ID')}</span>
+                  <span className="text-[10px] text-neutral-500">{t.supplierDebt}: Rp {totalOutstandingDebts.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</span>
                 </div>
                 <div className="w-11 h-11 bg-emerald-50 rounded-lg flex items-center justify-center border border-emerald-100">
                   <DollarSign className="text-emerald-605 w-5 h-5" />
@@ -956,10 +971,10 @@ export default function App() {
                     <div className="p-1 rounded bg-[#e4f0fd] text-blue-700">
                       <Scale className="w-4 h-4" />
                     </div>
-                    <span className="font-bold text-xs text-[#0a2345]">JEMBATAN TIMBANG TRUK</span>
+                    <span className="font-bold text-xs text-[#0a2345] uppercase">{t.weighbridge}</span>
                   </div>
                   <p className="text-xs text-neutral-500 leading-relaxed">
-                    Masuk ke modulator simulator jembatan timbang GSC GST-9700 untuk menimbang truk berat, kosong, penuangan susut potongan karung, persenan refaksi KA, serta cetak print thermal slip kasir.
+                    {t.truckWeighbridgeDesc}
                   </p>
                 </div>
                 <button
@@ -967,7 +982,7 @@ export default function App() {
                   className="mt-6 bg-[#0a2245] hover:bg-slate-800 text-white font-bold text-xs py-2 rounded-lg cursor-pointer flex items-center justify-center gap-1.5 transition"
                 >
                   <Truck className="w-4 h-4" />
-                  Buka Aplikasi Timbangan
+                  {t.openWeighbridge}
                 </button>
               </div>
 
@@ -978,10 +993,10 @@ export default function App() {
                     <div className="p-1 rounded bg-emerald-50 text-emerald-700">
                       <ArrowDownCircle className="w-4 h-4" />
                     </div>
-                    <span className="font-bold text-xs text-emerald-800">1. BARANG MASUK</span>
+                    <span className="font-bold text-xs text-emerald-800 uppercase">1. {t.inbound}</span>
                   </div>
                   <p className="text-xs text-neutral-500 leading-relaxed">
-                    Catat incoming jagung pipil basah untuk tangki pengeringan, timbang truk masuk petani, potong kadar air, hitung refaksi, upah buruh panggul harian dan letak penyimpanan sektor gudang.
+                    {t.inboundDesc}
                   </p>
                 </div>
                 <button
@@ -989,7 +1004,7 @@ export default function App() {
                   className="mt-6 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2 rounded-lg cursor-pointer flex items-center justify-center gap-1.5 transition"
                 >
                   <ArrowDownCircle className="w-4 h-4" />
-                  Catat Barang Masuk
+                  {t.recordInbound}
                 </button>
               </div>
 
@@ -1000,10 +1015,10 @@ export default function App() {
                     <div className="p-1 rounded bg-sky-50 text-sky-700">
                       <Wind className="w-4 h-4" />
                     </div>
-                    <span className="font-bold text-xs text-sky-800">3. JASA POLES, KIPAS & DRYER</span>
+                    <span className="font-bold text-xs text-sky-800 uppercase">3. {t.services}</span>
                   </div>
                   <p className="text-xs text-neutral-500 leading-relaxed">
-                    Pengolahan beras poles, pembersihan blower kipas, dan pengeringan jagung (dryer) untuk mendapatkan kualitas bersih.
+                    {t.processingDesc}
                   </p>
                 </div>
                 <button
@@ -1011,7 +1026,7 @@ export default function App() {
                   className="mt-6 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs py-2 rounded-lg cursor-pointer flex items-center justify-center gap-1.5 transition"
                 >
                   <Wind className="w-3.5 h-3.5" />
-                  Buka Jasa Poles Kipas
+                  {t.openServices}
                 </button>
               </div>
 
@@ -1021,21 +1036,21 @@ export default function App() {
             <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm">
               <h3 className="font-bold text-neutral-800 text-sm mb-4 flex items-center gap-2 border-b border-neutral-100 pb-2">
                 <Clock className="text-emerald-600 w-5 h-5" />
-                Antrian Timbangan Terbaru Hari Ini ({new Date().toISOString().split('T')[0]})
+                {t.weighingQueueTitle} ({new Date().toISOString().split('T')[0]})
               </h3>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs text-neutral-600">
                   <thead className="bg-[#122345] text-[#afcbff] font-mono tracking-wider font-semibold uppercase">
                     <tr>
-                      <th className="py-2.5 px-3">No. Tiket</th>
-                      <th className="py-2.5 px-3">No. Polisi</th>
-                      <th className="py-2.5 px-3">Barang</th>
-                      <th className="py-2.5 px-3">Suplier / Tujuan Mitra</th>
-                      <th className="py-2.5 px-3 text-right">Timbang I (Gross)</th>
-                      <th className="py-2.5 px-3 text-right">Timbang II (Tare)</th>
-                      <th className="py-2.5 px-3 text-right">Berat Netto</th>
-                      <th className="py-2.5 px-3 text-center">Status</th>
+                      <th className="py-2.5 px-3">{t.ticketNo}</th>
+                      <th className="py-2.5 px-3">{t.policeNo}</th>
+                      <th className="py-2.5 px-3">{t.goods}</th>
+                      <th className="py-2.5 px-3">{t.supplierOrMitra}</th>
+                      <th className="py-2.5 px-3 text-right">{t.weighing1Gross}</th>
+                      <th className="py-2.5 px-3 text-right">{t.weighing2Tare}</th>
+                      <th className="py-2.5 px-3 text-right">{t.netWeightDashboard}</th>
+                      <th className="py-2.5 px-3 text-center">{t.status}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-150">
@@ -1049,18 +1064,18 @@ export default function App() {
                           </span>
                         </td>
                         <td className="py-2.5 px-3 text-neutral-800 font-medium">{tk.agency}</td>
-                        <td className="text-right py-2.5 px-3 font-mono">{tk.timbang1Weight.toLocaleString('id-ID')} Kg</td>
+                        <td className="text-right py-2.5 px-3 font-mono">{tk.timbang1Weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg</td>
                         <td className="text-right py-2.5 px-3 font-mono text-orange-600 font-semibold">
-                          {tk.timbang2Weight > 0 ? `${tk.timbang2Weight.toLocaleString('id-ID')} Kg` : '- -'}
+                          {tk.timbang2Weight > 0 ? `${tk.timbang2Weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg` : '- -'}
                         </td>
                         <td className="text-right py-2.5 px-3 font-black text-emerald-600 font-mono">
-                          {tk.netWeight.toLocaleString('id-ID')} Kg
+                          {tk.netWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg
                         </td>
                         <td className="py-2.5 px-3 text-center">
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                             tk.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700 animate-pulse'
                           }`}>
-                            {tk.status === 'COMPLETED' ? 'SELESAI TIMBANG' : 'MENUNGGU II'}
+                            {tk.status === 'COMPLETED' ? t.completedStatus : t.waitingStatus}
                           </span>
                         </td>
                       </tr>
@@ -1073,7 +1088,7 @@ export default function App() {
                   onClick={() => setActiveTab('TIMBANG')}
                   className="text-xs text-blue-600 hover:text-blue-500 font-bold transition flex items-center justify-center gap-1 mx-auto"
                 >
-                  Lihat Seluruh Arsip Timbangan <ChevronRight className="w-4 h-4" />
+                  {t.viewAllArchives} <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -1220,7 +1235,7 @@ export default function App() {
       {/* FOOTER METADATA */}
       <footer className={`py-6 border-t text-xs mt-auto transition-colors duration-300 ${theme.footerBg} ${theme.footerBorder} text-neutral-400`}>
         <div className="max-w-7xl mx-auto px-4 flex justify-center items-center text-center">
-          <p className="font-bold text-neutral-300">Aplikasi Pergudangan Terpadu US Bilibili 162 @2026</p>
+          <p className="font-bold text-neutral-300">Aplikasi Pergudangan Terpadu US Bilibili 162</p>
         </div>
       </footer>
 
@@ -1265,7 +1280,7 @@ export default function App() {
                 
                 <div className="flex-1 min-w-0 pr-4">
                   <p className="text-xs font-extrabold leading-tight tracking-tight uppercase opacity-55 font-mono">
-                    {toast.type === 'success' ? 'SUKSES' : toast.type === 'error' ? 'KESALAHAN' : toast.type === 'warning' ? 'PERINGATAN' : 'INFORMASI'}
+                    {toast.type === 'success' ? t.successToast : toast.type === 'error' ? t.errorToast : toast.type === 'warning' ? t.warningToast : t.infoToast}
                   </p>
                   <p className="text-xs leading-normal mt-1 text-neutral-800 font-bold font-sans break-words whitespace-pre-wrap">
                     {toast.message}
