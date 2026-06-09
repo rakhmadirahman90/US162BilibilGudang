@@ -111,12 +111,34 @@ export function printPDFReport(
           body {
             background-color: #ffffff;
             color: #000000;
+            font-size: 10pt;
           }
           .no-print {
             display: none !important;
           }
           @page {
             margin: 5mm;
+            size: auto;
+          }
+          .container {
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+          /* Ensure tables don't break weirdly */
+          table {
+            page-break-inside: auto;
+          }
+          tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+          }
+          /* Strip background colors for ink saving */
+          * {
+            background-color: transparent !important;
+            color: #000 !important;
           }
         }
         body {
@@ -134,10 +156,6 @@ export function printPDFReport(
           padding: 15px;
           border: 1px solid #ddd;
           box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-        @media print {
-          body { padding: 0; }
-          .container { border: none; box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
         }
       </style>
     </head>
