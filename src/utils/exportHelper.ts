@@ -8,6 +8,8 @@
  * and trigger elegant, styled print jobs to physical printers or PDF generators.
  */
 
+import { WeighbridgeTicket } from '../types';
+
 export function exportToCSV(headers: string[], rows: string[][], filename: string) {
   // Map rows to escaped CSV cells
   const csvContent = [
@@ -260,6 +262,99 @@ export function printPDFReport(
           }, 1000);
         });
       </script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+export function printSlip(ticket: WeighbridgeTicket) {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    alert('Pop-up terblokir! Harap izinkan pop-up untuk mencetak slip.');
+    return;
+  }
+
+  const bruto = ticket.timbang1Weight;
+  const tara = ticket.timbang2Weight;
+  const net = ticket.netWeight || 0;
+  const potKrg = (bruto * ticket.bagDeductionPercent) / 100;
+  const potRefaksi = (bruto * ticket.refaksiPercent) / 100;
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Slip Timbang #${ticket.ticketNo}</title>
+      <style>
+        @media print {
+          @page { size: 80mm auto; margin: 0; }
+          body { -webkit-print-color-adjust: exact; margin: 0; padding: 2mm; }
+        }
+        body { font-family: 'Courier New', monospace; font-size: 10pt; color: #000; margin: 0; padding: 5px; line-height: 1.2; }
+        .slip { width: 100%; max-width: 300px; }
+        .border-t { border-top: 1px solid #000; margin: 4px 0; }
+        .font-bold { font-weight: bold; }
+        .text-center { text-align: center; }
+        .flex { display: flex; justify-content: space-between; width: 100%; }
+        .mt-4 { margin-top: 10px; }
+        .mt-2 { margin-top: 5px; }
+      </style>
+    </head>
+    <body onload="window.print(); window.close();">
+      <div class="slip">
+        <div class="text-center font-bold" style="font-size: 12pt;">GUDANG US BILIBILI 162</div>
+        <div class="text-center" style="font-size: 8pt;">
+          Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
+          Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
+          TELP - 085244466009
+        </div>
+        <div class="border-t"></div>
+        <div class="flex"><span>No. Tiket :</span><span class="font-bold">${ticket.ticketNo}</span></div>
+        <div class="flex"><span>No. Polisi:</span><span class="font-bold">${ticket.policeNo}</span></div>
+        <div class="flex"><span>Mitra/Agen:</span><span class="font-bold">${ticket.agency}</span></div>
+        <div class="flex"><span>Nama Barang:</span><span class="font-bold">${ticket.goodsName}</span></div>
+        
+        <div class="border-t"></div>
+        
+        <div class="flex font-bold mt-2"><span>TIMBANG I (Masuk)</span><span>${bruto.toLocaleString('id-ID')} Kg</span></div>
+        <div class="text-right" style="font-size: 8pt;">${ticket.timbang1Time || '-'}</div>
+        
+        <div class="flex font-bold"><span>TIMBANG II (Keluar)</span><span>${tara > 0 ? tara.toLocaleString('id-ID') + ' Kg' : '- -'}</span></div>
+        <div class="text-right" style="font-size: 8pt;">${ticket.timbang2Time || '-'}</div>
+        
+        <div class="border-t"></div>
+        
+        <div class="flex"><span>BERAT BRUTO :</span><span>${bruto.toLocaleString('id-ID')} Kg</span></div>
+        <div class="flex"><span>POTONGAN TARA :</span><span>${tara.toLocaleString('id-ID')} Kg</span></div>
+        <div class="flex"><span>Pot. Karung (${ticket.bagDeductionPercent.toFixed(2)}%):</span><span>- ${potKrg.toLocaleString('id-ID')} Kg</span></div>
+        <div class="flex"><span>Pot. Refaksi (${ticket.refaksiPercent.toFixed(2)}%):</span><span>- ${potRefaksi.toLocaleString('id-ID')} Kg</span></div>
+        
+        <div class="border-t"></div>
+        <div class="flex font-bold" style="font-size: 12pt;"><span>BERAT NETTO :</span><span>${net.toLocaleString('id-ID')} KG</span></div>
+        
+        <div class="mt-2" style="border: 1px solid #000; padding: 5px; font-size: 8pt;">
+          Catatan: ${ticket.notes || '-'}
+        </div>
+        
+        <div class="flex mt-4" style="font-size: 8pt;">
+          <div class="text-center">Penerima Staff 162</div>
+          <div class="text-center">Sopir / Pembawa</div>
+        </div>
+        <div class="flex" style="height: 50px;">
+          <div></div>
+          <div></div>
+        </div>
+        <div class="flex" style="font-size: 8pt;">
+          <div class="text-center">__________________</div>
+          <div class="text-center">( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</div>
+        </div>
+        
+        <div class="text-center mt-4" style="font-size: 7pt;">
+          * Terimakasih atas kerjasamanya *<br/>
+          Aplikasi Timbangan GSC GST-9700 Jembatan Timbang v2.0
+        </div>
+      </div>
     </body>
     </html>
   `);

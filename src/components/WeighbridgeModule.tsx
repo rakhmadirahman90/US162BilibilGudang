@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { WeighbridgeTicket, VehicleRecord, BuyerRecord, SupplierRecord } from '../types';
 import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { exportToCSV, printPDFReport } from '../utils/exportHelper';
+import { exportToCSV, printPDFReport, printSlip } from '../utils/exportHelper';
 import ConfirmModal from './ConfirmModal';
 
 interface WeighbridgeModuleProps {
@@ -965,13 +965,13 @@ export default function WeighbridgeModule({
               <div className="mt-4 flex gap-2">
                 <button 
                   onClick={() => {
-                    (window as any).__showToast?.("Mengirimkan cetakan slip timbangan ke thermal printer ESC/POS...", "info");
+                    printSlip(printTicket);
                     setPrintTicket(null);
                   }}
                   className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1.5 shadow"
                 >
                   <Printer className="w-4 h-4" />
-                  Kirim ke Printer (ESC/POS)
+                  Cetak Slip (Printer)
                 </button>
                 <button
                   onClick={() => setPrintTicket(null)}
