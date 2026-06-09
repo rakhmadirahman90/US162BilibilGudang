@@ -116,8 +116,7 @@ export function printPDFReport(
             display: none !important;
           }
           @page {
-            size: A4;
-            margin: 15mm;
+            margin: 5mm;
           }
         }
         body {
@@ -238,8 +237,9 @@ export function printPDFReport(
         // Auto trigger browser print engine when opened
         window.addEventListener('DOMContentLoaded', () => {
           setTimeout(() => {
+            window.focus();
             window.print();
-          }, 450);
+          }, 1000);
         });
       </script>
     </body>
