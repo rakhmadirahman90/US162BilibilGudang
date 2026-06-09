@@ -289,50 +289,50 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
       <style>
         @media print {
           @page { size: 80mm auto; margin: 0; }
-          body { -webkit-print-color-adjust: exact; margin: 0; padding: 0; }
+          body { -webkit-print-color-adjust: exact; margin: 0; padding: 2mm; }
         }
-        body { font-family: 'Courier New', Courier, monospace; font-size: 9pt; color: #000; margin: 0; padding: 2mm; line-height: 1.1; }
+        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 0mm; line-height: 1.25; font-weight: bold; }
         .slip { width: 100%; max-width: 80mm; }
-        .border-dashed { border-top: 1px dashed #000; margin: 2px 0; }
+        .border-dashed { border-top: 2px dashed #000; margin: 4px 0; }
         .font-bold { font-weight: bold; }
         .text-center { text-align: center; }
         .flex { display: flex; justify-content: space-between; width: 100%; }
-        .mt-2 { margin-top: 2px; }
+        .mt-2 { margin-top: 4px; }
       </style>
     </head>
     <body onload="window.print(); window.close();">
       <div class="slip">
-        <div class="text-center font-bold" style="font-size: 11pt;">GUDANG US BILIBILI 162</div>
-        <div class="text-center" style="font-size: 8pt;">
+        <div class="text-center font-bold" style="font-size: 14pt;">GUDANG US BILIBILI 162</div>
+        <div class="text-center" style="font-size: 11pt;">
           Jl. Poros Pinrang - Parepare, Kec. Suppa
         </div>
         <div class="border-dashed"></div>
-        <div class="flex"><span>No. Tb:</span><span>${record.ticketNo || '-'}</span><span>Tgl:</span><span>${record.date}</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>No. Tb:</span><span>${record.ticketNo || '-'}</span><span>Tgl:</span><span>${record.date}</span></div>
         <div class="border-dashed"></div>
-        <div class="flex"><span>No. Polisi:</span><span>${record.vehicleNo}</span></div>
-        <div class="flex"><span>Nama Barang:</span><span>${record.commodity}</span></div>
-        <div class="flex"><span>Agen/Tujuan:</span><span>${record.supplier}</span></div>
-        <div class="flex"><span>Jml. krg:</span><span>${record.bagDeductionPercent}%</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>No. Polisi:</span><span>${record.vehicleNo}</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>Nama Barang:</span><span>${record.commodity}</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>Agen/Tujuan:</span><span>${record.supplier}</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>Jml. krg:</span><span>${record.bagDeductionPercent}%</span></div>
         <div class="border-dashed"></div>
-        <div class="flex"><span></span><span class="font-bold">JAM</span><span class="font-bold">BERAT</span></div>
+        <div class="flex" style="font-size: 11pt;"><span></span><span class="font-bold">JAM</span><span class="font-bold">BERAT</span></div>
         <div class="border-dashed"></div>
-        <div class="flex"><span>Timbang-1:</span><span>${ticket?.timbang1Time || '-'}</span><span>${bruto.toLocaleString('id-ID')} kg</span></div>
-        <div class="flex"><span>Timbang-2:</span><span>${ticket?.timbang2Time || '-'}</span><span>${tara.toLocaleString('id-ID')} kg</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>Timbang-1:</span><span>${ticket?.timbang1Time || '-'}</span><span>${bruto.toLocaleString('id-ID')} kg</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>Timbang-2:</span><span>${ticket?.timbang2Time || '-'}</span><span>${tara.toLocaleString('id-ID')} kg</span></div>
         <div class="border-dashed"></div>
-        <div class="flex"><span>BRUTO:</span><span>${bruto.toLocaleString('id-ID')} kg</span></div>
-        <div class="flex"><span>POT. KRG:</span><span>${potKrg.toLocaleString('id-ID')} kg</span></div>
-        <div class="flex"><span>REFAKSI:</span><span>${potRefaksi.toLocaleString('id-ID')} kg</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>BRUTO:</span><span>${bruto.toLocaleString('id-ID')} kg</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>POT. KRG:</span><span>${potKrg.toLocaleString('id-ID')} kg</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>REFAKSI:</span><span>${potRefaksi.toLocaleString('id-ID')} kg</span></div>
         <div class="border-dashed"></div>
-        <div class="flex"><span>HARGA:</span><span>Rp ${(record.price || 0).toLocaleString('id-ID')}/kg</span></div>
-        <div class="flex font-bold" style="font-size: 11pt;"><span>NETTO:</span><span>${net.toLocaleString('id-ID')} kg</span></div>
-        <div class="flex font-bold" style="font-size: 11pt;"><span>TOTAL:</span><span>Rp ${(record.totalPrice || 0).toLocaleString('id-ID')}</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>HARGA:</span><span>Rp ${(record.price || 0).toLocaleString('id-ID')}/kg</span></div>
+        <div class="flex font-bold" style="font-size: 13pt;"><span>NETTO:</span><span>${net.toLocaleString('id-ID')} kg</span></div>
+        <div class="flex font-bold" style="font-size: 13pt;"><span>TOTAL:</span><span>Rp ${(record.totalPrice || 0).toLocaleString('id-ID')}</span></div>
         <div class="border-dashed"></div>
-        <div class="flex mt-2" style="font-size: 8pt;">
+        <div class="flex mt-2" style="font-size: 11pt;">
           <div class="text-center">Penimbang,</div>
           <div class="text-center">Petugas/Staff,</div>
         </div>
-        <div style="height: 50px;"></div>
-        <div class="flex" style="font-size: 8pt;">
+        <div style="height: 60px;"></div>
+        <div class="flex" style="font-size: 11pt;">
           <div class="text-center">( .................... )</div>
           <div class="text-center">( .................... )</div>
         </div>
