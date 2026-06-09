@@ -291,14 +291,15 @@ export function printSlip(ticket: WeighbridgeTicket) {
           @page { size: 80mm auto; margin: 0; }
           body { -webkit-print-color-adjust: exact; margin: 0; padding: 2mm; }
         }
-        body { font-family: 'Courier New', monospace; font-size: 10pt; color: #000; margin: 0; padding: 5px; line-height: 1.2; }
+        body { font-family: 'Courier New', Courier, monospace; font-size: 12pt; color: #000; margin: 0; padding: 5px; line-height: 1.4; font-weight: 600; }
         .slip { width: 100%; max-width: 300px; }
         .border-t { border-top: 1px solid #000; margin: 4px 0; }
         .font-bold { font-weight: bold; }
         .text-center { text-align: center; }
-        .flex { display: flex; justify-content: space-between; width: 100%; }
+        .flex { display: flex; justify-content: space-between; width: 100%; font-family: 'Courier New', Courier, monospace; font-weight: 600; }
         .mt-4 { margin-top: 10px; }
         .mt-2 { margin-top: 5px; }
+        span { font-family: 'Courier New', Courier, monospace; }
       </style>
     </head>
     <body onload="window.print(); window.close();">
