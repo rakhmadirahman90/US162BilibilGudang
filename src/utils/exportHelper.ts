@@ -289,10 +289,10 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
       <style>
         @media print {
           @page { size: 80mm auto; margin: 0; }
-          body { -webkit-print-color-adjust: exact; margin: 0; padding: 2mm; }
+          body { display: flex; justify-content: flex-start; }
         }
-        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 0mm; line-height: 1.25; font-weight: bold; }
-        .slip { width: 100%; max-width: 80mm; }
+        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 2mm; line-height: 1.25; font-weight: bold; display: flex; justify-content: flex-start; }
+        .slip { width: 100%; max-width: 80mm; padding: 4mm; padding-left: 6mm; box-sizing: border-box; border: 1px solid #eee; }
         .border-dashed { border-top: 2px dashed #000; margin: 4px 0; }
         .font-bold { font-weight: bold; }
         .text-center { text-align: center; }
@@ -302,9 +302,11 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
     </head>
     <body onload="window.print(); window.close();">
       <div class="slip">
-        <div class="text-center font-bold" style="font-size: 14pt;">GUDANG US BILIBILI 162</div>
-        <div class="text-center" style="font-size: 11pt;">
-          Jl. Poros Pinrang - Parepare, Kec. Suppa
+        <div class="text-center font-bold" style="font-size: 12pt;">GUDANG US BILIBILI 162</div>
+        <div class="text-center" style="font-size: 8pt;">
+          Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
+          Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
+          TELP - 085244466009
         </div>
         <div class="border-dashed"></div>
         <div class="flex" style="font-size: 11pt;"><span>No. Tb:</span><span>${record.ticketNo || '-'}</span><span>Tgl:</span><span>${record.date}</span></div>
@@ -358,10 +360,10 @@ export function printOutboundSlip(record: OutboundRecord) {
       <style>
         @media print {
           @page { size: 80mm auto; margin: 0; }
-          body { -webkit-print-color-adjust: exact; margin: 0; padding: 2mm; }
+          body { display: flex; justify-content: flex-start; }
         }
-        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 0mm; line-height: 1.25; font-weight: bold; }
-        .slip { width: 100%; max-width: 80mm; }
+        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 2mm; line-height: 1.25; font-weight: bold; display: flex; justify-content: flex-start; }
+        .slip { width: 100%; max-width: 80mm; padding: 4mm; padding-left: 6mm; box-sizing: border-box; border: 1px solid #eee; }
         .border-dashed { border-top: 2px dashed #000; margin: 4px 0; }
         .font-bold { font-weight: bold; }
         .text-center { text-align: center; }
@@ -371,7 +373,13 @@ export function printOutboundSlip(record: OutboundRecord) {
     </head>
     <body onload="window.print(); window.close();">
       <div class="slip">
-        <div class="text-center font-bold" style="font-size: 14pt;">GUDANG US BILIBILI 162</div>
+        <div class="text-center font-bold" style="font-size: 12pt;">GUDANG US BILIBILI 162</div>
+        <div class="text-center" style="font-size: 8pt;">
+          Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
+          Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
+          TELP - 085244466009
+        </div>
+        <div class="border-dashed"></div>
         <div class="text-center" style="font-size: 11pt;">RESIDENSI PENGIRIMAN</div>
         <div class="border-dashed"></div>
         <div class="flex" style="font-size: 11pt;"><span>Invoice:</span><span>${record.invoiceNo}</span><span>Tgl:</span><span>${record.date}</span></div>
@@ -415,10 +423,10 @@ export function printRiceStockSlip(record: RiceStockRecord) {
       <style>
         @media print {
           @page { size: 80mm auto; margin: 0; }
-          body { -webkit-print-color-adjust: exact; margin: 0; padding: 2mm; }
+          body { display: flex; justify-content: flex-start; }
         }
-        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 0mm; line-height: 1.25; font-weight: bold; }
-        .slip { width: 100%; max-width: 80mm; }
+        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 2mm; line-height: 1.25; font-weight: bold; display: flex; justify-content: flex-start; }
+        .slip { width: 100%; max-width: 80mm; padding: 4mm; padding-left: 6mm; box-sizing: border-box; border: 1px solid #eee; }
         .border-dashed { border-top: 2px dashed #000; margin: 4px 0; }
         .font-bold { font-weight: bold; }
         .text-center { text-align: center; }
@@ -428,7 +436,13 @@ export function printRiceStockSlip(record: RiceStockRecord) {
     </head>
     <body onload="window.print(); window.close();">
       <div class="slip">
-        <div class="text-center font-bold" style="font-size: 14pt;">GUDANG US BILIBILI 162</div>
+        <div class="text-center font-bold" style="font-size: 12pt;">GUDANG US BILIBILI 162</div>
+        <div class="text-center" style="font-size: 8pt;">
+          Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
+          Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
+          TELP - 085244466009
+        </div>
+        <div class="border-dashed"></div>
         <div class="text-center" style="font-size: 11pt;">RESIDENSI STOK</div>
         <div class="border-dashed"></div>
         <div class="flex" style="font-size: 11pt;"><span>ID:</span><span>${record.id.slice(-6)}</span><span>Tgl:</span><span>${record.date}</span></div>
@@ -470,10 +484,10 @@ export function printServiceSlip(record: ServiceRecord) {
       <style>
         @media print {
           @page { size: 80mm auto; margin: 0; }
-          body { -webkit-print-color-adjust: exact; margin: 0; padding: 2mm; }
+          body { display: flex; justify-content: flex-start; }
         }
-        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 0mm; line-height: 1.25; font-weight: bold; }
-        .slip { width: 100%; max-width: 80mm; }
+        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 2mm; line-height: 1.25; font-weight: bold; display: flex; justify-content: flex-start; }
+        .slip { width: 100%; max-width: 80mm; padding: 4mm; padding-left: 6mm; box-sizing: border-box; border: 1px solid #eee; }
         .border-dashed { border-top: 2px dashed #000; margin: 4px 0; }
         .font-bold { font-weight: bold; }
         .text-center { text-align: center; }
@@ -483,7 +497,13 @@ export function printServiceSlip(record: ServiceRecord) {
     </head>
     <body onload="window.print(); window.close();">
       <div class="slip">
-        <div class="text-center font-bold" style="font-size: 14pt;">GUDANG US BILIBILI 162</div>
+        <div class="text-center font-bold" style="font-size: 12pt;">GUDANG US BILIBILI 162</div>
+        <div class="text-center" style="font-size: 8pt;">
+          Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
+          Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
+          TELP - 085244466009
+        </div>
+        <div class="border-dashed"></div>
         <div class="text-center" style="font-size: 11pt;">JASA LAYANAN</div>
         <div class="border-dashed"></div>
         <div class="flex" style="font-size: 11pt;"><span>No. ID:</span><span>${record.id.slice(-6)}</span><span>Tgl:</span><span>${record.date}</span></div>
@@ -535,10 +555,10 @@ export function printSlip(ticket: WeighbridgeTicket) {
       <style>
         @media print {
           @page { size: 80mm auto; margin: 0; }
-          body { -webkit-print-color-adjust: exact; margin: 0; padding: 2mm; }
+          body { display: flex; justify-content: center; }
         }
-        body { font-family: 'Courier New', Courier, monospace; font-size: 12pt; color: #000; margin: 0; padding: 5px; line-height: 1.4; font-weight: 600; }
-        .slip { width: 100%; max-width: 300px; }
+        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 2mm; line-height: 1.4; font-weight: 600; display: flex; justify-content: flex-start; }
+        .slip { width: 100%; max-width: 80mm; padding: 4mm; padding-left: 6mm; box-sizing: border-box; }
         .border-t { border-top: 1px solid #000; margin: 4px 0; }
         .font-bold { font-weight: bold; }
         .text-center { text-align: center; }
@@ -584,17 +604,17 @@ export function printSlip(ticket: WeighbridgeTicket) {
           Catatan: ${ticket.notes || '-'}
         </div>
         
-        <div class="flex mt-4" style="font-size: 8pt;">
-          <div class="text-center">Penerima Staff 162</div>
-          <div class="text-center">Sopir / Pembawa</div>
+        <div class="flex mt-4" style="font-size: 8pt; justify-content: space-around;">
+          <div class="text-center" style="width: 45%;">Penimbang (162)</div>
+          <div class="text-center" style="width: 45%;">Sopir</div>
         </div>
-        <div class="flex" style="height: 50px;">
-          <div></div>
-          <div></div>
+        <div class="flex" style="height: 50px; justify-content: space-around;">
+          <div style="width: 45%;"></div>
+          <div style="width: 45%;"></div>
         </div>
-        <div class="flex" style="font-size: 8pt;">
-          <div class="text-center">__________________</div>
-          <div class="text-center">( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</div>
+        <div class="flex" style="font-size: 8pt; justify-content: space-around;">
+          <div class="text-center" style="width: 45%; border-top: 1px solid #000;">( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</div>
+          <div class="text-center" style="width: 45%; border-top: 1px solid #000;">( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</div>
         </div>
         
         <div class="text-center mt-4" style="font-size: 7pt;">

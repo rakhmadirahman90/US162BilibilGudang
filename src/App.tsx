@@ -978,7 +978,7 @@ export default function App() {
                     <div className="p-1 rounded bg-emerald-50 text-emerald-700">
                       <ArrowDownCircle className="w-4 h-4" />
                     </div>
-                    <span className="font-bold text-xs text-emerald-800">1. BARANG MASUK 2026</span>
+                    <span className="font-bold text-xs text-emerald-800">1. BARANG MASUK</span>
                   </div>
                   <p className="text-xs text-neutral-500 leading-relaxed">
                     Catat incoming jagung pipil basah untuk tangki pengeringan, timbang truk masuk petani, potong kadar air, hitung refaksi, upah buruh panggul harian dan letak penyimpanan sektor gudang.
