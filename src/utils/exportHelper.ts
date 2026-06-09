@@ -267,190 +267,207 @@ export function printPDFReport(
 }
 
 const COMMON_SLIP_STYLE = `
-  body {
-    font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap');
+
+  html, body {
+    width: 105mm !important;
+    height: 148mm !important;
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
     color: #1e293b;
-    background-color: #f1f5f9;
-    margin: 0;
-    padding: 24px;
-    line-height: 1.5;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    background-color: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.35;
+    display: flex !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    box-sizing: border-box !important;
   }
   .slip {
-    width: 380px;
-    margin: 0 auto;
-    padding: 24px;
+    width: 105mm;
+    height: 148mm;
+    margin: 0;
+    padding: 10mm 10mm 10mm 10mm;
     box-sizing: border-box;
-    background-color: #fafafa;
-    border: 1px dashed #cbd5e1;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
   }
   @media print {
-    @page { size: auto; margin: 0; }
-    body { background-color: #fff; margin: 0; padding: 0; display: block; }
+    @page { 
+      size: auto; 
+      margin: 0; 
+    }
+    body { 
+      background-color: #fff !important; 
+      margin: 0 !important; 
+      padding: 0 !important; 
+      display: block !important;
+    }
     .slip {
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
       border: none !important;
       box-shadow: none !important;
       margin: 0 !important;
-      padding: 10px !important;
-      width: 100% !important;
-      max-width: 80mm !important;
+      padding: 10mm !important;
+      width: 105mm !important;
+      height: 148mm !important;
+      box-sizing: border-box !important;
       background-color: #fff !important;
+      border-radius: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: flex-start !important;
     }
   }
   .header {
-    text-align: center;
-    margin-bottom: 12px;
+    text-align: left;
+    margin-bottom: 2px;
   }
   .header-title {
-    font-size: 13.5pt;
+    font-size: 11pt;
     font-weight: 800;
-    color: #064e3b;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
+    color: #0f2d21;
+    letter-spacing: 0.2px;
+    margin-bottom: 2px;
     text-transform: uppercase;
   }
   .header-subtitle {
-    font-size: 8pt;
+    font-size: 6.5pt;
     color: #475569;
-    line-height: 1.35;
+    line-height: 1.3;
+    font-weight: 500;
   }
-  .border-dashed {
-    border-top: 1.5px dashed #cbd5e1;
-    margin: 10px 0;
+  .divider-line {
+    border-top: 1px solid #cbd5e1;
+    margin: 5px 0;
   }
-  .border-solid {
-    border-top: 1.5px solid #475569;
-    margin: 10px 0;
-  }
-  .border-double {
-    border-top: 3px double #334155;
-    margin: 10px 0;
+  .divider-double {
+    border-top: 2px double #475569;
+    margin: 5px 0;
   }
   .ticket-type {
-    text-align: center;
-    font-size: 9pt;
+    text-align: left;
+    font-size: 8pt;
     font-weight: 800;
     color: #0f172a;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     background-color: #f1f5f9;
-    padding: 6px 0;
-    border-radius: 6px;
-    margin-bottom: 12px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    margin-bottom: 2px;
   }
   .flex {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     width: 100%;
-    margin: 6px 0;
-    gap: 8px;
+    margin: 3px 0;
+    gap: 6px;
   }
   .flex span {
-    font-size: 9.5pt;
+    font-size: 8pt;
   }
   .flex span.label {
     color: #475569;
     text-align: left;
     white-space: nowrap;
     flex-shrink: 0;
+    font-weight: 500;
   }
   .flex span.value {
-    color: #0f172a;
+    color: #000000;
     font-weight: 700;
     text-align: right;
     word-break: break-all;
   }
-  .weight-block {
-    background-color: #f8fafc;
-    border: 1px dashed #cbd5e1;
-    border-radius: 6px;
-    padding: 10px 14px;
-    margin: 12px 0;
-  }
-  .weight-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 2px 0;
-  }
-  .weight-label {
-    font-size: 9.5pt;
-    font-weight: 700;
-    color: #334155;
-  }
-  .weight-val {
-    font-size: 10pt;
-    font-weight: 800;
+  .flex span.label-heavy {
     color: #0f172a;
+    font-weight: 700;
+    font-size: 8.5pt;
+  }
+  .flex span.value-heavy {
+    color: #000000;
+    font-weight: 800;
+    font-size: 8.5pt;
   }
   .weight-time {
-    font-size: 8pt;
+    font-size: 7.2pt;
     color: #64748b;
     text-align: right;
-    margin-top: -1px;
-    margin-bottom: 6px;
+    margin-top: -3px;
+    margin-bottom: 4px;
+    font-weight: 500;
   }
   .netto-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
+    padding: 3px 0;
   }
   .netto-label {
-    font-size: 11pt;
+    font-size: 9pt;
     font-weight: 800;
     color: #064e3b;
   }
   .netto-val {
-    font-size: 13pt;
-    font-weight: 900;
+    font-size: 11pt;
+    font-weight: 950;
     color: #059669;
   }
-  .notes {
-    font-size: 8pt;
+  .notes-box {
+    font-size: 7.5pt;
     color: #334155;
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-    padding: 8px;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    padding: 4px 8px;
     border-radius: 4px;
-    margin-top: 10px;
-    font-style: italic;
+    margin: 4px 0;
+    text-align: left;
+    line-height: 1.3;
     word-break: break-all;
   }
   .signatures {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-top: 25px;
+    gap: 12px;
+    margin-top: 10px;
     text-align: center;
-    font-size: 8.5pt;
-    color: #475569;
+    font-size: 7.5pt;
+    color: #334155;
+    font-weight: 500;
   }
   .signature-space {
-    height: 45px;
+    height: 25px;
   }
   .signature-line {
     border-top: 1px solid #cbd5e1;
-    margin: 4px auto 0 auto;
-    width: 80%;
+    margin: 2px auto 0 auto;
+    width: 90%;
     font-weight: 700;
-    color: #0f172a;
-    font-size: 9pt;
+    color: #000000;
+    font-size: 8pt;
     padding-top: 2px;
+    text-align: center;
   }
   .footer-msg {
-    text-align: center;
+    text-align: left;
     color: #94a3b8;
-    font-size: 7.5pt;
-    margin-top: 25px;
-    line-height: 1.4;
+    font-size: 6.8pt;
+    margin-top: 10px;
+    line-height: 1.3;
+    font-weight: 500;
+    border-top: 1px dashed #cbd5e1;
+    padding-top: 5px;
   }
 `;
 
@@ -486,15 +503,17 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
             TELP - 085244466009
           </div>
         </div>
-        <div class="border-double"></div>
-        <div class="ticket-type">RESI TERPADU</div>
+        
+        <div class="divider-line"></div>
+        <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 10px;">RESI TERPADU (MASUK)</div>
+        <div class="divider-line"></div>
         
         <div class="flex">
-          <span class="label">No. Tiket/Ref:</span>
+          <span class="label">No. Tiket :</span>
           <span class="value">${record.ticketNo || '-'}</span>
         </div>
         <div class="flex">
-          <span class="label">Tanggal:</span>
+          <span class="label">Tanggal :</span>
           <span class="value">${formatReceiptDate(record.date)}</span>
         </div>
         <div class="flex">
@@ -506,7 +525,7 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
           <span class="value">${record.commodity}</span>
         </div>
         <div class="flex">
-          <span class="label">Agen/Tujuan:</span>
+          <span class="label">Mitra/Agen:</span>
           <span class="value">${record.supplier}</span>
         </div>
         <div class="flex">
@@ -514,66 +533,69 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
           <span class="value">${record.bagDeductionPercent}%</span>
         </div>
         
-        <div class="border-dashed"></div>
-        
-        <div class="weight-block">
-          <div class="weight-row">
-            <span class="weight-label">TIMBANG I (Masuk)</span>
-            <span class="weight-val">${bruto.toLocaleString('id-ID')} kg</span>
-          </div>
-          <div class="weight-time">${ticket?.timbang1Time || '-'}</div>
-          
-          <div class="weight-row">
-            <span class="weight-label">TIMBANG II (Keluar)</span>
-            <span class="weight-val">${tara.toLocaleString('id-ID')} kg</span>
-          </div>
-          <div class="weight-time">${ticket?.timbang2Time || '-'}</div>
-        </div>
-        
-        <div class="border-dashed"></div>
+        <div class="divider-line"></div>
         
         <div class="flex">
-          <span class="label">BERAT BRUTO:</span>
+          <span class="label-heavy">TIMBANG I (Masuk)</span>
+          <span class="value-heavy">${bruto.toLocaleString('id-ID')} Kg</span>
+        </div>
+        <div class="weight-time">${ticket?.timbang1Time || '-'}</div>
+        
+        <div class="flex">
+          <span class="label-heavy">TIMBANG II (Keluar)</span>
+          <span class="value-heavy">${tara > 0 ? tara.toLocaleString('id-ID') + ' Kg' : '- -'}</span>
+        </div>
+        <div class="weight-time">${ticket?.timbang2Time || '-'}</div>
+        
+        <div class="divider-line"></div>
+        
+        <div class="flex">
+          <span class="label">BERAT BRUTO :</span>
           <span class="value">${bruto.toLocaleString('id-ID')} kg</span>
         </div>
         <div class="flex">
-          <span class="label">POTONGAN TARA:</span>
+          <span class="label">BERAT TARA :</span>
           <span class="value">${tara.toLocaleString('id-ID')} kg</span>
         </div>
         <div class="flex">
-          <span class="label">POT. KARUNG:</span>
-          <span class="value">${potKrg.toLocaleString('id-ID')} kg</span>
+          <span class="label">Pot. Karung (${record.bagDeductionPercent.toFixed(2)}%):</span>
+          <span class="value">- ${potKrg.toLocaleString('id-ID')} kg</span>
         </div>
         <div class="flex">
-          <span class="label">POT. REFAKSI:</span>
-          <span class="value">${potRefaksi.toLocaleString('id-ID')} kg</span>
+          <span class="label">Pot. Refaksi (${record.refaksiKaPercent.toFixed(2)}%):</span>
+          <span class="value">- ${potRefaksi.toLocaleString('id-ID')} kg</span>
         </div>
         
-        <div class="border-dashed"></div>
+        <div class="divider-line"></div>
         
         <div class="flex">
-          <span class="label" style="font-size: 10pt;">HARGA:</span>
-          <span class="value" style="font-size: 10pt; color: #0f172a;">Rp ${(record.price || 0).toLocaleString('id-ID')}/kg</span>
+          <span class="label" style="font-size: 10pt;">HARGA :</span>
+          <span class="value" style="font-size: 10pt; color: #000; font-weight: bold;">Rp ${(record.price || 0).toLocaleString('id-ID')}/kg</span>
         </div>
+        
+        <div class="divider-line"></div>
+        
         <div class="netto-row">
-          <span class="netto-label">BERAT NETTO:</span>
-          <span class="netto-val">${net.toLocaleString('id-ID')} kg</span>
+          <span class="netto-label">BERAT NETTO :</span>
+          <span class="netto-val">${net.toLocaleString('id-ID')} KG</span>
         </div>
-        <div class="netto-row" style="margin-top: -5px; border-top: 1px dashed #e2e8f0; padding-top: 5px;">
-          <span class="netto-label">TOTAL BAYAR:</span>
+        <div class="netto-row" style="margin-top: -10px; padding-top: 0px;">
+          <span class="netto-label">TOTAL BAYAR :</span>
           <span class="netto-val" style="color: #0284c7;">Rp ${(record.totalPrice || 0).toLocaleString('id-ID')}</span>
         </div>
         
-        <div class="border-solid"></div>
+        <div class="divider-line"></div>
         
         <div class="signatures">
           <div>
-            <div class="signature-space"></div>
-            <div class="signature-line">( SOPIR )</div>
-          </div>
-          <div>
+            Penerima Staff 162
             <div class="signature-space"></div>
             <div class="signature-line">${staffName}</div>
+          </div>
+          <div>
+            Sopir / Pembawa
+            <div class="signature-space"></div>
+            <div class="signature-line">(          )</div>
           </div>
         </div>
         
@@ -614,15 +636,17 @@ export function printOutboundSlip(record: OutboundRecord, staffName: string = "A
             TELP - 085244466009
           </div>
         </div>
-        <div class="border-double"></div>
-        <div class="ticket-type">RESIDENSI PENGIRIMAN</div>
+        
+        <div class="divider-line"></div>
+        <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 10px;">RESIDENSI PENGIRIMAN</div>
+        <div class="divider-line"></div>
         
         <div class="flex">
-          <span class="label">No. Invoice:</span>
+          <span class="label">No. Invoice :</span>
           <span class="value">${record.invoiceNo}</span>
         </div>
         <div class="flex">
-          <span class="label">Tanggal:</span>
+          <span class="label">Tanggal :</span>
           <span class="value">${formatReceiptDate(record.date)}</span>
         </div>
         <div class="flex">
@@ -642,27 +666,29 @@ export function printOutboundSlip(record: OutboundRecord, staffName: string = "A
           <span class="value">${record.destination}</span>
         </div>
         
-        <div class="border-dashed"></div>
+        <div class="divider-line"></div>
         
         <div class="netto-row">
-          <span class="netto-label">TOTAL BERAT:</span>
+          <span class="netto-label">TOTAL BERAT :</span>
           <span class="netto-val">${record.totalWeight.toLocaleString('id-ID')} kg</span>
         </div>
         <div class="flex">
-          <span class="label">Upah Buruh:</span>
+          <span class="label">Upah Buruh :</span>
           <span class="value">Rp ${record.loadingLaborCost.toLocaleString('id-ID')}</span>
         </div>
         
-        <div class="border-solid"></div>
+        <div class="divider-line"></div>
         
         <div class="signatures">
           <div>
-            <div class="signature-space"></div>
-            <div class="signature-line">( SOPIR )</div>
-          </div>
-          <div>
+            Penerima Staff 162
             <div class="signature-space"></div>
             <div class="signature-line">${staffName}</div>
+          </div>
+          <div>
+            Sopir / Pembawa
+            <div class="signature-space"></div>
+            <div class="signature-line">(          )</div>
           </div>
         </div>
         
@@ -703,47 +729,57 @@ export function printRiceStockSlip(record: RiceStockRecord, staffName: string = 
             TELP - 085244466009
           </div>
         </div>
-        <div class="border-double"></div>
-        <div class="ticket-type">RESIDENSI MUTASI STOK</div>
+        
+        <div class="divider-line"></div>
+        <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 10px;">RESIDENSI MUTASI STOK</div>
+        <div class="divider-line"></div>
         
         <div class="flex">
-          <span class="label">ID Mutasi:</span>
+          <span class="label">ID Mutasi :</span>
           <span class="value">#${record.id.slice(-6)}</span>
         </div>
         <div class="flex">
-          <span class="label">Tanggal:</span>
+          <span class="label">Tanggal :</span>
           <span class="value">${formatReceiptDate(record.date)}</span>
         </div>
         <div class="flex">
-          <span class="label">No. Polisi:</span>
+          <span class="label">No. Polisi :</span>
           <span class="value">${record.policeNo || '-'}</span>
         </div>
         <div class="flex">
-          <span class="label">Nama Barang:</span>
+          <span class="label">Nama Barang :</span>
           <span class="value">${record.itemName}</span>
         </div>
         
-        <div class="border-dashed"></div>
+        <div class="divider-line"></div>
         
         <div class="flex">
-          <span class="label">Masuk:</span>
-          <span class="value" style="color: #0d9488; font-weight: 800;">${record.inWeight.toLocaleString('id-ID')} kg</span>
+          <span class="label-heavy">Masuk :</span>
+          <span class="value-heavy" style="color: #059669;">${record.inWeight.toLocaleString('id-ID')} kg</span>
         </div>
         <div class="flex">
-          <span class="label">Keluar:</span>
-          <span class="value" style="color: #e11d48; font-weight: 800;">${record.outWeight.toLocaleString('id-ID')} kg</span>
+          <span class="label-heavy">Keluar :</span>
+          <span class="value-heavy" style="color: #dc2626;">${record.outWeight.toLocaleString('id-ID')} kg</span>
         </div>
         
-        <div class="border-solid"></div>
+        <div class="divider-line"></div>
+        
+        ${record.description ? `
+          <div class="notes-box">
+            Keterangan: ${record.description}
+          </div>
+        ` : ''}
         
         <div class="signatures">
           <div>
-            <div class="signature-space"></div>
-            <div class="signature-line">( SOPIR )</div>
-          </div>
-          <div>
+            Penerima Staff 162
             <div class="signature-space"></div>
             <div class="signature-line">${staffName}</div>
+          </div>
+          <div>
+            Sopir / Pembawa
+            <div class="signature-space"></div>
+            <div class="signature-line">(          )</div>
           </div>
         </div>
         
@@ -784,38 +820,40 @@ export function printServiceSlip(record: ServiceRecord, staffName: string = "Asm
             TELP - 085244466009
           </div>
         </div>
-        <div class="border-double"></div>
-        <div class="ticket-type">RESIDENSI JASA LAYANAN</div>
+        
+        <div class="divider-line"></div>
+        <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 10px;">RESIDENSI JASA LAYANAN</div>
+        <div class="divider-line"></div>
         
         <div class="flex">
-          <span class="label">ID Layanan:</span>
+          <span class="label">ID Layanan :</span>
           <span class="value">#${record.id.slice(-6)}</span>
         </div>
         <div class="flex">
-          <span class="label">Tanggal:</span>
+          <span class="label">Tanggal :</span>
           <span class="value">${formatReceiptDate(record.date)}</span>
         </div>
         <div class="flex">
-          <span class="label">Pelanggan:</span>
+          <span class="label">Pelanggan :</span>
           <span class="value">${record.customerName}</span>
         </div>
         <div class="flex">
-          <span class="label">Jenis Layanan:</span>
+          <span class="label">Jenis Jasa :</span>
           <span class="value">${record.serviceType}</span>
         </div>
         <div class="flex">
-          <span class="label">Komoditas:</span>
+          <span class="label">Komoditas :</span>
           <span class="value">${record.commodity}</span>
         </div>
         <div class="flex">
-          <span class="label">Status Bayar:</span>
-          <span class="value" style="color: ${record.paymentStatus === 'PAID' ? '#0d9488' : '#e11d48'};">${record.paymentStatus === 'PAID' ? 'LUNAS' : 'BELUM LUNAS'}</span>
+          <span class="label">Status Bayar :</span>
+          <span class="value" style="color: ${record.paymentStatus === 'PAID' ? '#059669' : '#dc2626'}; font-weight: 800;">${record.paymentStatus === 'PAID' ? 'LUNAS' : 'BELUM LUNAS'}</span>
         </div>
         
-        <div class="border-dashed"></div>
+        <div class="divider-line"></div>
         
         <div class="flex">
-          <span class="label">Berat Jasa:</span>
+          <span class="label">Berat Jasa :</span>
           <span class="value">${record.weight.toLocaleString('id-ID')} kg</span>
         </div>
         <div class="flex">
@@ -823,23 +861,25 @@ export function printServiceSlip(record: ServiceRecord, staffName: string = "Asm
           <span class="value">Rp ${record.ratePerKg.toLocaleString('id-ID')}</span>
         </div>
         
-        <div class="border-dashed"></div>
+        <div class="divider-line"></div>
         
         <div class="netto-row">
-          <span class="netto-label">TOTAL TARIF:</span>
+          <span class="netto-label">TOTAL TARIF :</span>
           <span class="netto-val">Rp ${record.totalFee.toLocaleString('id-ID')}</span>
         </div>
         
-        <div class="border-solid"></div>
+        <div class="divider-line"></div>
         
         <div class="signatures">
           <div>
-            <div class="signature-space"></div>
-            <div class="signature-line">( PELANGGAN )</div>
-          </div>
-          <div>
+            Penerima Staff 162
             <div class="signature-space"></div>
             <div class="signature-line">${staffName}</div>
+          </div>
+          <div>
+            Pelanggan
+            <div class="signature-space"></div>
+            <div class="signature-line">(          )</div>
           </div>
         </div>
         
@@ -886,11 +926,11 @@ export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Asma")
             TELP - 085244466009
           </div>
         </div>
-        <div class="border-double"></div>
-        <div class="ticket-type">SLIP TIMBANGAN BARANG</div>
+        
+        <div class="divider-line"></div>
         
         <div class="flex">
-          <span class="label">No. Tiket:</span>
+          <span class="label">No. Tiket :</span>
           <span class="value">${ticket.ticketNo}</span>
         </div>
         <div class="flex">
@@ -906,64 +946,64 @@ export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Asma")
           <span class="value">${ticket.goodsName}</span>
         </div>
         
-        <div class="border-dashed"></div>
-        
-        <div class="weight-block">
-          <div class="weight-row">
-            <span class="weight-label">TIMBANG I (Masuk)</span>
-            <span class="weight-val">${bruto.toLocaleString('id-ID')} Kg</span>
-          </div>
-          <div class="weight-time">${ticket.timbang1Time || '-'}</div>
-          
-          <div class="weight-row">
-            <span class="weight-label">TIMBANG II (Keluar)</span>
-            <span class="weight-val">${tara > 0 ? tara.toLocaleString('id-ID') + ' Kg' : '- -'}</span>
-          </div>
-          <div class="weight-time">${ticket.timbang2Time || '-'}</div>
-        </div>
-        
-        <div class="border-dashed"></div>
+        <div class="divider-line"></div>
         
         <div class="flex">
-          <span class="label">BERAT BRUTO:</span>
-          <span class="value">${bruto.toLocaleString('id-ID')} Kg</span>
+          <span class="label-heavy">TIMBANG I (Masuk)</span>
+          <span class="value-heavy">${bruto.toLocaleString('id-ID')} Kg</span>
+        </div>
+        <div class="weight-time">${ticket.timbang1Time || '-'}</div>
+        
+        <div class="flex">
+          <span class="label-heavy">TIMBANG II (Keluar)</span>
+          <span class="value-heavy">${tara > 0 ? tara.toLocaleString('id-ID') + ' Kg' : '- -'}</span>
+        </div>
+        <div class="weight-time">${ticket.timbang2Time || '-'}</div>
+        
+        <div class="divider-line"></div>
+        
+        <div class="flex">
+          <span class="label">BERAT BRUTO :</span>
+          <span class="value">${bruto.toLocaleString('id-ID')} kg</span>
         </div>
         <div class="flex">
-          <span class="label">POTONGAN TARA:</span>
-          <span class="value">${tara.toLocaleString('id-ID')} Kg</span>
+          <span class="label">BERAT TARA :</span>
+          <span class="value">${tara.toLocaleString('id-ID')} kg</span>
         </div>
         <div class="flex">
           <span class="label">Pot. Karung (${ticket.bagDeductionPercent.toFixed(2)}%):</span>
-          <span class="value">- ${potKrg.toLocaleString('id-ID')} Kg</span>
+          <span class="value">- ${potKrg.toLocaleString('id-ID')} kg</span>
         </div>
         <div class="flex">
           <span class="label">Pot. Refaksi (${ticket.refaksiPercent.toFixed(2)}%):</span>
-          <span class="value">- ${potRefaksi.toLocaleString('id-ID')} Kg</span>
+          <span class="value">- ${potRefaksi.toLocaleString('id-ID')} kg</span>
         </div>
         
-        <div class="border-dashed"></div>
+        <div class="divider-line"></div>
         
         <div class="netto-row">
-          <span class="netto-label">BERAT NETTO:</span>
+          <span class="netto-label">BERAT NETTO :</span>
           <span class="netto-val">${net.toLocaleString('id-ID')} KG</span>
         </div>
         
+        <div class="divider-line"></div>
+        
         ${ticket.notes ? `
-          <div class="notes">
-            <strong>Catatan:</strong> ${ticket.notes}
+          <div class="notes-box">
+            Catatan: ${ticket.notes}
           </div>
         ` : ''}
         
-        <div class="border-solid"></div>
-        
         <div class="signatures">
           <div>
-            <div class="signature-space"></div>
-            <div class="signature-line">( SOPIR )</div>
-          </div>
-          <div>
+            Penerima Staff 162
             <div class="signature-space"></div>
             <div class="signature-line">${staffName}</div>
+          </div>
+          <div>
+            Sopir / Pembawa
+            <div class="signature-space"></div>
+            <div class="signature-line">(          )</div>
           </div>
         </div>
         

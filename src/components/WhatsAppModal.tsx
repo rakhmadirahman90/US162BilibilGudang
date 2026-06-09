@@ -37,50 +37,83 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
       setIsGenerating(true);
       try {
         const opt = {
-          margin:       0.15,
+          margin:       0,
           filename:     pdfFileName || 'Resi.pdf',
-          image:        { type: 'jpeg' as const, quality: 0.68 },
+          image:        { type: 'jpeg' as const, quality: 0.98 },
           html2canvas:  { 
-            scale: 1.4, 
+            scale: 2.0, 
             useCORS: true, 
             logging: false, 
             letterRendering: true 
           },
           jsPDF:        { 
-            unit: 'in', 
-            format: 'letter', 
+            unit: 'mm', 
+            format: [105, 148] as [number, number], 
             orientation: 'portrait' as const,
             compress: true
           }
         };
         const pdfBlob = await html2pdf().set(opt).from(pdfHtml).output('blob');
         
-        const formData = new FormData();
-        formData.append('file', pdfBlob, pdfFileName || 'Resi.pdf');
-        
-        const res = await fetch('https://tmpfiles.org/api/v1/upload', {
-          method: 'POST',
-          body: formData
-        });
-        const json = await res.json();
-        
-        if(json.status === 'success') {
-          const strUrl = json.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
-          finalMsg += `\n\n⬇️ *Unduh File PDF Resi:*\n${strUrl}`;
+        let uploadUrl = '';
+
+        // Coba upload ke file.io terlebih dahulu (CORS-friendly, link langsung, tanpa registrasi)
+        try {
+          const formDataIo = new FormData();
+          formDataIo.append('file', pdfBlob, pdfFileName || 'Resi.pdf');
+          const res = await fetch('https://file.io', {
+            method: 'POST',
+            body: formDataIo
+          });
+          if (res.ok) {
+            const json = await res.json();
+            if (json.success && json.link) {
+              uploadUrl = json.link;
+              console.log("PDF uploaded successfully to file.io:", uploadUrl);
+            }
+          }
+        } catch (ioErr) {
+          console.warn("file.io upload failed, trying tmpfiles.org:", ioErr);
+        }
+
+        // Coba upload ke tmpfiles.org jika file.io gagal
+        if (!uploadUrl) {
+          try {
+            const formDataTmp = new FormData();
+            formDataTmp.append('file', pdfBlob, pdfFileName || 'Resi.pdf');
+            const res = await fetch('https://tmpfiles.org/api/v1/upload', {
+              method: 'POST',
+              body: formDataTmp
+            });
+            if (res.ok) {
+              const json = await res.json();
+              if (json.status === 'success' && json.data?.url) {
+                uploadUrl = json.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+                console.log("PDF uploaded successfully to tmpfiles.org:", uploadUrl);
+              }
+            }
+          } catch (tmpErr) {
+            console.warn("tmpfiles.org upload failed:", tmpErr);
+          }
+        }
+
+        if (uploadUrl) {
+          finalMsg += `\n\n⬇️ *Unduh File PDF Resi:*\n${uploadUrl}`;
         } else {
-          // fallback to manual download
+          // Fallback ke unduhan lokal manual jika kedua server upload gagal
+          console.warn("Satu atau lebih server upload tidak dapat dijangkau. Mengunduh secara manual.");
           await html2pdf().set(opt).from(pdfHtml).save();
         }
       } catch (err) {
-        console.error("Failed to generate/upload PDF:", err);
-        // fallback to manual download
+        console.warn("Gagal memproses/mengunggah PDF resi, mengunduh secara manual sebagai cadangan:", err);
+        // Fallback ke unduhan lokal manual
         try {
           const opt = { 
-            margin: 0.15, 
+            margin: 0, 
             filename: pdfFileName || 'Resi.pdf', 
-            image: { type: 'jpeg' as const, quality: 0.68 },
-            html2canvas: { scale: 1.4, useCORS: true, logging: false }, 
-            jsPDF: { unit: 'in', format: 'letter' as const, compress: true } 
+            image: { type: 'jpeg' as const, quality: 0.98 },
+            html2canvas: { scale: 2.0, useCORS: true, logging: false }, 
+            jsPDF: { unit: 'mm', format: [105, 148] as [number, number], orientation: 'portrait' as const, compress: true } 
           };
           await html2pdf().set(opt).from(pdfHtml).save();
         } catch(e) {}
