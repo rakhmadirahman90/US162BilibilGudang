@@ -57,6 +57,11 @@ import DatabaseMasterModule from './components/DatabaseMasterModule';
 import RiceStockModule from './components/RiceStockModule';
 import { useLanguage } from './i18n/LanguageContext';
 
+// Custom Firebase Live Dynamic Sync Helpers
+import { useSyncCollection, saveOnline, deleteOnline } from './utils/firebaseSync';
+import { auth, signInWithGoogle } from './utils/firebase';
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+
 // Brand Assets
 import bilibiliLogo from './assets/images/bilibili_logo_1780925186692.png';
 
@@ -335,6 +340,94 @@ export default function App() {
     return saved ? JSON.parse(saved) : initialFinanceCategories;
   });
 
+  // --- GOOGLE AUTHENTICATION STATE & EVENTS ---
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+    return unsub;
+  }, []);
+
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithGoogle();
+      showToast("Sukses Login Google! Sinkronisasi siap.", "success");
+    } catch (e) {
+      showToast("Gagal Login Google", "error");
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      showToast("Berhasil Logout Session", "success");
+    } catch (e) {
+      showToast("Gagal Logout", "error");
+    }
+  };
+
+  // --- REAL-TIME DATA SYNCHRONIZATION VIA FIREBASE STREAMS ---
+  useSyncCollection('tickets', tickets, setTickets, initialWeighbridgeTickets);
+  useSyncCollection('inboundRecords', inboundRecords, setInboundRecords, initialInboundRecords);
+  useSyncCollection('outboundRecords', outboundRecords, setOutboundRecords, initialOutboundRecords);
+  useSyncCollection('serviceRecords', serviceRecords, setServiceRecords, initialServiceRecords);
+  useSyncCollection('debts', debts, setDebts, initialDebtRecords);
+  useSyncCollection('finances', finances, setFinances, initialFinancialRecords);
+  useSyncCollection('employees', employees, setEmployees, initialEmployeeRecords);
+  useSyncCollection('vehicles', vehicles, setVehicles, initialVehicles);
+  useSyncCollection('suppliers', suppliers, setSuppliers, initialSuppliers);
+  useSyncCollection('buyers', buyers, setBuyers, initialBuyers);
+  useSyncCollection('commodities', commodities, setCommodities, initialCommodities);
+  useSyncCollection('riceStockRecords', riceStockRecords, setRiceStockRecords, initialRiceStockRecords);
+  useSyncCollection('banks', banks, setBanks, initialBankAccounts);
+  useSyncCollection('brokers', brokers, setBrokers, initialBrokers);
+  useSyncCollection('locations', locations, setLocations, initialStorageLocations);
+  useSyncCollection('customers', customers, setCustomers, initialCustomers);
+  useSyncCollection('financeCategories', financeCategories, setFinanceCategories, initialFinanceCategories);
+
+  // --- SYNCHRONIZED MASTER SETTERS WRAPPER ---
+  const createSyncedSetter = <T extends { id: string }>(
+    collectionName: string,
+    setLocal: React.Dispatch<React.SetStateAction<T[]>>
+  ) => {
+    return (update: T[] | ((prev: T[]) => T[])) => {
+      setLocal((prev) => {
+        const next = typeof update === 'function' ? update(prev) : update;
+        
+        // 1. Save new or edited docs
+        next.forEach(newItem => {
+          const oldItem = prev.find(p => p.id === newItem.id);
+          if (!oldItem || JSON.stringify(oldItem) !== JSON.stringify(newItem)) {
+            saveOnline(collectionName, newItem);
+          }
+        });
+        
+        // 2. Remove deleted docs
+        prev.forEach(oldItem => {
+          const exists = next.some(n => n.id === oldItem.id);
+          if (!exists) {
+            deleteOnline(collectionName, oldItem.id);
+          }
+        });
+
+        return next;
+      });
+    };
+  };
+
+  const syncedSetVehicles = createSyncedSetter('vehicles', setVehicles);
+  const syncedSetSuppliers = createSyncedSetter('suppliers', setSuppliers);
+  const syncedSetBuyers = createSyncedSetter('buyers', setBuyers);
+  const syncedSetEmployees = createSyncedSetter('employees', setEmployees);
+  const syncedSetCommodities = createSyncedSetter('commodities', setCommodities);
+  const syncedSetBanks = createSyncedSetter('banks', setBanks);
+  const syncedSetBrokers = createSyncedSetter('brokers', setBrokers);
+  const syncedSetLocations = createSyncedSetter('locations', setLocations);
+  const syncedSetCustomers = createSyncedSetter('customers', setCustomers);
+  const syncedSetFinanceCategories = createSyncedSetter('financeCategories', setFinanceCategories);
+
   // Active navigational tab
   const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE' | 'STOK_BERAS' | 'LAPORAN' | 'DATABASE'>('DASHBOARD');
   
@@ -481,14 +574,16 @@ export default function App() {
     localStorage.setItem('bilibili_finance_categories', JSON.stringify(financeCategories));
   }, [financeCategories]);
 
-  // --- COMPONENT ACTION CALLBACKS ---
+  // --- COMPONENT ACTION CALLBACKS WITH REALTIME ONLINE MUTATORS ---
   const handleAddTicket = (tk: WeighbridgeTicket) => {
     setTickets(prev => [tk, ...prev]);
+    saveOnline('tickets', tk);
     showToast(`${t.saveWeighbridgeSuccess} (#${tk.ticketNo} - ${tk.policeNo})!`, 'success');
   };
 
   const handleUpdateTicket = (updatedTk: WeighbridgeTicket) => {
     setTickets(prev => prev.map(t => t.id === updatedTk.id ? updatedTk : t));
+    saveOnline('tickets', updatedTk);
     const isComp = updatedTk.status === 'COMPLETED';
     showToast(
       isComp 
@@ -502,11 +597,13 @@ export default function App() {
     const target = tickets.find(t => t.id === id);
     const label = target ? `#${target.ticketNo}` : '';
     setTickets(prev => prev.filter(t => t.id !== id));
+    deleteOnline('tickets', id);
     showToast(`${t.deleteWeighbridgeSuccess} ${label}!`, 'success');
   };
 
   const handleAddInbound = (rec: InboundRecord) => {
     setInboundRecords(prev => [rec, ...prev]);
+    saveOnline('inboundRecords', rec);
     
     // Auto-update Rice Stock
     const newStock: RiceStockRecord = {
@@ -521,22 +618,26 @@ export default function App() {
       outWeight: 0,
     };
     setRiceStockRecords(prev => [newStock, ...prev]);
+    saveOnline('riceStockRecords', newStock);
     
     showToast(`Sukses menyimpan: Penerimaan ${rec.commodity} dari ${rec.supplier} (${rec.netWeight.toLocaleString('id-ID')} Kg Netto)!`, 'success');
   };
 
   const handleUpdateInbound = (rec: InboundRecord) => {
     setInboundRecords(prev => prev.map(r => r.id === rec.id ? rec : r));
+    saveOnline('inboundRecords', rec);
     showToast(`Sukses memperbarui catatan penerimaan ${rec.commodity} dari ${rec.supplier}!`, 'success');
   };
 
   const handleDeleteInbound = (id: string) => {
     setInboundRecords(prev => prev.filter(r => r.id !== id));
+    deleteOnline('inboundRecords', id);
     showToast('Catatan barang masuk berhasil dihapus!', 'success');
   };
 
   const handleAddOutbound = (rec: OutboundRecord) => {
     setOutboundRecords(prev => [rec, ...prev]);
+    saveOnline('outboundRecords', rec);
 
     // Auto-update Rice Stock
     const newStock: RiceStockRecord = {
@@ -545,53 +646,62 @@ export default function App() {
       policeNo: rec.vehicleNo,
       description: `Pengiriman ${rec.commodity} ke ${rec.buyer}`,
       itemName: rec.commodity,
-      price: 0, // Outbound price not stored in outbound record directly, could be inferred
+      price: 0, 
       colly: 0,
       inWeight: 0,
       outWeight: rec.totalWeight,
     };
     setRiceStockRecords(prev => [newStock, ...prev]);
+    saveOnline('riceStockRecords', newStock);
 
     showToast(`Sukses menyimpan: Pengiriman ${rec.commodity} ke ${rec.buyer} (${rec.totalWeight.toLocaleString('id-ID')} Kg Netto)!`, 'success');
   };
 
   const handleUpdateOutbound = (rec: OutboundRecord) => {
     setOutboundRecords(prev => prev.map(r => r.id === rec.id ? rec : r));
+    saveOnline('outboundRecords', rec);
     showToast(`Sukses memperbarui catatan pengiriman ${rec.commodity} ke ${rec.buyer}!`, 'success');
   };
 
   const handleDeleteOutbound = (id: string) => {
     setOutboundRecords(prev => prev.filter(r => r.id !== id));
+    deleteOnline('outboundRecords', id);
     showToast('Catatan barang keluar berhasil dihapus!', 'success');
   };
 
   const handleAddService = (rec: ServiceRecord) => {
     setServiceRecords(prev => [rec, ...prev]);
+    saveOnline('serviceRecords', rec);
     showToast(`Sukses mencatatkan layanan jasa poles/kipas untuk ${rec.customerName}!`, 'success');
   };
 
   const handleUpdateService = (rec: ServiceRecord) => {
     setServiceRecords(prev => prev.map(r => r.id === rec.id ? rec : r));
+    saveOnline('serviceRecords', rec);
     showToast(`Sukses memperbarui layanan jasa poles/kipas untuk ${rec.customerName}!`, 'success');
   };
 
   const handleDeleteService = (id: string) => {
     setServiceRecords(prev => prev.filter(r => r.id !== id));
+    deleteOnline('serviceRecords', id);
     showToast('Catatan layanan jasa poles berhasil dihapus!', 'success');
   };
 
   const handleAddDebt = (debt: DebtRecord) => {
     setDebts(prev => [debt, ...prev]);
+    saveOnline('debts', debt);
     showToast(`Sukses mencatatkan utang kepada ${debt.supplierName} sebesar Rp ${debt.totalDebt.toLocaleString('id-ID')}!`, 'success');
   };
 
   const handleUpdateDebt = (debt: DebtRecord) => {
     setDebts(prev => prev.map(d => d.id === debt.id ? debt : d));
+    saveOnline('debts', debt);
     showToast(`Sukses memperbarui catatan utang kepada ${debt.supplierName}!`, 'success');
   };
 
   const handleDeleteDebt = (id: string) => {
     setDebts(prev => prev.filter(d => d.id !== id));
+    deleteOnline('debts', id);
     showToast('Catatan utang berhasil dihapus!', 'success');
   };
 
@@ -617,7 +727,11 @@ export default function App() {
         };
         setFinances(prev => [newFin, ...prev]);
 
-        return { ...d, paidAmount: paid, remainingBalance: remaining, status };
+        const updatedDebt = { ...d, paidAmount: paid, remainingBalance: remaining, status };
+        saveOnline('debts', updatedDebt);
+        saveOnline('finances', newFin);
+
+        return updatedDebt;
       }
       return d;
     }));
@@ -626,31 +740,37 @@ export default function App() {
 
   const handleAddFinance = (fin: FinancialRecord) => {
     setFinances(prev => [fin, ...prev]);
+    saveOnline('finances', fin);
     showToast(`Mutasi kas ${fin.type === 'DEBIT' ? 'Pemasukan' : 'Pengeluaran'} Rp ${fin.amount.toLocaleString('id-ID')} berhasil disimpan!`, 'success');
   };
 
   const handleUpdateFinance = (fin: FinancialRecord) => {
     setFinances(prev => prev.map(f => f.id === fin.id ? fin : f));
+    saveOnline('finances', fin);
     showToast(`Mutasi kas ${fin.description} berhasil diperbarui!`, 'success');
   };
 
   const handleDeleteFinance = (id: string) => {
     setFinances(prev => prev.filter(f => f.id !== id));
+    deleteOnline('finances', id);
     showToast('Catatan mutasi kas berhasil dihapus!', 'success');
   };
 
   const handleAddRiceStock = (rec: RiceStockRecord) => {
     setRiceStockRecords(prev => [rec, ...prev]);
+    saveOnline('riceStockRecords', rec);
     showToast(t.successSaveStock, 'success');
   };
 
   const handleUpdateRiceStock = (rec: RiceStockRecord) => {
     setRiceStockRecords(prev => prev.map(r => r.id === rec.id ? rec : r));
+    saveOnline('riceStockRecords', rec);
     showToast(t.successUpdateStock, 'success');
   };
 
   const handleDeleteRiceStock = (id: string) => {
     setRiceStockRecords(prev => prev.filter(r => r.id !== id));
+    deleteOnline('riceStockRecords', id);
     showToast(t.deleteSuccessGeneral, 'success');
   };
 
@@ -746,6 +866,30 @@ export default function App() {
                 <option value="id" className="text-neutral-900 font-bold font-sans">🇮🇩 ID</option>
                 <option value="en" className="text-neutral-900 font-bold font-sans">🇺🇸 EN</option>
               </select>
+            </div>
+
+            {/* Google Authentication Status */}
+            <div className="flex items-center gap-1.5">
+              {currentUser && !currentUser.isAnonymous ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-yellow-350 font-bold font-mono max-w-[100px] truncate hidden md:inline" title={currentUser.email || ''}>
+                    {currentUser.email}
+                  </span>
+                  <button
+                    onClick={handleLogout}
+                    className="text-[10px] font-extrabold px-2.5 py-1.5 rounded-lg transition border border-red-500 bg-red-650/80 text-white hover:bg-red-750 cursor-pointer text-xs"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={handleGoogleLogin}
+                  className={`text-[10px] font-extrabold px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer ${theme.statusBoxBg} ${theme.statusBoxBorder} text-white hover:brightness-110 text-xs`}
+                >
+                  G-Login
+                </button>
+              )}
             </div>
 
             {/* Printer Settings Button */}
@@ -1722,25 +1866,25 @@ export default function App() {
         {activeTab === 'DATABASE' && (
           <DatabaseMasterModule
             vehicles={vehicles}
-            setVehicles={setVehicles}
+            setVehicles={syncedSetVehicles}
             suppliers={suppliers}
-            setSuppliers={setSuppliers}
+            setSuppliers={syncedSetSuppliers}
             buyers={buyers}
-            setBuyers={setBuyers}
+            setBuyers={syncedSetBuyers}
             employees={employees}
-            setEmployees={setEmployees}
+            setEmployees={syncedSetEmployees}
             commodities={commodities}
-            setCommodities={setCommodities}
+            setCommodities={syncedSetCommodities}
             banks={banks}
-            setBanks={setBanks}
+            setBanks={syncedSetBanks}
             brokers={brokers}
-            setBrokers={setBrokers}
+            setBrokers={syncedSetBrokers}
             locations={locations}
-            setLocations={setLocations}
+            setLocations={syncedSetLocations}
             customers={customers}
-            setCustomers={setCustomers}
+            setCustomers={syncedSetCustomers}
             financeCategories={financeCategories}
-            setFinanceCategories={setFinanceCategories}
+            setFinanceCategories={syncedSetFinanceCategories}
           />
         )}
 

@@ -1,0 +1,283 @@
+{
+  "entities": {
+    "WeighbridgeTicket": {
+      "title": "WeighbridgeTicket",
+      "description": "Truck weighing scale records",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ticketNo": { "type": "string" },
+        "policeNo": { "type": "string" },
+        "goodsName": { "type": "string" },
+        "agency": { "type": "string" },
+        "timbang1Time": { "type": "string" },
+        "timbang1Weight": { "type": "number" },
+        "timbang2Time": { "type": "string" },
+        "timbang2Weight": { "type": "number" },
+        "grossWeight": { "type": "number" },
+        "tareWeight": { "type": "number" },
+        "bagDeductionPercent": { "type": "number" },
+        "refaksiPercent": { "type": "number" },
+        "netWeight": { "type": "number" },
+        "status": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "ticketNo", "policeNo", "goodsName", "agency", "status"]
+    },
+    "InboundRecord": {
+      "title": "InboundRecord",
+      "description": "Warehouse commodity arrival record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "ticketNo": { "type": "string" },
+        "vehicleNo": { "type": "string" },
+        "supplier": { "type": "string" },
+        "commodity": { "type": "string" },
+        "grossWeight": { "type": "number" },
+        "tareWeight": { "type": "number" },
+        "refaksiKaPercent": { "type": "number" },
+        "bagDeductionPercent": { "type": "number" },
+        "netWeight": { "type": "number" },
+        "moistureContent": { "type": "number" },
+        "warehouseSection": { "type": "string" },
+        "laborCost": { "type": "number" },
+        "price": { "type": "number" },
+        "totalPrice": { "type": "number" },
+        "driverName": { "type": "string" }
+      },
+      "required": ["id", "date", "vehicleNo", "supplier", "commodity", "netWeight", "totalPrice"]
+    },
+    "OutboundRecord": {
+      "title": "OutboundRecord",
+      "description": "Warehouse commodity departure record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "ticketNo": { "type": "string" },
+        "vehicleNo": { "type": "string" },
+        "buyer": { "type": "string" },
+        "commodity": { "type": "string" },
+        "totalWeight": { "type": "number" },
+        "loadingLaborCost": { "type": "number" },
+        "destination": { "type": "string" },
+        "invoiceNo": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "date", "vehicleNo", "buyer", "commodity", "totalWeight", "invoiceNo", "status"]
+    },
+    "ServiceRecord": {
+      "title": "ServiceRecord",
+      "description": "Service billing record for rice/corn processing (polishing, dryer, etc)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "customerName": { "type": "string" },
+        "serviceType": { "type": "string" },
+        "commodity": { "type": "string" },
+        "weight": { "type": "number" },
+        "ratePerKg": { "type": "number" },
+        "totalFee": { "type": "number" },
+        "paymentStatus": { "type": "string" },
+        "operatorName": { "type": "string" }
+      },
+      "required": ["id", "date", "customerName", "serviceType", "weight", "totalFee", "paymentStatus"]
+    },
+    "DebtRecord": {
+      "title": "DebtRecord",
+      "description": "Supplier Accounts Payable record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "supplierName": { "type": "string" },
+        "description": { "type": "string" },
+        "totalDebt": { "type": "number" },
+        "paidAmount": { "type": "number" },
+        "remainingBalance": { "type": "number" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "date", "supplierName", "totalDebt", "remainingBalance", "status"]
+    },
+    "FinancialRecord": {
+      "title": "FinancialRecord",
+      "description": "General Ledger transaction / Cash mutation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "type": { "type": "string" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "partyName": { "type": "string" },
+        "amount": { "type": "number" },
+        "bankAccount": { "type": "string" }
+      },
+      "required": ["id", "date", "type", "category", "description", "amount", "bankAccount"]
+    },
+    "EmployeeRecord": {
+      "title": "EmployeeRecord",
+      "description": "Staff and labor force profiles",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "phone": { "type": "string" },
+        "ratePerKg": { "type": "number" }
+      },
+      "required": ["id", "name", "role"]
+    },
+    "VehicleRecord": {
+      "title": "VehicleRecord",
+      "description": "Familiar trucks and license numbers plus tare weights",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "policeNo": { "type": "string" },
+        "driverName": { "type": "string" },
+        "vehicleType": { "type": "string" },
+        "tareWeight": { "type": "number" }
+      },
+      "required": ["id", "policeNo", "driverName"]
+    },
+    "CustomerRecord": {
+      "title": "CustomerRecord",
+      "description": "Poles and processing customers profiles",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" }
+      },
+      "required": ["id", "name"]
+    },
+    "FinanceCategoryRecord": {
+      "title": "FinanceCategoryRecord",
+      "description": "Master list of accounting categories",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string" }
+      },
+      "required": ["id", "name", "type"]
+    },
+    "SupplierRecord": {
+      "title": "SupplierRecord",
+      "description": "Active suppliers of corn, paddy, or rice grains",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "mainCommodity": { "type": "string" }
+      },
+      "required": ["id", "name", "mainCommodity"]
+    },
+    "BuyerRecord": {
+      "title": "BuyerRecord",
+      "description": "Outbound buyers of rice and agricultural products",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" }
+      },
+      "required": ["id", "name"]
+    },
+    "CommodityRecord": {
+      "title": "CommodityRecord",
+      "description": "Quality standard for grains and cereals",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "moistureStandard": { "type": "number" },
+        "bagDeductionPercent": { "type": "number" }
+      },
+      "required": ["id", "name", "type"]
+    },
+    "RiceStockRecord": {
+      "title": "RiceStockRecord",
+      "description": "Log of general warehouse stock updates",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "policeNo": { "type": "string" },
+        "description": { "type": "string" },
+        "itemName": { "type": "string" },
+        "price": { "type": "number" },
+        "colly": { "type": "number" },
+        "inWeight": { "type": "number" },
+        "outWeight": { "type": "number" }
+      },
+      "required": ["id", "date", "itemName", "inWeight", "outWeight"]
+    },
+    "BankRecord": {
+      "title": "BankRecord",
+      "description": "Active bank accounts / safe drawers",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "accountName": { "type": "string" },
+        "accountNo": { "type": "string" },
+        "bankName": { "type": "string" },
+        "initialBalance": { "type": "number" }
+      },
+      "required": ["id", "accountName", "bankName", "initialBalance"]
+    },
+    "BrokerRecord": {
+      "title": "BrokerRecord",
+      "description": "Paddy brokers and agents with standard commission",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "commissionRate": { "type": "number" },
+        "address": { "type": "string" }
+      },
+      "required": ["id", "name", "commissionRate"]
+    },
+    "LocationRecord": {
+      "title": "LocationRecord",
+      "description": "Warehouse floors, dryers and bins storage layout",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "capacityKg": { "type": "number" }
+      },
+      "required": ["id", "name", "type"]
+    }
+  },
+  "firestore": {
+    "tickets": { "schema": "WeighbridgeTicket", "description": "Truck weighing scales log" },
+    "inboundRecords": { "schema": "InboundRecord", "description": "Inbound warehouse ledger" },
+    "outboundRecords": { "schema": "OutboundRecord", "description": "Outbound warehouse ledger" },
+    "serviceRecords": { "schema": "ServiceRecord", "description": "Billing logs for polishing and dryers" },
+    "debts": { "schema": "DebtRecord", "description": "Outstanding vendor liabilities (AP)" },
+    "finances": { "schema": "FinancialRecord", "description": "Cash mutation reports" },
+    "employees": { "schema": "EmployeeRecord", "description": "Labor force master list" },
+    "vehicles": { "schema": "VehicleRecord", "description": "Vehicles profile catalog" },
+    "customers": { "schema": "CustomerRecord", "description": "Customers profile catalog" },
+    "financeCategories": { "schema": "FinanceCategoryRecord", "description": "Accounting category filters" },
+    "suppliers": { "schema": "SupplierRecord", "description": "Suppliers database log" },
+    "buyers": { "schema": "BuyerRecord", "description": "Registered buyer list info" },
+    "commodities": { "schema": "CommodityRecord", "description": "Commodity moisture standards list" },
+    "riceStockRecords": { "schema": "RiceStockRecord", "description": "Stock balance card histories" },
+    "banks": { "schema": "BankRecord", "description": "Bank account catalogs" },
+    "brokers": { "schema": "BrokerRecord", "description": "Master registered agents" },
+    "locations": { "schema": "LocationRecord", "description": "Storage physical zones" }
+  }
+}

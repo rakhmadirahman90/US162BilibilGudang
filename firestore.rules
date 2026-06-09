@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // catch-all default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Globals & Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Rules for all 17 collections
+    match /tickets/{ticketId} {
+      allow read, write: if isSignedIn() && isValidId(ticketId);
+    }
+    match /inboundRecords/{inboundId} {
+      allow read, write: if isSignedIn() && isValidId(inboundId);
+    }
+    match /outboundRecords/{outboundId} {
+      allow read, write: if isSignedIn() && isValidId(outboundId);
+    }
+    match /serviceRecords/{serviceId} {
+      allow read, write: if isSignedIn() && isValidId(serviceId);
+    }
+    match /debts/{debtId} {
+      allow read, write: if isSignedIn() && isValidId(debtId);
+    }
+    match /finances/{financeId} {
+      allow read, write: if isSignedIn() && isValidId(financeId);
+    }
+    match /employees/{employeeId} {
+      allow read, write: if isSignedIn() && isValidId(employeeId);
+    }
+    match /vehicles/{vehicleId} {
+      allow read, write: if isSignedIn() && isValidId(vehicleId);
+    }
+    match /customers/{customerId} {
+      allow read, write: if isSignedIn() && isValidId(customerId);
+    }
+    match /financeCategories/{financeCategoryId} {
+      allow read, write: if isSignedIn() && isValidId(financeCategoryId);
+    }
+    match /suppliers/{supplierId} {
+      allow read, write: if isSignedIn() && isValidId(supplierId);
+    }
+    match /buyers/{buyerId} {
+      allow read, write: if isSignedIn() && isValidId(buyerId);
+    }
+    match /commodities/{commodityId} {
+      allow read, write: if isSignedIn() && isValidId(commodityId);
+    }
+    match /riceStockRecords/{riceStockId} {
+      allow read, write: if isSignedIn() && isValidId(riceStockId);
+    }
+    match /banks/{bankId} {
+      allow read, write: if isSignedIn() && isValidId(bankId);
+    }
+    match /brokers/{brokerId} {
+      allow read, write: if isSignedIn() && isValidId(brokerId);
+    }
+    match /locations/{locationId} {
+      allow read, write: if isSignedIn() && isValidId(locationId);
+    }
+  }
+}
