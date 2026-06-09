@@ -741,7 +741,7 @@ export default function App() {
             }`}
           >
             <Wind className="w-4 h-4 text-sky-500" />
-            5. JASA POLES & KIPAS
+            5. JASA POLES, KIPAS & DRYER
           </button>
  
           <button
@@ -970,10 +970,10 @@ export default function App() {
                     <div className="p-1 rounded bg-sky-50 text-sky-700">
                       <Wind className="w-4 h-4" />
                     </div>
-                    <span className="font-bold text-xs text-sky-800">3. JASA POLES & KIPAS</span>
+                    <span className="font-bold text-xs text-sky-800">3. JASA POLES, KIPAS & DRYER</span>
                   </div>
                   <p className="text-xs text-neutral-500 leading-relaxed">
-                    Pengolahan beras poles yang kotor/berdebu dengan peniup kipas angin (blower) untuk mendapatkan beras bersih kualitas super, ampas dedak, dan rekapan jasa palka.
+                    Pengolahan beras poles, pembersihan blower kipas, dan pengeringan jagung (dryer) untuk mendapatkan kualitas bersih.
                   </p>
                 </div>
                 <button

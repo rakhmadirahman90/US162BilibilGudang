@@ -47,7 +47,7 @@ export default function ServicesModule({
 
   // Form states
   const [customerName, setCustomerName] = useState("");
-  const [serviceType, setServiceType] = useState<'POLES' | 'KIPAS' | 'POLES & KIPAS'>('POLES & KIPAS');
+  const [serviceType, setServiceType] = useState<'POLES' | 'KIPAS' | 'POLES & KIPAS' | 'DRYER'>('POLES & KIPAS');
   const [commodity, setCommodity] = useState("Beras Medium B+");
   const [weight, setWeight] = useState(10000);
   const [ratePerKg, setRatePerKg] = useState(150); // standard rate is Rp 150 per kg
@@ -55,14 +55,16 @@ export default function ServicesModule({
   const [operatorName, setOperatorName] = useState("Wahyu & Tim");
 
   // Dynamically set standard rate when service moves
-  const handleServiceTypeChange = (type: 'POLES' | 'KIPAS' | 'POLES & KIPAS') => {
+  const handleServiceTypeChange = (type: 'POLES' | 'KIPAS' | 'POLES & KIPAS' | 'DRYER') => {
     setServiceType(type);
     if (type === 'POLES & KIPAS') {
       setRatePerKg(150);
     } else if (type === 'POLES') {
       setRatePerKg(100);
-    } else {
+    } else if (type === 'KIPAS') {
       setRatePerKg(80); // kipas saja
+    } else {
+      setRatePerKg(120); // dryer saja
     }
   };
 
@@ -226,6 +228,7 @@ export default function ServicesModule({
                   <option value="POLES & KIPAS">POLES & KIPAS (Blower + Polish) 🌾🌪️</option>
                   <option value="POLES">POLES (Pembersihan Saja) 🌾</option>
                   <option value="KIPAS">KIPAS (Pemisah Serpihan) 🌪️</option>
+                  <option value="DRYER">DRYER (Pengeringan Jagung) 🔥🌽</option>
                 </select>
               </div>
 

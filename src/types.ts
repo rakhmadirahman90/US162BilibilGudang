@@ -60,7 +60,7 @@ export interface ServiceRecord {
   id: string;
   date: string;
   customerName: string;
-  serviceType: 'POLES' | 'KIPAS' | 'POLES & KIPAS';
+  serviceType: 'POLES' | 'KIPAS' | 'POLES & KIPAS' | 'DRYER';
   commodity: string;
   weight: number; // in kg
   ratePerKg: number; // e.g., Rp 150/kg
