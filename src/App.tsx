@@ -18,7 +18,10 @@ import {
   SupplierRecord,
   BuyerRecord,
   CommodityRecord,
-  RiceStockRecord
+  RiceStockRecord,
+  BankRecord,
+  BrokerRecord,
+  LocationRecord
 } from './types';
 import { 
   initialWeighbridgeTickets, 
@@ -32,7 +35,10 @@ import {
   initialSuppliers,
   initialBuyers,
   initialCommodities,
-  initialRiceStockRecords
+  initialRiceStockRecords,
+  initialBankAccounts,
+  initialBrokers,
+  initialStorageLocations
 } from './data';
 
 // Import our modular subcomponents
@@ -297,6 +303,21 @@ export default function App() {
     return saved ? JSON.parse(saved) : initialRiceStockRecords;
   });
 
+  const [banks, setBanks] = useState<BankRecord[]>(() => {
+    const saved = localStorage.getItem('bilibili_banks');
+    return saved ? JSON.parse(saved) : initialBankAccounts;
+  });
+
+  const [brokers, setBrokers] = useState<BrokerRecord[]>(() => {
+    const saved = localStorage.getItem('bilibili_brokers');
+    return saved ? JSON.parse(saved) : initialBrokers;
+  });
+
+  const [locations, setLocations] = useState<LocationRecord[]>(() => {
+    const saved = localStorage.getItem('bilibili_locations');
+    return saved ? JSON.parse(saved) : initialStorageLocations;
+  });
+
   // Active navigational tab
   const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE' | 'STOK_BERAS' | 'LAPORAN' | 'DATABASE'>('DASHBOARD');
 
@@ -343,6 +364,16 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('bilibili_finances', JSON.stringify(finances));
   }, [finances]);
+
+  // Real-time clock state
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // --- LOCAL TOAST NOTIFICATION STATE ---
   interface ToastItem {
@@ -409,6 +440,18 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('bilibili_rice_stock_v2', JSON.stringify(riceStockRecords));
   }, [riceStockRecords]);
+
+  useEffect(() => {
+    localStorage.setItem('bilibili_banks', JSON.stringify(banks));
+  }, [banks]);
+
+  useEffect(() => {
+    localStorage.setItem('bilibili_brokers', JSON.stringify(brokers));
+  }, [brokers]);
+
+  useEffect(() => {
+    localStorage.setItem('bilibili_locations', JSON.stringify(locations));
+  }, [locations]);
 
   // --- COMPONENT ACTION CALLBACKS ---
   const handleAddTicket = (tk: WeighbridgeTicket) => {
@@ -637,10 +680,15 @@ export default function App() {
           {/* Time, Active status & Visual Theme Switcher */}
           <div className="flex flex-wrap items-center gap-3.5 text-xs font-sans">
             
-            {/* Real-time clock */}
-            <div className={`hidden sm:flex px-3 py-1.5 rounded border items-center gap-1.5 font-mono text-[11px] transition-all duration-300 ${theme.statusBoxBg} ${theme.statusBoxBorder}`}>
+            {/* Real-time clock & Date */}
+            <div className={`hidden sm:flex px-3 py-1.5 rounded border items-center gap-2 font-mono text-[11px] transition-all duration-300 ${theme.statusBoxBg} ${theme.statusBoxBorder}`}>
               <Clock className="w-3.5 h-3.5 text-yellow-300 animate-spin-slow" />
-              <span>{new Date().toLocaleTimeString('id-US', { hour12: false })} WITA</span>
+              <div className="flex flex-col items-start leading-tight">
+                <span className="text-[9px] opacity-70 uppercase tracking-tighter">
+                  {currentTime.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+                </span>
+                <span className="font-bold">{currentTime.toLocaleTimeString('id-US', { hour12: false })} WITA</span>
+              </div>
             </div>
 
             {/* Premium Theme Selector Picker Dropdown */}
@@ -1217,6 +1265,12 @@ export default function App() {
             setEmployees={setEmployees}
             commodities={commodities}
             setCommodities={setCommodities}
+            banks={banks}
+            setBanks={setBanks}
+            brokers={brokers}
+            setBrokers={setBrokers}
+            locations={locations}
+            setLocations={setLocations}
           />
         )}
 

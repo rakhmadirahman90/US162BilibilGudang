@@ -4,7 +4,10 @@ import {
   SupplierRecord, 
   BuyerRecord, 
   EmployeeRecord, 
-  CommodityRecord 
+  CommodityRecord,
+  BankRecord,
+  BrokerRecord,
+  LocationRecord
 } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import ConfirmModal from './ConfirmModal';
@@ -21,7 +24,10 @@ import {
   Check, 
   X,
   Scale,
-  Database
+  Database,
+  Landmark,
+  UserCheck,
+  MapPin
 } from 'lucide-react';
 
 interface DatabaseMasterModuleProps {
@@ -35,6 +41,12 @@ interface DatabaseMasterModuleProps {
   setEmployees: React.Dispatch<React.SetStateAction<EmployeeRecord[]>>;
   commodities: CommodityRecord[];
   setCommodities: React.Dispatch<React.SetStateAction<CommodityRecord[]>>;
+  banks: BankRecord[];
+  setBanks: React.Dispatch<React.SetStateAction<BankRecord[]>>;
+  brokers: BrokerRecord[];
+  setBrokers: React.Dispatch<React.SetStateAction<BrokerRecord[]>>;
+  locations: LocationRecord[];
+  setLocations: React.Dispatch<React.SetStateAction<LocationRecord[]>>;
 }
 
 export default function DatabaseMasterModule({
@@ -47,11 +59,17 @@ export default function DatabaseMasterModule({
   employees,
   setEmployees,
   commodities,
-  setCommodities
+  setCommodities,
+  banks,
+  setBanks,
+  brokers,
+  setBrokers,
+  locations,
+  setLocations
 }: DatabaseMasterModuleProps) {
   const { t, language } = useLanguage();
   // Tabs for the database master
-  type DbTab = 'VEHICLES' | 'SUPPLIERS' | 'BUYERS' | 'EMPLOYEES' | 'COMMODITIES';
+  type DbTab = 'VEHICLES' | 'SUPPLIERS' | 'BUYERS' | 'EMPLOYEES' | 'COMMODITIES' | 'BANKS' | 'BROKERS' | 'LOCATIONS';
   const [activeSubTab, setActiveSubTab] = useState<DbTab>('VEHICLES');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -108,6 +126,23 @@ export default function DatabaseMasterModule({
   const [commodityMoisture, setCommodityMoisture] = useState<number>(14.0);
   const [commodityBagDeduction, setCommodityBagDeduction] = useState<number>(1.0);
 
+  // Bank
+  const [bankAccountName, setBankAccountName] = useState('');
+  const [bankAccountNo, setBankAccountNo] = useState('');
+  const [bankName, setBankName] = useState('');
+  const [bankInitialBalance, setBankInitialBalance] = useState<number>(0);
+
+  // Broker
+  const [brokerName, setBrokerName] = useState('');
+  const [brokerPhone, setBrokerPhone] = useState('');
+  const [brokerAddress, setBrokerAddress] = useState('');
+  const [brokerCommRate, setBrokerCommRate] = useState<number>(0);
+
+  // Location
+  const [locName, setLocName] = useState('');
+  const [locType, setLocType] = useState<'SILO' | 'FLOOR' | 'DRYER' | 'POLISHING'>('SILO');
+  const [locCapacity, setLocCapacity] = useState<number>(0);
+
   // Handler helpers
   const triggerToast = (msg: string, type: 'success' | 'error' | 'info' | 'warning' = 'success') => {
     (window as any).__showToast?.(msg, type);
@@ -143,6 +178,20 @@ export default function DatabaseMasterModule({
     setCommodityType('JAGUNG');
     setCommodityMoisture(14.0);
     setCommodityBagDeduction(1.0);
+
+    setBankAccountName('');
+    setBankAccountNo('');
+    setBankName('');
+    setBankInitialBalance(0);
+
+    setBrokerName('');
+    setBrokerPhone('');
+    setBrokerAddress('');
+    setBrokerCommRate(0);
+
+    setLocName('');
+    setLocType('SILO');
+    setLocCapacity(0);
   };
 
   // --- VEHICLE ACTIONS ---
@@ -498,6 +547,193 @@ export default function DatabaseMasterModule({
     });
   };
 
+  // --- BANK ACTIONS ---
+  const handleSaveBank = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bankAccountName.trim() || !bankName.trim()) {
+      triggerToast('Nama Akun dan Bank wajib diisi!', 'error');
+      return;
+    }
+    const executeSave = () => {
+      if (editingId) {
+        setBanks(prev => prev.map(b => b.id === editingId ? {
+          ...b,
+          accountName: bankAccountName.trim(),
+          accountNo: bankAccountNo.trim(),
+          bankName: bankName.trim(),
+          initialBalance: Number(bankInitialBalance)
+        } : b));
+        triggerToast(`Data Bank ${bankAccountName} diperbarui!`, 'success');
+      } else {
+        const newBank: BankRecord = {
+          id: `bank-${Date.now()}`,
+          accountName: bankAccountName.trim(),
+          accountNo: bankAccountNo.trim(),
+          bankName: bankName.trim(),
+          initialBalance: Number(bankInitialBalance)
+        };
+        setBanks(prev => [newBank, ...prev]);
+        triggerToast(`Akun Bank ${bankAccountName} berhasil didaftarkan!`, 'success');
+      }
+      handleCancel();
+    };
+    setConfirmModal({
+      isOpen: true,
+      title: editingId ? 'Konfirmasi Ubah Rekening' : 'Konfirmasi Pendaftaran Rekening',
+      message: editingId 
+        ? `Apakah Anda yakin ingin menyimpan perubahan data untuk rekening ${bankAccountName}?`
+        : `Apakah Anda yakin ingin mendaftarkan rekening baru ${bankAccountName}?`,
+      type: editingId ? 'EDIT' : 'ADD',
+      onConfirm: () => { executeSave(); closeConfirm(); }
+    });
+  };
+
+  const handleEditBank = (b: BankRecord) => {
+    setEditingId(b.id);
+    setBankAccountName(b.accountName);
+    setBankAccountNo(b.accountNo || '');
+    setBankName(b.bankName);
+    setBankInitialBalance(b.initialBalance);
+    setIsAddingNew(false);
+  };
+
+  const handleDeleteBank = (id: string, name: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Konfirmasi Hapus Rekening',
+      message: `Hapus rekening ${name}? Catatan finansial yang sudah ada mungkin akan terpengaruh.`,
+      type: 'DELETE',
+      onConfirm: () => {
+        setBanks(prev => prev.filter(b => b.id !== id));
+        triggerToast(`Rekening ${name} dihapus.`, 'success');
+        closeConfirm();
+      }
+    });
+  };
+
+  // --- BROKER ACTIONS ---
+  const handleSaveBroker = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!brokerName.trim()) {
+      triggerToast('Nama Makelar wajib diisi!', 'error');
+      return;
+    }
+    const executeSave = () => {
+      if (editingId) {
+        setBrokers(prev => prev.map(b => b.id === editingId ? {
+          ...b,
+          name: brokerName.trim(),
+          phone: brokerPhone.trim(),
+          address: brokerAddress.trim(),
+          commissionRate: Number(brokerCommRate)
+        } : b));
+        triggerToast(`Data Broker ${brokerName} diperbarui!`, 'success');
+      } else {
+        const newBroker: BrokerRecord = {
+          id: `bro-${Date.now()}`,
+          name: brokerName.trim(),
+          phone: brokerPhone.trim(),
+          address: brokerAddress.trim(),
+          commissionRate: Number(brokerCommRate)
+        };
+        setBrokers(prev => [newBroker, ...prev]);
+        triggerToast(`Makelar ${brokerName} berhasil didaftarkan!`, 'success');
+      }
+      handleCancel();
+    };
+    setConfirmModal({
+      isOpen: true,
+      title: editingId ? 'Konfirmasi Ubah Makelar' : 'Konfirmasi Pendaftaran Makelar',
+      message: editingId 
+        ? `Apakah Anda yakin ingin menyimpan perubahan data makelar ${brokerName}?`
+        : `Apakah Anda yakin ingin mendaftarkan makelar baru ${brokerName}?`,
+      type: editingId ? 'EDIT' : 'ADD',
+      onConfirm: () => { executeSave(); closeConfirm(); }
+    });
+  };
+
+  const handleEditBroker = (b: BrokerRecord) => {
+    setEditingId(b.id);
+    setBrokerName(b.name);
+    setBrokerPhone(b.phone || '');
+    setBrokerAddress(b.address || '');
+    setBrokerCommRate(b.commissionRate);
+    setIsAddingNew(false);
+  };
+
+  const handleDeleteBroker = (id: string, name: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Konfirmasi Hapus Makelar',
+      message: `Hapus makelar ${name} dari sistem?`,
+      type: 'DELETE',
+      onConfirm: () => {
+        setBrokers(prev => prev.filter(b => b.id !== id));
+        triggerToast(`Makelar ${name} dihapus.`, 'success');
+        closeConfirm();
+      }
+    });
+  };
+
+  // --- LOCATION ACTIONS ---
+  const handleSaveLocation = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!locName.trim()) {
+      triggerToast('Nama Lokasi wajib diisi!', 'error');
+      return;
+    }
+    const executeSave = () => {
+      if (editingId) {
+        setLocations(prev => prev.map(l => l.id === editingId ? {
+          ...l,
+          name: locName.trim(),
+          type: locType,
+          capacityKg: Number(locCapacity)
+        } : l));
+        triggerToast(`Lokasi ${locName} diperbarui!`, 'success');
+      } else {
+        const newLoc: LocationRecord = {
+          id: `loc-${Date.now()}`,
+          name: locName.trim(),
+          type: locType,
+          capacityKg: Number(locCapacity)
+        };
+        setLocations(prev => [newLoc, ...prev]);
+        triggerToast(`Lokasi ${locName} ditambahkan ke database!`, 'success');
+      }
+      handleCancel();
+    };
+    setConfirmModal({
+      isOpen: true,
+      title: editingId ? 'Konfirmasi Ubah Lokasi' : 'Konfirmasi Pendaftaran Lokasi',
+      message: editingId ? `Simpan perubahan lokasi ${locName}?` : `Daftarkan lokasi baru ${locName}?`,
+      type: editingId ? 'EDIT' : 'ADD',
+      onConfirm: () => { executeSave(); closeConfirm(); }
+    });
+  };
+
+  const handleEditLocation = (l: LocationRecord) => {
+    setEditingId(l.id);
+    setLocName(l.name);
+    setLocType(l.type);
+    setLocCapacity(l.capacityKg || 0);
+    setIsAddingNew(false);
+  };
+
+  const handleDeleteLocation = (id: string, name: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Konfirmasi Hapus Lokasi',
+      message: `Hapus lokasi penyimpanan ${name}?`,
+      type: 'DELETE',
+      onConfirm: () => {
+        setLocations(prev => prev.filter(l => l.id !== id));
+        triggerToast(`Lokasi ${name} dihapus.`, 'success');
+        closeConfirm();
+      }
+    });
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-md border border-neutral-100 overflow-hidden font-sans">
       
@@ -590,6 +826,42 @@ export default function DatabaseMasterModule({
         >
           <Layers className="w-3.5 h-3.5" />
           📦 Daftar Barang / Komoditas ({commodities.length})
+        </button>
+
+        <button
+          onClick={() => { setActiveSubTab('BANKS'); setSearchQuery(''); handleCancel(); }}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            activeSubTab === 'BANKS'
+              ? 'bg-rose-900 text-white shadow-sm'
+              : 'text-neutral-600 hover:bg-neutral-100'
+          }`}
+        >
+          <Landmark className="w-3.5 h-3.5" />
+          🏦 Saluran Rekening / Bank ({banks.length})
+        </button>
+
+        <button
+          onClick={() => { setActiveSubTab('BROKERS'); setSearchQuery(''); handleCancel(); }}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            activeSubTab === 'BROKERS'
+              ? 'bg-rose-900 text-white shadow-sm'
+              : 'text-neutral-600 hover:bg-neutral-100'
+          }`}
+        >
+          <UserCheck className="w-3.5 h-3.5" />
+          🤝 Makelar / Broker ({brokers.length})
+        </button>
+
+        <button
+          onClick={() => { setActiveSubTab('LOCATIONS'); setSearchQuery(''); handleCancel(); }}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            activeSubTab === 'LOCATIONS'
+              ? 'bg-rose-900 text-white shadow-sm'
+              : 'text-neutral-600 hover:bg-neutral-100'
+          }`}
+        >
+          <MapPin className="w-3.5 h-3.5" />
+          📍 Lokasi / Sektor Gudang ({locations.length})
         </button>
       </div>
 
@@ -874,6 +1146,156 @@ export default function DatabaseMasterModule({
               </form>
             )}
 
+            {/* Form: BANKS */}
+            {activeSubTab === 'BANKS' && (
+              <form onSubmit={handleSaveBank} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Nama Akun / Alias</label>
+                  <input
+                    type="text"
+                    required
+                    value={bankAccountName}
+                    onChange={(e) => setBankAccountName(e.target.value)}
+                    className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-bold focus:border-indigo-500 outline-none text-neutral-800"
+                    placeholder="Contoh: Mandiri Bilibili 162"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Nama Bank</label>
+                  <input
+                    type="text"
+                    required
+                    value={bankName}
+                    onChange={(e) => setBankName(e.target.value)}
+                    className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs focus:border-indigo-500 outline-none text-neutral-800"
+                    placeholder="Contoh: Mandiri / BRI / Tunai"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">No. Rekening</label>
+                  <input
+                    type="text"
+                    value={bankAccountNo}
+                    onChange={(e) => setBankAccountNo(e.target.value)}
+                    className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-mono focus:border-indigo-500 outline-none text-neutral-800"
+                    placeholder="Contoh: 162-xx-xxx"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Saldo Awal (Rp)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      value={bankInitialBalance || ''}
+                      onChange={(e) => setBankInitialBalance(Number(e.target.value))}
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-mono focus:border-indigo-500 outline-none text-neutral-800"
+                      placeholder="Contoh: 1000000"
+                    />
+                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
+                      <Check className="w-3.5 h-3.5" /> SIMPAN
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+
+            {/* Form: BROKERS */}
+            {activeSubTab === 'BROKERS' && (
+              <form onSubmit={handleSaveBroker} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Nama Makelar</label>
+                  <input
+                    type="text"
+                    required
+                    value={brokerName}
+                    onChange={(e) => setBrokerName(e.target.value)}
+                    className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-bold focus:border-indigo-500 outline-none text-neutral-800"
+                    placeholder="Contoh: Pak Ridwan"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Nomor HP</label>
+                  <input
+                    type="text"
+                    value={brokerPhone}
+                    onChange={(e) => setBrokerPhone(e.target.value)}
+                    className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs focus:border-indigo-500 outline-none text-neutral-800"
+                    placeholder="08xx-xxxx"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Tarif Komisi (Rp / Kg)</label>
+                  <input
+                    type="number"
+                    value={brokerCommRate || ''}
+                    onChange={(e) => setBrokerCommRate(Number(e.target.value))}
+                    className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-mono focus:border-indigo-500 outline-none text-neutral-800"
+                    placeholder="Contoh: 50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Alamat / Domisili</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={brokerAddress}
+                      onChange={(e) => setBrokerAddress(e.target.value)}
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs focus:border-indigo-500 outline-none text-neutral-800"
+                      placeholder="Contoh: Pinrang"
+                    />
+                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
+                      <Check className="w-3.5 h-3.5" /> SIMPAN
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+
+            {/* Form: LOCATIONS */}
+            {activeSubTab === 'LOCATIONS' && (
+              <form onSubmit={handleSaveLocation} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Nama Lokasi Gudang/Sektor</label>
+                  <input
+                    type="text"
+                    required
+                    value={locName}
+                    onChange={(e) => setLocName(e.target.value)}
+                    className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-bold focus:border-indigo-500 outline-none text-neutral-800"
+                    placeholder="Contoh: Sektor Timur (Silo 1)"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Tipe Fasilitas</label>
+                  <select
+                    value={locType}
+                    onChange={(e) => setLocType(e.target.value as any)}
+                    className="w-full bg-white border border-neutral-300 rounded-lg px-2 py-2 text-xs font-semibold focus:border-indigo-500 outline-none text-neutral-800"
+                  >
+                    <option value="SILO">SILO (Penyimpanan Vertikal)</option>
+                    <option value="FLOOR">Lantai Gudang (Flat House)</option>
+                    <option value="DRYER">Lantai Jemur / Dryer</option>
+                    <option value="POLISHING">Area Produksi / Poles</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Kapasitas Maksimal (Kg)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      value={locCapacity || ''}
+                      onChange={(e) => setLocCapacity(Number(e.target.value))}
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-mono focus:border-indigo-500 outline-none text-neutral-800"
+                      placeholder="Contoh: 500000"
+                    />
+                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
+                      <Check className="w-3.5 h-3.5" /> SIMPAN
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+
           </div>
         )}
 
@@ -895,6 +1317,9 @@ export default function DatabaseMasterModule({
             {activeSubTab === 'BUYERS' && `Total: ${buyers.length} Buyer / Industri`}
             {activeSubTab === 'EMPLOYEES' && `Total: ${employees.length} Pegawai & Makelar`}
             {activeSubTab === 'COMMODITIES' && `Total: ${commodities.length} Jenis Produk`}
+            {activeSubTab === 'BANKS' && `Total: ${banks.length} Saluran Kas`}
+            {activeSubTab === 'BROKERS' && `Total: ${brokers.length} Makelar Aktif`}
+            {activeSubTab === 'LOCATIONS' && `Total: ${locations.length} Lokasi Operasional`}
           </div>
         </div>
 
@@ -1119,6 +1544,135 @@ export default function DatabaseMasterModule({
                         </button>
                         <button 
                           onClick={() => handleDeleteCommodity(c.id, c.name)}
+                          className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* GRID: BANKS */}
+        {activeSubTab === 'BANKS' && (
+          <div className="overflow-x-auto rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                  <th className="p-3 font-semibold">Nama Akun</th>
+                  <th className="p-3 font-semibold">Bank</th>
+                  <th className="p-3 font-semibold">No. Rekening</th>
+                  <th className="p-3 font-semibold text-right">Saldo Awal</th>
+                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-150">
+                {banks
+                  .filter(b => b.accountName.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(b => (
+                    <tr key={b.id} className="hover:bg-slate-50 text-neutral-800">
+                      <td className="p-3 font-extrabold text-neutral-900">{b.accountName}</td>
+                      <td className="p-3 font-semibold">{b.bankName}</td>
+                      <td className="p-3 font-mono">{b.accountNo || '-'}</td>
+                      <td className="p-3 text-right font-mono font-bold text-emerald-800">Rp {b.initialBalance?.toLocaleString('id-ID')}</td>
+                      <td className="p-3 text-center flex items-center justify-center gap-1.5">
+                        <button 
+                          onClick={() => handleEditBank(b)}
+                          className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteBank(b.id, b.accountName)}
+                          className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* GRID: BROKERS */}
+        {activeSubTab === 'BROKERS' && (
+          <div className="overflow-x-auto rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                  <th className="p-3 font-semibold">Nama Makelar</th>
+                  <th className="p-3 font-semibold">No. HP</th>
+                  <th className="p-3 font-semibold">Wilayah / Domisili</th>
+                  <th className="p-3 font-semibold text-right">Tarif Komisi (Rp/Kg)</th>
+                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-150">
+                {brokers
+                  .filter(b => b.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(b => (
+                    <tr key={b.id} className="hover:bg-slate-50 text-neutral-800">
+                      <td className="p-3 font-extrabold text-neutral-900">{b.name}</td>
+                      <td className="p-3 font-mono">{b.phone || '-'}</td>
+                      <td className="p-3 text-neutral-600">{b.address || '-'}</td>
+                      <td className="p-3 text-right font-mono font-bold text-rose-700">Rp {b.commissionRate} / Kg</td>
+                      <td className="p-3 text-center flex items-center justify-center gap-1.5">
+                        <button 
+                          onClick={() => handleEditBroker(b)}
+                          className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteBroker(b.id, b.name)}
+                          className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* GRID: LOCATIONS */}
+        {activeSubTab === 'LOCATIONS' && (
+          <div className="overflow-x-auto rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                  <th className="p-3 font-semibold">Lokasi / Fasilitas</th>
+                  <th className="p-3 font-semibold text-center">Tipe Unit</th>
+                  <th className="p-3 font-semibold text-right">Kapasitas (Kg)</th>
+                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-150">
+                {locations
+                  .filter(l => l.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(l => (
+                    <tr key={l.id} className="hover:bg-slate-50 text-neutral-800">
+                      <td className="p-3 font-extrabold text-indigo-900">{l.name}</td>
+                      <td className="p-3 text-center font-bold text-[10px] text-neutral-500 uppercase">{l.type}</td>
+                      <td className="p-3 text-right font-mono font-bold text-neutral-700">
+                        {l.capacityKg ? `${l.capacityKg.toLocaleString('id-ID')} Kg` : '-'}
+                      </td>
+                      <td className="p-3 text-center flex items-center justify-center gap-1.5">
+                        <button 
+                          onClick={() => handleEditLocation(l)}
+                          className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteLocation(l.id, l.name)}
                           className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />

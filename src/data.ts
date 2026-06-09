@@ -15,7 +15,10 @@ import {
   SupplierRecord,
   BuyerRecord,
   CommodityRecord,
-  RiceStockRecord
+  RiceStockRecord,
+  BankRecord,
+  BrokerRecord,
+  LocationRecord
 } from './types';
 
 // Standard Corn Moisture Deduction (Refaksi KA Jagung) Table lookup helper
@@ -376,5 +379,25 @@ export const initialRiceStockRecords: RiceStockRecord[] = [
   { id: "rice-14", date: "2026-05-19", policeNo: "-", description: "ANTI", itemName: "BERAS", price: 0, colly: 0, inWeight: 0, outWeight: 400 },
   { id: "rice-15", date: "2026-05-18", policeNo: "DD 8506 SU", description: "ALEX", itemName: "BERAS", price: 13475, colly: 200, inWeight: 10000, outWeight: 0 },
   { id: "rice-16", date: "2026-05-19", policeNo: "DD 8506 SU", description: "ALEX", itemName: "BERAS", price: 13475, colly: 0, inWeight: 10030, outWeight: 0 }
+];
+
+export const initialBankAccounts: BankRecord[] = [
+  { id: 'bank-1', accountName: 'KAS TUNAI GUDANG', bankName: 'TUNAI', initialBalance: 50000000 },
+  { id: 'bank-2', accountName: 'MANDIRI BILIBILI 162', accountNo: '162-00-112233-4', bankName: 'MANDIRI', initialBalance: 250000000 },
+  { id: 'bank-3', accountName: 'BRI OPERASIONAL', accountNo: '0012-01-000222-30-1', bankName: 'BRI', initialBalance: 125000000 }
+];
+
+export const initialBrokers: BrokerRecord[] = [
+  { id: 'bro-1', name: 'Pak Ridwan', phone: '0852-4411-2299', commissionRate: 50, address: 'Pinrang' },
+  { id: 'bro-2', name: 'H. Kamal', phone: '0812-9900-1122', commissionRate: 40, address: 'Sidrap' },
+  { id: 'bro-3', name: 'Ucu Broker', phone: '0853-2211-1622', commissionRate: 60, address: 'Suppa' }
+];
+
+export const initialStorageLocations: LocationRecord[] = [
+  { id: 'loc-1', name: 'Sektor Timur (Silo 1)', type: 'SILO', capacityKg: 500000 },
+  { id: 'loc-2', name: 'Sektor Barat (Gudang B)', type: 'FLOOR', capacityKg: 1000000 },
+  { id: 'loc-3', name: 'Kavling Gabah Basah 1', type: 'FLOOR', capacityKg: 300000 },
+  { id: 'loc-4', name: 'Silo Jagung Utama', type: 'SILO', capacityKg: 1500000 },
+  { id: 'loc-5', name: 'Area Dryer & Poles', type: 'DRYER', capacityKg: 0 }
 ];
 

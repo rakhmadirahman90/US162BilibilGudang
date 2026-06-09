@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { WeighbridgeTicket, VehicleRecord, BuyerRecord, SupplierRecord } from '../types';
-import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2, Download, Clock, ChevronRight, Truck } from 'lucide-react';
+import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2, Edit3, Download, Clock, ChevronRight, Truck, Save, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { exportToCSV, printPDFReport, printSlip } from '../utils/exportHelper';
@@ -77,7 +77,15 @@ export default function WeighbridgeModule({
   }, [errorMessage]);
   const [printTicket, setPrintTicket] = useState<WeighbridgeTicket | null>(null);
   const [isCreatingNew, setIsCreatingNew] = useState<boolean>(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editingTicketId, setEditingTicketId] = useState<string | null>(null);
+  const [staffName, setStaffName] = useState<string>(() => {
+    return localStorage.getItem('bilibili_staff_name') || "Wahyu & Tim";
+  });
+
+  useEffect(() => {
+    localStorage.setItem('bilibili_staff_name', staffName);
+  }, [staffName]);
 
   // Generate sequence No
   useEffect(() => {
@@ -105,13 +113,19 @@ export default function WeighbridgeModule({
   // Helper values
   const currentGross = selectedTicket ? selectedTicket.timbang1Weight : 0;
   const currentTare = selectedTicket ? selectedTicket.timbang2Weight : 0;
-  const computedNet = selectedTicket 
-    ? calculateNetWeight(currentGross, currentTare, selectedTicket.bagDeductionPercent, selectedTicket.refaksiPercent)
+  const computedNet = (selectedTicket || isCreatingNew || isEditing) 
+    ? calculateNetWeight(
+        currentGross || simulatorWeight, 
+        currentTare, 
+        bagDeductionPercent, 
+        refaksiPercent
+      )
     : 0;
 
   // Handle setting a draft active
   const startNewTicketDraft = () => {
     setIsCreatingNew(true);
+    setIsEditing(false);
     setPoliceNo("DP ");
     setGoodsName("BERAS");
     setAgency("");
@@ -399,17 +413,27 @@ export default function WeighbridgeModule({
             {t.operationalButtons}
           </h3>
           <div className="flex flex-col gap-2">
-            <button
-              onClick={startNewTicketDraft}
-              className={`w-full py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition cursor-pointer ${
-                isCreatingNew 
-                  ? 'bg-neutral-200 text-neutral-600' 
-                  : 'bg-emerald-600 text-white hover:bg-emerald-500'
-              }`}
-            >
-              <PlusCircle className="w-4 h-4" />
-              {t.startNewWeighing}
-            </button>
+              {isEditing ? (
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="w-full py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition cursor-pointer bg-red-100 text-red-600 hover:bg-red-200"
+                >
+                  <XCircle className="w-4 h-4" />
+                  BATAL EDIT
+                </button>
+              ) : (
+                <button
+                  onClick={startNewTicketDraft}
+                  className={`w-full py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition cursor-pointer ${
+                    isCreatingNew 
+                      ? 'bg-neutral-200 text-neutral-600' 
+                      : 'bg-emerald-600 text-white hover:bg-emerald-500'
+                  }`}
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  {t.startNewWeighing}
+                </button>
+              )}
 
             <button
               onClick={handleTimbang1}
@@ -495,7 +519,7 @@ export default function WeighbridgeModule({
                 <div className="flex items-center">
                   <span className="w-32 text-[#a0c5fc] inline-block">{t.ticketNumberLabel}</span>
                   <span className="mr-2 text-[#a0c5fc]">:</span>
-                  {isCreatingNew ? (
+                  {(isCreatingNew || isEditing) ? (
                     <input 
                       type="text" 
                       value={ticketNo} 
@@ -510,7 +534,7 @@ export default function WeighbridgeModule({
                 <div className="flex items-center">
                   <span className="w-32 text-[#a0c5fc] inline-block">{t.plateNumberLabel}</span>
                   <span className="mr-2 text-[#a0c5fc]">:</span>
-                  {isCreatingNew ? (
+                  {(isCreatingNew || isEditing) ? (
                     <>
                       <input 
                         type="text" 
@@ -518,9 +542,11 @@ export default function WeighbridgeModule({
                         onChange={(e) => {
                           const val = e.target.value.toUpperCase();
                           setPoliceNo(val);
-                          const matched = vehicles.find(v => v.policeNo === val);
-                          if (matched && matched.driverName) {
-                            setNotes(prev => prev ? prev : `Sopir: ${matched.driverName} (${matched.vehicleType})`);
+                          if (isCreatingNew) {
+                            const matched = vehicles.find(v => v.policeNo === val);
+                            if (matched && matched.driverName) {
+                              setNotes(prev => prev ? prev : `Sopir: ${matched.driverName} (${matched.vehicleType})`);
+                            }
                           }
                         }}
                         className="bg-[#122345] border border-[#2d4d8c] text-[#efefef] px-2 py-0.5 rounded text-sm w-36 outline-none focus:border-yellow-400"
@@ -541,7 +567,7 @@ export default function WeighbridgeModule({
                 <div className="flex items-center">
                   <span className="w-32 text-[#a0c5fc] inline-block">{t.goodsNameLabel}</span>
                   <span className="mr-2 text-[#a0c5fc]">:</span>
-                  {isCreatingNew ? (
+                  {(isCreatingNew || isEditing) ? (
                     <select 
                       value={goodsName} 
                       onChange={(e) => setGoodsName(e.target.value)}
@@ -561,7 +587,7 @@ export default function WeighbridgeModule({
                 <div className="flex items-center">
                   <span className="w-32 text-[#a0c5fc] inline-block">{t.agencyLabel}</span>
                   <span className="mr-2 text-[#a0c5fc]">:</span>
-                  {isCreatingNew ? (
+                  {(isCreatingNew || isEditing) ? (
                     <>
                       <input 
                         type="text" 
@@ -629,7 +655,7 @@ export default function WeighbridgeModule({
                 <div className="flex items-center justify-between border-b border-[#2d4d8c]/60 pb-1.5">
                   <span className="text-[#a0c5fc]">{t.bagDeductionLabel}</span>
                   <div className="flex items-center">
-                    {isCreatingNew ? (
+                    {(isCreatingNew || isEditing) ? (
                       <input 
                         type="number" 
                         step="0.01"
@@ -647,7 +673,7 @@ export default function WeighbridgeModule({
                 <div className="flex items-center justify-between border-b border-[#2d4d8c]/60 pb-1.5">
                   <span className="text-[#a0c5fc]">{t.refaksiLabel}</span>
                   <div className="flex items-center">
-                    {isCreatingNew ? (
+                    {(isCreatingNew || isEditing) ? (
                       <input 
                         type="number" 
                         step="0.1"
@@ -672,7 +698,7 @@ export default function WeighbridgeModule({
 
                 <div className="mt-2">
                   <span className="text-xs text-[#a0c5fc] block mb-1">{t.notesLabel} :</span>
-                  {isCreatingNew ? (
+                  {(isCreatingNew || isEditing) ? (
                     <textarea 
                       value={notes} 
                       onChange={(e) => setNotes(e.target.value)}
@@ -699,14 +725,55 @@ export default function WeighbridgeModule({
             )}
 
             {/* Simulated Keyboard Status bar at bottom */}
-            <div className="border-t-2 border-[#2d4d8c] pt-2 mt-4 flex flex-wrap gap-2 md:gap-x-4 text-[10px] text-cyan-200 justify-center">
-              <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F2-Timbang1</span>
-              <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F3-Timbang2</span>
-              <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F4-Koreksi</span>
-              <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F5-Hapus</span>
-              <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F6-Cari</span>
-              <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F7-List</span>
-              <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c] text-yellow-300 font-bold cursor-pointer" onClick={() => selectedTicket && setPrintTicket(selectedTicket)}>F8-Cetak Slip</span>
+            <div className="border-t-2 border-[#2d4d8c] pt-2 mt-4 flex flex-col gap-4">
+              <div className="flex flex-wrap gap-4 items-end">
+                <div className="flex flex-col gap-1 flex-1 min-w-[180px]">
+                  <label className="text-[9px] text-[#a0c5fc] font-bold uppercase tracking-widest">Nama Petugas / Staff 162</label>
+                  <input 
+                    type="text" 
+                    value={staffName}
+                    onChange={(e) => setStaffName(e.target.value)}
+                    className="bg-[#122345] border border-[#2d4d8c] text-emerald-400 font-bold px-3 py-1 text-xs rounded outline-none focus:border-emerald-500"
+                    placeholder="Nama Staff..."
+                  />
+                </div>
+
+                {isEditing && (
+                  <button 
+                    onClick={() => {
+                      if (selectedTicket) {
+                        const updated: WeighbridgeTicket = {
+                          ...selectedTicket,
+                          ticketNo,
+                          policeNo: policeNo.toUpperCase(),
+                          goodsName: goodsName.toUpperCase(),
+                          agency: agency.toUpperCase(),
+                          bagDeductionPercent,
+                          refaksiPercent,
+                          notes,
+                          netWeight: calculateNetWeight(selectedTicket.timbang1Weight, selectedTicket.timbang2Weight, bagDeductionPercent, refaksiPercent)
+                        };
+                        onUpdateTicket(updated);
+                        setSelectedTicket(updated);
+                        setIsEditing(false);
+                      }
+                    }}
+                    className="bg-sky-600 hover:bg-sky-500 text-white text-[10px] font-bold px-4 py-1.5 rounded transition shadow-lg cursor-pointer"
+                  >
+                    <Save className="w-3.5 h-3.5 inline mr-1" /> SIMPAN PERUBAHAN
+                  </button>
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-2 md:gap-x-4 text-[10px] text-cyan-200 justify-center border-t border-[#2d4d8c]/40 pt-2">
+                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F2-Timbang1</span>
+                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F3-Timbang2</span>
+                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F4-Koreksi</span>
+                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F5-Hapus</span>
+                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F6-Cari</span>
+                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F7-List</span>
+                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c] text-yellow-300 font-bold cursor-pointer" onClick={() => selectedTicket && setPrintTicket(selectedTicket)}>F8-Cetak Slip</span>
+              </div>
             </div>
 
           </div>
@@ -804,6 +871,24 @@ export default function WeighbridgeModule({
                     </td>
                     <td className="py-2.5 px-3" onClick={(e) => e.stopPropagation()}>
                       <div className="flex gap-2 justify-center">
+                        <button 
+                          onClick={() => {
+                            setIsCreatingNew(false);
+                            setIsEditing(true);
+                            setSelectedTicket(ticket);
+                            setTicketNo(ticket.ticketNo);
+                            setPoliceNo(ticket.policeNo);
+                            setGoodsName(ticket.goodsName);
+                            setAgency(ticket.agency);
+                            setBagDeductionPercent(ticket.bagDeductionPercent);
+                            setRefaksiPercent(ticket.refaksiPercent);
+                            setNotes(ticket.notes || '');
+                          }} 
+                          title="Edit Data Tiket"
+                          className="p-1 text-neutral-400 hover:text-blue-600 transition"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
                         <button 
                           onClick={() => setPrintTicket(ticket)} 
                           title="Cetak Tiket"
@@ -949,10 +1034,10 @@ export default function WeighbridgeModule({
                 )}
 
                 <div className="grid grid-cols-2 gap-4 text-center mt-6 text-[9px]">
-                  <div>
-                    <p className="mb-8">Penerima Staff 162</p>
-                    <p className="border-t border-neutral-400 pt-1 font-bold">Wahyu & Tim</p>
-                  </div>
+                    <div>
+                      <p className="mb-8">{t.riceStockTitle === 'Rincian Stok Beras' ? 'Penerima Staff 162' : 'Staff 162'}</p>
+                      <p className="border-t border-neutral-400 pt-1 font-bold">{staffName}</p>
+                    </div>
                   <div>
                     <p className="mb-8">Sopir / Pembawa</p>
                     <p className="border-t border-neutral-400 pt-1 font-bold">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</p>
@@ -969,7 +1054,7 @@ export default function WeighbridgeModule({
               <div className="mt-4 flex gap-2">
                 <button 
                   onClick={() => {
-                    printSlip(printTicket);
+                    printSlip(printTicket, staffName);
                     setPrintTicket(null);
                   }}
                   className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1.5 shadow"

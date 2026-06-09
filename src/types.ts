@@ -142,6 +142,29 @@ export interface RiceStockRecord {
   outWeight: number; // Keluar
 }
 
+export interface BankRecord {
+  id: string;
+  accountName: string; // e.g. 'MANDIRI BILIBILI 162'
+  accountNo?: string;
+  bankName: string;   // e.g. 'Bank Mandiri'
+  initialBalance: number;
+}
+
+export interface BrokerRecord {
+  id: string;
+  name: string;
+  phone?: string;
+  commissionRate: number; // Rp per Kg
+  address?: string;
+}
+
+export interface LocationRecord {
+  id: string;
+  name: string; // e.g. 'Sektor Timur', 'Gudang Tengah'
+  type: 'SILO' | 'FLOOR' | 'DRYER' | 'POLISHING';
+  capacityKg?: number;
+}
+
 export interface CornMoistureRule {
   moistureMin: number;
   moistureMax: number;

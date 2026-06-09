@@ -531,7 +531,7 @@ export function printServiceSlip(record: ServiceRecord) {
   printWindow.document.close();
 }
 
-export function printSlip(ticket: WeighbridgeTicket) {
+export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Wahyu & Tim") {
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
     alert('Pop-up terblokir! Harap izinkan pop-up untuk mencetak slip.');
@@ -607,8 +607,8 @@ export function printSlip(ticket: WeighbridgeTicket) {
         </div>
         <div style="height: 40px;"></div>
         <div class="flex" style="font-size: 8pt; justify-content: center; gap: 10px;">
-          <div class="text-center" style="width: 90px; border-top: 1px solid #000;"></div>
-          <div class="text-center" style="width: 90px; border-top: 1px solid #000;"></div>
+          <div class="text-center" style="width: 90px; border-top: 1px solid #000;">( Sopir )</div>
+          <div class="text-center" style="width: 90px; border-top: 1px solid #000;">${staffName}</div>
         </div>
         
         <div class="text-center mt-4" style="font-size: 7pt;">
