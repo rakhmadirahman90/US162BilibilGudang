@@ -302,9 +302,12 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
     </head>
     <body onload="window.print(); window.close();">
       <div class="slip">
-        <div style="border-top: 2px dashed #000; border-bottom: 2px dashed #000; padding: 5px 0;">
-          <div class="flex"><span>No. Tb:</span><span>${record.ticketNo || '-'}</span><span>Tgl:</span><span>${record.date}</span></div>
+        <div class="text-center font-bold" style="font-size: 11pt;">GUDANG US BILIBILI 162</div>
+        <div class="text-center" style="font-size: 8pt;">
+          Jl. Poros Pinrang - Parepare, Kec. Suppa
         </div>
+        <div class="border-dashed"></div>
+        <div class="flex"><span>No. Tb:</span><span>${record.ticketNo || '-'}</span><span>Tgl:</span><span>${record.date}</span></div>
         <div class="border-dashed"></div>
         <div class="flex"><span>No. Polisi:</span><span>${record.vehicleNo}</span></div>
         <div class="flex"><span>Nama Barang:</span><span>${record.commodity}</span></div>
@@ -320,11 +323,19 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
         <div class="flex"><span>POT. KRG:</span><span>${potKrg.toLocaleString('id-ID')} kg</span></div>
         <div class="flex"><span>REFAKSI:</span><span>${potRefaksi.toLocaleString('id-ID')} kg</span></div>
         <div class="border-dashed"></div>
+        <div class="flex"><span>HARGA:</span><span>Rp ${(record.price || 0).toLocaleString('id-ID')}/kg</span></div>
         <div class="flex font-bold" style="font-size: 11pt;"><span>NETTO:</span><span>${net.toLocaleString('id-ID')} kg</span></div>
+        <div class="flex font-bold" style="font-size: 11pt;"><span>TOTAL:</span><span>Rp ${(record.totalPrice || 0).toLocaleString('id-ID')}</span></div>
         <div class="border-dashed"></div>
-        <div class="mt-2 text-center">Penimbang,</div>
+        <div class="flex mt-2" style="font-size: 8pt;">
+          <div class="text-center">Penimbang,</div>
+          <div class="text-center">Petugas/Staff,</div>
+        </div>
         <div style="height: 50px;"></div>
-        <div class="text-center">( .................... )</div>
+        <div class="flex" style="font-size: 8pt;">
+          <div class="text-center">( .................... )</div>
+          <div class="text-center">( .................... )</div>
+        </div>
       </div>
     </body>
     </html>

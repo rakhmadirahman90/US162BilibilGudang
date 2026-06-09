@@ -63,6 +63,7 @@ export default function InboundModule({
   const [moistureContent, setMoistureContent] = useState(14.0);
   const [warehouseSection, setWarehouseSection] = useState("Gudang Jagung Tengah");
   const [laborCost, setLaborCost] = useState(350000);
+  const [price, setPrice] = useState(0);
   const [driverName, setDriverName] = useState("");
 
   // When a weighing ticket is chosen, automatically fill details!
@@ -116,6 +117,8 @@ export default function InboundModule({
       moistureContent,
       warehouseSection,
       laborCost,
+      price,
+      totalPrice: fNet * price,
       driverName
     };
 
@@ -154,6 +157,7 @@ export default function InboundModule({
     setMoistureContent(14.0);
     setWarehouseSection("Gudang Jagung Tengah");
     setLaborCost(350000);
+    setPrice(0);
     setDriverName("");
     setEditingId(null);
   };
@@ -418,6 +422,15 @@ export default function InboundModule({
                     type="number"
                     value={laborCost}
                     onChange={(e) => setLaborCost(parseInt(e.target.value) || 0)}
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-neutral-600 mb-1">Harga Satuan (Rp/Kg)</label>
+                  <input
+                    type="number"
+                    value={price}
+                    onChange={(e) => setPrice(parseInt(e.target.value) || 0)}
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
                   />
                 </div>

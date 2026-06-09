@@ -117,7 +117,8 @@ export default function RiceStockModule({ records, onAddRecord, onUpdateRecord, 
   let runningTotal = 0;
   const recordsWithTotal = filteredRecords.map(r => {
     runningTotal += (r.inWeight - r.outWeight);
-    return { ...r, runningTotal };
+    const totalTransaksi = (r.inWeight + r.outWeight) * r.price;
+    return { ...r, runningTotal, totalTransaksi };
   });
 
   return (
@@ -202,6 +203,7 @@ export default function RiceStockModule({ records, onAddRecord, onUpdateRecord, 
                 <th className="py-2.5 px-3">Colly</th>
                 <th className="py-2.5 px-3">Masuk</th>
                 <th className="py-2.5 px-3">Keluar</th>
+                <th className="py-2.5 px-3">Total Transaksi</th>
                 <th className="py-2.5 px-3">Total Stok</th>
                 <th className="py-2.5 px-3 text-center">Aksi</th>
               </tr>
@@ -217,6 +219,7 @@ export default function RiceStockModule({ records, onAddRecord, onUpdateRecord, 
                   <td className="py-2.5 px-3">{r.colly}</td>
                   <td className="py-2.5 px-3 font-bold text-emerald-600">{r.inWeight}</td>
                   <td className="py-2.5 px-3 font-bold text-red-600">{r.outWeight}</td>
+                  <td className="py-2.5 px-3 font-mono">Rp {(r.totalTransaksi || 0).toLocaleString('id-ID')}</td>
                   <td className="py-2.5 px-3 font-black text-neutral-900 font-mono">{r.runningTotal.toLocaleString('id-ID')}</td>
                   <td className="py-2.5 px-3 text-center">
                     <div className="flex gap-2 justify-center">

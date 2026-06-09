@@ -362,6 +362,12 @@ export const initialRiceStockRecords: RiceStockRecord[] = [
   { id: "rice-7", date: "2026-05-12", policeNo: "-", description: "BIDADARI", itemName: "BERAS", price: 0, colly: 0, inWeight: 0, outWeight: 23150 },
   { id: "rice-8", date: "2026-05-16", policeNo: "DD 8605 SU", description: "ALEX", itemName: "BERAS", price: 13475, colly: 200, inWeight: 10030, outWeight: 0 },
   { id: "rice-9", date: "2026-05-17", policeNo: "DD 8605 SU", description: "ALEX", itemName: "BERAS", price: 13475, colly: 200, inWeight: 10040, outWeight: 0 },
-  { id: "rice-10", date: "2026-05-18", policeNo: "DD 8506 SU", description: "ANTI", itemName: "BERAS", price: 13500, colly: 0, inWeight: 10050, outWeight: 0 }
+  { id: "rice-10", date: "2026-05-18", policeNo: "DD 8506 SU", description: "ANTI", itemName: "BERAS", price: 13500, colly: 0, inWeight: 10050, outWeight: 0 },
+  { id: "rice-11", date: "2026-05-18", policeNo: "PHINISI MERAH", description: "P UNGGUL", itemName: "BERAS", price: 0, colly: 0, inWeight: 0, outWeight: 9350 },
+  { id: "rice-12", date: "2026-05-18", policeNo: "-", description: "ANTI", itemName: "BERAS", price: 0, colly: 0, inWeight: 0, outWeight: 6430 },
+  { id: "rice-13", date: "2026-05-18", policeNo: "-", description: "ALEX", itemName: "BERAS", price: 0, colly: 0, inWeight: 0, outWeight: 10040 },
+  { id: "rice-14", date: "2026-05-19", policeNo: "-", description: "ANTI", itemName: "BERAS", price: 0, colly: 0, inWeight: 0, outWeight: 400 },
+  { id: "rice-15", date: "2026-05-18", policeNo: "DD 8506 SU", description: "ALEX", itemName: "BERAS", price: 13475, colly: 200, inWeight: 10000, outWeight: 0 },
+  { id: "rice-16", date: "2026-05-19", policeNo: "DD 8506 SU", description: "ALEX", itemName: "BERAS", price: 13475, colly: 0, inWeight: 10030, outWeight: 0 }
 ];
 

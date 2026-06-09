@@ -37,6 +37,8 @@ export interface InboundRecord {
   moistureContent: number; // KA % (Moisture content e.g. 14.5)
   warehouseSection: string; // Location in warehouse, e.g. 'Sektor Timur', 'Gudang Tengah'
   laborCost: number; // Biaya buruh panggul
+  price: number;
+  totalPrice: number;
   driverName?: string;
 }
 
