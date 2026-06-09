@@ -37,11 +37,21 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
       setIsGenerating(true);
       try {
         const opt = {
-          margin:       0.2,
+          margin:       0.15,
           filename:     pdfFileName || 'Resi.pdf',
-          image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2 },
-          jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+          image:        { type: 'jpeg' as const, quality: 0.68 },
+          html2canvas:  { 
+            scale: 1.4, 
+            useCORS: true, 
+            logging: false, 
+            letterRendering: true 
+          },
+          jsPDF:        { 
+            unit: 'in', 
+            format: 'letter', 
+            orientation: 'portrait' as const,
+            compress: true
+          }
         };
         const pdfBlob = await html2pdf().set(opt).from(pdfHtml).output('blob');
         
@@ -65,7 +75,13 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
         console.error("Failed to generate/upload PDF:", err);
         // fallback to manual download
         try {
-          const opt = { margin: 0.2, filename: pdfFileName || 'Resi.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter' } };
+          const opt = { 
+            margin: 0.15, 
+            filename: pdfFileName || 'Resi.pdf', 
+            image: { type: 'jpeg' as const, quality: 0.68 },
+            html2canvas: { scale: 1.4, useCORS: true, logging: false }, 
+            jsPDF: { unit: 'in', format: 'letter' as const, compress: true } 
+          };
           await html2pdf().set(opt).from(pdfHtml).save();
         } catch(e) {}
       } finally {

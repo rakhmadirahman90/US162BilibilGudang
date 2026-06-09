@@ -18,7 +18,9 @@ import {
   RiceStockRecord,
   BankRecord,
   BrokerRecord,
-  LocationRecord
+  LocationRecord,
+  CustomerRecord,
+  FinanceCategoryRecord
 } from './types';
 
 // Standard Corn Moisture Deduction (Refaksi KA Jagung) Table lookup helper

@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { formatNumberInput, parseNumberInput, formatReceiptDate } from '../utils/format';
-import { ServiceRecord } from '../types';
+import { ServiceRecord, EmployeeRecord, CustomerRecord } from '../types';
 import { Wind, Trash, User, Search, Play, Plus, DollarSign, CheckCircle2, AlertCircle, Download, Printer, Edit2, X, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useLanguage } from '../i18n/LanguageContext';

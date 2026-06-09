@@ -7,7 +7,9 @@ import {
   CommodityRecord,
   BankRecord,
   BrokerRecord,
-  LocationRecord
+  LocationRecord,
+  CustomerRecord,
+  FinanceCategoryRecord
 } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import ConfirmModal from './ConfirmModal';

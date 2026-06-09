@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { WeighbridgeTicket, VehicleRecord, BuyerRecord, SupplierRecord } from '../types';
+import { WeighbridgeTicket, VehicleRecord, BuyerRecord, SupplierRecord, EmployeeRecord } from '../types';
 import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2, Edit3, Download, Clock, ChevronRight, Truck, Save, XCircle, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -998,10 +998,6 @@ export default function WeighbridgeModule({
                   <div className="text-[9px] mt-0.5">{t.thermalSlipPhone}</div>
                 </div>
 
-                <div className="flex justify-between">
-                  <span>Tanggal :</span>
-                  <span className="font-bold font-mono">{formatReceiptDate(printTicket.timbang1Time || printTicket.timbang2Time)}</span>
-                </div>
                 <div className="flex justify-between">
                   <span>No. Tiket :</span>
                   <span className="font-bold font-mono">{printTicket.ticketNo}</span>

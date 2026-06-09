@@ -266,6 +266,194 @@ export function printPDFReport(
   printWindow.document.close();
 }
 
+const COMMON_SLIP_STYLE = `
+  body {
+    font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    color: #1e293b;
+    background-color: #f1f5f9;
+    margin: 0;
+    padding: 24px;
+    line-height: 1.5;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .slip {
+    width: 380px;
+    margin: 0 auto;
+    padding: 24px;
+    box-sizing: border-box;
+    background-color: #fafafa;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  @media print {
+    @page { size: auto; margin: 0; }
+    body { background-color: #fff; margin: 0; padding: 0; display: block; }
+    .slip {
+      border: none !important;
+      box-shadow: none !important;
+      margin: 0 !important;
+      padding: 10px !important;
+      width: 100% !important;
+      max-width: 80mm !important;
+      background-color: #fff !important;
+    }
+  }
+  .header {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .header-title {
+    font-size: 13.5pt;
+    font-weight: 800;
+    color: #064e3b;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .header-subtitle {
+    font-size: 8pt;
+    color: #475569;
+    line-height: 1.35;
+  }
+  .border-dashed {
+    border-top: 1.5px dashed #cbd5e1;
+    margin: 10px 0;
+  }
+  .border-solid {
+    border-top: 1.5px solid #475569;
+    margin: 10px 0;
+  }
+  .border-double {
+    border-top: 3px double #334155;
+    margin: 10px 0;
+  }
+  .ticket-type {
+    text-align: center;
+    font-size: 9pt;
+    font-weight: 800;
+    color: #0f172a;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background-color: #f1f5f9;
+    padding: 6px 0;
+    border-radius: 6px;
+    margin-bottom: 12px;
+  }
+  .flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    margin: 6px 0;
+    gap: 8px;
+  }
+  .flex span {
+    font-size: 9.5pt;
+  }
+  .flex span.label {
+    color: #475569;
+    text-align: left;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .flex span.value {
+    color: #0f172a;
+    font-weight: 700;
+    text-align: right;
+    word-break: break-all;
+  }
+  .weight-block {
+    background-color: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 12px 0;
+  }
+  .weight-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 0;
+  }
+  .weight-label {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #334155;
+  }
+  .weight-val {
+    font-size: 10pt;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  .weight-time {
+    font-size: 8pt;
+    color: #64748b;
+    text-align: right;
+    margin-top: -1px;
+    margin-bottom: 6px;
+  }
+  .netto-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+  }
+  .netto-label {
+    font-size: 11pt;
+    font-weight: 800;
+    color: #064e3b;
+  }
+  .netto-val {
+    font-size: 13pt;
+    font-weight: 900;
+    color: #059669;
+  }
+  .notes {
+    font-size: 8pt;
+    color: #334155;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 8px;
+    border-radius: 4px;
+    margin-top: 10px;
+    font-style: italic;
+    word-break: break-all;
+  }
+  .signatures {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 25px;
+    text-align: center;
+    font-size: 8.5pt;
+    color: #475569;
+  }
+  .signature-space {
+    height: 45px;
+  }
+  .signature-line {
+    border-top: 1px solid #cbd5e1;
+    margin: 4px auto 0 auto;
+    width: 80%;
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 9pt;
+    padding-top: 2px;
+  }
+  .footer-msg {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 7.5pt;
+    margin-top: 25px;
+    line-height: 1.4;
+  }
+`;
+
 export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTicket | undefined, staffName: string = "Asma") {
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
@@ -285,56 +473,113 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
     <head>
       <title>Resi Terpadu #${record.ticketNo || record.id.slice(-6)}</title>
       <style>
-        @media print {
-          @page { size: 80mm auto; margin: 0; }
-          body { display: flex; justify-content: flex-start; }
-        }
-        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 2mm; line-height: 1.25; font-weight: bold; display: flex; justify-content: flex-start; }
-        .slip { width: 100%; max-width: 80mm; padding: 4mm; padding-left: 6mm; box-sizing: border-box; border: 1px solid #eee; }
-        .border-dashed { border-top: 2px dashed #000; margin: 4px 0; }
-        .font-bold { font-weight: bold; }
-        .text-center { text-align: center; }
-        .flex { display: flex; justify-content: space-between; width: 100%; }
-        .mt-2 { margin-top: 4px; }
+        ${COMMON_SLIP_STYLE}
       </style>
     </head>
     <body onload="window.print(); window.close();">
       <div class="slip">
-        <div class="text-center font-bold" style="font-size: 12pt;">GUDANG US BILIBILI 162</div>
-        <div class="text-center" style="font-size: 8pt;">
-          Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
-          Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
-          TELP - 085244466009
+        <div class="header">
+          <div class="header-title">GUDANG US BILIBILI 162</div>
+          <div class="header-subtitle">
+            Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
+            Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
+            TELP - 085244466009
+          </div>
         </div>
-        <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>No. Tb:</span><span>${record.ticketNo || '-'}</span><span>Tgl:</span><span>${formatReceiptDate(record.date)}</span></div>
-        <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>No. Polisi:</span><span>${record.vehicleNo}</span></div>
-        <div class="flex" style="font-size: 11pt;"><span>Nama Barang:</span><span>${record.commodity}</span></div>
-        <div class="flex" style="font-size: 11pt;"><span>Agen/Tujuan:</span><span>${record.supplier}</span></div>
-        <div class="flex" style="font-size: 11pt;"><span>Jml. krg:</span><span>${record.bagDeductionPercent}%</span></div>
-        <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span></span><span class="font-bold">JAM</span><span class="font-bold">BERAT</span></div>
-        <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>Timbang-1:</span><span>${ticket?.timbang1Time || '-'}</span><span>${bruto.toLocaleString('id-ID')} kg</span></div>
-        <div class="flex" style="font-size: 11pt;"><span>Timbang-2:</span><span>${ticket?.timbang2Time || '-'}</span><span>${tara.toLocaleString('id-ID')} kg</span></div>
-        <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>BRUTO:</span><span>${bruto.toLocaleString('id-ID')} kg</span></div>
-        <div class="flex" style="font-size: 11pt;"><span>POT. KRG:</span><span>${potKrg.toLocaleString('id-ID')} kg</span></div>
-        <div class="flex" style="font-size: 11pt;"><span>REFAKSI:</span><span>${potRefaksi.toLocaleString('id-ID')} kg</span></div>
-        <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>HARGA:</span><span>Rp ${(record.price || 0).toLocaleString('id-ID')}/kg</span></div>
-        <div class="flex font-bold" style="font-size: 13pt;"><span>NETTO:</span><span>${net.toLocaleString('id-ID')} kg</span></div>
-        <div class="flex font-bold" style="font-size: 13pt;"><span>TOTAL:</span><span>Rp ${(record.totalPrice || 0).toLocaleString('id-ID')}</span></div>
-        <div class="border-dashed"></div>
-        <div class="flex mt-2" style="font-size: 11pt;">
-          <div class="text-center">Penimbang,</div>
-          <div class="text-center">Petugas/Staff,</div>
+        <div class="border-double"></div>
+        <div class="ticket-type">RESI TERPADU</div>
+        
+        <div class="flex">
+          <span class="label">No. Tiket/Ref:</span>
+          <span class="value">${record.ticketNo || '-'}</span>
         </div>
-        <div style="height: 40px;"></div>
-        <div class="flex" style="font-size: 11pt; justify-content: center; gap: 20px;">
-          <div class="text-center" style="width: 120px; border-top: 1px solid #000;">( SOPIR )</div>
-          <div class="text-center" style="width: 120px; border-top: 1px solid #000;">${staffName}</div>
+        <div class="flex">
+          <span class="label">Tanggal:</span>
+          <span class="value">${formatReceiptDate(record.date)}</span>
+        </div>
+        <div class="flex">
+          <span class="label">No. Polisi:</span>
+          <span class="value">${record.vehicleNo}</span>
+        </div>
+        <div class="flex">
+          <span class="label">Nama Barang:</span>
+          <span class="value">${record.commodity}</span>
+        </div>
+        <div class="flex">
+          <span class="label">Agen/Tujuan:</span>
+          <span class="value">${record.supplier}</span>
+        </div>
+        <div class="flex">
+          <span class="label">Jml. Karung:</span>
+          <span class="value">${record.bagDeductionPercent}%</span>
+        </div>
+        
+        <div class="border-dashed"></div>
+        
+        <div class="weight-block">
+          <div class="weight-row">
+            <span class="weight-label">TIMBANG I (Masuk)</span>
+            <span class="weight-val">${bruto.toLocaleString('id-ID')} kg</span>
+          </div>
+          <div class="weight-time">${ticket?.timbang1Time || '-'}</div>
+          
+          <div class="weight-row">
+            <span class="weight-label">TIMBANG II (Keluar)</span>
+            <span class="weight-val">${tara.toLocaleString('id-ID')} kg</span>
+          </div>
+          <div class="weight-time">${ticket?.timbang2Time || '-'}</div>
+        </div>
+        
+        <div class="border-dashed"></div>
+        
+        <div class="flex">
+          <span class="label">BERAT BRUTO:</span>
+          <span class="value">${bruto.toLocaleString('id-ID')} kg</span>
+        </div>
+        <div class="flex">
+          <span class="label">POTONGAN TARA:</span>
+          <span class="value">${tara.toLocaleString('id-ID')} kg</span>
+        </div>
+        <div class="flex">
+          <span class="label">POT. KARUNG:</span>
+          <span class="value">${potKrg.toLocaleString('id-ID')} kg</span>
+        </div>
+        <div class="flex">
+          <span class="label">POT. REFAKSI:</span>
+          <span class="value">${potRefaksi.toLocaleString('id-ID')} kg</span>
+        </div>
+        
+        <div class="border-dashed"></div>
+        
+        <div class="flex">
+          <span class="label" style="font-size: 10pt;">HARGA:</span>
+          <span class="value" style="font-size: 10pt; color: #0f172a;">Rp ${(record.price || 0).toLocaleString('id-ID')}/kg</span>
+        </div>
+        <div class="netto-row">
+          <span class="netto-label">BERAT NETTO:</span>
+          <span class="netto-val">${net.toLocaleString('id-ID')} kg</span>
+        </div>
+        <div class="netto-row" style="margin-top: -5px; border-top: 1px dashed #e2e8f0; padding-top: 5px;">
+          <span class="netto-label">TOTAL BAYAR:</span>
+          <span class="netto-val" style="color: #0284c7;">Rp ${(record.totalPrice || 0).toLocaleString('id-ID')}</span>
+        </div>
+        
+        <div class="border-solid"></div>
+        
+        <div class="signatures">
+          <div>
+            <div class="signature-space"></div>
+            <div class="signature-line">( SOPIR )</div>
+          </div>
+          <div>
+            <div class="signature-space"></div>
+            <div class="signature-line">${staffName}</div>
+          </div>
+        </div>
+        
+        <div class="footer-msg">
+          * Terimakasih atas kerjasamanya *<br/>
+          Aplikasi Timbangan GSC GST-9700 Jembatan Timbang v2.0
         </div>
       </div>
     </body>
@@ -356,48 +601,74 @@ export function printOutboundSlip(record: OutboundRecord, staffName: string = "A
     <head>
       <title>Resi Keluar #${record.invoiceNo}</title>
       <style>
-        @media print {
-          @page { size: 80mm auto; margin: 0; }
-          body { display: flex; justify-content: flex-start; }
-        }
-        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 2mm; line-height: 1.25; font-weight: bold; display: flex; justify-content: flex-start; }
-        .slip { width: 100%; max-width: 80mm; padding: 4mm; padding-left: 6mm; box-sizing: border-box; border: 1px solid #eee; }
-        .border-dashed { border-top: 2px dashed #000; margin: 4px 0; }
-        .font-bold { font-weight: bold; }
-        .text-center { text-align: center; }
-        .flex { display: flex; justify-content: space-between; width: 100%; }
-        .mt-2 { margin-top: 4px; }
+        ${COMMON_SLIP_STYLE}
       </style>
     </head>
     <body onload="window.print(); window.close();">
       <div class="slip">
-        <div class="text-center font-bold" style="font-size: 12pt;">GUDANG US BILIBILI 162</div>
-        <div class="text-center" style="font-size: 8pt;">
-          Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
-          Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
-          TELP - 085244466009
+        <div class="header">
+          <div class="header-title">GUDANG US BILIBILI 162</div>
+          <div class="header-subtitle">
+            Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
+            Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
+            TELP - 085244466009
+          </div>
         </div>
-        <div class="border-dashed"></div>
-        <div class="text-center" style="font-size: 11pt;">RESIDENSI PENGIRIMAN</div>
-        <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>Invoice:</span><span>${record.invoiceNo}</span><span>Tgl:</span><span>${formatReceiptDate(record.date)}</span></div>
-        <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>Pembeli:</span><span>${record.buyer}</span></div>
-        <div class="flex" style="font-size: 11pt;"><span>No Pol:</span><span>${record.vehicleNo}</span></div>
-        <div class="flex" style="font-size: 11pt;"><span>Komoditas:</span><span>${record.commodity}</span></div>
-        <div class="flex" style="font-size: 11pt;"><span>Tujuan:</span><span>${record.destination}</span></div>
-        <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>Total Berat:</span><span>${record.totalWeight.toLocaleString('id-ID')} kg</span></div>
-        <div class="flex" style="font-size: 11pt;"><span>Upah Buruh:</span><span>Rp ${record.loadingLaborCost.toLocaleString('id-ID')}</span></div>
-        <div class="border-dashed"></div>
-        <div class="flex mt-2" style="font-size: 11pt;">
-          <div class="text-center">Penimbang,</div>
-          <div class="text-center">Petugas/Staff,</div>
+        <div class="border-double"></div>
+        <div class="ticket-type">RESIDENSI PENGIRIMAN</div>
+        
+        <div class="flex">
+          <span class="label">No. Invoice:</span>
+          <span class="value">${record.invoiceNo}</span>
         </div>
-        <div style="height: 40px;"></div>
-        <div class="flex" style="font-size: 11pt; justify-content: center; gap: 20px;">
-          <div class="text-center" style="width: 120px; border-top: 1px solid #000;">( SOPIR )</div>
-          <div class="text-center" style="width: 120px; border-top: 1px solid #000;">${staffName}</div>
+        <div class="flex">
+          <span class="label">Tanggal:</span>
+          <span class="value">${formatReceiptDate(record.date)}</span>
+        </div>
+        <div class="flex">
+          <span class="label">Pembeli/Relasi:</span>
+          <span class="value">${record.buyer}</span>
+        </div>
+        <div class="flex">
+          <span class="label">No. Polisi:</span>
+          <span class="value">${record.vehicleNo}</span>
+        </div>
+        <div class="flex">
+          <span class="label">Komoditas:</span>
+          <span class="value">${record.commodity}</span>
+        </div>
+        <div class="flex">
+          <span class="label">Tujuan:</span>
+          <span class="value">${record.destination}</span>
+        </div>
+        
+        <div class="border-dashed"></div>
+        
+        <div class="netto-row">
+          <span class="netto-label">TOTAL BERAT:</span>
+          <span class="netto-val">${record.totalWeight.toLocaleString('id-ID')} kg</span>
+        </div>
+        <div class="flex">
+          <span class="label">Upah Buruh:</span>
+          <span class="value">Rp ${record.loadingLaborCost.toLocaleString('id-ID')}</span>
+        </div>
+        
+        <div class="border-solid"></div>
+        
+        <div class="signatures">
+          <div>
+            <div class="signature-space"></div>
+            <div class="signature-line">( SOPIR )</div>
+          </div>
+          <div>
+            <div class="signature-space"></div>
+            <div class="signature-line">${staffName}</div>
+          </div>
+        </div>
+        
+        <div class="footer-msg">
+          * Terimakasih atas kerjasamanya *<br/>
+          Aplikasi Timbangan GSC GST-9700 Jembatan Timbang v2.0
         </div>
       </div>
     </body>
@@ -419,46 +690,66 @@ export function printRiceStockSlip(record: RiceStockRecord, staffName: string = 
     <head>
       <title>Resi Stok #${record.id.slice(-6)}</title>
       <style>
-        @media print {
-          @page { size: 80mm auto; margin: 0; }
-          body { display: flex; justify-content: flex-start; }
-        }
-        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 2mm; line-height: 1.25; font-weight: bold; display: flex; justify-content: flex-start; }
-        .slip { width: 100%; max-width: 80mm; padding: 4mm; padding-left: 6mm; box-sizing: border-box; border: 1px solid #eee; }
-        .border-dashed { border-top: 2px dashed #000; margin: 4px 0; }
-        .font-bold { font-weight: bold; }
-        .text-center { text-align: center; }
-        .flex { display: flex; justify-content: space-between; width: 100%; }
-        .mt-2 { margin-top: 4px; }
+        ${COMMON_SLIP_STYLE}
       </style>
     </head>
     <body onload="window.print(); window.close();">
       <div class="slip">
-        <div class="text-center font-bold" style="font-size: 12pt;">GUDANG US BILIBILI 162</div>
-        <div class="text-center" style="font-size: 8pt;">
-          Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
-          Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
-          TELP - 085244466009
+        <div class="header">
+          <div class="header-title">GUDANG US BILIBILI 162</div>
+          <div class="header-subtitle">
+            Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
+            Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
+            TELP - 085244466009
+          </div>
         </div>
-        <div class="border-dashed"></div>
-        <div class="text-center" style="font-size: 11pt;">RESIDENSI STOK</div>
-        <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>ID:</span><span>${record.id.slice(-6)}</span><span>Tgl:</span><span>${formatReceiptDate(record.date)}</span></div>
-        <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>No Pol:</span><span>${record.policeNo}</span></div>
-        <div class="flex" style="font-size: 11pt;"><span>Barang:</span><span>${record.itemName}</span></div>
-        <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>Masuk:</span><span>${record.inWeight.toLocaleString('id-ID')} kg</span></div>
-        <div class="flex" style="font-size: 11pt;"><span>Keluar:</span><span>${record.outWeight.toLocaleString('id-ID')} kg</span></div>
-        <div class="border-dashed"></div>
-        <div class="flex mt-2" style="font-size: 11pt;">
-          <div class="text-center">Penimbang,</div>
-          <div class="text-center">Petugas/Staff,</div>
+        <div class="border-double"></div>
+        <div class="ticket-type">RESIDENSI MUTASI STOK</div>
+        
+        <div class="flex">
+          <span class="label">ID Mutasi:</span>
+          <span class="value">#${record.id.slice(-6)}</span>
         </div>
-        <div style="height: 40px;"></div>
-        <div class="flex" style="font-size: 11pt; justify-content: center; gap: 20px;">
-          <div class="text-center" style="width: 120px; border-top: 1px solid #000;">( SOPIR )</div>
-          <div class="text-center" style="width: 120px; border-top: 1px solid #000;">${staffName}</div>
+        <div class="flex">
+          <span class="label">Tanggal:</span>
+          <span class="value">${formatReceiptDate(record.date)}</span>
+        </div>
+        <div class="flex">
+          <span class="label">No. Polisi:</span>
+          <span class="value">${record.policeNo || '-'}</span>
+        </div>
+        <div class="flex">
+          <span class="label">Nama Barang:</span>
+          <span class="value">${record.itemName}</span>
+        </div>
+        
+        <div class="border-dashed"></div>
+        
+        <div class="flex">
+          <span class="label">Masuk:</span>
+          <span class="value" style="color: #0d9488; font-weight: 800;">${record.inWeight.toLocaleString('id-ID')} kg</span>
+        </div>
+        <div class="flex">
+          <span class="label">Keluar:</span>
+          <span class="value" style="color: #e11d48; font-weight: 800;">${record.outWeight.toLocaleString('id-ID')} kg</span>
+        </div>
+        
+        <div class="border-solid"></div>
+        
+        <div class="signatures">
+          <div>
+            <div class="signature-space"></div>
+            <div class="signature-line">( SOPIR )</div>
+          </div>
+          <div>
+            <div class="signature-space"></div>
+            <div class="signature-line">${staffName}</div>
+          </div>
+        </div>
+        
+        <div class="footer-msg">
+          * Terimakasih atas kerjasamanya *<br/>
+          Aplikasi Timbangan GSC GST-9700 Jembatan Timbang v2.0
         </div>
       </div>
     </body>
@@ -480,50 +771,81 @@ export function printServiceSlip(record: ServiceRecord, staffName: string = "Asm
     <head>
       <title>Resi Jasa #${record.id.slice(-6)}</title>
       <style>
-        @media print {
-          @page { size: 80mm auto; margin: 0; }
-          body { display: flex; justify-content: flex-start; }
-        }
-        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 2mm; line-height: 1.25; font-weight: bold; display: flex; justify-content: flex-start; }
-        .slip { width: 100%; max-width: 80mm; padding: 4mm; padding-left: 6mm; box-sizing: border-box; border: 1px solid #eee; }
-        .border-dashed { border-top: 2px dashed #000; margin: 4px 0; }
-        .font-bold { font-weight: bold; }
-        .text-center { text-align: center; }
-        .flex { display: flex; justify-content: space-between; width: 100%; }
-        .mt-2 { margin-top: 4px; }
+        ${COMMON_SLIP_STYLE}
       </style>
     </head>
     <body onload="window.print(); window.close();">
       <div class="slip">
-        <div class="text-center font-bold" style="font-size: 12pt;">GUDANG US BILIBILI 162</div>
-        <div class="text-center" style="font-size: 8pt;">
-          Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
-          Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
-          TELP - 085244466009
+        <div class="header">
+          <div class="header-title">GUDANG US BILIBILI 162</div>
+          <div class="header-subtitle">
+            Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
+            Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
+            TELP - 085244466009
+          </div>
         </div>
-        <div class="border-dashed"></div>
-        <div class="text-center" style="font-size: 11pt;">JASA LAYANAN</div>
-        <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>No. ID:</span><span>${record.id.slice(-6)}</span><span>Tgl:</span><span>${formatReceiptDate(record.date)}</span></div>
-        <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>Pelanggan:</span><span>${record.customerName}</span></div>
-        <div class="flex" style="font-size: 11pt;"><span>Layanan:</span><span>${record.serviceType}</span></div>
-        <div class="flex" style="font-size: 11pt;"><span>Komoditas:</span><span>${record.commodity}</span></div>
-        <div class="flex" style="font-size: 11pt;"><span>Status:</span><span>${record.paymentStatus}</span></div>
-        <div class="border-dashed"></div>
-        <div class="flex" style="font-size: 11pt;"><span>Berat:</span><span>${record.weight.toLocaleString('id-ID')} kg</span></div>
-        <div class="flex" style="font-size: 11pt;"><span>Tarif/kg:</span><span>Rp ${record.ratePerKg.toLocaleString('id-ID')}</span></div>
-        <div class="border-dashed"></div>
-        <div class="flex font-bold" style="font-size: 13pt;"><span>TOTAL:</span><span>Rp ${record.totalFee.toLocaleString('id-ID')}</span></div>
-        <div class="border-dashed"></div>
-        <div class="flex mt-2" style="font-size: 11pt;">
-          <div class="text-center">Penimbang,</div>
-          <div class="text-center">Petugas/Staff,</div>
+        <div class="border-double"></div>
+        <div class="ticket-type">RESIDENSI JASA LAYANAN</div>
+        
+        <div class="flex">
+          <span class="label">ID Layanan:</span>
+          <span class="value">#${record.id.slice(-6)}</span>
         </div>
-        <div style="height: 40px;"></div>
-        <div class="flex" style="font-size: 11pt; justify-content: center; gap: 20px;">
-          <div class="text-center" style="width: 120px; border-top: 1px solid #000;">( PELANGGAN )</div>
-          <div class="text-center" style="width: 120px; border-top: 1px solid #000;">${staffName}</div>
+        <div class="flex">
+          <span class="label">Tanggal:</span>
+          <span class="value">${formatReceiptDate(record.date)}</span>
+        </div>
+        <div class="flex">
+          <span class="label">Pelanggan:</span>
+          <span class="value">${record.customerName}</span>
+        </div>
+        <div class="flex">
+          <span class="label">Jenis Layanan:</span>
+          <span class="value">${record.serviceType}</span>
+        </div>
+        <div class="flex">
+          <span class="label">Komoditas:</span>
+          <span class="value">${record.commodity}</span>
+        </div>
+        <div class="flex">
+          <span class="label">Status Bayar:</span>
+          <span class="value" style="color: ${record.paymentStatus === 'PAID' ? '#0d9488' : '#e11d48'};">${record.paymentStatus === 'PAID' ? 'LUNAS' : 'BELUM LUNAS'}</span>
+        </div>
+        
+        <div class="border-dashed"></div>
+        
+        <div class="flex">
+          <span class="label">Berat Jasa:</span>
+          <span class="value">${record.weight.toLocaleString('id-ID')} kg</span>
+        </div>
+        <div class="flex">
+          <span class="label">Tarif Per kg:</span>
+          <span class="value">Rp ${record.ratePerKg.toLocaleString('id-ID')}</span>
+        </div>
+        
+        <div class="border-dashed"></div>
+        
+        <div class="netto-row">
+          <span class="netto-label">TOTAL TARIF:</span>
+          <span class="netto-val">Rp ${record.totalFee.toLocaleString('id-ID')}</span>
+        </div>
+        
+        <div class="border-solid"></div>
+        
+        <div class="signatures">
+          <div>
+            <div class="signature-space"></div>
+            <div class="signature-line">( PELANGGAN )</div>
+          </div>
+          <div>
+            <div class="signature-space"></div>
+            <div class="signature-line">${staffName}</div>
+          </div>
+        </div>
+        
+        <div class="footer-msg">
+          * Terimakasih atas kerjasamanya *<br/>
+          Aplikasi Timbangan GSC GST-9700 Jembatan Timbang v2.0
         </div>
       </div>
     </body>
@@ -551,69 +873,101 @@ export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Asma")
     <head>
       <title>Slip Timbang #${ticket.ticketNo}</title>
       <style>
-        @media print {
-          @page { size: 80mm auto; margin: 0; }
-          body { display: flex; justify-content: center; }
-        }
-        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 2mm; line-height: 1.4; font-weight: 600; display: flex; justify-content: flex-start; }
-        .slip { width: 100%; max-width: 80mm; padding: 4mm; padding-left: 6mm; box-sizing: border-box; }
-        .border-t { border-top: 1px solid #000; margin: 4px 0; }
-        .font-bold { font-weight: bold; }
-        .text-center { text-align: center; }
-        .flex { display: flex; justify-content: space-between; width: 100%; font-family: 'Courier New', Courier, monospace; font-weight: 600; }
-        .mt-4 { margin-top: 10px; }
-        .mt-2 { margin-top: 5px; }
-        span { font-family: 'Courier New', Courier, monospace; }
+        ${COMMON_SLIP_STYLE}
       </style>
     </head>
     <body onload="window.print(); window.close();">
       <div class="slip">
-        <div class="text-center font-bold" style="font-size: 12pt;">GUDANG US BILIBILI 162</div>
-        <div class="text-center" style="font-size: 8pt;">
-          Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
-          Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
-          TELP - 085244466009
+        <div class="header">
+          <div class="header-title">GUDANG US BILIBILI 162</div>
+          <div class="header-subtitle">
+            Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
+            Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
+            TELP - 085244466009
+          </div>
         </div>
-        <div class="border-t"></div>
-        <div class="flex"><span>Tanggal   :</span><span class="font-bold">${formatReceiptDate(ticket.timbang1Time || ticket.timbang2Time)}</span></div>
-        <div class="flex"><span>No. Tiket :</span><span class="font-bold">${ticket.ticketNo}</span></div>
-        <div class="flex"><span>No. Polisi:</span><span class="font-bold">${ticket.policeNo}</span></div>
-        <div class="flex"><span>Mitra/Agen:</span><span class="font-bold">${ticket.agency}</span></div>
-        <div class="flex"><span>Nama Barang:</span><span class="font-bold">${ticket.goodsName}</span></div>
+        <div class="border-double"></div>
+        <div class="ticket-type">SLIP TIMBANGAN BARANG</div>
         
-        <div class="border-t"></div>
-        
-        <div class="flex font-bold mt-2"><span>TIMBANG I (Masuk)</span><span>${bruto.toLocaleString('id-ID')} Kg</span></div>
-        <div class="text-right" style="font-size: 8pt;">${ticket.timbang1Time || '-'}</div>
-        
-        <div class="flex font-bold"><span>TIMBANG II (Keluar)</span><span>${tara > 0 ? tara.toLocaleString('id-ID') + ' Kg' : '- -'}</span></div>
-        <div class="text-right" style="font-size: 8pt;">${ticket.timbang2Time || '-'}</div>
-        
-        <div class="border-t"></div>
-        
-        <div class="flex"><span>BERAT BRUTO :</span><span>${bruto.toLocaleString('id-ID')} Kg</span></div>
-        <div class="flex"><span>POTONGAN TARA :</span><span>${tara.toLocaleString('id-ID')} Kg</span></div>
-        <div class="flex"><span>Pot. Karung (${ticket.bagDeductionPercent.toFixed(2)}%):</span><span>- ${potKrg.toLocaleString('id-ID')} Kg</span></div>
-        <div class="flex"><span>Pot. Refaksi (${ticket.refaksiPercent.toFixed(2)}%):</span><span>- ${potRefaksi.toLocaleString('id-ID')} Kg</span></div>
-        
-        <div class="border-t"></div>
-        <div class="flex font-bold" style="font-size: 12pt;"><span>BERAT NETTO :</span><span>${net.toLocaleString('id-ID')} KG</span></div>
-        
-        <div class="mt-2" style="border: 1px solid #000; padding: 5px; font-size: 8pt;">
-          Catatan: ${ticket.notes || '-'}
+        <div class="flex">
+          <span class="label">No. Tiket:</span>
+          <span class="value">${ticket.ticketNo}</span>
+        </div>
+        <div class="flex">
+          <span class="label">No. Polisi:</span>
+          <span class="value">${ticket.policeNo}</span>
+        </div>
+        <div class="flex">
+          <span class="label">Mitra/Agen:</span>
+          <span class="value">${ticket.agency}</span>
+        </div>
+        <div class="flex">
+          <span class="label">Nama Barang:</span>
+          <span class="value">${ticket.goodsName}</span>
         </div>
         
-        <div class="flex mt-4" style="font-size: 8pt; justify-content: center; gap: 10px;">
-          <div class="text-center" style="width: 110px;">Penimbang</div>
-          <div class="text-center" style="width: 110px;">Petugas/Staff</div>
-        </div>
-        <div style="height: 40px;"></div>
-        <div class="flex" style="font-size: 8pt; justify-content: center; gap: 10px;">
-          <div class="text-center" style="width: 110px; border-top: 1px solid #000;">( Sopir )</div>
-          <div class="text-center" style="width: 110px; border-top: 1px solid #000;">${staffName}</div>
+        <div class="border-dashed"></div>
+        
+        <div class="weight-block">
+          <div class="weight-row">
+            <span class="weight-label">TIMBANG I (Masuk)</span>
+            <span class="weight-val">${bruto.toLocaleString('id-ID')} Kg</span>
+          </div>
+          <div class="weight-time">${ticket.timbang1Time || '-'}</div>
+          
+          <div class="weight-row">
+            <span class="weight-label">TIMBANG II (Keluar)</span>
+            <span class="weight-val">${tara > 0 ? tara.toLocaleString('id-ID') + ' Kg' : '- -'}</span>
+          </div>
+          <div class="weight-time">${ticket.timbang2Time || '-'}</div>
         </div>
         
-        <div class="text-center mt-4" style="font-size: 7pt;">
+        <div class="border-dashed"></div>
+        
+        <div class="flex">
+          <span class="label">BERAT BRUTO:</span>
+          <span class="value">${bruto.toLocaleString('id-ID')} Kg</span>
+        </div>
+        <div class="flex">
+          <span class="label">POTONGAN TARA:</span>
+          <span class="value">${tara.toLocaleString('id-ID')} Kg</span>
+        </div>
+        <div class="flex">
+          <span class="label">Pot. Karung (${ticket.bagDeductionPercent.toFixed(2)}%):</span>
+          <span class="value">- ${potKrg.toLocaleString('id-ID')} Kg</span>
+        </div>
+        <div class="flex">
+          <span class="label">Pot. Refaksi (${ticket.refaksiPercent.toFixed(2)}%):</span>
+          <span class="value">- ${potRefaksi.toLocaleString('id-ID')} Kg</span>
+        </div>
+        
+        <div class="border-dashed"></div>
+        
+        <div class="netto-row">
+          <span class="netto-label">BERAT NETTO:</span>
+          <span class="netto-val">${net.toLocaleString('id-ID')} KG</span>
+        </div>
+        
+        ${ticket.notes ? `
+          <div class="notes">
+            <strong>Catatan:</strong> ${ticket.notes}
+          </div>
+        ` : ''}
+        
+        <div class="border-solid"></div>
+        
+        <div class="signatures">
+          <div>
+            <div class="signature-space"></div>
+            <div class="signature-line">( SOPIR )</div>
+          </div>
+          <div>
+            <div class="signature-space"></div>
+            <div class="signature-line">${staffName}</div>
+          </div>
+        </div>
+        
+        <div class="footer-msg">
           * Terimakasih atas kerjasamanya *<br/>
           Aplikasi Timbangan GSC GST-9700 Jembatan Timbang v2.0
         </div>
