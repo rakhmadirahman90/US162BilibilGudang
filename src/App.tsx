@@ -434,6 +434,21 @@ export default function App() {
 
   const handleAddInbound = (rec: InboundRecord) => {
     setInboundRecords(prev => [rec, ...prev]);
+    
+    // Auto-update Rice Stock
+    const newStock: RiceStockRecord = {
+      id: `stock-${Date.now()}`,
+      date: rec.date,
+      policeNo: rec.vehicleNo,
+      description: `Penerimaan ${rec.commodity} dari ${rec.supplier}`,
+      itemName: rec.commodity,
+      price: rec.price,
+      colly: 0,
+      inWeight: rec.netWeight,
+      outWeight: 0,
+    };
+    setRiceStockRecords(prev => [newStock, ...prev]);
+    
     showToast(`Sukses menyimpan: Penerimaan ${rec.commodity} dari ${rec.supplier} (${rec.netWeight.toLocaleString('id-ID')} Kg Netto)!`, 'success');
   };
 
@@ -449,6 +464,21 @@ export default function App() {
 
   const handleAddOutbound = (rec: OutboundRecord) => {
     setOutboundRecords(prev => [rec, ...prev]);
+
+    // Auto-update Rice Stock
+    const newStock: RiceStockRecord = {
+      id: `stock-${Date.now()}`,
+      date: rec.date,
+      policeNo: rec.vehicleNo,
+      description: `Pengiriman ${rec.commodity} ke ${rec.buyer}`,
+      itemName: rec.commodity,
+      price: 0, // Outbound price not stored in outbound record directly, could be inferred
+      colly: 0,
+      inWeight: 0,
+      outWeight: rec.totalWeight,
+    };
+    setRiceStockRecords(prev => [newStock, ...prev]);
+
     showToast(`Sukses menyimpan: Pengiriman ${rec.commodity} ke ${rec.buyer} (${rec.totalWeight.toLocaleString('id-ID')} Kg Netto)!`, 'success');
   };
 

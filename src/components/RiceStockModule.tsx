@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { RiceStockRecord } from '../types';
 import { Package, PlusCircle, Search, Calendar, Download, Printer, Edit2, Trash2 } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
-import { exportToCSV, printPDFReport } from '../utils/exportHelper';
+import { exportToCSV, printPDFReport, printRiceStockSlip } from '../utils/exportHelper';
 
 interface RiceStockModuleProps {
   records: RiceStockRecord[];
@@ -223,6 +223,9 @@ export default function RiceStockModule({ records, onAddRecord, onUpdateRecord, 
                   <td className="py-2.5 px-3 font-black text-neutral-900 font-mono">{r.runningTotal.toLocaleString('id-ID')}</td>
                   <td className="py-2.5 px-3 text-center">
                     <div className="flex gap-2 justify-center">
+                      <button onClick={() => printRiceStockSlip(r)} className="text-neutral-400 hover:text-sky-600 transition" title="Cetak Resi">
+                        <Printer className="w-3.5 h-3.5" />
+                      </button>
                       <button onClick={() => handleEdit(r)} className="text-neutral-400 hover:text-blue-600 transition">
                         <Edit2 className="w-3.5 h-3.5" />
                       </button>

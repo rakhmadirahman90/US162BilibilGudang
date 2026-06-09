@@ -8,7 +8,7 @@
  * and trigger elegant, styled print jobs to physical printers or PDF generators.
  */
 
-import { WeighbridgeTicket } from '../types';
+import { WeighbridgeTicket, OutboundRecord, RiceStockRecord, InboundRecord, ServiceRecord } from '../types';
 
 export function exportToCSV(headers: string[], rows: string[][], filename: string) {
   // Map rows to escaped CSV cells
@@ -326,6 +326,118 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
         <div class="flex" style="font-size: 11pt;"><span>HARGA:</span><span>Rp ${(record.price || 0).toLocaleString('id-ID')}/kg</span></div>
         <div class="flex font-bold" style="font-size: 13pt;"><span>NETTO:</span><span>${net.toLocaleString('id-ID')} kg</span></div>
         <div class="flex font-bold" style="font-size: 13pt;"><span>TOTAL:</span><span>Rp ${(record.totalPrice || 0).toLocaleString('id-ID')}</span></div>
+        <div class="border-dashed"></div>
+        <div class="flex mt-2" style="font-size: 11pt;">
+          <div class="text-center">Penimbang,</div>
+          <div class="text-center">Petugas/Staff,</div>
+        </div>
+        <div style="height: 60px;"></div>
+        <div class="flex" style="font-size: 11pt;">
+          <div class="text-center">( .................... )</div>
+          <div class="text-center">( .................... )</div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+export function printOutboundSlip(record: OutboundRecord) {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    alert('Pop-up terblokir! Harap izinkan pop-up untuk mencetak slip.');
+    return;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Resi Keluar #${record.invoiceNo}</title>
+      <style>
+        @media print {
+          @page { size: 80mm auto; margin: 0; }
+          body { -webkit-print-color-adjust: exact; margin: 0; padding: 2mm; }
+        }
+        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 0mm; line-height: 1.25; font-weight: bold; }
+        .slip { width: 100%; max-width: 80mm; }
+        .border-dashed { border-top: 2px dashed #000; margin: 4px 0; }
+        .font-bold { font-weight: bold; }
+        .text-center { text-align: center; }
+        .flex { display: flex; justify-content: space-between; width: 100%; }
+        .mt-2 { margin-top: 4px; }
+      </style>
+    </head>
+    <body onload="window.print(); window.close();">
+      <div class="slip">
+        <div class="text-center font-bold" style="font-size: 14pt;">GUDANG US BILIBILI 162</div>
+        <div class="text-center" style="font-size: 11pt;">RESIDENSI PENGIRIMAN</div>
+        <div class="border-dashed"></div>
+        <div class="flex" style="font-size: 11pt;"><span>Invoice:</span><span>${record.invoiceNo}</span><span>Tgl:</span><span>${record.date}</span></div>
+        <div class="border-dashed"></div>
+        <div class="flex" style="font-size: 11pt;"><span>Pembeli:</span><span>${record.buyer}</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>No Pol:</span><span>${record.vehicleNo}</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>Komoditas:</span><span>${record.commodity}</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>Tujuan:</span><span>${record.destination}</span></div>
+        <div class="border-dashed"></div>
+        <div class="flex" style="font-size: 11pt;"><span>Total Berat:</span><span>${record.totalWeight.toLocaleString('id-ID')} kg</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>Upah Buruh:</span><span>Rp ${record.loadingLaborCost.toLocaleString('id-ID')}</span></div>
+        <div class="border-dashed"></div>
+        <div class="flex mt-2" style="font-size: 11pt;">
+          <div class="text-center">Penimbang,</div>
+          <div class="text-center">Petugas/Staff,</div>
+        </div>
+        <div style="height: 60px;"></div>
+        <div class="flex" style="font-size: 11pt;">
+          <div class="text-center">( .................... )</div>
+          <div class="text-center">( .................... )</div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+export function printRiceStockSlip(record: RiceStockRecord) {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    alert('Pop-up terblokir! Harap izinkan pop-up untuk mencetak slip.');
+    return;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Resi Stok #${record.id.slice(-6)}</title>
+      <style>
+        @media print {
+          @page { size: 80mm auto; margin: 0; }
+          body { -webkit-print-color-adjust: exact; margin: 0; padding: 2mm; }
+        }
+        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; color: #000; margin: 0; padding: 0mm; line-height: 1.25; font-weight: bold; }
+        .slip { width: 100%; max-width: 80mm; }
+        .border-dashed { border-top: 2px dashed #000; margin: 4px 0; }
+        .font-bold { font-weight: bold; }
+        .text-center { text-align: center; }
+        .flex { display: flex; justify-content: space-between; width: 100%; }
+        .mt-2 { margin-top: 4px; }
+      </style>
+    </head>
+    <body onload="window.print(); window.close();">
+      <div class="slip">
+        <div class="text-center font-bold" style="font-size: 14pt;">GUDANG US BILIBILI 162</div>
+        <div class="text-center" style="font-size: 11pt;">RESIDENSI STOK</div>
+        <div class="border-dashed"></div>
+        <div class="flex" style="font-size: 11pt;"><span>ID:</span><span>${record.id.slice(-6)}</span><span>Tgl:</span><span>${record.date}</span></div>
+        <div class="border-dashed"></div>
+        <div class="flex" style="font-size: 11pt;"><span>No Pol:</span><span>${record.policeNo}</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>Barang:</span><span>${record.itemName}</span></div>
+        <div class="border-dashed"></div>
+        <div class="flex" style="font-size: 11pt;"><span>Masuk:</span><span>${record.inWeight.toLocaleString('id-ID')} kg</span></div>
+        <div class="flex" style="font-size: 11pt;"><span>Keluar:</span><span>${record.outWeight.toLocaleString('id-ID')} kg</span></div>
         <div class="border-dashed"></div>
         <div class="flex mt-2" style="font-size: 11pt;">
           <div class="text-center">Penimbang,</div>
