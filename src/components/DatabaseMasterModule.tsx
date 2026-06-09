@@ -1542,8 +1542,8 @@ export default function DatabaseMasterModule({
 
         {/* GRID: VEHICLES */}
         {activeSubTab === 'VEHICLES' && (
-          <div className="overflow-x-auto rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs">
+          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
               <thead>
                 <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
                   <th className="p-3 font-semibold">No. Polisi</th>
@@ -1587,8 +1587,8 @@ export default function DatabaseMasterModule({
 
         {/* GRID: SUPPLIERS */}
         {activeSubTab === 'SUPPLIERS' && (
-          <div className="overflow-x-auto rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs">
+          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
               <thead>
                 <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
                   <th className="p-3 font-semibold">Nama Supplier</th>
@@ -1634,8 +1634,8 @@ export default function DatabaseMasterModule({
 
         {/* GRID: BUYERS */}
         {activeSubTab === 'BUYERS' && (
-          <div className="overflow-x-auto rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs">
+          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
               <thead>
                 <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
                   <th className="p-3 font-semibold">Nama Perusahaan / Buyer</th>
@@ -1675,8 +1675,8 @@ export default function DatabaseMasterModule({
 
         {/* GRID: EMPLOYEES */}
         {activeSubTab === 'EMPLOYEES' && (
-          <div className="overflow-x-auto rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs">
+          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
               <thead>
                 <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
                   <th className="p-3 font-semibold">Nama Lengkap</th>
@@ -1730,8 +1730,8 @@ export default function DatabaseMasterModule({
 
         {/* GRID: COMMODITIES */}
         {activeSubTab === 'COMMODITIES' && (
-          <div className="overflow-x-auto rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs">
+          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
               <thead>
                 <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
                   <th className="p-3 font-semibold">Nama Barang/Komoditas</th>
@@ -1773,8 +1773,8 @@ export default function DatabaseMasterModule({
 
         {/* GRID: BANKS */}
         {activeSubTab === 'BANKS' && (
-          <div className="overflow-x-auto rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs">
+          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
               <thead>
                 <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
                   <th className="p-3 font-semibold">Nama Akun</th>
@@ -1816,8 +1816,8 @@ export default function DatabaseMasterModule({
 
         {/* GRID: BROKERS */}
         {activeSubTab === 'BROKERS' && (
-          <div className="overflow-x-auto rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs">
+          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
               <thead>
                 <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
                   <th className="p-3 font-semibold">Nama Makelar</th>
@@ -1859,8 +1859,8 @@ export default function DatabaseMasterModule({
 
         {/* GRID: LOCATIONS */}
         {activeSubTab === 'LOCATIONS' && (
-          <div className="overflow-x-auto rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs">
+          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
               <thead>
                 <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
                   <th className="p-3 font-semibold">Lokasi / Fasilitas</th>
@@ -1902,8 +1902,8 @@ export default function DatabaseMasterModule({
 
         {/* GRID: CUSTOMERS */}
         {activeSubTab === 'CUSTOMERS' && (
-          <div className="overflow-x-auto rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs">
+          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
               <thead>
                 <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
                   <th className="p-3 font-semibold">Nama Pelanggan</th>
@@ -1943,8 +1943,8 @@ export default function DatabaseMasterModule({
 
         {/* GRID: FINANCE_CATS */}
         {activeSubTab === 'FINANCE_CATS' && (
-          <div className="overflow-x-auto rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs">
+          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
               <thead>
                 <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
                   <th className="p-3 font-semibold">Nama Kategori</th>

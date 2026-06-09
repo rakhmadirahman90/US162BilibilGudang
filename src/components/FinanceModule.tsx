@@ -476,8 +476,8 @@ export default function FinanceModule({
 
           {/* Table display debts */}
           <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-neutral-600">
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left text-xs text-neutral-600 min-w-[900px]">
                 <thead className="bg-neutral-50 text-neutral-500 font-semibold uppercase tracking-wider border-b border-neutral-200">
                   <tr>
                     <th className="py-2.5 px-3">Tanggal Terbit</th>
@@ -656,8 +656,8 @@ export default function FinanceModule({
               Petugas Gudang & Makelar Terdaftar (9. BURUH & KARYAWAN)
             </h3>
             
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left text-xs min-w-[500px]">
                 <thead className="bg-neutral-50 text-neutral-500 font-semibold border-b border-neutral-200">
                   <tr>
                     <th className="py-2 px-3">Nama Petugas</th>
@@ -833,8 +833,8 @@ export default function FinanceModule({
 
           {/* Ledger display table */}
           <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-neutral-600">
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left text-xs text-neutral-600 min-w-[900px]">
                 <thead className="bg-neutral-50 text-neutral-500 font-semibold uppercase tracking-wider border-b border-neutral-200">
                   <tr>
                     <th className="py-2.5 px-3">Tanggal Catat</th>

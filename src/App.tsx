@@ -671,7 +671,7 @@ export default function App() {
   const totalOutstandingDebts = debts.filter(d => d.status === 'BELUM_LUNAS').reduce((acc, d) => acc + d.remainingBalance, 0);
 
   return (
-    <div className={`h-screen ${theme.pageBg} text-neutral-800 font-sans flex flex-col transition-colors duration-300`}>
+    <div className={`h-screen ${theme.pageBg} text-neutral-800 font-sans flex flex-col transition-colors duration-300 overflow-x-hidden w-full max-w-full`}>
       
       {/* GLOBAL WAREHOUSE HEADER BAR */}
       <header className={`text-white shadow-md border-b sticky top-0 z-40 transition-all duration-300 ${theme.headerBg} ${theme.headerBorder}`}>
@@ -808,7 +808,7 @@ export default function App() {
       )}
 
       {/* TABS SELECTOR RAILS */}
-      <div className="bg-white border-b border-neutral-200 shadow-sm sticky top-[69px] z-30 overflow-x-auto whitespace-nowrap">
+      <div className="bg-white border-b border-neutral-200 shadow-sm sticky top-[69px] z-30 overflow-x-auto whitespace-nowrap custom-scrollbar">
         <div className="max-w-7xl mx-auto px-4 flex">
           
           <button
@@ -935,7 +935,7 @@ export default function App() {
       </div>
 
       {/* CORE WORKSPACE PORTALS */}
-      <main className="max-w-7xl mx-auto px-4 py-8 flex-1 w-full overflow-y-auto">
+      <main className="max-w-7xl mx-auto px-4 py-8 flex-1 w-full overflow-y-auto overflow-x-hidden">
         
         {/* VIEW 1: DASHBOARD OVERVIEW */}
         {activeTab === 'DASHBOARD' && (

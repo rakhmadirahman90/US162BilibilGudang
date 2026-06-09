@@ -10,6 +10,7 @@
 
 import { WeighbridgeTicket, OutboundRecord, RiceStockRecord, InboundRecord, ServiceRecord } from '../types';
 import { formatReceiptDate } from './format';
+import bilibiliLogo from '../assets/images/bilibili_logo_1780925186692.png';
 
 export function exportToCSV(headers: string[], rows: string[][], filename: string) {
   // Map rows to escaped CSV cells
@@ -178,7 +179,7 @@ export function printPDFReport(
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px;">
           <tr>
             <td style="width: 100px; text-align: left; vertical-align: middle;">
-              <img src="/src/assets/images/bilibili_logo_1780925186692.png" alt="US Bilibili 162" style="width: 80px; height: auto;" />
+              <img src="${bilibiliLogo}" alt="US Bilibili 162" style="width: 80px; height: auto;" />
             </td>
             <td style="text-align: left; vertical-align: middle; padding-left: 15px;">
               <h2 style="margin: 0; font-size: 16px; letter-spacing: 0.5px; font-weight: 900; text-transform: uppercase;">
@@ -329,21 +330,35 @@ const COMMON_SLIP_STYLE = `
     }
   }
   .header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px;
     text-align: left;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
+    width: 100%;
+  }
+  .header-logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+  .header-text {
+    flex-grow: 1;
   }
   .header-title {
-    font-size: 11pt;
+    font-size: 9.5pt;
     font-weight: 800;
-    color: #0f2d21;
+    color: #000000;
     letter-spacing: 0.2px;
-    margin-bottom: 2px;
+    margin: 0;
     text-transform: uppercase;
   }
   .header-subtitle {
-    font-size: 6.5pt;
+    font-size: 6pt;
     color: #475569;
-    line-height: 1.3;
+    line-height: 1.35;
+    margin-top: 2px;
     font-weight: 500;
   }
   .divider-line {
@@ -496,11 +511,13 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
     <body onload="window.print(); window.close();">
       <div class="slip">
         <div class="header">
-          <div class="header-title">GUDANG US BILIBILI 162</div>
-          <div class="header-subtitle">
-            Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
-            Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
-            TELP - 085244466009
+          <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
+          <div class="header-text">
+            <div class="header-title">GUDANG US BILIBILI 162</div>
+            <div class="header-subtitle">
+              Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
+              Kabupaten Pinrang, Sulawesi Selatan | TELP - 085244466009
+            </div>
           </div>
         </div>
         
@@ -629,11 +646,13 @@ export function printOutboundSlip(record: OutboundRecord, staffName: string = "A
     <body onload="window.print(); window.close();">
       <div class="slip">
         <div class="header">
-          <div class="header-title">GUDANG US BILIBILI 162</div>
-          <div class="header-subtitle">
-            Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
-            Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
-            TELP - 085244466009
+          <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
+          <div class="header-text">
+            <div class="header-title">GUDANG US BILIBILI 162</div>
+            <div class="header-subtitle">
+              Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
+              Kabupaten Pinrang, Sulawesi Selatan | TELP - 085244466009
+            </div>
           </div>
         </div>
         
@@ -722,11 +741,13 @@ export function printRiceStockSlip(record: RiceStockRecord, staffName: string = 
     <body onload="window.print(); window.close();">
       <div class="slip">
         <div class="header">
-          <div class="header-title">GUDANG US BILIBILI 162</div>
-          <div class="header-subtitle">
-            Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
-            Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
-            TELP - 085244466009
+          <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
+          <div class="header-text">
+            <div class="header-title">GUDANG US BILIBILI 162</div>
+            <div class="header-subtitle">
+              Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
+              Kabupaten Pinrang, Sulawesi Selatan | TELP - 085244466009
+            </div>
           </div>
         </div>
         
@@ -813,11 +834,13 @@ export function printServiceSlip(record: ServiceRecord, staffName: string = "Asm
     <body onload="window.print(); window.close();">
       <div class="slip">
         <div class="header">
-          <div class="header-title">GUDANG US BILIBILI 162</div>
-          <div class="header-subtitle">
-            Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
-            Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
-            TELP - 085244466009
+          <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
+          <div class="header-text">
+            <div class="header-title">GUDANG US BILIBILI 162</div>
+            <div class="header-subtitle">
+              Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
+              Kabupaten Pinrang, Sulawesi Selatan | TELP - 085244466009
+            </div>
           </div>
         </div>
         
@@ -919,11 +942,13 @@ export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Asma")
     <body onload="window.print(); window.close();">
       <div class="slip">
         <div class="header">
-          <div class="header-title">GUDANG US BILIBILI 162</div>
-          <div class="header-subtitle">
-            Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
-            Kabupaten Pinrang, Sulawesi Selatan 91131<br/>
-            TELP - 085244466009
+          <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
+          <div class="header-text">
+            <div class="header-title">GUDANG US BILIBILI 162</div>
+            <div class="header-subtitle">
+              Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
+              Kabupaten Pinrang, Sulawesi Selatan | TELP - 085244466009
+            </div>
           </div>
         </div>
         

@@ -164,8 +164,8 @@ export default function MoistureRefaksiModule() {
             Berikut adalah representasi isi file <code className="bg-neutral-100 text-neutral-800 px-1.5 py-0.5 rounded font-mono font-medium text-[10px]">~$TABEL REFAKSI KA JAGUNG 2025.xlsx</code> untuk menentukan susut timbangan pembelian petani berdasarkan kadar air:
           </p>
 
-          <div className="overflow-hidden border border-neutral-150 rounded-lg">
-            <table className="w-full text-left text-xs">
+          <div className="overflow-x-auto custom-scrollbar border border-neutral-150 rounded-lg">
+            <table className="w-full text-left text-xs min-w-[600px]">
               <thead className="bg-[#1e2a42] text-white font-mono tracking-wider">
                 <tr>
                   <th className="py-2 px-3 text-center">Kadar Air (%)</th>

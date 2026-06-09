@@ -351,7 +351,7 @@ export default function WeighbridgeModule({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6" id="weighbridge-main font-sans">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 font-sans" id="weighbridge-main">
       
       {/* 1. PHYSICAL HARWARE INDICATOR EMULATOR (GST-9700) */}
       <div className="lg:col-span-4 flex flex-col gap-4">
@@ -362,7 +362,7 @@ export default function WeighbridgeModule({
           </div>
 
           {/* LED Display screen */}
-          <div className="bg-black border-2 border-neutral-900 rounded-lg p-6 flex flex-col items-end relative overflow-hidden shadow-inner my-2">
+          <div className="bg-black border-2 border-neutral-900 rounded-lg p-4 sm:p-6 flex flex-col items-end relative overflow-hidden shadow-inner my-2">
             <div className="absolute top-2 left-3 flex gap-2">
               <span className={`w-2 h-2 rounded-full ${simulatorWeight > 0 ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,1)]' : 'bg-red-950'}`}></span>
               <span className="text-[9px] font-mono text-neutral-500">{t.stable}</span>
@@ -371,10 +371,10 @@ export default function WeighbridgeModule({
             </div>
             
             {/* LARGE SEVEN SEGMENT RESEMBLANCE */}
-            <div className="text-red-500 font-mono text-5xl font-extrabold tracking-widest leading-none drop-shadow-[0_0_6px_rgba(239,68,68,0.7)]">
+            <div className="text-red-500 font-mono text-4xl sm:text-5xl font-extrabold tracking-widest leading-none drop-shadow-[0_0_6px_rgba(239,68,68,0.7)]">
               {simulatorWeight.toLocaleString('id-ID')}
             </div>
-            <div className="text-red-400 font-mono text-sm mt-1">kg</div>
+            <div className="text-red-400 font-mono text-xs sm:text-sm mt-1">kg</div>
           </div>
 
           {/* Controls to Mock physical setup weights for the computer */}
@@ -385,11 +385,11 @@ export default function WeighbridgeModule({
                 type="text"
                 value={formatNumberInput(customSimulatorInput)}
                 onChange={(e) => setCustomSimulatorInput(e.target.value)}
-                className="bg-neutral-900 border border-neutral-600 text-red-400 font-mono text-center text-lg rounded px-2 py-1 flex-1 focus:outline-none focus:border-red-500"
+                className="bg-neutral-900 border border-neutral-600 text-red-400 font-mono text-center text-sm sm:text-lg rounded px-2 py-1 flex-1 focus:outline-none focus:border-red-500"
               />
               <button 
                 type="submit" 
-                className="bg-red-700 hover:bg-red-600 font-mono px-3 py-1 text-sm rounded font-bold transition"
+                className="bg-red-700 hover:bg-red-600 font-mono px-3 py-1 text-xs sm:text-sm rounded font-bold transition shrink-0"
               >
                 {t.apply}
               </button>
@@ -397,23 +397,23 @@ export default function WeighbridgeModule({
           </div>
 
           {/* Preset Buttons */}
-          <div className="grid grid-cols-3 gap-2 mt-3">
-            <button onClick={() => applySimulatorPreset(3560)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1 rounded text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mt-3">
+            <button onClick={() => applySimulatorPreset(3560)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate">
               3,560 kg (Beras)
             </button>
-            <button onClick={() => applySimulatorPreset(14650)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1 rounded text-xs">
+            <button onClick={() => applySimulatorPreset(14650)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate">
               14,650 kg (Truk)
             </button>
-            <button onClick={() => applySimulatorPreset(4250)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1 rounded text-xs">
+            <button onClick={() => applySimulatorPreset(4250)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate">
               4,250 kg (Empty)
             </button>
-            <button onClick={() => applySimulatorPreset(12450)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1 rounded text-xs">
+            <button onClick={() => applySimulatorPreset(12450)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate">
               12,450 kg (Gross)
             </button>
-            <button onClick={() => applySimulatorPreset(3900)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1 rounded text-xs">
+            <button onClick={() => applySimulatorPreset(3900)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate">
               3,900 kg (Empty)
             </button>
-            <button onClick={resetZero} className="bg-neutral-950 hover:bg-neutral-900 text-red-500 font-bold border border-red-950 font-mono py-1 rounded text-xs leading-none">
+            <button onClick={resetZero} className="bg-neutral-950 hover:bg-neutral-900 text-red-500 font-bold border border-red-950 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate leading-none">
               {t.zeroScale}
             </button>
           </div>
@@ -837,8 +837,8 @@ export default function WeighbridgeModule({
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-neutral-600">
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="w-full text-left text-xs text-neutral-600 min-w-[800px]">
               <thead className="bg-neutral-50 text-neutral-500 font-semibold uppercase tracking-wider border-b border-neutral-200">
                 <tr>
                   <th className="py-2.5 px-3">{t.ticketNoHeader}</th>

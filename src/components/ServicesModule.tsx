@@ -411,8 +411,8 @@ export default function ServicesModule({
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-neutral-600">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left text-xs text-neutral-600 min-w-[900px]">
             <thead className="bg-neutral-50 text-neutral-500 font-semibold uppercase tracking-wider border-b border-neutral-200">
               <tr>
                 <th className="py-2.5 px-3">Tanggal</th>

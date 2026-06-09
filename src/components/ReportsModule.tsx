@@ -778,8 +778,8 @@ export default function ReportsModule({
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left text-xs border-collapse min-w-[850px]">
                 <thead>
                   <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-250">
                     <th className="p-2 font-mono">No. Tiket</th>
@@ -853,8 +853,8 @@ export default function ReportsModule({
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left text-xs border-collapse min-w-[950px]">
                 <thead>
                   <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-250">
                     <th className="p-2">Tanggal</th>
@@ -920,8 +920,8 @@ export default function ReportsModule({
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left text-xs border-collapse min-w-[850px]">
                 <thead>
                   <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-250">
                     <th className="p-2">Tanggal</th>
@@ -991,8 +991,8 @@ export default function ReportsModule({
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left text-xs border-collapse min-w-[900px]">
                 <thead>
                   <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-250">
                     <th className="p-2">Tanggal</th>
@@ -1062,8 +1062,8 @@ export default function ReportsModule({
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left text-xs border-collapse min-w-[900px]">
                 <thead>
                   <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-250">
                     <th className="p-2">Tanggal</th>
