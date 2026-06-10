@@ -7,6 +7,7 @@ import WhatsAppModal from './WhatsAppModal';
 import { exportToCSV, printPDFReport, printRiceStockSlip, getHTMLForPDF } from '../utils/exportHelper';
 import { buildRiceStockWAText, sendWhatsAppMessage } from '../utils/whatsappHelper';
 import { formatNumberInput, parseNumberInput, formatReceiptDate } from '../utils/format';
+import SmartNumberInput from './SmartNumberInput';
 import { Package, PlusCircle, Search, Calendar, Download, Printer, Edit2, Trash2, ArrowUpCircle, ArrowDownCircle, X, MessageCircle } from 'lucide-react';
 
 interface RiceStockModuleProps {
@@ -193,20 +194,44 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
               <input type="text" value={itemName} onChange={(e) => setItemName(e.target.value)} className="w-full border p-2 rounded" />
             </div>
             <div>
-              <label>{t.priceLabel}</label>
-              <input type="text" value={formatNumberInput(price)} onChange={(e) => setPrice(parseNumberInput(e.target.value))} className="w-full border p-2 rounded" />
+              <SmartNumberInput
+                value={price}
+                onChange={setPrice}
+                label={t.priceLabel}
+                mode="currency"
+                unit="Rp/Kg"
+                presets={[10000, 11000, 12000, 12500, 13000]}
+              />
             </div>
             <div>
-              <label>{t.collyLabel}</label>
-              <input type="text" value={formatNumberInput(colly)} onChange={(e) => setColly(parseNumberInput(e.target.value))} className="w-full border p-2 rounded" />
+              <SmartNumberInput
+                value={colly}
+                onChange={setColly}
+                label={t.collyLabel}
+                mode="general"
+                unit="Sak"
+                presets={[50, 100, 200, 300, 500]}
+              />
             </div>
             <div>
-              <label>{t.inStockLabel}</label>
-              <input type="text" value={formatNumberInput(inWeight)} onChange={(e) => setInWeight(parseNumberInput(e.target.value))} className="w-full border p-2 rounded" />
+              <SmartNumberInput
+                value={inWeight}
+                onChange={setInWeight}
+                label={t.inStockLabel}
+                mode="weight"
+                unit="Kg"
+                presets={[1000, 5000, 10000, 15000]}
+              />
             </div>
             <div>
-              <label>{t.outStockLabel}</label>
-              <input type="text" value={formatNumberInput(outWeight)} onChange={(e) => setOutWeight(parseNumberInput(e.target.value))} className="w-full border p-2 rounded" />
+              <SmartNumberInput
+                value={outWeight}
+                onChange={setOutWeight}
+                label={t.outStockLabel}
+                mode="weight"
+                unit="Kg"
+                presets={[1000, 5000, 10000, 15000]}
+              />
             </div>
             <div className="col-span-3 flex justify-end gap-2">
               <button type="submit" className="bg-emerald-600 text-white px-4 py-2 rounded">{t.saveStock}</button>

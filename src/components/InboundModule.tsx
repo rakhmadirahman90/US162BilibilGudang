@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { InboundRecord, WeighbridgeTicket, VehicleRecord, SupplierRecord, EmployeeRecord, LaborRateRecord, CornMoistureRule } from '../types';
-import { getRefaksiByRule } from '../data';
+import { getRefaksiByRule, initialCornMoistureRules } from '../data';
 import { useLanguage } from '../i18n/LanguageContext';
 import ConfirmModal from './ConfirmModal';
 import WhatsAppModal from './WhatsAppModal';
@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { exportToCSV, printPDFReport, printCombinedSlip, getHTMLForPDF } from '../utils/exportHelper';
 import { buildInboundWAText, sendWhatsAppMessage } from '../utils/whatsappHelper';
 import { formatNumberInput, parseNumberInput, formatReceiptDate } from '../utils/format';
+import SmartNumberInput from './SmartNumberInput';
 
 interface InboundModuleProps {
   records: InboundRecord[];
@@ -45,6 +46,7 @@ export default function InboundModule({
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [previewRecord, setPreviewRecord] = useState<InboundRecord | null>(null);
+  const [showMoistureModal, setShowMoistureModal] = useState(false);
   
   const [staffName, setStaffName] = useState<string>(() => {
     return localStorage.getItem('bilibili_staff_name') || "Asma";
@@ -285,19 +287,20 @@ export default function InboundModule({
       {showAddForm && (
         <div className="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
           <h3 className="font-bold text-neutral-800 text-sm mb-4 border-b border-neutral-100 pb-2">
-            {editingId ? 'Formulir Ubah Transaksi Barang Masuk' : 'Formulir Catat Barang Masuk Baru'}
+            {editingId ? 'Formulir Ubah Catatan Penerimaan Barang Masuk' : 'Formulir Catat Barang Masuk Baru'}
           </h3>
-          <form onSubmit={handleCreateRecord} className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
+          <form onSubmit={handleCreateRecord} className="grid grid-cols-1 lg:grid-cols-3 gap-5 text-xs">
             
-            {/* Sec 1: Ticket Links / Plate */}
+            {/* Column 1: Jembatan Timbang & No Kendaraan */}
             <div className="flex flex-col gap-3">
-              <span className="font-bold text-neutral-500">1. REFERENSI TIMBANGAN</span>
-              <div className="bg-amber-50/50 p-3 rounded-lg border border-amber-100 flex flex-col gap-2">
-                <label className="block text-neutral-600">Pilih Tiket Jembatan Timbang (Opsional)</label>
+              <span className="font-bold text-neutral-500">1. REFERENSI LOGISTIK</span>
+              
+              <div className="bg-emerald-50/40 p-3 rounded-lg border border-emerald-100/60 flex flex-col gap-1.5 animate-fade-in">
+                <label className="block text-neutral-600">Pilih Tiket Timbang (Opsional)</label>
                 <select
                   value={selectedTicketId}
                   onChange={(e) => handleTicketChange(e.target.value)}
-                  className="w-full bg-white border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-amber-600"
+                  className="w-full bg-white border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-emerald-600 transition cursor-pointer"
                 >
                   <option value="">-- Manual Tanpa Tiket Timbang --</option>
                   {tickets.map(t => (
@@ -306,9 +309,6 @@ export default function InboundModule({
                     </option>
                   ))}
                 </select>
-                <p className="text-[10px] text-amber-700 italic">
-                  💡 Memilih tiket timbang akan mengimpor data Berat Bruto, Tara, Nomor Polisi, dan Potongan Karung secara otomatis.
-                </p>
               </div>
 
               <div>
@@ -330,7 +330,7 @@ export default function InboundModule({
                       }
                     }
                   }}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 uppercase"
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 uppercase transition"
                   list="inbound-vehicles"
                 />
                 <datalist id="inbound-vehicles">
@@ -347,7 +347,7 @@ export default function InboundModule({
                   placeholder="Contoh: Daeng Naba"
                   value={driverName}
                   onChange={(e) => setDriverName(e.target.value)}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 transition"
                   list="inbound-drivers"
                 />
                 <datalist id="inbound-drivers">
@@ -356,19 +356,30 @@ export default function InboundModule({
                   ))}
                 </datalist>
               </div>
+
+              <div>
+                <label className="block text-neutral-600 mb-1">Sektor Letak Gudang Tolak/Terima</label>
+                <input
+                  type="text"
+                  value={warehouseSection}
+                  onChange={(e) => setWarehouseSection(e.target.value)}
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 transition"
+                  placeholder="Misal: Gudang Utara, Silo B"
+                />
+              </div>
             </div>
 
-            {/* Sec 2: Product & Weights */}
+            {/* Column 2: Commodity & Weights */}
             <div className="flex flex-col gap-3">
-              <span className="font-bold text-neutral-500">2. DETIL KOMODITAS & BERAT</span>
+              <span className="font-bold text-neutral-500">2. DETIL KOMODITAS & MASUK</span>
               
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-2">
                 <div>
                   <label className="block text-neutral-600 mb-1">Jenis Komoditas</label>
                   <select
                     value={commodity}
                     onChange={(e) => setCommodity(e.target.value as any)}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 transition cursor-pointer"
                   >
                     <option value="JAGUNG">JAGUNG PIPIL 🌽</option>
                     <option value="BERAS">BERAS MOLEK 🌾</option>
@@ -377,13 +388,13 @@ export default function InboundModule({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[#475569] font-semibold mb-1">Nama Suplier / Pemilik</label>
+                  <label className="block text-neutral-600 mb-1 font-semibold">Nama Suplier / Pemilik</label>
                   <input
                     type="text"
                     placeholder="Contoh: H. Mustamin"
                     value={supplier}
                     onChange={(e) => setSupplier(e.target.value)}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 font-bold"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 font-bold uppercase transition"
                     list="inbound-suppliers"
                   />
                   <datalist id="inbound-suppliers">
@@ -394,140 +405,216 @@ export default function InboundModule({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-neutral-600 mb-1">Berat Bruto (Kg)</label>
-                  <input
-                    type="text"
-                    value={formatNumberInput(grossWeight)}
-                    onChange={(e) => setGrossWeight(parseNumberInput(e.target.value))}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-neutral-600 mb-1">Berat Tara (Kg)</label>
-                  <input
-                    type="text"
-                    value={formatNumberInput(tareWeight)}
-                    onChange={(e) => setTareWeight(parseNumberInput(e.target.value))}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
-                  />
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3">
+                <SmartNumberInput
+                  value={grossWeight}
+                  onChange={setGrossWeight}
+                  label="Berat Bruto"
+                  mode="weight"
+                  unit="Kg"
+                  presets={[3000, 5000, 8000, 12000]}
+                />
+                <SmartNumberInput
+                  value={tareWeight}
+                  onChange={setTareWeight}
+                  label="Berat Tara"
+                  mode="weight"
+                  unit="Kg"
+                  presets={[1000, 2000, 3500, 4200]}
+                />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-neutral-600 mb-1">Potongan Karung (%)</label>
-                  <input
-                    type="text"
-                    value={formatNumberInput(bagDeductionPercent)}
-                    onChange={(e) => setBagDeductionPercent(parseNumberInput(e.target.value))}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-neutral-600 mb-1">Kadar Air (KA %)</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={formatNumberInput(moistureContent)}
-                      onChange={(e) => setMoistureContent(parseNumberInput(e.target.value))}
-                      className="w-1/2 bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
-                    />
+              <div>
+                <SmartNumberInput
+                  value={bagDeductionPercent}
+                  onChange={setBagDeductionPercent}
+                  label="Potongan Karung"
+                  mode="percent"
+                  unit="%"
+                  presets={[1.0, 1.25, 1.5, 2.0]}
+                />
+              </div>
+            </div>
+
+            {/* Column 3: Moisture rate & Prices */}
+            <div className="flex flex-col justify-between gap-3">
+              <div className="flex flex-col gap-3">
+                <span className="font-bold text-neutral-500">3. KADAR AIR & OPERASIONAL HARGA</span>
+                
+                <div className="flex flex-col gap-1 w-full font-sans">
+                  <div className="flex justify-between items-center mb-0.5">
+                    <span className="text-[11px] font-bold text-neutral-600">Kadar Air (KA) Jagung</span>
+                    {commodity === 'JAGUNG' && (
+                      <button
+                        type="button"
+                        onClick={() => setShowMoistureModal(true)}
+                        className="text-[10px] text-emerald-600 hover:text-emerald-800 font-bold underline cursor-pointer flex items-center gap-0.5"
+                      >
+                        Aturan Potongan KA ℹ️
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex gap-2 items-start">
+                    <div className="flex-1">
+                      <SmartNumberInput
+                        value={moistureContent}
+                        onChange={setMoistureContent}
+                        mode="percent"
+                        unit="%"
+                        presets={[14, 15, 17, 20]}
+                      />
+                    </div>
                     {commodity === 'JAGUNG' && (
                       <select
                         value={refaksiType}
                         onChange={(e) => setRefaksiType(e.target.value as 'LOKAL' | 'LUAR_DAERAH')}
-                        className="w-1/2 bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 text-[10px]"
+                        className="bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-neutral-700 px-2.5 rounded-xl font-bold text-xs h-[42px] outline-none transition cursor-pointer"
                       >
-                        <option value="LOKAL">Tabel Lokal</option>
-                        <option value="LUAR_DAERAH">Tabel Bone/Luar</option>
+                        <option value="LOKAL">Lokal</option>
+                        <option value="LUAR_DAERAH">Luar</option>
                       </select>
                     )}
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Sec 3: Offloading and placement */}
-            <div className="flex flex-col justify-between gap-3">
-              <div className="flex flex-col gap-3">
-                <span className="font-bold text-neutral-500">3. ALOKASI OPERASIONAL</span>
-                <div>
-                  <label className="block text-neutral-600 mb-1">Sektor Letak Gudang</label>
-                  <input
-                    type="text"
-                    value={warehouseSection}
-                    onChange={(e) => setWarehouseSection(e.target.value)}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
-                    placeholder="Misal: Gudang Utara, Silo Jagung B"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-neutral-600 mb-1">Biaya Buruh Panggul/Kegiatan</label>
-                  <select
-                    value={selectedLaborId}
-                    onChange={(e) => {
-                      const id = e.target.value;
-                      setSelectedLaborId(id);
-                      if (id) {
-                        const labor = laborRates.find(l => l.id === id);
-                        if (labor) {
-                          // Gunakan netto kotor atau netto akhir untuk perhitungan?
-                          // Menghitung labor base weight:
-                          const fNet = (grossWeight - tareWeight - ((grossWeight - tareWeight) * (bagDeductionPercent / 100)) - ((grossWeight - tareWeight) * (commodity === 'JAGUNG' ? getRefaksiByRule(moistureContent, cornMoistureRules, refaksiType).refaksiPercent : 0) / 100));
-                          if (labor.rateType === 'FLAT') {
-                            setLaborCost(labor.rate);
-                          } else {
-                            setLaborCost(Math.round(fNet * labor.rate));
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-2">
+                  <div className="col-span-1 sm:col-span-2 lg:col-span-1 xl:col-span-2">
+                    <label className="block text-neutral-600 mb-1">Kegiatan Buruh Panggul</label>
+                    <select
+                      value={selectedLaborId}
+                      onChange={(e) => {
+                        const id = e.target.value;
+                        setSelectedLaborId(id);
+                        if (id) {
+                          const labor = laborRates.find(l => l.id === id);
+                          if (labor) {
+                            const refPercentage = commodity === 'JAGUNG' ? getRefaksiByRule(moistureContent, cornMoistureRules, refaksiType).refaksiPercent : 0;
+                            const rNet = grossWeight - tareWeight;
+                            const bagDed = rNet * (bagDeductionPercent / 100);
+                            const refDed = rNet * (refPercentage / 100);
+                            const computedNet = rNet - bagDed - refDed;
+                            
+                            if (labor.rateType === 'FLAT') {
+                              setLaborCost(labor.rate);
+                            } else {
+                              setLaborCost(Math.round(computedNet * labor.rate));
+                            }
                           }
+                        } else {
+                          setLaborCost(0);
                         }
-                      } else {
-                        setLaborCost(0);
-                      }
-                    }}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 mb-2 focus:bg-white focus:outline-none focus:border-emerald-600"
-                  >
-                    <option value="">-- Pilih Kegiatan Buruh --</option>
-                    {laborRates.map(l => (
-                      <option key={l.id} value={l.id}>{l.activityName} ({l.rateType === 'FLAT' ? `Rp ${l.rate.toLocaleString('id-ID')}` : `Rp ${l.rate}/Kg`})</option>
-                    ))}
-                  </select>
-                  <input
-                    type="text"
-                    value={formatNumberInput(laborCost)}
-                    onChange={(e) => setLaborCost(parseNumberInput(e.target.value))}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
-                    placeholder="Atau isi nominal manual (Rp)"
-                  />
-                </div>
-                <div>
-                  <label className="block text-neutral-600 mb-1">Harga Satuan (Rp/Kg)</label>
-                  <input
-                    type="text"
-                    value={formatNumberInput(price)}
-                    onChange={(e) => setPrice(parseNumberInput(e.target.value))}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
-                  />
+                      }}
+                      className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 transition cursor-pointer h-[38px] truncate"
+                    >
+                      <option value="">-- Pilih Kegiatan Buruh --</option>
+                      {laborRates.map(l => (
+                        <option key={l.id} value={l.id}>{l.activityName}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <SmartNumberInput
+                      value={laborCost}
+                      onChange={setLaborCost}
+                      label="Upah Buruh"
+                      mode="currency"
+                      unit="Rp"
+                      presets={[100000, 200000]}
+                    />
+                  </div>
+                  <div>
+                    <SmartNumberInput
+                      value={price}
+                      onChange={setPrice}
+                      label="Harga Pembelian"
+                      mode="currency"
+                      unit="Rp/Kg"
+                      presets={[4500, 5000, 5200, 5500, 6000]}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="flex gap-2 mt-4 pt-1 border-t border-neutral-100">
-                <button
-                  type="submit"
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg cursor-pointer"
-                >
-                  {editingId ? 'Simpan Perubahan Transaksi' : 'Simpan Transaksi Masuk'}
-                </button>
+              <div className="flex gap-2 mt-2 pt-2 border-t border-neutral-100">
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-3 py-2 rounded-lg"
+                  className="bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold px-3 py-2 rounded-lg transition"
                 >
                   Reset
                 </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg cursor-pointer transition"
+                >
+                  {editingId ? 'Simpan' : 'Simpan Transaksi Masuk'}
+                </button>
               </div>
+            </div>
+
+            {/* HORIZONTAL COMPUTATION PREVIEW BOARD */}
+            <div className="lg:col-span-3 bg-neutral-900 text-white rounded-xl p-3.5 shadow-inner border border-neutral-800 mt-2 flex flex-col lg:flex-row items-center justify-between gap-4 text-xs">
+              {(() => {
+                const rNet = grossWeight - tareWeight;
+                const bagDed = rNet * (bagDeductionPercent / 100);
+                const activeRefaksiRule = commodity === 'JAGUNG'
+                  ? getRefaksiByRule(moistureContent, cornMoistureRules.length > 0 ? cornMoistureRules : initialCornMoistureRules, refaksiType)
+                  : { refaksiPercent: 0, description: 'Bukan Jagung' };
+                const refPercentage = activeRefaksiRule.refaksiPercent;
+                const refDed = rNet * (refPercentage / 100);
+                const computedNet = Math.max(0, Math.round(rNet - bagDed - refDed));
+                const purchaseTotal = computedNet * price;
+                const subTotalFinal = Math.max(0, purchaseTotal - laborCost);
+
+                return (
+                  <>
+                    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-zinc-300 w-full lg:w-auto">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Netto Kotor</span>
+                        <span className="font-mono font-bold text-white text-xs">{rNet.toLocaleString('id-ID')} Kg</span>
+                      </div>
+
+                      <div className="w-px h-6 bg-neutral-800 hidden lg:block" />
+
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Karung ({bagDeductionPercent}%)</span>
+                        <span className="font-mono text-red-400">-{Math.round(bagDed).toLocaleString('id-ID')} Kg</span>
+                      </div>
+
+                      {commodity === 'JAGUNG' && (
+                        <>
+                          <div className="w-px h-6 bg-neutral-800 hidden lg:block" />
+                          <div className="flex flex-col">
+                            <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Potongan KA ({refPercentage}%)</span>
+                            <span className="font-mono text-red-400">-{Math.round(refDed).toLocaleString('id-ID')} Kg</span>
+                          </div>
+                        </>
+                      )}
+
+                      <div className="w-px h-6 bg-neutral-800 hidden lg:block" />
+
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Netto Bersih Akhir</span>
+                        <span className="font-mono text-emerald-400 font-extrabold text-sm">{computedNet.toLocaleString('id-ID')} Kg</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-end border-t border-neutral-800 pt-2 lg:border-0 lg:pt-0 shrink-0">
+                      <div className="flex flex-col items-end">
+                        <span className="text-[9px] text-zinc-450 uppercase tracking-wider">Total Pembelian</span>
+                        <span className="font-mono text-white">Rp {purchaseTotal.toLocaleString('id-ID')}</span>
+                      </div>
+                      
+                      <div className="w-px h-6 bg-neutral-800 hidden lg:block" />
+
+                      <div className="flex flex-col items-end">
+                        <span className="text-[9px] text-zinc-450 uppercase tracking-wider">Pembayaran Bersih Sopir</span>
+                        <span className="font-mono text-sm font-black text-amber-300">Rp {subTotalFinal.toLocaleString('id-ID')}</span>
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
 
           </form>
@@ -622,13 +709,21 @@ export default function InboundModule({
                       <div>{(r.grossWeight ?? 0).toLocaleString('id-ID')} kg G</div>
                       <div className="text-[10px]">{(r.tareWeight ?? 0).toLocaleString('id-ID')} kg T</div>
                     </td>
-                    <td className="text-center py-2.5 px-3">
-                      <div className="font-semibold text-indigo-700">{r.moistureContent.toFixed(1)}%</div>
-                      {r.refaksiKaPercent > 0 && (
-                        <span className="text-[10px] bg-red-50 text-red-600 px-1 rounded font-bold">
-                          -{r.refaksiKaPercent}% Pot
+                    <td className="py-2.5 px-3 whitespace-nowrap text-center">
+                      <div className="inline-flex flex-col items-center">
+                        <span className="font-mono font-bold text-neutral-800 text-xs bg-slate-100 px-2.5 py-0.5 rounded border border-slate-200">
+                          {r.moistureContent ? `${r.moistureContent.toFixed(1)}%` : '0.0%'}
                         </span>
-                      )}
+                        {r.refaksiKaPercent > 0 ? (
+                          <span className="text-[9px] text-red-600 font-extrabold mt-1 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded">
+                            Pot: -{r.refaksiKaPercent.toFixed(1)}%
+                          </span>
+                        ) : (
+                          <span className="text-[9px] text-emerald-600 font-bold mt-1 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded">
+                            Aman (0%)
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="text-right py-2.5 px-3 font-extrabold font-mono text-emerald-600">
                       {(r.netWeight ?? 0).toLocaleString('id-ID')} kg
@@ -809,6 +904,25 @@ export default function InboundModule({
                   </div>
                 </div>
 
+                <div className="border-t border-neutral-250 pt-2 space-y-1">
+                  <div className="flex justify-between text-neutral-600">
+                    <span>HARGA BELI :</span>
+                    <span className="font-bold">Rp {(previewRecord.price ?? 0).toLocaleString('id-ID')}/Kg</span>
+                  </div>
+                  <div className="flex justify-between text-neutral-600">
+                    <span>HARGA BRUTO :</span>
+                    <span>Rp {((previewRecord.netWeight ?? 0) * (previewRecord.price ?? 0)).toLocaleString('id-ID')}</span>
+                  </div>
+                  <div className="flex justify-between text-neutral-600">
+                    <span>BIAYA BURUH PANGGUL :</span>
+                    <span>-Rp {(previewRecord.laborCost ?? 0).toLocaleString('id-ID')}</span>
+                  </div>
+                  <div className="flex justify-between font-black text-amber-800 text-[11px] border-t border-dashed border-neutral-300 mt-1 pt-1 bg-amber-50 px-1.5 py-1 rounded">
+                    <span>TOTAL HARUS DIBAYAR :</span>
+                    <span>Rp {(previewRecord.totalPrice ?? 0).toLocaleString('id-ID')}</span>
+                  </div>
+                </div>
+
                 <div className="mt-4 grid grid-cols-2 gap-4 text-center text-[9px]">
                   <div>
                     <p className="mb-2">Staff 162</p>
@@ -867,6 +981,102 @@ export default function InboundModule({
         pdfHtml={waModalConfig.pdfHtml}
         pdfFileName={waModalConfig.pdfFileName}
       />
+
+      {/* MODAL ACUAN REFAKSI KADAR AIR */}
+      <AnimatePresence>
+        {showMoistureModal && (
+          <div className="fixed inset-0 bg-neutral-900/40 backdrop-blur-[2px] flex items-center justify-center p-4 z-50 animate-fade-in">
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white border border-neutral-200 rounded-2xl p-5 shadow-xl max-w-sm w-full font-sans text-xs"
+            >
+              <div className="flex items-center justify-between border-b border-neutral-100 pb-2 mb-3">
+                <h3 className="font-extrabold text-neutral-800 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                  <span>Aturan Potongan KA ({refaksiType})</span>
+                </h3>
+                <button 
+                  type="button"
+                  onClick={() => setShowMoistureModal(false)}
+                  className="text-neutral-400 hover:text-neutral-600 p-1 rounded transition cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <p className="text-[11px] text-neutral-500 leading-relaxed mb-3">
+                Tabel acuan potongan untuk Jagung Pipil ({refaksiType}). Baris dengan latar belakang <span className="text-emerald-700 font-bold bg-emerald-50 px-1 rounded">hijau</span> adalah rule acuan potongan aktif berdasarkan kadar air saat ini <span className="font-bold text-slate-800 font-mono">({moistureContent}%)</span>.
+              </p>
+
+              <div className="max-h-[220px] overflow-y-auto border border-neutral-200/80 rounded-lg bg-white shadow-inner">
+                <table className="w-full text-[11px] text-left border-collapse select-none">
+                  <thead className="bg-neutral-50 text-neutral-600 font-bold sticky top-0 border-b border-neutral-200 uppercase text-[9px]">
+                    <tr>
+                      <th className="py-2 px-3">Kadar Air (Min - Max)</th>
+                      <th className="py-2.5 px-3 text-center">Refaksi (%)</th>
+                      <th className="py-2 px-3 text-right">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-100 font-sans">
+                    {(() => {
+                      const rulesSource = cornMoistureRules.length > 0 ? cornMoistureRules : initialCornMoistureRules;
+                      const activeRules = rulesSource.filter(r => r.type === refaksiType);
+                      
+                      if (activeRules.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan={3} className="text-center py-4 text-neutral-400 italic">Tidak ada data aturan refaksi.</td>
+                          </tr>
+                        );
+                      }
+                      return activeRules.map(rule => {
+                        const isSelected = moistureContent >= rule.moistureMin && moistureContent <= rule.moistureMax;
+                        return (
+                          <tr 
+                            key={rule.id} 
+                            className={`transition-all duration-150 ${
+                              isSelected 
+                                ? 'bg-emerald-50 text-emerald-900 font-black border-y border-emerald-250' 
+                                : 'text-neutral-600 hover:bg-neutral-50'
+                            }`}
+                          >
+                            <td className="py-2 px-3 font-mono">
+                              {rule.moistureMin.toFixed(2)}% - {rule.moistureMax.toFixed(2)}%
+                            </td>
+                            <td className={`py-2 px-3 text-center font-mono font-extrabold ${isSelected ? 'text-emerald-700' : 'text-slate-850'}`}>
+                              {rule.refaksiPercent.toFixed(2)}%
+                            </td>
+                            <td className="py-2 px-3 text-right">
+                              {isSelected ? (
+                                <span className="inline-flex items-center gap-1 text-[8px] bg-emerald-600 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest animate-pulse">
+                                  AKTIF
+                                </span>
+                              ) : (
+                                <span className="text-[9px] text-neutral-400 font-medium">Sesuai</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      });
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mt-4 pt-2.5 border-t border-gradient flex justify-end">
+                <button 
+                  type="button"
+                  onClick={() => setShowMoistureModal(false)}
+                  className="bg-neutral-900 hover:bg-neutral-800 text-white text-[11px] font-bold px-5 py-1.5 rounded-lg transition cursor-pointer uppercase tracking-wider"
+                >
+                  Selesai
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

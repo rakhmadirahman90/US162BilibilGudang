@@ -10,7 +10,8 @@ import {
   OutboundRecord, 
   ServiceRecord, 
   DebtRecord, 
-  FinancialRecord 
+  FinancialRecord,
+  RiceStockRecord
 } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import { DryerRecord } from './DryerModule';
@@ -32,7 +33,9 @@ import {
   Repeat,
   CheckCircle,
   TrendingUp,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Layers,
+  FileCheck
 } from 'lucide-react';
 import { exportToCSV, printPDFReport } from '../utils/exportHelper';
 
@@ -44,9 +47,10 @@ interface ReportsModuleProps {
   debts: DebtRecord[];
   finances: FinancialRecord[];
   dryerRecords: DryerRecord[];
+  riceStockRecords: RiceStockRecord[];
 }
 
-type ReportTabSelection = 'RINGKASAN' | 'TIMBANGAN' | 'INBOUND' | 'OUTBOUND' | 'SERVICES' | 'FINANCE' | 'DRYER';
+type ReportTabSelection = 'RINGKASAN' | 'TIMBANGAN' | 'INBOUND' | 'OUTBOUND' | 'SERVICES' | 'FINANCE' | 'DRYER' | 'STOK_BERAS' | 'DEBTS';
 
 export default function ReportsModule({
   tickets,
@@ -55,7 +59,8 @@ export default function ReportsModule({
   serviceRecords,
   debts,
   finances,
-  dryerRecords
+  dryerRecords,
+  riceStockRecords
 }: ReportsModuleProps) {
   const { t } = useLanguage();
   // Navigation & Sub-activity Tabs
@@ -180,6 +185,36 @@ export default function ReportsModule({
       return true;
     });
   }, [dryerRecords, startDate, endDate, searchQuery]);
+
+  // 7. Rice Stock (Stok Beras) Filter
+  const filteredRiceStock = useMemo(() => {
+    return (riceStockRecords || []).filter(r => {
+      if (!isWithinDateRange(r.date)) return false;
+      if (commodityFilter !== 'ALL' && r.itemName !== commodityFilter) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matchesPlate = r.policeNo.toLowerCase().includes(q);
+        const matchesDesc = r.description.toLowerCase().includes(q);
+        const matchesItem = r.itemName.toLowerCase().includes(q);
+        if (!matchesPlate && !matchesDesc && !matchesItem) return false;
+      }
+      return true;
+    });
+  }, [riceStockRecords, startDate, endDate, commodityFilter, searchQuery]);
+
+  // 8. Debts (Utang Supplier) Filter
+  const filteredDebts = useMemo(() => {
+    return (debts || []).filter(d => {
+      if (!isWithinDateRange(d.date)) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matchesSupplier = d.supplierName.toLowerCase().includes(q);
+        const matchesDesc = d.description.toLowerCase().includes(q);
+        if (!matchesSupplier && !matchesDesc) return false;
+      }
+      return true;
+    });
+  }, [debts, startDate, endDate, searchQuery]);
 
   // --- EXCEL & PDF EXPORTERS ---
 
@@ -406,6 +441,91 @@ export default function ReportsModule({
     printPDFReport('Laporan Buku Keuangan dan Aliran Kas', headers, rows, summaries);
   };
 
+  // Export 6. Rice Stock (Mutasi Stok Beras & Gilingan)
+  const handleExportRiceStockExcel = () => {
+    const headers = [
+      'Tanggal', 'No. Polisi', 'Keterangan', 'Nama Komoditas', 'Harga Beli (Rp/Kg)', 
+      'Karung (Colly)', 'Masuk (Kg)', 'Keluar (Kg)'
+    ];
+    const rows = filteredRiceStock.map(r => [
+      r.date,
+      r.policeNo,
+      r.description,
+      r.itemName,
+      r.price.toString(),
+      r.colly.toString(),
+      r.inWeight.toString(),
+      r.outWeight.toString()
+    ]);
+    exportToCSV(headers, rows, 'Laporan_Mutasi_Stok_Bilibili');
+  };
+
+  const handlePrintRiceStockPDF = () => {
+    const headers = [
+      'Tanggal', 'No. Polisi', 'Keterangan', 'Komoditas', 'Masuk (Kg)', 'Keluar (Kg)'
+    ];
+    const rows = filteredRiceStock.map(r => [
+      r.date,
+      r.policeNo,
+      r.description,
+      r.itemName,
+      r.inWeight.toLocaleString('id-ID'),
+      r.outWeight.toLocaleString('id-ID')
+    ]);
+    const totalIn = filteredRiceStock.reduce((sum, r) => sum + r.inWeight, 0);
+    const totalOut = filteredRiceStock.reduce((sum, r) => sum + r.outWeight, 0);
+    const netBalance = totalIn - totalOut;
+    const summaries = [
+      { label: 'Banyak Catatan Mutasi', value: `${filteredRiceStock.length} Baris` },
+      { label: 'Total Volume Masuk', value: `${totalIn.toLocaleString('id-ID')} Kg` },
+      { label: 'Total Volume Keluar', value: `${totalOut.toLocaleString('id-ID')} Kg` },
+      { label: 'Saldo Stok Bersih', value: `${netBalance.toLocaleString('id-ID')} Kg` }
+    ];
+    printPDFReport('Laporan Mutasi Buku Stok Gudang', headers, rows, summaries);
+  };
+
+  // Export 7. Debts (Utang Supplier)
+  const handleExportDebtsExcel = () => {
+    const headers = [
+      'Tanggal', 'Nama Supplier', 'Deskripsi/Keterangan', 'Total Utang (Rp)', 
+      'Sudah Dibayar (Rp)', 'Sisa Utang (Rp)', 'Status'
+    ];
+    const rows = filteredDebts.map(d => [
+      d.date,
+      d.supplierName,
+      d.description,
+      d.totalDebt.toString(),
+      d.paidAmount.toString(),
+      d.remainingBalance.toString(),
+      d.status
+    ]);
+    exportToCSV(headers, rows, 'Laporan_Buku_Utang_Supplier');
+  };
+
+  const handlePrintDebtsPDF = () => {
+    const headers = [
+      'Tanggal', 'Nama Pemasok', 'Keterangan Utang', 'Total Utang', 'Paid / Dibayar', 'Sisa Saldo'
+    ];
+    const rows = filteredDebts.map(d => [
+      d.date,
+      d.supplierName,
+      d.description,
+      `Rp ${d.totalDebt.toLocaleString('id-ID')}`,
+      `Rp ${d.paidAmount.toLocaleString('id-ID')}`,
+      `Rp ${d.remainingBalance.toLocaleString('id-ID')}`
+    ]);
+    const totalD = filteredDebts.reduce((sum, d) => sum + d.totalDebt, 0);
+    const totalP = filteredDebts.reduce((sum, d) => sum + d.paidAmount, 0);
+    const totalR = filteredDebts.reduce((sum, d) => sum + d.remainingBalance, 0);
+    const summaries = [
+      { label: 'Banyak Faktur Utang', value: `${filteredDebts.length} Invoice` },
+      { label: 'Total Pembelian Utang', value: `Rp ${totalD.toLocaleString('id-ID')}` },
+      { label: 'Total Angsuran Terbayar', value: `Rp ${totalP.toLocaleString('id-ID')}` },
+      { label: 'Sisa Saldo Jatuh Tempo', value: `Rp ${totalR.toLocaleString('id-ID')}` }
+    ];
+    printPDFReport('Laporan Catatan Buku Utang Supplier', headers, rows, summaries);
+  };
+
   // --- EXECUTIVE EXECUTIVE CALCULATIONS FOR RINGKASAN VIEW ---
   const consolidatedStats = useMemo(() => {
     const totalInboundNet = inboundRecords.reduce((sum, r) => sum + r.netWeight, 0);
@@ -462,7 +582,7 @@ export default function ReportsModule({
         </div>
 
         {/* COMPREHENSIVE FILTER CONSOLE */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t border-neutral-100">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5 pt-5 border-t border-neutral-100">
           
           {/* Start Date */}
           <div className="flex flex-col gap-1.5">
@@ -616,6 +736,30 @@ export default function ReportsModule({
           <DollarSign className="w-4 h-4" />
           Keuangan ({filteredFinances.length})
         </button>
+
+        <button
+          onClick={() => setActiveSubTab('STOK_BERAS')}
+          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-extrabold transition cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'STOK_BERAS'
+              ? 'bg-amber-800 text-white'
+              : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-50'
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          Stok Beras & Giling ({filteredRiceStock.length})
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('DEBTS')}
+          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-extrabold transition cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'DEBTS'
+              ? 'bg-red-800 text-white'
+              : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-50'
+          }`}
+        >
+          <FileCheck className="w-4 h-4" />
+          Utang Supplier ({filteredDebts.length})
+        </button>
       </div>
 
       {/* SUB TAB VIEWS */}
@@ -626,7 +770,7 @@ export default function ReportsModule({
           <div className="flex flex-col gap-6 animate-fadeIn">
             
             {/* Stats Overview Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               
               <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
                 <div>
@@ -1204,6 +1348,138 @@ export default function ReportsModule({
                   {filteredFinances.length === 0 && (
                     <tr>
                       <td colSpan={7} className="p-8 text-center text-neutral-400 italic">Aktivitas pembukuan keuangan kosong pada penyaringan berkas ini.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        )}
+
+        {/* 7. REKAP BUKU MUTASI STOK BERAS & GILING */}
+        {activeSubTab === 'STOK_BERAS' && (
+          <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm animate-fadeIn">
+            
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-neutral-100 pb-3">
+              <div>
+                <span className="font-extrabold text-neutral-800 text-sm">Pratinjau Mutasi Buku Stok Gudang</span>
+                <p className="text-[11px] text-neutral-400 mt-0.5">Menampilkan {filteredRiceStock.length} baris log mutasi stok gudang beras & gilingan.</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleExportRiceStockExcel}
+                  className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" /> Export Excel
+                </button>
+                <button
+                  onClick={handlePrintRiceStockPDF}
+                  className="flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" /> Cetak Laporan / PDF
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left text-xs border-collapse min-w-[900px]">
+                <thead>
+                  <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-250">
+                    <th className="p-2">Tanggal</th>
+                    <th className="p-2">No. Polisi</th>
+                    <th className="p-2">Keterangan Aktivitas</th>
+                    <th className="p-2">Komoditas</th>
+                    <th className="p-2 text-right">Harga (Rp)</th>
+                    <th className="p-2 text-right text-emerald-700 font-bold">Masuk (Kg)</th>
+                    <th className="p-2 text-right text-rose-600 font-bold">Keluar (Kg)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {filteredRiceStock.map(r => (
+                    <tr key={r.id} className="hover:bg-neutral-50 transition-colors">
+                      <td className="p-2 text-neutral-500">{r.date}</td>
+                      <td className="p-2 font-semibold text-neutral-800 uppercase">{r.policeNo}</td>
+                      <td className="p-2 font-medium text-neutral-700">{r.description}</td>
+                      <td className="p-2"><span className="bg-neutral-100 text-neutral-800 px-1.5 py-0.5 rounded font-bold uppercase text-[10px]">{r.itemName}</span></td>
+                      <td className="p-2 text-right text-neutral-600 font-mono">Rp {r.price.toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-right font-black text-emerald-700 font-mono">{r.inWeight > 0 ? `${r.inWeight.toLocaleString('id-ID')} Kg` : '-'}</td>
+                      <td className="p-2 text-right font-black text-rose-600 font-mono">{r.outWeight > 0 ? `${r.outWeight.toLocaleString('id-ID')} Kg` : '-'}</td>
+                    </tr>
+                  ))}
+                  {filteredRiceStock.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="p-8 text-center text-neutral-400 italic">Data mutasi stok beras & gilingan kosong pada penyaringan berkas ini.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        )}
+
+        {/* 8. REKAP CATATAN BUKU UTANG SUPPLIER */}
+        {activeSubTab === 'DEBTS' && (
+          <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm animate-fadeIn">
+            
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-neutral-100 pb-3">
+              <div>
+                <span className="font-extrabold text-neutral-800 text-sm">Pratinjau Catatan Buku Utang Supplier</span>
+                <p className="text-[11px] text-neutral-400 mt-0.5">Menampilkan {filteredDebts.length} transaksi rincian saldo utang dagang.</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleExportDebtsExcel}
+                  className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" /> Export Excel
+                </button>
+                <button
+                  onClick={handlePrintDebtsPDF}
+                  className="flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" /> Cetak Laporan / PDF
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left text-xs border-collapse min-w-[900px]">
+                <thead>
+                  <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-250">
+                    <th className="p-2">Tanggal</th>
+                    <th className="p-2">Nama Supplier</th>
+                    <th className="p-2">Keterangan / Deskripsi</th>
+                    <th className="p-2 text-right">Nilai Utang</th>
+                    <th className="p-2 text-right">Sudah Dibayar</th>
+                    <th className="p-2 text-right font-bold text-red-600">Sisa Saldo</th>
+                    <th className="p-2 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {filteredDebts.map(d => (
+                    <tr key={d.id} className="hover:bg-neutral-50 transition-colors">
+                      <td className="p-2 text-neutral-500">{d.date}</td>
+                      <td className="p-2 font-bold text-neutral-800">{d.supplierName}</td>
+                      <td className="p-2 text-neutral-600 font-medium">{d.description}</td>
+                      <td className="p-2 text-right font-mono font-medium">Rp {d.totalDebt.toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-right text-emerald-700 font-mono">Rp {d.paidAmount.toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-right text-rose-600 font-mono font-bold">Rp {d.remainingBalance.toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-center">
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold ${
+                          d.status === 'LUNAS' ? 'bg-green-100 text-green-700' : 'bg-red-105 bg-red-100 text-red-700'
+                        }`}>
+                          {d.status === 'LUNAS' ? 'LUNAS' : 'BELUM LUNAS'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredDebts.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="p-8 text-center text-neutral-400 italic">Tidak ada catatan utang supplier yang sesuai saringan filter.</td>
                     </tr>
                   )}
                 </tbody>

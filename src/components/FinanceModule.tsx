@@ -10,6 +10,7 @@ import { Landmark, PlusCircle, Search, Calendar, ChevronRight, Users, Scale, Cre
 import ConfirmModal from './ConfirmModal';
 import { exportToCSV, printPDFReport } from '../utils/exportHelper';
 import { formatNumberInput, parseNumberInput } from '../utils/format';
+import SmartNumberInput from './SmartNumberInput';
 
 interface FinanceModuleProps {
   debts: DebtRecord[];
@@ -454,12 +455,13 @@ export default function FinanceModule({
                   />
                 </div>
                 <div>
-                  <label className="block text-neutral-600 mb-1">Jumlah Nilai Utang (Rp)</label>
-                  <input
-                    type="text"
-                    value={formatNumberInput(debtAmount)}
-                    onChange={(e) => setDebtAmount(parseNumberInput(e.target.value))}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
+                  <SmartNumberInput
+                    value={debtAmount}
+                    onChange={setDebtAmount}
+                    label="Jumlah Nilai Utang"
+                    mode="currency"
+                    unit="Rp"
+                    presets={[1000000, 5000000, 10000000, 25000000]}
                   />
                 </div>
                 <div className="flex items-end">
@@ -611,12 +613,13 @@ export default function FinanceModule({
               </div>
 
               <div>
-                <label className="block text-neutral-600 mb-1">Total Hasil Berat Netto Timbangan (Kg)</label>
-                <input
-                  type="text"
-                  value={formatNumberInput(brokerCargoWeight)}
-                  onChange={(e) => setBrokerCargoWeight(parseNumberInput(e.target.value))}
-                  className="w-full bg-neutral-50 border border-neutral-300 rounded p-2 font-mono text-sm font-semibold"
+                <SmartNumberInput
+                  value={brokerCargoWeight}
+                  onChange={setBrokerCargoWeight}
+                  label="Total Hasil Berat Netto Timbangan"
+                  mode="weight"
+                  unit="Kg"
+                  presets={[5000, 10000, 15000, 20000]}
                 />
               </div>
 
@@ -810,21 +813,23 @@ export default function FinanceModule({
                 </div>
 
                 <div>
-                  <label className="block text-neutral-600 mb-1">Jumlah Nilai (Rp)</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={formatNumberInput(finAmount)}
-                      onChange={(e) => setFinAmount(parseNumberInput(e.target.value))}
-                      className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 font-mono"
-                    />
-                    <button
-                      type="submit"
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 rounded-lg cursor-pointer"
-                    >
-                      {editingFinId ? 'SIMPAN' : 'SIMPAN'}
-                    </button>
-                  </div>
+                  <SmartNumberInput
+                    value={finAmount}
+                    onChange={setFinAmount}
+                    label="Jumlah Nilai"
+                    mode="currency"
+                    unit="Rp"
+                    presets={[50000, 100000, 500000, 1000000, 5000000]}
+                  />
+                </div>
+
+                <div className="md:col-span-5 flex justify-end mt-2 pt-2 border-t border-neutral-100">
+                  <button
+                    type="submit"
+                    className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-xl transition-colors cursor-pointer text-xs uppercase tracking-wider shadow"
+                  >
+                    {editingFinId ? 'Simpan Transaksi Kas' : 'Tambah Transaksi Kas'}
+                  </button>
                 </div>
 
               </form>

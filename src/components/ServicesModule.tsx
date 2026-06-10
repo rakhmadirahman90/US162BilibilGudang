@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import { formatNumberInput, parseNumberInput, formatReceiptDate } from '../utils/format';
+import SmartNumberInput from './SmartNumberInput';
 import { ServiceRecord, EmployeeRecord, CustomerRecord } from '../types';
 import { Wind, Trash, User, Search, Play, Plus, DollarSign, CheckCircle2, AlertCircle, Download, Printer, Edit2, X, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -285,28 +286,30 @@ export default function ServicesModule({
             {/* Calculations & Weights */}
             <div className="flex flex-col gap-3">
               <div>
-                <label className="block text-neutral-600 mb-1">Total Berat Barang Diproses (Kg)</label>
-                <input
-                  type="text"
-                  value={formatNumberInput(weight)}
-                  onChange={(e) => setWeight(parseNumberInput(e.target.value))}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-sky-500 font-mono text-sm"
+                <SmartNumberInput
+                  value={weight}
+                  onChange={setWeight}
+                  label="Total Berat Barang Diproses"
+                  mode="weight"
+                  unit="Kg"
+                  presets={[1000, 3000, 5000, 8000, 10000]}
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-4 col-span-2">
                 <div>
-                  <label className="block text-neutral-600 mb-1">Tarif (Rp per Kg)</label>
-                  <input
-                    type="text"
-                    value={formatNumberInput(ratePerKg)}
-                    onChange={(e) => setRatePerKg(parseNumberInput(e.target.value))}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
+                  <SmartNumberInput
+                    value={ratePerKg}
+                    onChange={setRatePerKg}
+                    label="Tarif Pelayanan (Rp/Kg)"
+                    mode="currency"
+                    unit="Rp/Kg"
+                    presets={[150, 200, 250, 300]}
                   />
                 </div>
                 <div>
-                  <label className="block text-neutral-600 mb-1">Total Biaya (Terhitung)</label>
-                  <div className="p-2 border border-neutral-100 bg-neutral-50 font-bold block rounded font-mono text-sky-700 text-sm">
+                  <label className="text-[11px] font-black text-slate-500 tracking-wider uppercase select-none">Total Biaya (Terhitung)</label>
+                  <div className="p-2.5 h-[42px] flex items-center bg-sky-50 border border-sky-100/80 font-bold block rounded-xl font-mono text-sky-700 text-sm mt-0.5">
                     Rp {(weight * ratePerKg).toLocaleString('id-ID')}
                   </div>
                 </div>

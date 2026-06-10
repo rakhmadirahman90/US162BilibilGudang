@@ -1061,8 +1061,8 @@ export default function App() {
     <div className={`h-screen ${theme.pageBg} text-neutral-800 font-sans flex flex-col transition-colors duration-300 overflow-x-hidden w-full max-w-full`}>
       
       {/* GLOBAL WAREHOUSE HEADER BAR */}
-      <header className={`text-white shadow-md border-b sticky top-0 z-40 transition-all duration-300 ${theme.headerBg} ${theme.headerBorder}`}>
-        <div className="max-w-7xl mx-auto px-4 py-3.5 flex flex-col sm:flex-row justify-between items-center gap-3">
+      <header className={`text-white shadow-md border-b md:sticky top-0 z-40 transition-all duration-300 ${theme.headerBg} ${theme.headerBorder}`}>
+        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
           
           <div className="flex items-center gap-3">
             {/* Visual Logo */}
@@ -1210,7 +1210,7 @@ export default function App() {
       )}
 
       {/* TABS SELECTOR RAILS */}
-      <div className="bg-white border-b border-neutral-200 shadow-sm sticky top-[69px] z-30 overflow-x-auto whitespace-nowrap custom-scrollbar">
+      <div className="bg-white border-b border-neutral-200 shadow-sm md:sticky md:top-[74px] z-30 overflow-x-auto whitespace-nowrap custom-scrollbar">
         <div className="max-w-7xl mx-auto px-4 flex">
           
           <button
@@ -2167,6 +2167,7 @@ export default function App() {
             debts={debts}
             finances={finances}
             dryerRecords={dryerRecords}
+            riceStockRecords={riceStockRecords}
           />
         )}
 

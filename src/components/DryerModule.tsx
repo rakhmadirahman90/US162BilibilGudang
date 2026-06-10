@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { Printer, Download, Search, PlusSquare, Wind, Check, Trash2, Edit3, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
 import { exportToCSV, printPDFReport } from '../utils/exportHelper';
+import SmartNumberInput from './SmartNumberInput';
 
 export interface DryerRecord {
   id: string;
@@ -199,26 +200,42 @@ export default function DryerModule({ records, onAddRecord, onUpdateRecord, onDe
             </div>
 
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-emerald-700 mb-1 text-xs font-bold"><ArrowDownCircle className="w-3 h-3 inline"/> Basah Masuk (Kg)</label>
-                  <input type="number" required value={wetWeight || ''} onChange={e => setWetWeight(Number(e.target.value))} className="w-full bg-emerald-50 border border-emerald-200 rounded p-2 text-xs font-mono focus:border-emerald-600 outline-none" placeholder="0" />
-                </div>
-                <div>
-                  <label className="block text-indigo-700 mb-1 text-xs font-bold">KA Awal Masuk (%)</label>
-                  <input type="number" step="0.1" required value={moistureIn || ''} onChange={e => setMoistureIn(Number(e.target.value))} className="w-full bg-indigo-50 border border-indigo-200 rounded p-2 text-xs font-mono focus:border-indigo-600 outline-none" placeholder="20.0" />
-                </div>
+              <div className="grid grid-cols-2 gap-4">
+                <SmartNumberInput
+                  value={wetWeight}
+                  onChange={setWetWeight}
+                  label="Basah Masuk"
+                  mode="weight"
+                  unit="Kg"
+                  presets={[1000, 5000, 10000, 15000]}
+                />
+                <SmartNumberInput
+                  value={moistureIn}
+                  onChange={setMoistureIn}
+                  label="KA Awal Masuk"
+                  mode="percent"
+                  unit="%"
+                  presets={[16, 18, 20, 22, 24]}
+                />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-emerald-700 mb-1 text-xs font-bold"><ArrowUpCircle className="w-3 h-3 inline"/> Kering Keluar (Kg)</label>
-                  <input type="number" required value={dryWeight || ''} onChange={e => setDryWeight(Number(e.target.value))} className="w-full bg-emerald-50 border border-emerald-200 rounded p-2 text-xs font-mono focus:border-emerald-600 outline-none" placeholder="0" />
-                </div>
-                <div>
-                  <label className="block text-indigo-700 mb-1 text-xs font-bold">KA Akhir Keluar (%)</label>
-                  <input type="number" step="0.1" required value={moistureOut || ''} onChange={e => setMoistureOut(Number(e.target.value))} className="w-full bg-indigo-50 border border-indigo-200 rounded p-2 text-xs font-mono focus:border-indigo-600 outline-none" placeholder="14.0" />
-                </div>
+              <div className="grid grid-cols-2 gap-4">
+                <SmartNumberInput
+                  value={dryWeight}
+                  onChange={setDryWeight}
+                  label="Kering Keluar"
+                  mode="weight"
+                  unit="Kg"
+                  presets={[1000, 5000, 10000, 15000]}
+                />
+                <SmartNumberInput
+                  value={moistureOut}
+                  onChange={setMoistureOut}
+                  label="KA Akhir Keluar"
+                  mode="percent"
+                  unit="%"
+                  presets={[14, 14.5, 15]}
+                />
               </div>
 
               <div className="bg-amber-50 rounded-lg p-3 border border-amber-200 text-xs">
@@ -229,14 +246,22 @@ export default function DryerModule({ records, onAddRecord, onUpdateRecord, onDe
             </div>
 
             <div className="space-y-4">
-              <div>
-                <label className="block text-neutral-600 mb-1 text-xs font-bold">Tarif Biaya Pengeringan per Kg Kering (Rp)</label>
-                <input type="number" required value={dryingCostPerKg || ''} onChange={e => setDryingCostPerKg(Number(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 text-xs font-mono focus:border-emerald-600 outline-none" placeholder="Contoh: 250" />
-              </div>
-              <div>
-                <label className="block text-neutral-600 mb-1 text-xs font-bold">Upah Buruh Panggul & Muat (Rp)</label>
-                <input type="number" required value={laborCost || ''} onChange={e => setLaborCost(Number(e.target.value))} className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 text-xs font-mono focus:border-emerald-600 outline-none" placeholder="(Opsional: cth: 350000)" />
-              </div>
+              <SmartNumberInput
+                value={dryingCostPerKg}
+                onChange={setDryingCostPerKg}
+                label="Tarif Biaya Pengeringan per Kg Kering"
+                mode="currency"
+                unit="Rp/Kg"
+                presets={[200, 250, 300, 350]}
+              />
+              <SmartNumberInput
+                value={laborCost}
+                onChange={setLaborCost}
+                label="Upah Buruh Panggul & Muat"
+                mode="currency"
+                unit="Rp"
+                presets={[150000, 250000, 350000, 500000]}
+              />
               <div>
                 <label className="block text-neutral-600 mb-1 text-xs font-bold">Status Penyelesaian</label>
                 <select value={status} onChange={e => setStatus(e.target.value as any)} className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 text-xs font-bold focus:border-emerald-600 outline-none">

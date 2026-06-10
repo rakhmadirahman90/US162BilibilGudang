@@ -12,6 +12,7 @@ import WhatsAppModal from './WhatsAppModal';
 import { exportToCSV, printPDFReport, printOutboundSlip, getHTMLForPDF } from '../utils/exportHelper';
 import { buildOutboundWAText, sendWhatsAppMessage } from '../utils/whatsappHelper';
 import { formatNumberInput, parseNumberInput, formatReceiptDate } from '../utils/format';
+import SmartNumberInput from './SmartNumberInput';
 import { ArrowUpCircle, PlusCircle, Search, Calendar, FileText, Scale, Landmark, UserCheck, Download, Printer, Edit2, X, MessageCircle } from 'lucide-react';
 
 
@@ -332,12 +333,13 @@ export default function OutboundModule({
               </div>
 
               <div>
-                <label className="block text-neutral-600 mb-1">Total Berat Cargo Muat (Kg)</label>
-                <input
-                  type="text"
-                  value={formatNumberInput(totalWeight)}
-                  onChange={(e) => setTotalWeight(parseNumberInput(e.target.value))}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
+                <SmartNumberInput
+                  value={totalWeight}
+                  onChange={setTotalWeight}
+                  label="Total Berat Cargo Muat"
+                  mode="weight"
+                  unit="Kg"
+                  presets={[5000, 10000, 15000, 25000, 30000]}
                 />
               </div>
 
@@ -359,12 +361,13 @@ export default function OutboundModule({
                 <span className="font-bold text-neutral-500">3. BIAYA OPERASIONAL & STATUS</span>
                 
                 <div>
-                  <label className="block text-neutral-600 mb-1">Upah Buruh Pemuat (Muat Karung) (Rp)</label>
-                  <input
-                    type="text"
-                    value={formatNumberInput(loadingLaborCost)}
-                    onChange={(e) => setLoadingLaborCost(parseNumberInput(e.target.value))}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
+                  <SmartNumberInput
+                    value={loadingLaborCost}
+                    onChange={setLoadingLaborCost}
+                    label="Upah Buruh Pemuat (Muat Karung)"
+                    mode="currency"
+                    unit="Rp"
+                    presets={[200000, 350000, 500000, 750000]}
                   />
                 </div>
 

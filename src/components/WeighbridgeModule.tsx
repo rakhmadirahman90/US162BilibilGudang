@@ -11,6 +11,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { exportToCSV, printPDFReport, printSlip, getHTMLForPDF } from '../utils/exportHelper';
 import { buildWeighbridgeWAText, sendWhatsAppMessage } from '../utils/whatsappHelper';
 import { formatNumberInput, parseNumberInput, formatReceiptDate } from '../utils/format';
+import SmartNumberInput from './SmartNumberInput';
 import ConfirmModal from './ConfirmModal';
 import WhatsAppModal from './WhatsAppModal';
 
@@ -666,40 +667,46 @@ export default function WeighbridgeModule({
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between border-b border-[#2d4d8c]/60 pb-1.5">
-                  <span className="text-[#a0c5fc]">{t.bagDeductionLabel}</span>
-                  <div className="flex items-center">
-                    {(isCreatingNew || isEditing) ? (
-                      <input 
-                        type="number" 
-                        step="0.01"
-                        value={bagDeductionPercent} 
-                        onChange={(e) => setBagDeductionPercent(parseFloat(e.target.value) || 0)}
-                        className="bg-[#122345] border border-[#2d4d8c] text-[#efefef] px-1 py-0.5 rounded text-xs w-16 text-center outline-none focus:border-yellow-400"
-                      />
-                    ) : (
-                      <span className="text-[#efefef] font-mono">{selectedTicket ? selectedTicket.bagDeductionPercent.toFixed(2) : '0.00'}</span>
-                    )}
-                    <span className="text-neutral-400 text-xs ml-1">%</span>
-                  </div>
+                 <div className="border-b border-[#2d4d8c]/60 pb-3 pt-1">
+                  {(isCreatingNew || isEditing) ? (
+                    <SmartNumberInput
+                      value={bagDeductionPercent}
+                      onChange={setBagDeductionPercent}
+                      label={t.bagDeductionLabel}
+                      mode="percent"
+                      unit="%"
+                      presets={[1.0, 1.25, 1.5, 2.0]}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#a0c5fc]">{t.bagDeductionLabel}</span>
+                      <div className="flex items-center">
+                        <span className="text-[#efefef] font-mono">{selectedTicket ? selectedTicket.bagDeductionPercent.toFixed(2) : '0.00'}</span>
+                        <span className="text-neutral-400 text-xs ml-1">%</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex items-center justify-between border-b border-[#2d4d8c]/60 pb-1.5">
-                  <span className="text-[#a0c5fc]">{t.refaksiLabel}</span>
-                  <div className="flex items-center">
-                    {(isCreatingNew || isEditing) ? (
-                      <input 
-                        type="number" 
-                        step="0.1"
-                        value={refaksiPercent} 
-                        onChange={(e) => setRefaksiPercent(parseFloat(e.target.value) || 0)}
-                        className="bg-[#122345] border border-[#2d4d8c] text-[#efefef] px-1 py-0.5 rounded text-xs w-16 text-center outline-none focus:border-yellow-400"
-                      />
-                    ) : (
-                      <span className="text-[#efefef] font-mono">{selectedTicket ? selectedTicket.refaksiPercent.toFixed(2) : '0.00'}</span>
-                    )}
-                    <span className="text-neutral-400 text-xs ml-1">%</span>
-                  </div>
+                <div className="border-b border-[#2d4d8c]/60 pb-3 pt-1">
+                  {(isCreatingNew || isEditing) ? (
+                    <SmartNumberInput
+                      value={refaksiPercent}
+                      onChange={setRefaksiPercent}
+                      label={t.refaksiLabel}
+                      mode="percent"
+                      unit="%"
+                      presets={[1.0, 2.0, 3.0, 4.0]}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#a0c5fc]">{t.refaksiLabel}</span>
+                      <div className="flex items-center">
+                        <span className="text-[#efefef] font-mono">{selectedTicket ? selectedTicket.refaksiPercent.toFixed(2) : '0.00'}</span>
+                        <span className="text-neutral-400 text-xs ml-1">%</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between pt-1">
