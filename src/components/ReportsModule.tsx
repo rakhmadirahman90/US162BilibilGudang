@@ -660,7 +660,7 @@ export default function ReportsModule({
                   <span className="text-xl font-bold font-mono mt-1 block text-neutral-800">
                     Rp {consolidatedStats.netKasBalance.toLocaleString('id-ID')}
                   </span>
-                  <p className="text-[10px] text-neutral-300 mt-1"><span className="text-emerald-600">Inflows: Rp {consolidatedStats.totalDebit.toLocaleString()}</span></p>
+                  <p className="text-[10px] text-neutral-300 mt-1"><span className="text-emerald-600">Inflows: Rp {consolidatedStats.totalDebit.toLocaleString('id-ID')}</span></p>
                 </div>
                 <div className="h-1 bg-stone-100 rounded-full overflow-hidden mt-4">
                   <div className="h-full bg-stone-700 rounded-full" style={{ width: '65%' }}></div>
@@ -750,7 +750,7 @@ export default function ReportsModule({
                   <div className="text-[10px] text-neutral-500 bg-neutral-50 p-2.5 rounded-lg border border-dashed border-neutral-200 leading-relaxed mt-2 font-mono flex justify-between items-center">
                     <span>Kas Berjalan Bersih (Net Margin):</span>
                     <strong className={`text-xs ${consolidatedStats.netKasBalance >= 0 ? "text-emerald-700" : "text-red-600"}`}>
-                      Rp {consolidatedStats.netKasBalance.toLocaleString()}
+                      Rp {consolidatedStats.netKasBalance.toLocaleString('id-ID')}
                     </strong>
                   </div>
                 </div>
@@ -909,7 +909,7 @@ export default function ReportsModule({
                       <td className="p-2 text-right font-mono">{(r.grossWeight ?? 0).toLocaleString('id-ID')}</td>
                       <td className="p-2 text-right font-black text-emerald-800 font-mono">{(r.netWeight ?? 0).toLocaleString('id-ID')}</td>
                       <td className="p-2 text-neutral-550 font-medium text-[10px]">{r.warehouseSection}</td>
-                      <td className="p-2 text-right font-mono text-neutral-650">Rp {(r.laborCost ?? 0).toLocaleString()}</td>
+                      <td className="p-2 text-right font-mono text-neutral-650">Rp {(r.laborCost ?? 0).toLocaleString('id-ID')}</td>
                     </tr>
                   ))}
                   {filteredInbound.length === 0 && (
@@ -1123,7 +1123,7 @@ export default function ReportsModule({
                       <td className="p-2 font-medium text-neutral-700 text-[10px]">{s.serviceType}</td>
                       <td className="p-2 text-neutral-550 font-medium">{s.commodity}</td>
                       <td className="p-2 text-right font-mono">{(s.weight ?? 0).toLocaleString('id-ID')}</td>
-                      <td className="p-2 text-right font-mono">Rp {(s.ratePerKg ?? 0).toLocaleString()}</td>
+                      <td className="p-2 text-right font-mono">Rp {(s.ratePerKg ?? 0).toLocaleString('id-ID')}</td>
                       <td className="p-2 text-right font-bold text-sky-700 font-mono">Rp {(s.totalFee ?? 0).toLocaleString('id-ID')}</td>
                       <td className="p-2 text-center">
                         <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold ${
@@ -1194,10 +1194,10 @@ export default function ReportsModule({
                       <td className="p-2 text-neutral-550">{f.partyName || '-'}</td>
                       <td className="p-2 font-medium text-[10px] text-neutral-600 font-mono">{f.bankAccount}</td>
                       <td className="p-2 text-right text-emerald-700 font-bold font-mono">
-                        {f.type === 'DEBIT' ? `+ Rp ${f.amount.toLocaleString()}` : '-'}
+                        {f.type === 'DEBIT' ? `+ Rp ${f.amount.toLocaleString('id-ID')}` : '-'}
                       </td>
                       <td className="p-2 text-right text-red-650 text-red-600 font-bold font-mono font-medium">
-                        {f.type === 'KREDIT' ? `- Rp ${f.amount.toLocaleString()}` : '-'}
+                        {f.type === 'KREDIT' ? `- Rp ${f.amount.toLocaleString('id-ID')}` : '-'}
                       </td>
                     </tr>
                   ))}

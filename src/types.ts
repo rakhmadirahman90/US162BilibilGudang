@@ -179,6 +179,7 @@ export interface LocationRecord {
 }
 
 export interface CornMoistureRule {
+  id: string;
   moistureMin: number;
   moistureMax: number;
   refaksiPercent: number; // Weight deduction discount %

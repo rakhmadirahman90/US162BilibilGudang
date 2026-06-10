@@ -260,7 +260,7 @@ export default function OutboundModule({
                   <option value="">-- Input Manual --</option>
                   {tickets.map(t => (
                     <option key={t.id} value={t.id}>
-                      Tiket {t.ticketNo} ({t.policeNo}) - Net {(t.netWeight ?? 0).toLocaleString()} Kg
+                      Tiket {t.ticketNo} ({t.policeNo}) - Net {(t.netWeight ?? 0).toLocaleString('id-ID')} Kg
                     </option>
                   ))}
                 </select>
@@ -482,7 +482,7 @@ export default function OutboundModule({
                     </span>
                   </td>
                   <td className="text-right py-2.5 px-3 font-bold font-mono text-emerald-600">
-                    {(r.totalWeight ?? 0).toLocaleString()} kg
+                    {(r.totalWeight ?? 0).toLocaleString('id-ID')} kg
                   </td>
                   <td className="py-2.5 px-3 text-neutral-600 italic">
                     <div className="flex items-center gap-1">

@@ -299,11 +299,11 @@ export default function DryerModule({ records, onAddRecord, onUpdateRecord, onDe
                     <div className="font-mono text-[9px] text-neutral-400">{r.batchNo}</div>
                   </td>
                   <td className="py-2.5 px-3 font-semibold text-neutral-800 uppercase">{r.customerName}</td>
-                  <td className="py-2.5 px-3 text-right font-mono text-amber-700 bg-amber-50">{(r.wetWeight).toLocaleString()}</td>
-                  <td className="py-2.5 px-3 text-right font-mono text-emerald-700 bg-emerald-50">{(r.dryWeight).toLocaleString()}</td>
+                  <td className="py-2.5 px-3 text-right font-mono text-amber-700 bg-amber-50">{(r.wetWeight).toLocaleString('id-ID')}</td>
+                  <td className="py-2.5 px-3 text-right font-mono text-emerald-700 bg-emerald-50">{(r.dryWeight).toLocaleString('id-ID')}</td>
                   <td className="py-2.5 px-3 text-right font-mono text-[10px]">IN: <span className="text-red-500 font-bold">{r.moistureIn.toFixed(1)}%</span><br/>OUT: <span className="text-green-600 font-bold">{r.moistureOut.toFixed(1)}%</span></td>
-                  <td className="py-2.5 px-3 text-right font-mono font-bold text-rose-600 border-l border-r border-neutral-100 bg-neutral-50">{(r.wetWeight - r.dryWeight).toLocaleString()}</td>
-                  <td className="py-2.5 px-3 text-right font-mono font-bold">{(r.totalCost).toLocaleString()}</td>
+                  <td className="py-2.5 px-3 text-right font-mono font-bold text-rose-600 border-l border-r border-neutral-100 bg-neutral-50">{(r.wetWeight - r.dryWeight).toLocaleString('id-ID')}</td>
+                  <td className="py-2.5 px-3 text-right font-mono font-bold">{(r.totalCost).toLocaleString('id-ID')}</td>
                   <td className="py-2.5 px-3 text-center">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${r.status === 'SELESAI' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
                       {r.status}

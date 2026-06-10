@@ -80,6 +80,9 @@ import {
   DollarSign, 
   LayoutDashboard, 
   Users, 
+  Lock,
+  Shield,
+  Key,
   Package, 
   TrendingUp, 
   PlusSquare,
@@ -374,8 +377,12 @@ export default function App() {
     try {
       await signInWithGoogle();
       showToast("Sukses Login Google! Sinkronisasi siap.", "success");
-    } catch (e) {
-      showToast("Gagal Login Google", "error");
+    } catch (e: any) {
+      if (e?.code === 'auth/popup-closed-by-user') {
+        showToast("Login Google dibatalkan.", "info");
+      } else {
+        showToast("Gagal Login Google", "error");
+      }
     }
   };
 
@@ -408,7 +415,7 @@ export default function App() {
   useSyncCollection('financeCategories', financeCategories, setFinanceCategories, initialFinanceCategories);
   useSyncCollection('laborRates', laborRates, setLaborRates, initialLaborRates);
   useSyncCollection('cornMoistureRules', cornMoistureRules, setCornMoistureRules, initialCornMoistureRules);
-  useSyncCollection('dryerRecords', dryerRecords, setDryerRecords);
+  useSyncCollection('dryerRecords', dryerRecords, setDryerRecords, []);
 
   // --- SYNCHRONIZED MASTER SETTERS WRAPPER ---
   const createSyncedSetter = <T extends { id: string }>(
@@ -454,8 +461,72 @@ export default function App() {
   const syncedSetCornMoistureRules = createSyncedSetter('cornMoistureRules', setCornMoistureRules);
   const syncedSetDryerRecords = createSyncedSetter('dryerRecords', setDryerRecords);
 
+  // --- CREDENTIALS AUTHENTICATION STATE & LOGIC ---
+  interface SessionUser {
+    username: string;
+    role: 'admin' | 'operator';
+  }
+
+  const [sessionUser, setSessionUser] = useState<SessionUser | null>(() => {
+    const saved = localStorage.getItem('bilibili_session_user');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+
+  const [loginUsername, setLoginUsername] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+
+  const handleSessionLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError('');
+
+    const u = loginUsername.trim().toLowerCase();
+    const p = loginPassword;
+
+    if (u === 'admin' && p === 'admin123') {
+      const user: SessionUser = { username: 'admin', role: 'admin' };
+      localStorage.setItem('bilibili_session_user', JSON.stringify(user));
+      setSessionUser(user);
+      setLoginUsername('');
+      setLoginPassword('');
+      showToast("Selamat datang! Login sukses sebagai Administrator.", "success");
+    } else if (u === 'operator' && p === 'operator123') {
+      const user: SessionUser = { username: 'operator', role: 'operator' };
+      localStorage.setItem('bilibili_session_user', JSON.stringify(user));
+      setSessionUser(user);
+      setLoginUsername('');
+      setLoginPassword('');
+      showToast("Selamat datang! Login sukses sebagai Operator.", "success");
+    } else {
+      setLoginError("Username atau password salah!");
+    }
+  };
+
+  const handleSessionLogout = () => {
+    localStorage.removeItem('bilibili_session_user');
+    setSessionUser(null);
+    showToast("Berhasil Logout dari akun gudang.", "success");
+  };
+
   // Active navigational tab
   const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE' | 'STOK_BERAS' | 'LAPORAN' | 'DATABASE' | 'DRYER'>('DASHBOARD');
+  
+  // Guard against direct tab loading by unauthorised roles
+  useEffect(() => {
+    if (sessionUser && sessionUser.role === 'operator') {
+      if (activeTab === 'FINANCE' || activeTab === 'LAPORAN' || activeTab === 'DATABASE') {
+        setActiveTab('DASHBOARD');
+        showToast("Akses Ditolak: Hanya Admin yang dapat mengakses menu Keuangan, Laporan, atau Database Master!", "warning");
+      }
+    }
+  }, [activeTab, sessionUser]);
   
   // Dashboard tab feed selections
   const [dashFeedTab, setDashFeedTab] = useState<'WEIGH' | 'INBOUND' | 'OUTBOUND' | 'SERVICES' | 'FINANCE'>('WEIGH');
@@ -620,6 +691,10 @@ export default function App() {
   };
 
   const handleDeleteTicket = (id: string) => {
+    if (sessionUser?.role !== 'admin') {
+      showToast("Gagal: Hanya Admin yang diperbolehkan menghapus tiket timbang!", "error");
+      return;
+    }
     const target = tickets.find(t => t.id === id);
     const label = target ? `#${target.ticketNo}` : '';
     setTickets(prev => prev.filter(t => t.id !== id));
@@ -656,6 +731,10 @@ export default function App() {
   };
 
   const handleDeleteInbound = (id: string) => {
+    if (sessionUser?.role !== 'admin') {
+      showToast("Gagal: Hanya Admin yang diperbolehkan menghapus catatan barang masuk!", "error");
+      return;
+    }
     setInboundRecords(prev => prev.filter(r => r.id !== id));
     deleteOnline('inboundRecords', id);
     showToast('Catatan barang masuk berhasil dihapus!', 'success');
@@ -690,6 +769,10 @@ export default function App() {
   };
 
   const handleDeleteOutbound = (id: string) => {
+    if (sessionUser?.role !== 'admin') {
+      showToast("Gagal: Hanya Admin yang diperbolehkan menghapus catatan barang keluar!", "error");
+      return;
+    }
     setOutboundRecords(prev => prev.filter(r => r.id !== id));
     deleteOnline('outboundRecords', id);
     showToast('Catatan barang keluar berhasil dihapus!', 'success');
@@ -708,6 +791,10 @@ export default function App() {
   };
 
   const handleDeleteService = (id: string) => {
+    if (sessionUser?.role !== 'admin') {
+      showToast("Gagal: Hanya Admin yang diperbolehkan menghapus catatan layanan jasa!", "error");
+      return;
+    }
     setServiceRecords(prev => prev.filter(r => r.id !== id));
     deleteOnline('serviceRecords', id);
     showToast('Catatan layanan jasa poles berhasil dihapus!', 'success');
@@ -726,6 +813,10 @@ export default function App() {
   };
 
   const handleDeleteDebt = (id: string) => {
+    if (sessionUser?.role !== 'admin') {
+      showToast("Gagal: Hanya Admin yang diperbolehkan menghapus catatan utang!", "error");
+      return;
+    }
     setDebts(prev => prev.filter(d => d.id !== id));
     deleteOnline('debts', id);
     showToast('Catatan utang berhasil dihapus!', 'success');
@@ -777,6 +868,10 @@ export default function App() {
   };
 
   const handleDeleteFinance = (id: string) => {
+    if (sessionUser?.role !== 'admin') {
+      showToast("Gagal: Hanya Admin yang diperbolehkan menghapus transaksi keuangan!", "error");
+      return;
+    }
     setFinances(prev => prev.filter(f => f.id !== id));
     deleteOnline('finances', id);
     showToast('Catatan mutasi kas berhasil dihapus!', 'success');
@@ -795,6 +890,10 @@ export default function App() {
   };
 
   const handleDeleteRiceStock = (id: string) => {
+    if (sessionUser?.role !== 'admin') {
+      showToast("Gagal: Hanya Admin yang diperbolehkan menghapus catatan stok beras!", "error");
+      return;
+    }
     setRiceStockRecords(prev => prev.filter(r => r.id !== id));
     deleteOnline('riceStockRecords', id);
     showToast(t.deleteSuccessGeneral, 'success');
@@ -820,6 +919,143 @@ export default function App() {
   const netKasBalance = totalCashIncome - totalCashExpense;
 
   const totalOutstandingDebts = debts.filter(d => d.status === 'BELUM_LUNAS').reduce((acc, d) => acc + d.remainingBalance, 0);
+
+  if (!sessionUser) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden" id="login-screen-portal">
+        {/* Modern high-quality background design elements */}
+        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-[120px] -ml-40 -mt-40 pointer-events-none"></div>
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-sky-600/10 rounded-full blur-[120px] -mr-40 -mb-40 pointer-events-none"></div>
+        
+        {/* Abstract subtle grid overlay for professional industrial/tech aesthetic */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30 pointer-events-none"></div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 25 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="bg-slate-800/80 backdrop-blur-md border border-slate-700/80 rounded-2xl shadow-2xl w-full max-w-md p-8 sm:p-10 relative z-10 font-sans"
+        >
+          {/* Header section */}
+          <div className="flex flex-col items-center text-center mb-8">
+            <div className="relative group mb-4">
+              {/* Outer soft breathing glow matching the log */}
+              <div className="absolute -inset-1.5 bg-gradient-to-r from-emerald-500 to-yellow-500 rounded-full blur opacity-40 group-hover:opacity-75 transition duration-500 animate-pulse"></div>
+              
+              <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-slate-600 bg-white shadow-xl flex items-center justify-center p-0.5">
+                <img 
+                  src={bilibiliLogo} 
+                  alt="US Bilibili 162 Logo" 
+                  className="w-full h-full object-cover rounded-full"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-none">
+              US Bilibili 162
+            </h2>
+            <p className="text-xs text-slate-400 font-bold mt-2 uppercase tracking-widest">
+              {language === 'id' ? 'Sistem Manajemen Gudang & Kas' : 'Integrated Warehouse & Finance'}
+            </p>
+
+            {/* Encrypted network badge */}
+            <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 bg-slate-700/55 border border-slate-600/60 rounded-full text-[10px] text-emerald-400 font-bold font-mono uppercase tracking-wider">
+              <Shield className="w-3.5 h-3.5" />
+              <span>{language === 'id' ? 'Sesi Terbuka & Terenkripsi' : 'Active Secured Session'}</span>
+            </div>
+          </div>
+
+          {/* Login Form */}
+          <form onSubmit={handleSessionLoginSubmit} className="space-y-5">
+            <div>
+              <label className="block text-[10px] font-black text-slate-400 tracking-widest uppercase mb-1.5 pl-1">
+                Username
+              </label>
+              <div className="relative group/input">
+                <input 
+                  type="text"
+                  required
+                  value={loginUsername}
+                  onChange={(e) => setLoginUsername(e.target.value)}
+                  placeholder={language === 'id' ? 'Masukkan username...' : 'Enter username...'}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/80 focus:border-transparent transition-all pl-11 font-medium shadow-inner"
+                />
+                <div className="absolute left-3.5 top-3.5 text-slate-500 group-focus-within/input:text-emerald-400 transition-colors">
+                  <Users className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black text-slate-400 tracking-widest uppercase mb-1.5 pl-1">
+                Password
+              </label>
+              <div className="relative group/input">
+                <input 
+                  type="password"
+                  required
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  placeholder={language === 'id' ? 'Masukkan password...' : 'Enter password...'}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/80 focus:border-transparent transition-all pl-11 font-medium shadow-inner"
+                />
+                <div className="absolute left-3.5 top-3.5 text-slate-500 group-focus-within/input:text-emerald-400 transition-colors">
+                  <Lock className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
+
+            {loginError && (
+              <motion.div 
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-red-950/40 text-red-400 text-xs py-2.5 px-3 rounded-xl font-bold flex items-center gap-2 border border-red-900/60"
+              >
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                <span>{language === 'id' ? 'Username atau password salah!' : 'Incorrect username or password!'}</span>
+              </motion.div>
+            )}
+
+            <button
+              type="submit"
+              className="w-full mt-2 relative overflow-hidden group/btn bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-lg transition-all duration-200 cursor-pointer text-sm flex items-center justify-center gap-2 tracking-wide"
+            >
+              <Key className="w-4 h-4 transition-transform group-hover/btn:rotate-12 duration-200" />
+              <span>{language === 'id' ? 'Masuk ke Sistem' : 'Authenticate Security'}</span>
+            </button>
+          </form>
+
+          {/* Bottom styling and language utilities */}
+          <div className="mt-8 pt-6 border-t border-slate-700/60 flex flex-col items-center gap-4">
+            {/* Quick Language Toggle on Login Screen */}
+            <div className="flex justify-center gap-3 text-[11px] text-slate-400 font-medium font-sans">
+              <button 
+                type="button"
+                onClick={() => setLanguage('id')} 
+                className={`transition-colors py-1 px-1.5 rounded hover:text-white ${language === 'id' ? 'text-emerald-400 font-bold bg-slate-700/40' : ''}`}
+              >
+                🇮🇩 Indonesia
+              </button>
+              <span className="text-slate-600 self-center">•</span>
+              <button 
+                type="button" 
+                onClick={() => setLanguage('en')}
+                className={`transition-colors py-1 px-1.5 rounded hover:text-white ${language === 'en' ? 'text-emerald-400 font-bold bg-slate-700/40' : ''}`}
+              >
+                🇺🇸 English
+              </button>
+            </div>
+
+            {/* Subtle disclaimer */}
+            <p className="text-[10px] text-slate-500 font-medium text-center">
+              © US Bilibili 162. {language === 'id' ? 'Hanya diizinkan untuk personel terotorisasi.' : 'Authorized personnel only.'}
+            </p>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className={`h-screen ${theme.pageBg} text-neutral-800 font-sans flex flex-col transition-colors duration-300 overflow-x-hidden w-full max-w-full`}>
@@ -894,28 +1130,28 @@ export default function App() {
               </select>
             </div>
 
-            {/* Google Authentication Status */}
-            <div className="flex items-center gap-1.5">
-              {currentUser && !currentUser.isAnonymous ? (
+            {/* Credentials Authentication Status */}
+            <div className="flex items-center gap-1.5 font-sans">
+              {sessionUser ? (
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-yellow-350 font-bold font-mono max-w-[100px] truncate hidden md:inline" title={currentUser.email || ''}>
-                    {currentUser.email}
+                  <span className={`text-[9px] sm:text-[10px] px-2 py-0.5 rounded font-black font-mono tracking-wide uppercase shadow-sm ${
+                    sessionUser.role === 'admin'
+                      ? 'bg-amber-500 text-neutral-900 border border-amber-400'
+                      : 'bg-indigo-600 text-white border border-indigo-500'
+                  }`}>
+                    {sessionUser.role === 'admin' ? '🛡️ Admin' : '👤 Operator'}
+                  </span>
+                  <span className="text-[11px] text-yellow-350 font-bold max-w-[90px] truncate hidden md:inline" title={sessionUser.username}>
+                    {sessionUser.username}
                   </span>
                   <button
-                    onClick={handleLogout}
-                    className="text-[10px] font-extrabold px-2.5 py-1.5 rounded-lg transition border border-red-500 bg-red-650/80 text-white hover:bg-red-750 cursor-pointer text-xs"
+                    onClick={handleSessionLogout}
+                    className="text-[10px] font-extrabold px-2 py-1 rounded transition border border-red-500 bg-red-600 font-sans text-white hover:bg-red-700 cursor-pointer"
                   >
                     Logout
                   </button>
                 </div>
-              ) : (
-                <button
-                  onClick={handleGoogleLogin}
-                  className={`text-[10px] font-extrabold px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer ${theme.statusBoxBg} ${theme.statusBoxBorder} text-white hover:brightness-110 text-xs`}
-                >
-                  G-Login
-                </button>
-              )}
+              ) : null}
             </div>
 
             {/* Printer Settings Button */}
@@ -1061,17 +1297,19 @@ export default function App() {
             7. Dryer Jagung
           </button>
  
-          <button
-            onClick={() => setActiveTab('FINANCE')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
-              activeTab === 'FINANCE' 
-                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
-                : 'border-transparent text-neutral-500 hover:text-neutral-800'
-            }`}
-          >
-            <DollarSign className="w-4 h-4 text-emerald-600" />
-            8. {t.finance}
-          </button>
+          {sessionUser?.role === 'admin' && (
+            <button
+              onClick={() => setActiveTab('FINANCE')}
+              className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+                activeTab === 'FINANCE' 
+                  ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
+                  : 'border-transparent text-neutral-500 hover:text-neutral-800'
+              }`}
+            >
+              <DollarSign className="w-4 h-4 text-emerald-600" />
+              8. {t.finance}
+            </button>
+          )}
  
           <button
             onClick={() => setActiveTab('STOK_BERAS')}
@@ -1085,29 +1323,33 @@ export default function App() {
             9. {t.riceStock}
           </button>
  
-          <button
-            onClick={() => setActiveTab('LAPORAN')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
-              activeTab === 'LAPORAN' 
-                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
-                : 'border-transparent text-neutral-500 hover:text-neutral-800'
-            }`}
-          >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
-            10. {t.reports}
-          </button>
- 
-          <button
-            onClick={() => setActiveTab('DATABASE')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
-              activeTab === 'DATABASE' 
-                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
-                : 'border-transparent text-neutral-500 hover:text-neutral-800'
-            }`}
-          >
-            <Database className="w-4 h-4 text-rose-500" />
-            10. {t.database}
-          </button>
+          {sessionUser?.role === 'admin' && (
+            <>
+              <button
+                onClick={() => setActiveTab('LAPORAN')}
+                className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+                  activeTab === 'LAPORAN' 
+                    ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
+                    : 'border-transparent text-neutral-500 hover:text-neutral-800'
+                }`}
+              >
+                <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
+                10. {t.reports}
+              </button>
+     
+              <button
+                onClick={() => setActiveTab('DATABASE')}
+                className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+                  activeTab === 'DATABASE' 
+                    ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
+                    : 'border-transparent text-neutral-500 hover:text-neutral-800'
+                }`}
+              >
+                <Database className="w-4 h-4 text-rose-500" />
+                10. {t.database}
+              </button>
+            </>
+          )}
 
         </div>
       </div>
@@ -1235,15 +1477,28 @@ export default function App() {
               <div id="card-metric-cash" className="bg-white border border-neutral-200 p-4.5 rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-between group">
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.cashBalance || 'Kas & Keuangan Tunai'}</span>
-                  <span className={`text-lg sm:text-xl font-black font-mono tracking-tight ${netKasBalance >= 0 ? 'text-emerald-700' : 'text-red-500'}`}>
-                    Rp {netKasBalance.toLocaleString('id-ID')}
-                  </span>
-                  <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1">
-                    <span className="text-orange-650 font-bold font-mono text-[9px] text-red-500">{t.supplierDebt || 'Hutang AP'}: Rp {totalOutstandingDebts.toLocaleString('id-ID')}</span>
-                  </div>
+                  {sessionUser?.role === 'admin' ? (
+                    <>
+                      <span className={`text-base sm:text-[17px] font-black font-mono tracking-tight ${netKasBalance >= 0 ? 'text-emerald-700' : 'text-red-500'}`}>
+                        Rp {netKasBalance.toLocaleString('id-ID')}
+                      </span>
+                      <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1">
+                        <span className="font-bold font-mono text-[9px] text-red-500">{t.supplierDebt || 'Hutang AP'}: Rp {totalOutstandingDebts.toLocaleString('id-ID')}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-base sm:text-[17px] font-black font-mono tracking-tight text-neutral-430 select-none">
+                        Rp ••••••••
+                      </span>
+                      <div className="flex items-center gap-1.5 text-[10px] text-neutral-400 font-semibold mt-1 font-mono">
+                        <span>🔒 {language === 'id' ? 'Khusus Administrator' : 'Administrator Only'}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center border group-hover:scale-110 transition duration-300 shrink-0 ${netKasBalance >= 0 ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'}`}>
-                  <DollarSign className={`w-5 h-5 ${netKasBalance >= 0 ? 'text-emerald-600' : 'text-red-552'}`} />
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center border group-hover:scale-110 transition duration-300 shrink-0 ${sessionUser?.role === 'admin' && netKasBalance < 0 ? 'bg-red-50 border-red-100' : 'bg-emerald-50 border-emerald-100'}`}>
+                  <DollarSign className={`w-5 h-5 ${sessionUser?.role === 'admin' && netKasBalance < 0 ? 'text-red-500' : 'text-emerald-600'}`} />
                 </div>
               </div>
 
@@ -1535,13 +1790,15 @@ export default function App() {
                   >
                     Layanan Jasa Poles
                   </button>
-                  <button 
-                    id="dash-feed-tab-finance"
-                    onClick={() => setDashFeedTab('FINANCE')}
-                    className={`px-3 py-1.5 text-xs rounded-full font-bold cursor-pointer transition ${dashFeedTab === 'FINANCE' ? 'bg-amber-600 text-white shadow-sm' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'}`}
-                  >
-                    Arus Kas & Buku Besar
-                  </button>
+                  {sessionUser?.role === 'admin' && (
+                    <button 
+                      id="dash-feed-tab-finance"
+                      onClick={() => setDashFeedTab('FINANCE')}
+                      className={`px-3 py-1.5 text-xs rounded-full font-bold cursor-pointer transition ${dashFeedTab === 'FINANCE' ? 'bg-amber-600 text-white shadow-sm' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'}`}
+                    >
+                      Arus Kas & Buku Besar
+                    </button>
+                  )}
                 </div>
               </div>
 

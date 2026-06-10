@@ -302,7 +302,7 @@ export default function InboundModule({
                   <option value="">-- Manual Tanpa Tiket Timbang --</option>
                   {tickets.map(t => (
                     <option key={t.id} value={t.id}>
-                      Tiket {t.ticketNo} ({t.policeNo}) - Net {(t.netWeight ?? 0).toLocaleString()} Kg
+                      Tiket {t.ticketNo} ({t.policeNo}) - Net {(t.netWeight ?? 0).toLocaleString('id-ID')} Kg
                     </option>
                   ))}
                 </select>
@@ -619,8 +619,8 @@ export default function InboundModule({
                       </span>
                     </td>
                     <td className="text-right py-2.5 px-3 font-mono text-neutral-500">
-                      <div>{(r.grossWeight ?? 0).toLocaleString()} kg G</div>
-                      <div className="text-[10px]">{(r.tareWeight ?? 0).toLocaleString()} kg T</div>
+                      <div>{(r.grossWeight ?? 0).toLocaleString('id-ID')} kg G</div>
+                      <div className="text-[10px]">{(r.tareWeight ?? 0).toLocaleString('id-ID')} kg T</div>
                     </td>
                     <td className="text-center py-2.5 px-3">
                       <div className="font-semibold text-indigo-700">{r.moistureContent.toFixed(1)}%</div>
@@ -631,7 +631,7 @@ export default function InboundModule({
                       )}
                     </td>
                     <td className="text-right py-2.5 px-3 font-extrabold font-mono text-emerald-600">
-                      {(r.netWeight ?? 0).toLocaleString()} kg
+                      {(r.netWeight ?? 0).toLocaleString('id-ID')} kg
                     </td>
                     <td className="py-2.5 px-3 text-neutral-500 text-[11px]">
                       <div className="flex items-center gap-1">

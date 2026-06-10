@@ -301,7 +301,7 @@ export default function FinanceModule({
   // Handles recording broker payment as expense
   const handlePayBrokerCommission = () => {
     if (!activeBroker) return;
-    const desc = `Pembayaran Komisi Makelar ${activeBroker.name} atas berat jagung ${brokerCargoWeight.toLocaleString()} Kg (Tarif Rp ${brokerRate}/Kg)`;
+    const desc = `Pembayaran Komisi Makelar ${activeBroker.name} atas berat jagung ${brokerCargoWeight.toLocaleString('id-ID')} Kg (Tarif Rp ${brokerRate}/Kg)`;
     const newFin: FinancialRecord = {
       id: `fin-${Date.now()}`,
       date: new Date().toISOString().split('T')[0],
@@ -628,7 +628,7 @@ export default function FinanceModule({
                 </div>
                 <div className="flex justify-between items-center py-1">
                   <span>Volume Jagung Netto:</span>
-                  <span className="font-bold">{brokerCargoWeight.toLocaleString()} Kg</span>
+                  <span className="font-bold">{brokerCargoWeight.toLocaleString('id-ID')} Kg</span>
                 </div>
                 <div className="flex justify-between items-center py-1">
                   <span>Fee Standard US Bilibili:</span>
@@ -681,7 +681,7 @@ export default function FinanceModule({
                       </td>
                       <td className="py-2 px-3 font-mono text-neutral-500">{e.phone || '- -'}</td>
                       <td className="text-right py-2 px-3 font-mono font-medium text-emerald-600">
-                        {e.ratePerKg ? `Rp ${e.ratePerKg} / Kg` : 'Gaji Mingguan Staff'}
+                        {e.ratePerKg ? `Rp ${e.ratePerKg.toLocaleString('id-ID')} / Kg` : 'Gaji Mingguan Staff'}
                       </td>
                     </tr>
                   ))}
