@@ -9,7 +9,9 @@ import {
   BrokerRecord,
   LocationRecord,
   CustomerRecord,
-  FinanceCategoryRecord
+  FinanceCategoryRecord,
+  LaborRateRecord,
+  CornMoistureRule
 } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import ConfirmModal from './ConfirmModal';
@@ -53,6 +55,10 @@ interface DatabaseMasterModuleProps {
   setCustomers: React.Dispatch<React.SetStateAction<CustomerRecord[]>>;
   financeCategories: FinanceCategoryRecord[];
   setFinanceCategories: React.Dispatch<React.SetStateAction<FinanceCategoryRecord[]>>;
+  laborRates: LaborRateRecord[];
+  setLaborRates: React.Dispatch<React.SetStateAction<LaborRateRecord[]>>;
+  cornMoistureRules: CornMoistureRule[];
+  setCornMoistureRules: React.Dispatch<React.SetStateAction<CornMoistureRule[]>>;
 }
 
 export default function DatabaseMasterModule({
@@ -75,11 +81,15 @@ export default function DatabaseMasterModule({
   customers,
   setCustomers,
   financeCategories,
-  setFinanceCategories
+  setFinanceCategories,
+  laborRates,
+  setLaborRates,
+  cornMoistureRules,
+  setCornMoistureRules
 }: DatabaseMasterModuleProps) {
   const { t, language } = useLanguage();
   // Tabs for the database master
-  type DbTab = 'VEHICLES' | 'SUPPLIERS' | 'BUYERS' | 'EMPLOYEES' | 'COMMODITIES' | 'BANKS' | 'BROKERS' | 'LOCATIONS' | 'CUSTOMERS' | 'FINANCE_CATS';
+  type DbTab = 'VEHICLES' | 'SUPPLIERS' | 'BUYERS' | 'EMPLOYEES' | 'COMMODITIES' | 'BANKS' | 'BROKERS' | 'LOCATIONS' | 'CUSTOMERS' | 'FINANCE_CATS' | 'LABOR_RATES';
   const [activeSubTab, setActiveSubTab] = useState<DbTab>('VEHICLES');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -162,6 +172,11 @@ export default function DatabaseMasterModule({
   const [fCatName, setFCatName] = useState('');
   const [fCatType, setFCatType] = useState<'DEBIT' | 'KREDIT' | 'BOTH'>('BOTH');
 
+  // Labor Rate
+  const [laborActivityName, setLaborActivityName] = useState('');
+  const [laborRateType, setLaborRateType] = useState<'PER_KG' | 'FLAT'>('PER_KG');
+  const [laborRateVal, setLaborRateVal] = useState<number>(0);
+
   // Handler helpers
   const triggerToast = (msg: string, type: 'success' | 'error' | 'info' | 'warning' = 'success') => {
     (window as any).__showToast?.(msg, type);
@@ -218,6 +233,10 @@ export default function DatabaseMasterModule({
 
     setFCatName('');
     setFCatType('BOTH');
+
+    setLaborActivityName('');
+    setLaborRateType('PER_KG');
+    setLaborRateVal(0);
   };
 
   // --- VEHICLE ACTIONS ---
@@ -849,6 +868,51 @@ export default function DatabaseMasterModule({
     });
   };
 
+  // --- LABOR RATE ACTIONS ---
+  const handleSaveLaborRate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!laborActivityName.trim()) return triggerToast('Nama Kegiatan Buruh wajib diisi!', 'error');
+    const executeSave = () => {
+      if (editingId) {
+        setLaborRates(prev => prev.map(l => l.id === editingId ? { ...l, activityName: laborActivityName.trim().toUpperCase(), rateType: laborRateType, rate: Number(laborRateVal) } : l));
+        triggerToast(`Kegiatan Buruh ${laborActivityName} diperbarui!`, 'success');
+      } else {
+        setLaborRates(prev => [{ id: `lr-${Date.now()}`, activityName: laborActivityName.trim().toUpperCase(), rateType: laborRateType, rate: Number(laborRateVal) }, ...prev]);
+        triggerToast(`Kegiatan Buruh ${laborActivityName} ditambahkan!`, 'success');
+      }
+      handleCancel();
+    };
+    setConfirmModal({
+      isOpen: true,
+      title: editingId ? 'Simpan Kegiatan Buruh' : 'Tambah Kegiatan Buruh',
+      message: `Lanjutkan simpan tarif buruh untuk ${laborActivityName}?`,
+      type: editingId ? 'EDIT' : 'ADD',
+      onConfirm: () => { executeSave(); closeConfirm(); }
+    });
+  };
+
+  const handleEditLaborRate = (l: LaborRateRecord) => {
+    setEditingId(l.id);
+    setLaborActivityName(l.activityName);
+    setLaborRateType(l.rateType);
+    setLaborRateVal(l.rate);
+    setIsAddingNew(false);
+  };
+
+  const handleDeleteLaborRate = (id: string, name: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hapus Kegiatan Buruh',
+      message: `Hapus kegiatan ${name}? Data transaksi lama tidak akan terpengaruh, tapi pilihan ini akan hilang dari form input.`,
+      type: 'DELETE',
+      onConfirm: () => {
+        setLaborRates(prev => prev.filter(l => l.id !== id));
+        triggerToast(`Kegiatan buruh ${name} dihapus.`, 'success');
+        closeConfirm();
+      }
+    });
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-md border border-neutral-100 overflow-hidden font-sans">
       
@@ -1001,6 +1065,18 @@ export default function DatabaseMasterModule({
         >
           <Layers className="w-3.5 h-3.5" />
           📊 Kategori Keuangan ({financeCategories.length})
+        </button>
+
+        <button
+          onClick={() => { setActiveSubTab('LABOR_RATES'); setSearchQuery(''); handleCancel(); }}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            activeSubTab === 'LABOR_RATES'
+              ? 'bg-amber-700 text-white shadow-sm'
+              : 'text-neutral-600 hover:bg-neutral-100'
+          }`}
+        >
+          <Users className="w-3.5 h-3.5" />
+          👷 Data Buruh ({laborRates.length})
         </button>
       </div>
 
@@ -1477,6 +1553,50 @@ export default function DatabaseMasterModule({
               </form>
             )}
 
+            {/* Form: LABOR_RATES */}
+            {activeSubTab === 'LABOR_RATES' && (
+              <form onSubmit={handleSaveLaborRate} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div className="md:col-span-2">
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Nama Kegiatan Buruh</label>
+                  <input
+                    type="text"
+                    required
+                    value={laborActivityName}
+                    onChange={(e) => setLaborActivityName(e.target.value)}
+                    className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-bold focus:border-indigo-500 outline-none text-neutral-800 uppercase"
+                    placeholder="Contoh: BONGKARAN / MUAT"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Tipe Tarif</label>
+                  <select
+                    value={laborRateType}
+                    onChange={(e) => setLaborRateType(e.target.value as any)}
+                    className="w-full bg-white border border-neutral-300 rounded-lg px-2 py-2 text-xs font-semibold focus:border-indigo-500 outline-none text-neutral-800"
+                  >
+                    <option value="PER_KG">Tarif Per Kg</option>
+                    <option value="FLAT">Tarif Borongan (Flat)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Nominal Tarif (Rp)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      required
+                      value={laborRateVal || ''}
+                      onChange={(e) => setLaborRateVal(Number(e.target.value))}
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs focus:border-indigo-500 outline-none text-neutral-800 font-mono"
+                      placeholder="Contoh: 30"
+                    />
+                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
+                      <Check className="w-3.5 h-3.5" /> SIMPAN
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+
             {/* Form: FINANCE_CATS */}
             {activeSubTab === 'FINANCE_CATS' && (
               <form onSubmit={handleSaveFinanceCategory} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
@@ -1936,6 +2056,64 @@ export default function DatabaseMasterModule({
                       </td>
                     </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* GRID: LABOR_RATES */}
+        {activeSubTab === 'LABOR_RATES' && (
+          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
+              <thead>
+                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                  <th className="p-3 font-semibold">Nama Kegiatan Buruh</th>
+                  <th className="p-3 font-semibold">Tipe Tarif</th>
+                  <th className="p-3 font-semibold text-right">Tarif (Rp)</th>
+                  <th className="p-3 font-semibold text-center w-24">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-neutral-100">
+                {laborRates.filter(l => l.activityName.toLowerCase().includes(searchQuery.toLowerCase())).map((l) => (
+                  <tr key={l.id} className="hover:bg-neutral-50/80 transition-colors group">
+                    <td className="p-3 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-amber-100 flex-shrink-0 flex items-center justify-center border border-amber-200 shadow-sm text-amber-700">
+                        <Users className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-neutral-900 text-xs">{l.activityName}</p>
+                        <p className="text-[10px] font-mono font-medium text-neutral-400 mt-0.5">ID: {l.id.substring(0,8)}</p>
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider inline-flex ${l.rateType === 'FLAT' ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800'}`}>
+                        {l.rateType === 'FLAT' ? 'BORONGAN (FLAT)' : 'PER KILOGRAM'}
+                      </span>
+                    </td>
+                    <td className="p-3 text-right font-mono font-bold text-emerald-600 text-xs">
+                      {l.rateType === 'FLAT' ? `Rp ${l.rate.toLocaleString('id-ID')}` : `Rp ${l.rate}/Kg`}
+                    </td>
+                    <td className="p-3">
+                      <div className="flex gap-1.5 justify-center opacity-40 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => handleEditLaborRate(l)} className="bg-white hover:bg-blue-50 text-neutral-400 hover:text-blue-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer" title="Edit Data">
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => handleDeleteLaborRate(l.id, l.activityName)} className="bg-white hover:bg-rose-50 text-neutral-400 hover:text-rose-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer" title="Hapus Permanen">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {laborRates.filter(l => l.activityName.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="p-6 text-center text-neutral-400 bg-neutral-50/50">
+                      <Users className="w-8 h-8 mx-auto text-neutral-300 mb-2 opacity-50" />
+                      <p className="font-medium text-xs">Belum ada data buruh</p>
+                      <p className="text-[10px] mt-1">Daftarkan jenis tanggungan buruh baru untuk dikelola.</p>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

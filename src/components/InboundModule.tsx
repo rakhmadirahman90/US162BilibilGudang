@@ -4,8 +4,8 @@
  */
 
 import React, { useState } from 'react';
-import { InboundRecord, WeighbridgeTicket, VehicleRecord, SupplierRecord, EmployeeRecord } from '../types';
-import { mockCornMoistureRefaksi } from '../data';
+import { InboundRecord, WeighbridgeTicket, VehicleRecord, SupplierRecord, EmployeeRecord, LaborRateRecord, CornMoistureRule } from '../types';
+import { getRefaksiByRule } from '../data';
 import { useLanguage } from '../i18n/LanguageContext';
 import ConfirmModal from './ConfirmModal';
 import WhatsAppModal from './WhatsAppModal';
@@ -24,6 +24,8 @@ interface InboundModuleProps {
   vehicles?: VehicleRecord[];
   suppliers?: SupplierRecord[];
   employees?: EmployeeRecord[];
+  laborRates?: LaborRateRecord[];
+  cornMoistureRules?: CornMoistureRule[];
 }
 
 export default function InboundModule({
@@ -34,7 +36,9 @@ export default function InboundModule({
   onDeleteRecord,
   vehicles = [],
   suppliers = [],
-  employees = []
+  employees = [],
+  laborRates = [],
+  cornMoistureRules = []
 }: InboundModuleProps) {
   const { t, language } = useLanguage();
   const [showAddForm, setShowAddForm] = useState(false);
@@ -91,8 +95,10 @@ export default function InboundModule({
   const [tareWeight, setTareWeight] = useState(4000);
   const [bagDeductionPercent, setBagDeductionPercent] = useState(1.00);
   const [moistureContent, setMoistureContent] = useState(14.0);
+  const [refaksiType, setRefaksiType] = useState<'LOKAL' | 'LUAR_DAERAH'>('LOKAL');
   const [warehouseSection, setWarehouseSection] = useState("Gudang Jagung Tengah");
-  const [laborCost, setLaborCost] = useState(350000);
+  const [selectedLaborId, setSelectedLaborId] = useState("");
+  const [laborCost, setLaborCost] = useState(0);
   const [price, setPrice] = useState(0);
   const [driverName, setDriverName] = useState("");
 
@@ -120,7 +126,7 @@ export default function InboundModule({
 
     // Determine refaksi KA
     const refaksiPercentage = commodity === 'JAGUNG' 
-      ? mockCornMoistureRefaksi(moistureContent).refaksiPercent
+      ? getRefaksiByRule(moistureContent, cornMoistureRules, refaksiType).refaksiPercent
       : 0;
 
     // Calculate netto
@@ -185,8 +191,10 @@ export default function InboundModule({
     setTareWeight(4000);
     setBagDeductionPercent(1.00);
     setMoistureContent(14.0);
+    setRefaksiType('LOKAL');
     setWarehouseSection("Gudang Jagung Tengah");
-    setLaborCost(350000);
+    setSelectedLaborId("");
+    setLaborCost(0);
     setPrice(0);
     setDriverName("");
     setEditingId(null);
@@ -419,12 +427,24 @@ export default function InboundModule({
                 </div>
                 <div>
                   <label className="block text-neutral-600 mb-1">Kadar Air (KA %)</label>
-                  <input
-                    type="text"
-                    value={formatNumberInput(moistureContent)}
-                    onChange={(e) => setMoistureContent(parseNumberInput(e.target.value))}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={formatNumberInput(moistureContent)}
+                      onChange={(e) => setMoistureContent(parseNumberInput(e.target.value))}
+                      className="w-1/2 bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
+                    />
+                    {commodity === 'JAGUNG' && (
+                      <select
+                        value={refaksiType}
+                        onChange={(e) => setRefaksiType(e.target.value as 'LOKAL' | 'LUAR_DAERAH')}
+                        className="w-1/2 bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 text-[10px]"
+                      >
+                        <option value="LOKAL">Tabel Lokal</option>
+                        <option value="LUAR_DAERAH">Tabel Bone/Luar</option>
+                      </select>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -445,12 +465,41 @@ export default function InboundModule({
                 </div>
 
                 <div>
-                  <label className="block text-neutral-600 mb-1">Biaya Buruh Panggul Bongkar (Rp)</label>
+                  <label className="block text-neutral-600 mb-1">Biaya Buruh Panggul/Kegiatan</label>
+                  <select
+                    value={selectedLaborId}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setSelectedLaborId(id);
+                      if (id) {
+                        const labor = laborRates.find(l => l.id === id);
+                        if (labor) {
+                          // Gunakan netto kotor atau netto akhir untuk perhitungan?
+                          // Menghitung labor base weight:
+                          const fNet = (grossWeight - tareWeight - ((grossWeight - tareWeight) * (bagDeductionPercent / 100)) - ((grossWeight - tareWeight) * (commodity === 'JAGUNG' ? getRefaksiByRule(moistureContent, cornMoistureRules, refaksiType).refaksiPercent : 0) / 100));
+                          if (labor.rateType === 'FLAT') {
+                            setLaborCost(labor.rate);
+                          } else {
+                            setLaborCost(Math.round(fNet * labor.rate));
+                          }
+                        }
+                      } else {
+                        setLaborCost(0);
+                      }
+                    }}
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 mb-2 focus:bg-white focus:outline-none focus:border-emerald-600"
+                  >
+                    <option value="">-- Pilih Kegiatan Buruh --</option>
+                    {laborRates.map(l => (
+                      <option key={l.id} value={l.id}>{l.activityName} ({l.rateType === 'FLAT' ? `Rp ${l.rate.toLocaleString('id-ID')}` : `Rp ${l.rate}/Kg`})</option>
+                    ))}
+                  </select>
                   <input
                     type="text"
                     value={formatNumberInput(laborCost)}
                     onChange={(e) => setLaborCost(parseNumberInput(e.target.value))}
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
+                    placeholder="Atau isi nominal manual (Rp)"
                   />
                 </div>
                 <div>

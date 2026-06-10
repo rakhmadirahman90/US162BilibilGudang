@@ -4,17 +4,23 @@
  */
 
 import React, { useState } from 'react';
-import { mockCornMoistureRefaksi } from '../data';
+import { CornMoistureRule } from '../types';
+import { getRefaksiByRule } from '../data';
 import { useLanguage } from '../i18n/LanguageContext';
-import { Percent, Droplet, HelpCircle, ArrowRight, Table, AlertTriangle, Calculator } from 'lucide-react';
+import { Percent, Droplet, HelpCircle, ArrowRight, Table, AlertTriangle, Calculator, FileText } from 'lucide-react';
 
-export default function MoistureRefaksiModule() {
+interface MoistureRefaksiModuleProps {
+  rules: CornMoistureRule[];
+}
+
+export default function MoistureRefaksiModule({ rules }: MoistureRefaksiModuleProps) {
   const { t, language } = useLanguage();
   const [moisture, setMoisture] = useState<number>(15.5);
   const [baseWeight, setBaseWeight] = useState<number>(10000); // 10 Tons
   const [pricePerKg, setPricePerKg] = useState<number>(4500); // Rp 4,500/kg
+  const [ruleType, setRuleType] = useState<'LOKAL' | 'LUAR_DAERAH'>('LOKAL');
 
-  const refaksiDetails = mockCornMoistureRefaksi(moisture);
+  const refaksiDetails = getRefaksiByRule(moisture, rules, ruleType);
   const refaksiPercent = refaksiDetails.refaksiPercent;
 
   // Calculations
@@ -70,6 +76,20 @@ export default function MoistureRefaksiModule() {
                 <span>12.0% (Sangat Kering)</span>
                 <span>14.0% (Standar)</span>
                 <span>25.0% (Basah/Maks)</span>
+              </div>
+              <div className="flex justify-between items-center mb-1 mt-3">
+                <span className="font-bold text-amber-950 flex items-center gap-1">
+                  <FileText className="w-3.5 h-3.5 text-orange-500" />
+                  Tabel Acuan:
+                </span>
+                <select
+                  value={ruleType}
+                  onChange={(e) => setRuleType(e.target.value as 'LOKAL' | 'LUAR_DAERAH')}
+                  className="bg-white border rounded px-2 text-xs py-1"
+                >
+                  <option value="LOKAL">Tabel Lokal (Pinrang/Sekitarnya)</option>
+                  <option value="LUAR_DAERAH">Tabel Bone / Luar Daerah</option>
+                </select>
               </div>
             </div>
 
@@ -155,68 +175,32 @@ export default function MoistureRefaksiModule() {
           <div className="flex justify-between items-center mb-4 border-b border-neutral-100 pb-2">
             <h3 className="font-bold text-neutral-800 text-sm flex items-center gap-1.5">
               <Table className="text-indigo-500 w-5 h-5" />
-              Tabel Kebijakan Potongan KA Gudang (162 Refaksi)
+              {ruleType === 'LOKAL' ? 'Tabel Refaksi KA Lokal (Januari 2026)' : 'Tabel Refaksi KA Bone / Luar (Januari 2026)'}
             </h3>
             <span className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-bold font-mono">TA</span>
           </div>
 
           <p className="text-xs text-neutral-500 mb-3 leading-relaxed">
-            Berikut adalah representasi isi file <code className="bg-neutral-100 text-neutral-800 px-1.5 py-0.5 rounded font-mono font-medium text-[10px]">~$TABEL REFAKSI KA JAGUNG 2025.xlsx</code> untuk menentukan susut timbangan pembelian petani berdasarkan kadar air:
+            Berikut adalah standar resmi <code className="bg-neutral-100 text-neutral-800 px-1.5 py-0.5 rounded font-mono font-medium text-[10px]">Tabel Refaksi {ruleType}</code> untuk menentukan susut timbangan pembelian petani berdasarkan kadar air.
           </p>
 
           <div className="overflow-x-auto custom-scrollbar border border-neutral-150 rounded-lg">
-            <table className="w-full text-left text-xs min-w-[600px]">
+            <table className="w-full text-left text-xs min-w-[300px]">
               <thead className="bg-[#1e2a42] text-white font-mono tracking-wider">
                 <tr>
                   <th className="py-2 px-3 text-center">Kadar Air (%)</th>
-                  <th className="py-2 px-3 text-center">Potongan Susut (Refaksi Weight %)</th>
-                  <th className="py-2 px-3">Klasifikasi Gudang</th>
-                  <th className="py-2 px-3">Tindakan Rekomendasi</th>
+                  <th className="py-2 px-3 text-center">Potongan Harga Pembelian (%)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100 text-[11px]">
-                <tr className="bg-green-50 text-green-950 font-semibold">
-                  <td className="py-2 px-3 text-center font-mono">≤ 14.0%</td>
-                  <td className="py-2 px-3 text-center font-mono">0.0%</td>
-                  <td className="py-2 px-3">Standar Kering Nasional</td>
-                  <td className="py-2 px-3">Bisa langsung disimpan di silo utama</td>
-                </tr>
-                <tr>
-                  <td className="py-2 px-3 text-center font-mono">14.1% - 15.0%</td>
-                  <td className="py-2 px-3 text-center font-mono font-bold text-red-500">1.0%</td>
-                  <td className="py-2 px-3">Kering Ringan</td>
-                  <td className="py-2 px-3">Aman palka, ditiup kipas blower ringan</td>
-                </tr>
-                <tr className="bg-neutral-50/50">
-                  <td className="py-2 px-3 text-center font-mono">15.1% - 16.0%</td>
-                  <td className="py-2 px-3 text-center font-mono font-bold text-red-500">2.5%</td>
-                  <td className="py-2 px-3">Kadar Air Sedang</td>
-                  <td className="py-2 px-3">Proses blower wajib, jemur tipis</td>
-                </tr>
-                <tr>
-                  <td className="py-2 px-3 text-center font-mono">16.1% - 17.0%</td>
-                  <td className="py-2 px-3 text-center font-mono font-bold text-red-500">4.0%</td>
-                  <td className="py-2 px-3">Kadar Air Lembab</td>
-                  <td className="py-2 px-3">Campur dengan jagung kering atau poles kipas</td>
-                </tr>
-                <tr className="bg-amber-50 text-amber-950 font-medium">
-                  <td className="py-2 px-3 text-center font-mono">17.1% - 18.0%</td>
-                  <td className="py-2 px-3 text-center font-mono font-bold text-red-600">5.5%</td>
-                  <td className="py-2 px-3">Kadar Air Basah</td>
-                  <td className="py-2 px-3">Wajib pengerjaan pengeringan total</td>
-                </tr>
-                <tr>
-                  <td className="py-2 px-3 text-center font-mono">18.1% - 20.0%</td>
-                  <td className="py-2 px-3 text-center font-mono font-bold text-red-600">9.0%</td>
-                  <td className="py-2 px-3">Basah Tinggi</td>
-                  <td className="py-2 px-3">Risiko jamur tinggi! Proses blower intensif</td>
-                </tr>
-                <tr className="bg-red-50 text-red-950">
-                  <td className="py-2 px-3 text-center font-mono">&gt; 20.0%</td>
-                  <td className="py-2 px-3 text-center font-mono font-bold text-red-700">&gt; 11% + 1.5% per 1% KA</td>
-                  <td className="py-2 px-3">Basah Ekstrim</td>
-                  <td className="py-2 px-3">Tindakan darurat, ditolak atau pot. berat tinggi</td>
-                </tr>
+                {rules.filter(r => r.type === ruleType).map((r, i) => (
+                  <tr key={i} className={r.refaksiPercent === 0 ? "bg-green-50 text-green-950 font-semibold" : r.refaksiPercent > 10 ? "bg-red-50" : (i % 2 === 0 ? "bg-neutral-50" : "")}>
+                    <td className="py-2 px-3 text-center font-mono">{r.moistureMin.toFixed(2)} - {r.moistureMax.toFixed(2)}</td>
+                    <td className={`py-2 px-3 text-center font-mono ${r.refaksiPercent > 0 ? "font-bold text-red-600" : ""}`}>
+                      {r.refaksiPercent.toFixed(1)}%
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

@@ -267,28 +267,23 @@ const COMMON_SLIP_STYLE = `
     padding: 0 !important;
     line-height: 1;
     text-align: left;
-    position: relative;
   }
 
   .slip {
     width: 105mm !important;
     height: 148.5mm !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
     padding: 8mm 6mm !important;
     background: #ffffff !important;
-    border: none !important;
     display: block !important;
     box-sizing: border-box !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
     page-break-after: avoid;
   }
 
   @media print {
     @page {
       size: A4 portrait;
-      margin: 0mm !important;
+      margin: 0 !important;
     }
     
     html, body {
@@ -298,7 +293,6 @@ const COMMON_SLIP_STYLE = `
       margin: 0 !important;
       padding: 0 !important;
       text-align: left !important;
-      position: relative !important;
     }
 
     .slip {
@@ -307,9 +301,7 @@ const COMMON_SLIP_STYLE = `
       border: none !important;
       box-shadow: none !important;
       page-break-inside: avoid;
-      position: absolute !important;
-      top: 0 !important;
-      left: 0 !important;
+      float: left !important;
     }
 
     * {
@@ -547,15 +539,14 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
     </div>
 
     <div class="divider-line"></div>
-    <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 5px;">RESI TERPADU (MASUK)</div>
+    <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 5px;">RESI KAS TERPADU</div>
     <div class="divider-line"></div>
 
     <div class="flex"><span class="label">No. Tiket :</span><span class="value">${record.ticketNo || '-'}</span></div>
     <div class="flex"><span class="label">Tanggal :</span><span class="value">${formatReceiptDate(record.date)}</span></div>
     <div class="flex"><span class="label">No. Polisi:</span><span class="value">${record.vehicleNo}</span></div>
-    <div class="flex"><span class="label">Nama Barang:</span><span class="value">${record.commodity}</span></div>
     <div class="flex"><span class="label">Mitra/Agen:</span><span class="value">${record.supplier}</span></div>
-    <div class="flex"><span class="label">Jml. Karung:</span><span class="value">${record.bagDeductionPercent}%</span></div>
+    <div class="flex"><span class="label">Nama Barang:</span><span class="value">${record.commodity}</span></div>
 
     <div class="divider-line"></div>
 
@@ -567,19 +558,27 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
 
     <div class="divider-line"></div>
 
+    <!-- KUALITAS -->
+    <div class="flex"><span class="label">Kadar Air (${record.commodity}) :</span><span class="value">${(record.moistureContent || 0).toFixed(1)} %</span></div>
+    <div class="flex"><span class="label">Biji Mati, Jamur dsb :</span><span class="value">0.0 %</span></div>
+
+    <div class="divider-line"></div>
+
     <div class="flex"><span class="label">BERAT BRUTO :</span><span class="value">${bruto.toLocaleString('id-ID')} kg</span></div>
     <div class="flex"><span class="label">BERAT TARA :</span><span class="value">${tara.toLocaleString('id-ID')} kg</span></div>
-    <div class="flex"><span class="label">Pot. Karung (${record.bagDeductionPercent.toFixed(2)}%):</span><span class="value">- ${potKrg.toLocaleString('id-ID')} kg</span></div>
-    <div class="flex"><span class="label">Pot. Refaksi (${record.refaksiKaPercent.toFixed(2)}%):</span><span class="value">- ${potRefaksi.toLocaleString('id-ID')} kg</span></div>
+    <div class="flex"><span class="label">Pot. Karung (${record.bagDeductionPercent.toFixed(2)}%) :</span><span class="value">- ${potKrg.toLocaleString('id-ID')} kg</span></div>
+    <div class="flex"><span class="label">Pot. Ref/Air (${record.refaksiKaPercent.toFixed(2)}%) :</span><span class="value">- ${potRefaksi.toLocaleString('id-ID')} kg</span></div>
 
     <div class="divider-line"></div>
 
-    <div class="flex"><span class="label" style="font-size: 8pt;">HARGA :</span><span class="value" style="font-size: 8pt; color: #000; font-weight: bold;">Rp ${(record.price || 0).toLocaleString('id-ID')}/kg</span></div>
+    <div class="flex"><span class="label">BERAT NETTO :</span><span class="value" style="font-weight: bold;">${net.toLocaleString('id-ID')} KG</span></div>
+    <div class="flex"><span class="label">HARGA / KG :</span><span class="value" style="font-weight: bold;">Rp ${(record.price || 0).toLocaleString('id-ID')}</span></div>
+    <div class="flex"><span class="label">SUB TOTAL :</span><span class="value">Rp ${(net * (record.price || 0)).toLocaleString('id-ID')}</span></div>
+    <div class="flex"><span class="label">BIAYA BURUH :</span><span class="value">- Rp ${(record.laborCost || 0).toLocaleString('id-ID')}</span></div>
 
     <div class="divider-line"></div>
 
-    <div class="netto-row"><span class="netto-label">BERAT NETTO :</span><span class="netto-val">${net.toLocaleString('id-ID')} KG</span></div>
-    <div class="netto-row" style="margin-top: -4px; padding-top: 0px;"><span class="netto-label">TOTAL BAYAR :</span><span class="netto-val" style="color: #0284c7;">Rp ${(record.totalPrice || 0).toLocaleString('id-ID')}</span></div>
+    <div class="netto-row" style="margin-top: 4px; padding-top: 4px; padding-bottom: 4px;"><span class="netto-label">TOTAL SISA (BAYAR) :</span><span class="netto-val" style="color: #0284c7; font-size: 11pt;">Rp ${(record.totalPrice || 0).toLocaleString('id-ID')}</span></div>
 
     <div class="divider-line"></div>
 

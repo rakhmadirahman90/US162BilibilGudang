@@ -20,24 +20,95 @@ import {
   BrokerRecord,
   LocationRecord,
   CustomerRecord,
-  FinanceCategoryRecord
+  FinanceCategoryRecord,
+  LaborRateRecord,
+  CornMoistureRule
 } from './types';
 
+export const initialLaborRates: LaborRateRecord[] = [
+  { id: 'lr-1', activityName: 'BONGKARAN', rateType: 'PER_KG', rate: 30 },
+  { id: 'lr-2', activityName: 'MUAT', rateType: 'PER_KG', rate: 30 },
+  { id: 'lr-3', activityName: 'TIMBANG JAGUNG SAK', rateType: 'PER_KG', rate: 25 },
+  { id: 'lr-4', activityName: 'MUAT JAGUNG SAK', rateType: 'PER_KG', rate: 30 },
+  { id: 'lr-5', activityName: 'TIMBANG JAGUNG CURAH', rateType: 'PER_KG', rate: 15 },
+  { id: 'lr-6', activityName: 'MUAT JAGUNG CURAH', rateType: 'PER_KG', rate: 15 },
+  { id: 'lr-7', activityName: 'CONTENER', rateType: 'FLAT', rate: 300000 },
+  { id: 'lr-8', activityName: 'BONGKARAN DEDAK', rateType: 'PER_KG', rate: 2500 },
+  { id: 'lr-9', activityName: 'MUAT DEDAK', rateType: 'PER_KG', rate: 2000 },
+  { id: 'lr-10', activityName: 'CURAH', rateType: 'PER_KG', rate: 10 },
+  { id: 'lr-11', activityName: 'OPER SAK', rateType: 'PER_KG', rate: 20 },
+  { id: 'lr-12', activityName: 'PINDAHAN', rateType: 'PER_KG', rate: 10 },
+  { id: 'lr-13', activityName: 'BAL', rateType: 'PER_KG', rate: 10 },
+  { id: 'lr-14', activityName: 'STAPEL', rateType: 'PER_KG', rate: 10 },
+  { id: 'lr-15', activityName: 'KARUNG AMPAS JAGUNG', rateType: 'PER_KG', rate: 2000 },
+  { id: 'lr-16', activityName: 'PINDAHAN AMPAS JAGUNG', rateType: 'PER_KG', rate: 1000 },
+  { id: 'lr-17', activityName: 'CURAH AMPAS HALUS', rateType: 'PER_KG', rate: 20 },
+  { id: 'lr-18', activityName: 'OPER SAK AMPAS HALUS', rateType: 'PER_KG', rate: 30 },
+  { id: 'lr-19', activityName: 'PRODUKSI ARANG CANGKANG', rateType: 'PER_KG', rate: 60 },
+  { id: 'lr-20', activityName: 'SEROK JAGUNG', rateType: 'PER_KG', rate: 20 },
+  { id: 'lr-21', activityName: 'JEMUR JAGUNG', rateType: 'PER_KG', rate: 70 },
+  { id: 'lr-22', activityName: 'PRODUKSI POLES', rateType: 'PER_KG', rate: 25 },
+  { id: 'lr-23', activityName: 'PRODUKSI KIPAS', rateType: 'PER_KG', rate: 20 },
+  { id: 'lr-24', activityName: 'TIMBANG DEDAK POLES', rateType: 'PER_KG', rate: 2500 },
+  { id: 'lr-25', activityName: 'KARUNG DEDAK POLES', rateType: 'PER_KG', rate: 20 },
+  { id: 'lr-26', activityName: 'DEDAK JAGUNG', rateType: 'PER_KG', rate: 3000 },
+  { id: 'lr-27', activityName: 'SEROK AMPAS', rateType: 'FLAT', rate: 100000 },
+  { id: 'lr-28', activityName: 'BONGKAR JAGUNG', rateType: 'PER_KG', rate: 30 },
+  { id: 'lr-29', activityName: 'KERO JAGUNG', rateType: 'PER_KG', rate: 20 },
+];
+
+export const initialCornMoistureRules: CornMoistureRule[] = [
+  // LOKAL
+  { moistureMin: 0.00, moistureMax: 16.00, refaksiPercent: 0.0, priceDiscountPerKg: 0, type: 'LOKAL' },
+  { moistureMin: 16.01, moistureMax: 17.00, refaksiPercent: 1.0, priceDiscountPerKg: 0, type: 'LOKAL' },
+  { moistureMin: 17.01, moistureMax: 18.00, refaksiPercent: 2.2, priceDiscountPerKg: 0, type: 'LOKAL' },
+  { moistureMin: 18.01, moistureMax: 19.00, refaksiPercent: 3.4, priceDiscountPerKg: 0, type: 'LOKAL' },
+  { moistureMin: 19.01, moistureMax: 20.00, refaksiPercent: 4.5, priceDiscountPerKg: 0, type: 'LOKAL' },
+  { moistureMin: 20.01, moistureMax: 21.00, refaksiPercent: 5.0, priceDiscountPerKg: 0, type: 'LOKAL' },
+  { moistureMin: 21.01, moistureMax: 22.00, refaksiPercent: 6.2, priceDiscountPerKg: 0, type: 'LOKAL' },
+  { moistureMin: 22.01, moistureMax: 23.00, refaksiPercent: 7.4, priceDiscountPerKg: 0, type: 'LOKAL' },
+  { moistureMin: 23.01, moistureMax: 24.00, refaksiPercent: 8.6, priceDiscountPerKg: 0, type: 'LOKAL' },
+  { moistureMin: 24.01, moistureMax: 25.00, refaksiPercent: 11.3, priceDiscountPerKg: 0, type: 'LOKAL' },
+  { moistureMin: 25.01, moistureMax: 26.00, refaksiPercent: 12.5, priceDiscountPerKg: 0, type: 'LOKAL' },
+  { moistureMin: 26.01, moistureMax: 27.00, refaksiPercent: 13.7, priceDiscountPerKg: 0, type: 'LOKAL' },
+  { moistureMin: 27.01, moistureMax: 28.00, refaksiPercent: 15.7, priceDiscountPerKg: 0, type: 'LOKAL' },
+  { moistureMin: 28.01, moistureMax: 29.00, refaksiPercent: 16.5, priceDiscountPerKg: 0, type: 'LOKAL' },
+  { moistureMin: 29.01, moistureMax: 30.00, refaksiPercent: 18.7, priceDiscountPerKg: 0, type: 'LOKAL' },
+  // BONE / LUAR DAERAH
+  { moistureMin: 0.00, moistureMax: 16.00, refaksiPercent: 0.0, priceDiscountPerKg: 0, type: 'LUAR_DAERAH' },
+  { moistureMin: 16.01, moistureMax: 17.00, refaksiPercent: 1.0, priceDiscountPerKg: 0, type: 'LUAR_DAERAH' },
+  { moistureMin: 17.01, moistureMax: 18.00, refaksiPercent: 2.2, priceDiscountPerKg: 0, type: 'LUAR_DAERAH' },
+  { moistureMin: 18.01, moistureMax: 19.00, refaksiPercent: 3.4, priceDiscountPerKg: 0, type: 'LUAR_DAERAH' },
+  { moistureMin: 19.01, moistureMax: 20.00, refaksiPercent: 4.5, priceDiscountPerKg: 0, type: 'LUAR_DAERAH' },
+  { moistureMin: 20.01, moistureMax: 21.00, refaksiPercent: 5.0, priceDiscountPerKg: 0, type: 'LUAR_DAERAH' },
+  { moistureMin: 21.01, moistureMax: 22.00, refaksiPercent: 6.2, priceDiscountPerKg: 0, type: 'LUAR_DAERAH' },
+  { moistureMin: 22.01, moistureMax: 23.00, refaksiPercent: 7.4, priceDiscountPerKg: 0, type: 'LUAR_DAERAH' },
+  { moistureMin: 23.01, moistureMax: 24.00, refaksiPercent: 8.6, priceDiscountPerKg: 0, type: 'LUAR_DAERAH' },
+  { moistureMin: 24.01, moistureMax: 25.00, refaksiPercent: 10.3, priceDiscountPerKg: 0, type: 'LUAR_DAERAH' },
+  { moistureMin: 25.01, moistureMax: 26.00, refaksiPercent: 11.5, priceDiscountPerKg: 0, type: 'LUAR_DAERAH' },
+  { moistureMin: 26.01, moistureMax: 27.00, refaksiPercent: 12.7, priceDiscountPerKg: 0, type: 'LUAR_DAERAH' },
+  { moistureMin: 27.01, moistureMax: 28.00, refaksiPercent: 14.7, priceDiscountPerKg: 0, type: 'LUAR_DAERAH' },
+  { moistureMin: 28.01, moistureMax: 29.00, refaksiPercent: 15.5, priceDiscountPerKg: 0, type: 'LUAR_DAERAH' },
+  { moistureMin: 29.01, moistureMax: 30.00, refaksiPercent: 17.7, priceDiscountPerKg: 0, type: 'LUAR_DAERAH' },
+  { moistureMin: 30.01, moistureMax: 31.00, refaksiPercent: 19.3, priceDiscountPerKg: 0, type: 'LUAR_DAERAH' },
+];
+
 // Standard Corn Moisture Deduction (Refaksi KA Jagung) Table lookup helper
+export const getRefaksiByRule = (moisture: number, rules: CornMoistureRule[], type: 'LOKAL' | 'LUAR_DAERAH'): { refaksiPercent: number; description: string } => {
+  const filteredRules = rules.filter(r => r.type === type);
+  for (const rule of filteredRules) {
+    if (moisture >= rule.moistureMin && moisture <= rule.moistureMax) {
+      const description = rule.refaksiPercent === 0.0 ? "Aman" : `Potongan ${rule.refaksiPercent}%`;
+      return { refaksiPercent: rule.refaksiPercent, description };
+    }
+  }
+  return { refaksiPercent: 0, description: "Tidak Ditemukan" };
+}
+
 export const mockCornMoistureRefaksi = (moisture: number): { refaksiPercent: number; description: string } => {
-  if (moisture <= 14.0) return { refaksiPercent: 0, description: "Kadar Air Standar (Aman)" };
-  if (moisture <= 14.5) return { refaksiPercent: 0.5, description: "Kadar Air Ringan" };
-  if (moisture <= 15.0) return { refaksiPercent: 1.0, description: "Kadar Air Ringan" };
-  if (moisture <= 15.5) return { refaksiPercent: 1.8, description: "Kadar Air Sedang" };
-  if (moisture <= 16.0) return { refaksiPercent: 2.5, description: "Kadar Air Sedang" };
-  if (moisture <= 17.0) return { refaksiPercent: 4.0, description: "Kadar Air Tinggi" };
-  if (moisture <= 18.0) return { refaksiPercent: 5.5, description: "Kadar Air Tinggi" };
-  if (moisture <= 19.0) return { refaksiPercent: 7.0, description: "Kadar Air Sangat Tinggi" };
-  if (moisture <= 20.0) return { refaksiPercent: 9.0, description: "Wajib Pengeringan / Poles" };
-  // Above 20%
-  const excessive = 9.0 + (moisture - 20) * 1.5;
-  return { refaksiPercent: Math.min(25, parseFloat(excessive.toFixed(1))), description: "Basah Ekstrim - Potongan Tinggi" };
+  return getRefaksiByRule(moisture, initialCornMoistureRules, 'LOKAL');
 };
+
 
 export const initialWeighbridgeTickets: WeighbridgeTicket[] = [
   {

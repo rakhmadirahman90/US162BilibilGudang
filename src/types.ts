@@ -183,4 +183,13 @@ export interface CornMoistureRule {
   moistureMax: number;
   refaksiPercent: number; // Weight deduction discount %
   priceDiscountPerKg: number; // Price refund Rp deduction per kg
+  type: 'LOKAL' | 'LUAR_DAERAH'; // Menambahkan Tipe: Lokal / Luar Daerah
 }
+
+export interface LaborRateRecord {
+  id: string;
+  activityName: string;
+  rateType: 'PER_KG' | 'FLAT';
+  rate: number;
+}
+

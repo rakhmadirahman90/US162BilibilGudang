@@ -23,7 +23,9 @@ import {
   BrokerRecord,
   LocationRecord,
   CustomerRecord,
-  FinanceCategoryRecord
+  FinanceCategoryRecord,
+  LaborRateRecord,
+  CornMoistureRule
 } from './types';
 import { 
   initialWeighbridgeTickets, 
@@ -42,7 +44,9 @@ import {
   initialBrokers,
   initialStorageLocations,
   initialCustomers,
-  initialFinanceCategories
+  initialFinanceCategories,
+  initialLaborRates,
+  initialCornMoistureRules
 } from './data';
 
 // Import our modular subcomponents
@@ -51,6 +55,7 @@ import InboundModule from './components/InboundModule';
 import OutboundModule from './components/OutboundModule';
 import ServicesModule from './components/ServicesModule';
 import MoistureRefaksiModule from './components/MoistureRefaksiModule';
+import DryerModule, { DryerRecord } from './components/DryerModule';
 import FinanceModule from './components/FinanceModule';
 import ReportsModule from './components/ReportsModule';
 import DatabaseMasterModule from './components/DatabaseMasterModule';
@@ -340,6 +345,21 @@ export default function App() {
     return saved ? JSON.parse(saved) : initialFinanceCategories;
   });
 
+  const [laborRates, setLaborRates] = useState<LaborRateRecord[]>(() => {
+    const saved = localStorage.getItem('bilibili_labor_rates');
+    return saved ? JSON.parse(saved) : initialLaborRates;
+  });
+
+  const [cornMoistureRules, setCornMoistureRules] = useState<CornMoistureRule[]>(() => {
+    const saved = localStorage.getItem('bilibili_corn_rules');
+    return saved ? JSON.parse(saved) : initialCornMoistureRules;
+  });
+
+  const [dryerRecords, setDryerRecords] = useState<DryerRecord[]>(() => {
+    const saved = localStorage.getItem('bilibili_dryer_records');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   // --- GOOGLE AUTHENTICATION STATE & EVENTS ---
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
@@ -386,6 +406,9 @@ export default function App() {
   useSyncCollection('locations', locations, setLocations, initialStorageLocations);
   useSyncCollection('customers', customers, setCustomers, initialCustomers);
   useSyncCollection('financeCategories', financeCategories, setFinanceCategories, initialFinanceCategories);
+  useSyncCollection('laborRates', laborRates, setLaborRates, initialLaborRates);
+  useSyncCollection('cornMoistureRules', cornMoistureRules, setCornMoistureRules, initialCornMoistureRules);
+  useSyncCollection('dryerRecords', dryerRecords, setDryerRecords);
 
   // --- SYNCHRONIZED MASTER SETTERS WRAPPER ---
   const createSyncedSetter = <T extends { id: string }>(
@@ -427,9 +450,12 @@ export default function App() {
   const syncedSetLocations = createSyncedSetter('locations', setLocations);
   const syncedSetCustomers = createSyncedSetter('customers', setCustomers);
   const syncedSetFinanceCategories = createSyncedSetter('financeCategories', setFinanceCategories);
+  const syncedSetLaborRates = createSyncedSetter('laborRates', setLaborRates);
+  const syncedSetCornMoistureRules = createSyncedSetter('cornMoistureRules', setCornMoistureRules);
+  const syncedSetDryerRecords = createSyncedSetter('dryerRecords', setDryerRecords);
 
   // Active navigational tab
-  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE' | 'STOK_BERAS' | 'LAPORAN' | 'DATABASE'>('DASHBOARD');
+  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE' | 'STOK_BERAS' | 'LAPORAN' | 'DATABASE' | 'DRYER'>('DASHBOARD');
   
   // Dashboard tab feed selections
   const [dashFeedTab, setDashFeedTab] = useState<'WEIGH' | 'INBOUND' | 'OUTBOUND' | 'SERVICES' | 'FINANCE'>('WEIGH');
@@ -1020,7 +1046,19 @@ export default function App() {
             }`}
           >
             <Percent className="w-4 h-4 text-amber-500" />
-            6. {t.moisture}
+            6. {t.moisture} / Refaksi
+          </button>
+
+          <button
+            onClick={() => setActiveTab('DRYER')}
+            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+              activeTab === 'DRYER' 
+                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
+                : 'border-transparent text-neutral-500 hover:text-neutral-800'
+            }`}
+          >
+            <Wind className="w-4 h-4 text-orange-500" />
+            7. Dryer Jagung
           </button>
  
           <button
@@ -1032,7 +1070,7 @@ export default function App() {
             }`}
           >
             <DollarSign className="w-4 h-4 text-emerald-600" />
-            7. {t.finance}
+            8. {t.finance}
           </button>
  
           <button
@@ -1044,7 +1082,7 @@ export default function App() {
             }`}
           >
             <Package className="w-4 h-4 text-emerald-600" />
-            8. {t.riceStock}
+            9. {t.riceStock}
           </button>
  
           <button
@@ -1056,7 +1094,7 @@ export default function App() {
             }`}
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
-            9. {t.reports}
+            10. {t.reports}
           </button>
  
           <button
@@ -1798,6 +1836,8 @@ export default function App() {
             vehicles={vehicles}
             suppliers={suppliers}
             employees={employees}
+            laborRates={laborRates}
+            cornMoistureRules={cornMoistureRules}
           />
         )}
 
@@ -1829,10 +1869,20 @@ export default function App() {
 
         {/* VIEW 6: REFAKSI CALCULATOR */}
         {activeTab === 'REFAKSI' && (
-          <MoistureRefaksiModule />
+          <MoistureRefaksiModule rules={cornMoistureRules} />
         )}
 
-        {/* VIEW 7: FINANCE, UTANG, MUTASI */}
+        {/* VIEW 7: DRYER JAGUNG */}
+        {activeTab === 'DRYER' && (
+          <DryerModule 
+            records={dryerRecords}
+            onAddRecord={(r) => syncedSetDryerRecords(prev => [r, ...prev])}
+            onUpdateRecord={(r) => syncedSetDryerRecords(prev => prev.map(old => old.id === r.id ? r : old))}
+            onDeleteRecord={(id) => syncedSetDryerRecords(prev => prev.filter(old => old.id !== id))}
+          />
+        )}
+
+        {/* VIEW 8: FINANCE, UTANG, MUTASI */}
         {activeTab === 'FINANCE' && (
           <FinanceModule
             debts={debts}
@@ -1859,6 +1909,7 @@ export default function App() {
             serviceRecords={serviceRecords}
             debts={debts}
             finances={finances}
+            dryerRecords={dryerRecords}
           />
         )}
 
@@ -1885,6 +1936,10 @@ export default function App() {
             setCustomers={syncedSetCustomers}
             financeCategories={financeCategories}
             setFinanceCategories={syncedSetFinanceCategories}
+            laborRates={laborRates}
+            setLaborRates={syncedSetLaborRates}
+            cornMoistureRules={cornMoistureRules}
+            setCornMoistureRules={syncedSetCornMoistureRules}
           />
         )}
 

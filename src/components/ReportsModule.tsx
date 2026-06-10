@@ -13,6 +13,7 @@ import {
   FinancialRecord 
 } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
+import { DryerRecord } from './DryerModule';
 import { 
   FileText, 
   Download, 
@@ -42,9 +43,10 @@ interface ReportsModuleProps {
   serviceRecords: ServiceRecord[];
   debts: DebtRecord[];
   finances: FinancialRecord[];
+  dryerRecords: DryerRecord[];
 }
 
-type ReportTabSelection = 'RINGKASAN' | 'TIMBANGAN' | 'INBOUND' | 'OUTBOUND' | 'SERVICES' | 'FINANCE';
+type ReportTabSelection = 'RINGKASAN' | 'TIMBANGAN' | 'INBOUND' | 'OUTBOUND' | 'SERVICES' | 'FINANCE' | 'DRYER';
 
 export default function ReportsModule({
   tickets,
@@ -52,7 +54,8 @@ export default function ReportsModule({
   outboundRecords,
   serviceRecords,
   debts,
-  finances
+  finances,
+  dryerRecords
 }: ReportsModuleProps) {
   const { t } = useLanguage();
   // Navigation & Sub-activity Tabs
@@ -162,6 +165,21 @@ export default function ReportsModule({
       return true;
     });
   }, [finances, startDate, endDate, searchQuery]);
+
+  // 6. Dryer Records Filter
+  const filteredDryer = useMemo(() => {
+    return dryerRecords.filter(r => {
+      if (!isWithinDateRange(r.date)) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matchesCustomer = r.customerName.toLowerCase().includes(q);
+        const matchesBatch = r.batchNo.toLowerCase().includes(q);
+        const matchesOperator = r.operator.toLowerCase().includes(q);
+        if (!matchesCustomer && !matchesBatch && !matchesOperator) return false;
+      }
+      return true;
+    });
+  }, [dryerRecords, startDate, endDate, searchQuery]);
 
   // --- EXCEL & PDF EXPORTERS ---
 
@@ -514,7 +532,7 @@ export default function ReportsModule({
       </div>
 
       {/* HORIZONTAL REPORTS TAB NAVIGATOR */}
-      <div className="flex border-b border-neutral-200 overflow-x-auto gap-1 bg-white p-1 rounded-xl shadow-sm border">
+      <div className="flex border-b border-neutral-200 overflow-x-auto gap-1 bg-white p-1 rounded-xl shadow-sm border custom-scrollbar">
         <button
           onClick={() => setActiveSubTab('RINGKASAN')}
           className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-extrabold transition cursor-pointer whitespace-nowrap ${
@@ -548,7 +566,7 @@ export default function ReportsModule({
           }`}
         >
           <ArrowDownCircle className="w-4 h-4" />
-          Barang Masuk ({filteredInbound.length})
+          BM ({filteredInbound.length})
         </button>
 
         <button
@@ -560,7 +578,19 @@ export default function ReportsModule({
           }`}
         >
           <ArrowUpCircle className="w-4 h-4" />
-          Barang Keluar ({filteredOutbound.length})
+          BK ({filteredOutbound.length})
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('DRYER')}
+          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-extrabold transition cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'DRYER'
+              ? 'bg-orange-600 text-white'
+              : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-50'
+          }`}
+        >
+          <Wind className="w-4 h-4" />
+          Dryer ({filteredDryer.length})
         </button>
 
         <button
@@ -571,8 +601,8 @@ export default function ReportsModule({
               : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-50'
           }`}
         >
-          <Wind className="w-4 h-4" />
-          Jasa Poles & Kipas ({filteredServices.length})
+          <Repeat className="w-4 h-4" />
+          Jasa Poles ({filteredServices.length})
         </button>
 
         <button
@@ -584,7 +614,7 @@ export default function ReportsModule({
           }`}
         >
           <DollarSign className="w-4 h-4" />
-          Buku Kas Mutasi ({filteredFinances.length})
+          Keuangan ({filteredFinances.length})
         </button>
       </div>
 
@@ -965,7 +995,87 @@ export default function ReportsModule({
           </div>
         )}
 
-        {/* 5. JASA POLES & KIPAS */}
+        {/* 5. DRYER JAGUNG */}
+        {activeSubTab === 'DRYER' && (
+          <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm animate-fadeIn">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-neutral-100 pb-3">
+              <div>
+                <span className="font-extrabold text-neutral-800 text-sm">Pratinjau Laporan Rekapan Dryer</span>
+                <p className="text-[11px] text-neutral-400 mt-0.5">Menampilkan {filteredDryer.length} transaksi pengeringan jagung.</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    const headers = ['Tanggal', 'No. Batch', 'Pelanggan', 'Basah (Kg)', 'Kering (Kg)', 'Susut (Kg)', 'Biaya (Rp)', 'Status'];
+                    exportToCSV(headers, filteredDryer.map(r => [r.date, r.batchNo, r.customerName, r.wetWeight.toString(), r.dryWeight.toString(), (r.wetWeight - r.dryWeight).toString(), r.totalCost.toString(), r.status]), 'Laporan_Rekapan_Dryer_Bilibili');
+                  }}
+                  className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" /> Export Excel
+                </button>
+                <button
+                  onClick={() => {
+                    const headers = ['Tanggal', 'Batch', 'Pelanggan', 'Basah (Kg)', 'Kering (Kg)', 'Susut (Kg)', 'Total Biaya'];
+                    const rows = filteredDryer.map(r => [r.date, r.batchNo, r.customerName, r.wetWeight.toLocaleString('id-ID'), r.dryWeight.toLocaleString('id-ID'), (r.wetWeight - r.dryWeight).toLocaleString('id-ID'), `Rp ${r.totalCost.toLocaleString('id-ID')}`]);
+                    const totW = filteredDryer.reduce((a,b)=>a+b.wetWeight, 0);
+                    const totD = filteredDryer.reduce((a,b)=>a+b.dryWeight, 0);
+                    printPDFReport('Laporan Rekapan Dryer Jagung', headers, rows, [
+                      {label:'Total Basah', value:`${totW.toLocaleString('id-ID')} Kg`},
+                      {label:'Total Kering', value:`${totD.toLocaleString('id-ID')} Kg`},
+                      {label:'Total Biaya', value:`Rp ${filteredDryer.reduce((a,b)=>a+b.totalCost,0).toLocaleString('id-ID')}`}
+                    ]);
+                  }}
+                  className="flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" /> Cetak Laporan
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left text-xs border-collapse min-w-[850px]">
+                <thead>
+                  <tr className="bg-neutral-100 text-neutral-700 font-bold border-b border-neutral-250">
+                    <th className="p-2">Tanggal / Batch</th>
+                    <th className="p-2">Pelanggan</th>
+                    <th className="p-2 text-right">Basah (Kg)</th>
+                    <th className="p-2 text-right">Kering (Kg)</th>
+                    <th className="p-2 text-right">Susut (Kg)</th>
+                    <th className="p-2 text-center">Biaya</th>
+                    <th className="p-2 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {filteredDryer.map(s => (
+                    <tr key={s.id} className="hover:bg-neutral-50 transition-colors">
+                      <td className="p-2 text-neutral-500"><div className="font-bold">{s.date}</div><div className="font-mono text-[9px]">{s.batchNo}</div></td>
+                      <td className="p-2 font-semibold text-neutral-800">{s.customerName}</td>
+                      <td className="p-2 text-right text-emerald-700 font-mono">{(s.wetWeight).toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-right text-emerald-700 font-mono">{(s.dryWeight).toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-right text-rose-600 font-mono font-bold">{(s.wetWeight - s.dryWeight).toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-center text-neutral-800 font-mono">Rp {s.totalCost.toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-center">
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold ${
+                          s.status === 'SELESAI' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                        }`}>
+                          {s.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredDryer.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="p-8 text-center text-neutral-400 italic">Tidak ada rekapan dryer yang cocok.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* 6. JASA POLES & KIPAS */}
         {activeSubTab === 'SERVICES' && (
           <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm animate-fadeIn">
             
