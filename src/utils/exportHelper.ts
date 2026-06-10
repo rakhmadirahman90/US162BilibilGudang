@@ -268,221 +268,239 @@ export function printPDFReport(
 }
 
 const COMMON_SLIP_STYLE = `
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap');
+  /* Optimized for Epson LX-310 dot matrix / impact printer */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
   html, body {
-    width: 105mm !important;
-    height: 148mm !important;
-    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
-    color: #1e293b;
-    background-color: #ffffff !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    line-height: 1.35;
-    display: flex !important;
-    justify-content: flex-start !important;
-    align-items: flex-start !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    box-sizing: border-box !important;
-  }
-  .slip {
-    width: 105mm;
-    height: 148mm;
-    margin: 0;
-    padding: 10mm 10mm 10mm 10mm;
-    box-sizing: border-box;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10pt;
+    color: #000000;
     background-color: #ffffff;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+    margin: 0;
+    padding: 0;
+    line-height: 1.45;
+    width: auto;
+    height: auto;
   }
+
+  .slip {
+    width: 190mm;
+    margin: 6mm auto;
+    padding: 6mm 8mm;
+    background: #ffffff;
+    border: 1px solid #aaaaaa;
+  }
+
   @media print {
-    @page { 
-      size: auto; 
-      margin: 0; 
+    @page {
+      size: A4 portrait;
+      margin: 8mm 8mm 8mm 8mm;
     }
-    body { 
-      background-color: #fff !important; 
-      margin: 0 !important; 
-      padding: 0 !important; 
-      display: block !important;
+    html, body {
+      background: #ffffff !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
     .slip {
-      position: absolute !important;
-      top: 0 !important;
-      left: 0 !important;
-      border: none !important;
-      box-shadow: none !important;
+      width: 100% !important;
       margin: 0 !important;
-      padding: 10mm !important;
-      width: 105mm !important;
-      height: 148mm !important;
-      box-sizing: border-box !important;
-      background-color: #fff !important;
-      border-radius: 0 !important;
-      display: flex !important;
-      flex-direction: column !important;
-      justify-content: flex-start !important;
+      padding: 0 !important;
+      border: none !important;
+    }
+    * {
+      color: #000000 !important;
+      background: transparent !important;
+      border-color: #000000 !important;
+      box-shadow: none !important;
     }
   }
+
+  /* HEADER */
   .header {
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px;
-    text-align: left;
-    margin-bottom: 4px;
+    display: table;
     width: 100%;
+    margin-bottom: 4px;
   }
   .header-logo {
-    width: 36px;
-    height: 36px;
+    display: table-cell;
+    width: 46px;
+    max-width: 46px;
+    height: 42px;
+    vertical-align: middle;
+    padding-right: 10px;
     object-fit: contain;
-    flex-shrink: 0;
   }
   .header-text {
-    flex-grow: 1;
+    display: table-cell;
+    vertical-align: middle;
   }
   .header-title {
-    font-size: 9.5pt;
-    font-weight: 800;
+    font-size: 11pt;
+    font-weight: bold;
     color: #000000;
-    letter-spacing: 0.2px;
-    margin: 0;
-    text-transform: uppercase;
-  }
-  .header-subtitle {
-    font-size: 6pt;
-    color: #475569;
-    line-height: 1.35;
-    margin-top: 2px;
-    font-weight: 500;
-  }
-  .divider-line {
-    border-top: 1px solid #cbd5e1;
-    margin: 5px 0;
-  }
-  .divider-double {
-    border-top: 2px double #475569;
-    margin: 5px 0;
-  }
-  .ticket-type {
-    text-align: left;
-    font-size: 8pt;
-    font-weight: 800;
-    color: #0f172a;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    background-color: #f1f5f9;
-    padding: 3px 6px;
-    border-radius: 4px;
-    margin-bottom: 2px;
   }
-  .flex {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    width: 100%;
+  .header-subtitle {
+    font-size: 8pt;
+    color: #000000;
+    line-height: 1.4;
+    margin-top: 1px;
+  }
+
+  /* DIVIDERS */
+  .divider-line {
+    border: none;
+    border-top: 1px solid #000000;
+    margin: 4px 0;
+  }
+  .divider-double {
+    border: none;
+    border-top: 3px double #000000;
+    margin: 4px 0;
+  }
+
+  /* TICKET TYPE LABEL */
+  .ticket-type {
+    font-size: 9pt;
+    font-weight: bold;
+    color: #000000;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     margin: 3px 0;
-    gap: 6px;
+  }
+
+  /* DATA ROWS — table-cell layout for reliable dot matrix alignment */
+  .flex {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    margin: 2px 0;
   }
   .flex span {
-    font-size: 8pt;
+    display: table-cell;
+    font-size: 9pt;
+    color: #000000;
+    vertical-align: top;
+    line-height: 1.4;
   }
   .flex span.label {
-    color: #475569;
+    width: 52%;
     text-align: left;
+    font-weight: normal;
+    color: #000000;
     white-space: nowrap;
-    flex-shrink: 0;
-    font-weight: 500;
   }
   .flex span.value {
-    color: #000000;
-    font-weight: 700;
+    width: 48%;
     text-align: right;
-    word-break: break-all;
+    font-weight: bold;
+    color: #000000;
+    word-break: break-word;
   }
   .flex span.label-heavy {
-    color: #0f172a;
-    font-weight: 700;
-    font-size: 8.5pt;
+    width: 52%;
+    font-weight: bold;
+    font-size: 9.5pt;
+    color: #000000;
   }
   .flex span.value-heavy {
+    width: 48%;
+    font-weight: bold;
+    font-size: 9.5pt;
     color: #000000;
-    font-weight: 800;
-    font-size: 8.5pt;
-  }
-  .weight-time {
-    font-size: 7.2pt;
-    color: #64748b;
     text-align: right;
-    margin-top: -3px;
-    margin-bottom: 4px;
-    font-weight: 500;
   }
+
+  /* WEIGHT TIMESTAMP */
+  .weight-time {
+    font-size: 8pt;
+    color: #000000;
+    text-align: right;
+    margin: 0 0 3px 0;
+    font-style: italic;
+  }
+
+  /* NETTO ROW — prominent result */
   .netto-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 3px 0;
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    padding: 2px 0;
   }
   .netto-label {
-    font-size: 9pt;
-    font-weight: 800;
-    color: #064e3b;
+    display: table-cell;
+    width: 52%;
+    font-size: 10.5pt;
+    font-weight: bold;
+    color: #000000;
+    vertical-align: middle;
   }
   .netto-val {
-    font-size: 11pt;
-    font-weight: 950;
-    color: #059669;
+    display: table-cell;
+    width: 48%;
+    font-size: 12pt;
+    font-weight: bold;
+    color: #000000;
+    text-align: right;
+    vertical-align: middle;
   }
+
+  /* NOTES */
   .notes-box {
-    font-size: 7.5pt;
-    color: #334155;
-    background-color: #ffffff;
-    border: 1px solid #cbd5e1;
-    padding: 4px 8px;
-    border-radius: 4px;
+    font-size: 8.5pt;
+    color: #000000;
+    border: 1px solid #000000;
+    padding: 3px 6px;
     margin: 4px 0;
-    text-align: left;
-    line-height: 1.3;
-    word-break: break-all;
+    line-height: 1.4;
+    word-break: break-word;
   }
+
+  /* SIGNATURES */
   .signatures {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    display: table;
+    width: 100%;
+    table-layout: fixed;
     margin-top: 10px;
+  }
+  .signatures > div {
+    display: table-cell;
+    width: 50%;
     text-align: center;
-    font-size: 7.5pt;
-    color: #334155;
-    font-weight: 500;
+    font-size: 8.5pt;
+    color: #000000;
+    padding: 0 4px;
+    vertical-align: top;
   }
   .signature-space {
-    height: 25px;
+    height: 28px;
+    display: block;
   }
   .signature-line {
-    border-top: 1px solid #cbd5e1;
+    border-top: 1px solid #000000;
     margin: 2px auto 0 auto;
-    width: 90%;
-    font-weight: 700;
+    width: 88%;
+    font-weight: bold;
     color: #000000;
-    font-size: 8pt;
+    font-size: 9pt;
     padding-top: 2px;
     text-align: center;
   }
+
+  /* FOOTER */
   .footer-msg {
-    text-align: left;
-    color: #94a3b8;
-    font-size: 6.8pt;
-    margin-top: 10px;
-    line-height: 1.3;
-    font-weight: 500;
-    border-top: 1px dashed #cbd5e1;
-    padding-top: 5px;
+    text-align: center;
+    color: #000000;
+    font-size: 7.5pt;
+    margin-top: 8px;
+    line-height: 1.4;
+    border-top: 1px dashed #000000;
+    padding-top: 4px;
   }
 `;
 
