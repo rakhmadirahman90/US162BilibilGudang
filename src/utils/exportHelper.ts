@@ -486,155 +486,176 @@ const COMMON_SLIP_STYLE = `
   }
 `;
 
-export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTicket | undefined, staffName: string = "Asma") {
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) {
-    alert('Pop-up terblokir! Harap izinkan pop-up untuk mencetak slip.');
+function printViaIframe(htmlContent: string) {
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentWindow?.document;
+  if (!doc) {
+    document.body.removeChild(iframe);
     return;
   }
 
+  doc.open();
+  doc.write(htmlContent);
+  doc.close();
+
+  iframe.contentWindow!.onload = () => {
+    setTimeout(() => {
+      try {
+        iframe.contentWindow!.focus();
+        iframe.contentWindow!.print();
+      } catch {
+        // fallback
+      }
+      setTimeout(() => document.body.removeChild(iframe), 1000);
+    }, 300);
+  };
+}
+
+export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTicket | undefined, staffName: string = "Asma") {
   const bruto = record.grossWeight;
   const tara = record.tareWeight;
+  const rawNet = bruto - tara;
   const net = record.netWeight;
-  const potKrg = (bruto * record.bagDeductionPercent) / 100;
-  const potRefaksi = (bruto * record.refaksiKaPercent) / 100;
+  const potKrg = rawNet * (record.bagDeductionPercent / 100);
+  const potRefaksi = rawNet * (record.refaksiKaPercent / 100);
 
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Resi Terpadu #${record.ticketNo || record.id.slice(-6)}</title>
-      <style>
-        ${COMMON_SLIP_STYLE}
-      </style>
-    </head>
-    <body onload="window.print(); window.close();">
-      <div class="slip">
-        <div class="header">
-          <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
-          <div class="header-text">
-            <div class="header-title">GUDANG US BILIBILI 162</div>
-            <div class="header-subtitle">
-              Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
-              Kabupaten Pinrang, Sulawesi Selatan | TELP - 085244466009
-            </div>
-          </div>
-        </div>
-        
-        <div class="divider-line"></div>
-        <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 10px;">RESI TERPADU (MASUK)</div>
-        <div class="divider-line"></div>
-        
-        <div class="flex">
-          <span class="label">No. Tiket :</span>
-          <span class="value">${record.ticketNo || '-'}</span>
-        </div>
-        <div class="flex">
-          <span class="label">Tanggal :</span>
-          <span class="value">${formatReceiptDate(record.date)}</span>
-        </div>
-        <div class="flex">
-          <span class="label">No. Polisi:</span>
-          <span class="value">${record.vehicleNo}</span>
-        </div>
-        <div class="flex">
-          <span class="label">Nama Barang:</span>
-          <span class="value">${record.commodity}</span>
-        </div>
-        <div class="flex">
-          <span class="label">Mitra/Agen:</span>
-          <span class="value">${record.supplier}</span>
-        </div>
-        <div class="flex">
-          <span class="label">Jml. Karung:</span>
-          <span class="value">${record.bagDeductionPercent}%</span>
-        </div>
-        
-        <div class="divider-line"></div>
-        
-        <div class="flex">
-          <span class="label-heavy">TIMBANG I (Masuk)</span>
-          <span class="value-heavy">${bruto.toLocaleString('id-ID')} Kg</span>
-        </div>
-        <div class="weight-time">${ticket?.timbang1Time || '-'}</div>
-        
-        <div class="flex">
-          <span class="label-heavy">TIMBANG II (Keluar)</span>
-          <span class="value-heavy">${tara > 0 ? tara.toLocaleString('id-ID') + ' Kg' : '- -'}</span>
-        </div>
-        <div class="weight-time">${ticket?.timbang2Time || '-'}</div>
-        
-        <div class="divider-line"></div>
-        
-        <div class="flex">
-          <span class="label">BERAT BRUTO :</span>
-          <span class="value">${bruto.toLocaleString('id-ID')} kg</span>
-        </div>
-        <div class="flex">
-          <span class="label">BERAT TARA :</span>
-          <span class="value">${tara.toLocaleString('id-ID')} kg</span>
-        </div>
-        <div class="flex">
-          <span class="label">Pot. Karung (${record.bagDeductionPercent.toFixed(2)}%):</span>
-          <span class="value">- ${potKrg.toLocaleString('id-ID')} kg</span>
-        </div>
-        <div class="flex">
-          <span class="label">Pot. Refaksi (${record.refaksiKaPercent.toFixed(2)}%):</span>
-          <span class="value">- ${potRefaksi.toLocaleString('id-ID')} kg</span>
-        </div>
-        
-        <div class="divider-line"></div>
-        
-        <div class="flex">
-          <span class="label" style="font-size: 10pt;">HARGA :</span>
-          <span class="value" style="font-size: 10pt; color: #000; font-weight: bold;">Rp ${(record.price || 0).toLocaleString('id-ID')}/kg</span>
-        </div>
-        
-        <div class="divider-line"></div>
-        
-        <div class="netto-row">
-          <span class="netto-label">BERAT NETTO :</span>
-          <span class="netto-val">${net.toLocaleString('id-ID')} KG</span>
-        </div>
-        <div class="netto-row" style="margin-top: -10px; padding-top: 0px;">
-          <span class="netto-label">TOTAL BAYAR :</span>
-          <span class="netto-val" style="color: #0284c7;">Rp ${(record.totalPrice || 0).toLocaleString('id-ID')}</span>
-        </div>
-        
-        <div class="divider-line"></div>
-        
-        <div class="signatures">
-          <div>
-            Penerima Staff 162
-            <div class="signature-space"></div>
-            <div class="signature-line">${staffName}</div>
-          </div>
-          <div>
-            Sopir / Pembawa
-            <div class="signature-space"></div>
-            <div class="signature-line">(          )</div>
-          </div>
-        </div>
-        
-        <div class="footer-msg">
-          * Terimakasih atas kerjasamanya *<br/>
-          Aplikasi Timbangan GSC GST-9700 Jembatan Timbang v2.0
+  const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <title>Resi Terpadu #${record.ticketNo || record.id.slice(-6)}</title>
+  <style>
+    ${COMMON_SLIP_STYLE}
+  </style>
+</head>
+<body>
+  <div class="slip">
+    <div class="header">
+      <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
+      <div class="header-text">
+        <div class="header-title">GUDANG US BILIBILI 162</div>
+        <div class="header-subtitle">
+          Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
+          Kabupaten Pinrang, Sulawesi Selatan | TELP - 085244466009
         </div>
       </div>
-    </body>
-    </html>
-  `);
-  printWindow.document.close();
+    </div>
+
+    <div class="divider-line"></div>
+    <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 10px;">RESI TERPADU (MASUK)</div>
+    <div class="divider-line"></div>
+
+    <div class="flex">
+      <span class="label">No. Tiket :</span>
+      <span class="value">${record.ticketNo || '-'}</span>
+    </div>
+    <div class="flex">
+      <span class="label">Tanggal :</span>
+      <span class="value">${formatReceiptDate(record.date)}</span>
+    </div>
+    <div class="flex">
+      <span class="label">No. Polisi:</span>
+      <span class="value">${record.vehicleNo}</span>
+    </div>
+    <div class="flex">
+      <span class="label">Nama Barang:</span>
+      <span class="value">${record.commodity}</span>
+    </div>
+    <div class="flex">
+      <span class="label">Mitra/Agen:</span>
+      <span class="value">${record.supplier}</span>
+    </div>
+    <div class="flex">
+      <span class="label">Jml. Karung:</span>
+      <span class="value">${record.bagDeductionPercent}%</span>
+    </div>
+
+    <div class="divider-line"></div>
+
+    <div class="flex">
+      <span class="label-heavy">TIMBANG I (Masuk)</span>
+      <span class="value-heavy">${bruto.toLocaleString('id-ID')} Kg</span>
+    </div>
+    <div class="weight-time">${ticket?.timbang1Time || '-'}</div>
+
+    <div class="flex">
+      <span class="label-heavy">TIMBANG II (Keluar)</span>
+      <span class="value-heavy">${tara > 0 ? tara.toLocaleString('id-ID') + ' Kg' : '- -'}</span>
+    </div>
+    <div class="weight-time">${ticket?.timbang2Time || '-'}</div>
+
+    <div class="divider-line"></div>
+
+    <div class="flex">
+      <span class="label">BERAT BRUTO :</span>
+      <span class="value">${bruto.toLocaleString('id-ID')} kg</span>
+    </div>
+    <div class="flex">
+      <span class="label">BERAT TARA :</span>
+      <span class="value">${tara.toLocaleString('id-ID')} kg</span>
+    </div>
+    <div class="flex">
+      <span class="label">Pot. Karung (${record.bagDeductionPercent.toFixed(2)}%):</span>
+      <span class="value">- ${potKrg.toLocaleString('id-ID')} kg</span>
+    </div>
+    <div class="flex">
+      <span class="label">Pot. Refaksi (${record.refaksiKaPercent.toFixed(2)}%):</span>
+      <span class="value">- ${potRefaksi.toLocaleString('id-ID')} kg</span>
+    </div>
+
+    <div class="divider-line"></div>
+
+    <div class="flex">
+      <span class="label" style="font-size: 10pt;">HARGA :</span>
+      <span class="value" style="font-size: 10pt; color: #000; font-weight: bold;">Rp ${(record.price || 0).toLocaleString('id-ID')}/kg</span>
+    </div>
+
+    <div class="divider-line"></div>
+
+    <div class="netto-row">
+      <span class="netto-label">BERAT NETTO :</span>
+      <span class="netto-val">${net.toLocaleString('id-ID')} KG</span>
+    </div>
+    <div class="netto-row" style="margin-top: -10px; padding-top: 0px;">
+      <span class="netto-label">TOTAL BAYAR :</span>
+      <span class="netto-val" style="color: #0284c7;">Rp ${(record.totalPrice || 0).toLocaleString('id-ID')}</span>
+    </div>
+
+    <div class="divider-line"></div>
+
+    <div class="signatures">
+      <div>
+        Penerima Staff 162
+        <div class="signature-space"></div>
+        <div class="signature-line">${staffName}</div>
+      </div>
+      <div>
+        Sopir / Pembawa
+        <div class="signature-space"></div>
+        <div class="signature-line">(          )</div>
+      </div>
+    </div>
+
+    <div class="footer-msg">
+      * Terimakasih atas kerjasamanya *<br/>
+      Aplikasi Timbangan GSC GST-9700 Jembatan Timbang v2.0
+    </div>
+  </div>
+</body>
+</html>`;
+
+  printViaIframe(htmlContent);
 }
 
 export function printOutboundSlip(record: OutboundRecord, staffName: string = "Asma") {
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) {
-    alert('Pop-up terblokir! Harap izinkan pop-up untuk mencetak slip.');
-    return;
-  }
-
-  printWindow.document.write(`
+  const htmlContent = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -643,7 +664,7 @@ export function printOutboundSlip(record: OutboundRecord, staffName: string = "A
         ${COMMON_SLIP_STYLE}
       </style>
     </head>
-    <body onload="window.print(); window.close();">
+    <body>
       <div class="slip">
         <div class="header">
           <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
@@ -655,11 +676,11 @@ export function printOutboundSlip(record: OutboundRecord, staffName: string = "A
             </div>
           </div>
         </div>
-        
+
         <div class="divider-line"></div>
         <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 10px;">RESIDENSI PENGIRIMAN</div>
         <div class="divider-line"></div>
-        
+
         <div class="flex">
           <span class="label">No. Invoice :</span>
           <span class="value">${record.invoiceNo}</span>
@@ -684,9 +705,9 @@ export function printOutboundSlip(record: OutboundRecord, staffName: string = "A
           <span class="label">Tujuan:</span>
           <span class="value">${record.destination}</span>
         </div>
-        
+
         <div class="divider-line"></div>
-        
+
         <div class="netto-row">
           <span class="netto-label">TOTAL BERAT :</span>
           <span class="netto-val">${(record.totalWeight ?? 0).toLocaleString('id-ID')} kg</span>
@@ -695,9 +716,9 @@ export function printOutboundSlip(record: OutboundRecord, staffName: string = "A
           <span class="label">Upah Buruh :</span>
           <span class="value">Rp ${(record.loadingLaborCost ?? 0).toLocaleString('id-ID')}</span>
         </div>
-        
+
         <div class="divider-line"></div>
-        
+
         <div class="signatures">
           <div>
             Penerima Staff 162
@@ -710,26 +731,20 @@ export function printOutboundSlip(record: OutboundRecord, staffName: string = "A
             <div class="signature-line">(          )</div>
           </div>
         </div>
-        
+
         <div class="footer-msg">
           * Terimakasih atas kerjasamanya *<br/>
           Aplikasi Timbangan GSC GST-9700 Jembatan Timbang v2.0
         </div>
       </div>
     </body>
-    </html>
-  `);
-  printWindow.document.close();
+    </html>`;
+
+  printViaIframe(htmlContent);
 }
 
 export function printRiceStockSlip(record: RiceStockRecord, staffName: string = "Asma") {
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) {
-    alert('Pop-up terblokir! Harap izinkan pop-up untuk mencetak slip.');
-    return;
-  }
-
-  printWindow.document.write(`
+  const htmlContent = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -738,7 +753,7 @@ export function printRiceStockSlip(record: RiceStockRecord, staffName: string = 
         ${COMMON_SLIP_STYLE}
       </style>
     </head>
-    <body onload="window.print(); window.close();">
+    <body>
       <div class="slip">
         <div class="header">
           <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
@@ -750,11 +765,11 @@ export function printRiceStockSlip(record: RiceStockRecord, staffName: string = 
             </div>
           </div>
         </div>
-        
+
         <div class="divider-line"></div>
         <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 10px;">RESIDENSI MUTASI STOK</div>
         <div class="divider-line"></div>
-        
+
         <div class="flex">
           <span class="label">ID Mutasi :</span>
           <span class="value">#${record.id.slice(-6)}</span>
@@ -771,9 +786,9 @@ export function printRiceStockSlip(record: RiceStockRecord, staffName: string = 
           <span class="label">Nama Barang :</span>
           <span class="value">${record.itemName}</span>
         </div>
-        
+
         <div class="divider-line"></div>
-        
+
         <div class="flex">
           <span class="label-heavy">Masuk :</span>
           <span class="value-heavy" style="color: #059669;">${(record.inWeight ?? 0).toLocaleString('id-ID')} kg</span>
@@ -782,15 +797,15 @@ export function printRiceStockSlip(record: RiceStockRecord, staffName: string = 
           <span class="label-heavy">Keluar :</span>
           <span class="value-heavy" style="color: #dc2626;">${(record.outWeight ?? 0).toLocaleString('id-ID')} kg</span>
         </div>
-        
+
         <div class="divider-line"></div>
-        
+
         ${record.description ? `
           <div class="notes-box">
             Keterangan: ${record.description}
           </div>
         ` : ''}
-        
+
         <div class="signatures">
           <div>
             Penerima Staff 162
@@ -803,26 +818,20 @@ export function printRiceStockSlip(record: RiceStockRecord, staffName: string = 
             <div class="signature-line">(          )</div>
           </div>
         </div>
-        
+
         <div class="footer-msg">
           * Terimakasih atas kerjasamanya *<br/>
           Aplikasi Timbangan GSC GST-9700 Jembatan Timbang v2.0
         </div>
       </div>
     </body>
-    </html>
-  `);
-  printWindow.document.close();
+    </html>`;
+
+  printViaIframe(htmlContent);
 }
 
 export function printServiceSlip(record: ServiceRecord, staffName: string = "Asma") {
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) {
-    alert('Pop-up terblokir! Harap izinkan pop-up untuk mencetak slip.');
-    return;
-  }
-
-  printWindow.document.write(`
+  const htmlContent = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -831,7 +840,7 @@ export function printServiceSlip(record: ServiceRecord, staffName: string = "Asm
         ${COMMON_SLIP_STYLE}
       </style>
     </head>
-    <body onload="window.print(); window.close();">
+    <body>
       <div class="slip">
         <div class="header">
           <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
@@ -843,11 +852,11 @@ export function printServiceSlip(record: ServiceRecord, staffName: string = "Asm
             </div>
           </div>
         </div>
-        
+
         <div class="divider-line"></div>
         <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 10px;">RESIDENSI JASA LAYANAN</div>
         <div class="divider-line"></div>
-        
+
         <div class="flex">
           <span class="label">ID Layanan :</span>
           <span class="value">#${record.id.slice(-6)}</span>
@@ -872,9 +881,9 @@ export function printServiceSlip(record: ServiceRecord, staffName: string = "Asm
           <span class="label">Status Bayar :</span>
           <span class="value" style="color: ${record.paymentStatus === 'PAID' ? '#059669' : '#dc2626'}; font-weight: 800;">${record.paymentStatus === 'PAID' ? 'LUNAS' : 'BELUM LUNAS'}</span>
         </div>
-        
+
         <div class="divider-line"></div>
-        
+
         <div class="flex">
           <span class="label">Berat Jasa :</span>
           <span class="value">${(record.weight ?? 0).toLocaleString('id-ID')} kg</span>
@@ -883,16 +892,16 @@ export function printServiceSlip(record: ServiceRecord, staffName: string = "Asm
           <span class="label">Tarif Per kg:</span>
           <span class="value">Rp ${(record.ratePerKg ?? 0).toLocaleString('id-ID')}</span>
         </div>
-        
+
         <div class="divider-line"></div>
-        
+
         <div class="netto-row">
           <span class="netto-label">TOTAL TARIF :</span>
           <span class="netto-val">Rp ${(record.totalFee ?? 0).toLocaleString('id-ID')}</span>
         </div>
-        
+
         <div class="divider-line"></div>
-        
+
         <div class="signatures">
           <div>
             Penerima Staff 162
@@ -905,32 +914,27 @@ export function printServiceSlip(record: ServiceRecord, staffName: string = "Asm
             <div class="signature-line">(          )</div>
           </div>
         </div>
-        
+
         <div class="footer-msg">
           * Terimakasih atas kerjasamanya *<br/>
           Aplikasi Timbangan GSC GST-9700 Jembatan Timbang v2.0
         </div>
       </div>
     </body>
-    </html>
-  `);
-  printWindow.document.close();
+    </html>`;
+
+  printViaIframe(htmlContent);
 }
 
 export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Asma") {
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) {
-    alert('Pop-up terblokir! Harap izinkan pop-up untuk mencetak slip.');
-    return;
-  }
-
   const bruto = ticket.timbang1Weight;
   const tara = ticket.timbang2Weight;
   const net = ticket.netWeight || 0;
-  const potKrg = (bruto * ticket.bagDeductionPercent) / 100;
-  const potRefaksi = (bruto * ticket.refaksiPercent) / 100;
+  const rawNet = bruto - tara;
+  const potKrg = rawNet * (ticket.bagDeductionPercent / 100);
+  const potRefaksi = rawNet * (ticket.refaksiPercent / 100);
 
-  printWindow.document.write(`
+  const htmlContent = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -939,7 +943,7 @@ export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Asma")
         ${COMMON_SLIP_STYLE}
       </style>
     </head>
-    <body onload="window.print(); window.close();">
+    <body>
       <div class="slip">
         <div class="header">
           <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
@@ -951,9 +955,9 @@ export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Asma")
             </div>
           </div>
         </div>
-        
+
         <div class="divider-line"></div>
-        
+
         <div class="flex">
           <span class="label">No. Tiket :</span>
           <span class="value">${ticket.ticketNo}</span>
@@ -970,23 +974,23 @@ export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Asma")
           <span class="label">Nama Barang:</span>
           <span class="value">${ticket.goodsName}</span>
         </div>
-        
+
         <div class="divider-line"></div>
-        
+
         <div class="flex">
           <span class="label-heavy">TIMBANG I (Masuk)</span>
           <span class="value-heavy">${bruto.toLocaleString('id-ID')} Kg</span>
         </div>
         <div class="weight-time">${ticket.timbang1Time || '-'}</div>
-        
+
         <div class="flex">
           <span class="label-heavy">TIMBANG II (Keluar)</span>
           <span class="value-heavy">${tara > 0 ? tara.toLocaleString('id-ID') + ' Kg' : '- -'}</span>
         </div>
         <div class="weight-time">${ticket.timbang2Time || '-'}</div>
-        
+
         <div class="divider-line"></div>
-        
+
         <div class="flex">
           <span class="label">BERAT BRUTO :</span>
           <span class="value">${bruto.toLocaleString('id-ID')} kg</span>
@@ -1003,22 +1007,22 @@ export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Asma")
           <span class="label">Pot. Refaksi (${ticket.refaksiPercent.toFixed(2)}%):</span>
           <span class="value">- ${potRefaksi.toLocaleString('id-ID')} kg</span>
         </div>
-        
+
         <div class="divider-line"></div>
-        
+
         <div class="netto-row">
           <span class="netto-label">BERAT NETTO :</span>
           <span class="netto-val">${net.toLocaleString('id-ID')} KG</span>
         </div>
-        
+
         <div class="divider-line"></div>
-        
+
         ${ticket.notes ? `
           <div class="notes-box">
             Catatan: ${ticket.notes}
           </div>
         ` : ''}
-        
+
         <div class="signatures">
           <div>
             Penerima Staff 162
@@ -1031,16 +1035,16 @@ export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Asma")
             <div class="signature-line">(          )</div>
           </div>
         </div>
-        
+
         <div class="footer-msg">
           * Terimakasih atas kerjasamanya *<br/>
           Aplikasi Timbangan GSC GST-9700 Jembatan Timbang v2.0
         </div>
       </div>
     </body>
-    </html>
-  `);
-  printWindow.document.close();
+    </html>`;
+
+  printViaIframe(htmlContent);
 }
 
 /**
