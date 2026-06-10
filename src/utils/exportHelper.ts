@@ -846,7 +846,9 @@ export function getHTMLForPDF(printFunc: Function, ...args: any[]): string {
       document: {
         write: (html: string) => { htmlResult += html; },
         close: () => {}
-      }
+      },
+      focus: () => {},
+      print: () => {}
     } as any;
   } as any;
   try {

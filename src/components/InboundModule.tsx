@@ -148,7 +148,7 @@ export default function InboundModule({
       warehouseSection,
       laborCost,
       price,
-      totalPrice: fNet * price,
+      totalPrice: (fNet * price) - laborCost,
       driverName
     };
 
