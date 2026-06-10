@@ -68,5 +68,14 @@ service cloud.firestore {
     match /locations/{locationId} {
       allow read, write: if isSignedIn() && isValidId(locationId);
     }
+    match /laborRates/{laborRateId} {
+      allow read, write: if isSignedIn() && isValidId(laborRateId);
+    }
+    match /cornMoistureRules/{ruleId} {
+      allow read, write: if isSignedIn() && isValidId(ruleId);
+    }
+    match /dryerRecords/{dryerId} {
+      allow read, write: if isSignedIn() && isValidId(dryerId);
+    }
   }
 }
