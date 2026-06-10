@@ -3,57 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { InboundRecord, WeighbridgeTicket, VehicleRecord, SupplierRecord, EmployeeRecord } from '../types';
-import { mockCornMoistureRefaksi, RefaksiRegion } from '../data';
+import { mockCornMoistureRefaksi } from '../data';
 import { useLanguage } from '../i18n/LanguageContext';
-
-interface LaborRate {
-  name: string;
-  rate: number;
-  unit: 'per_kg' | 'per_ton' | 'flat';
-}
-
-const INBOUND_LABOR_RATES: LaborRate[] = [
-  { name: 'BONGKARAN',             rate: 30,     unit: 'per_kg'  },
-  { name: 'BONGKAR JAGUNG',        rate: 30,     unit: 'per_kg'  },
-  { name: 'TIMBANG JAGUNG SAK',    rate: 25,     unit: 'per_kg'  },
-  { name: 'TIMBANG JAGUNG CURAH',  rate: 15,     unit: 'per_kg'  },
-  { name: 'MUAT',                  rate: 30,     unit: 'per_kg'  },
-  { name: 'MUAT JAGUNG SAK',       rate: 30,     unit: 'per_kg'  },
-  { name: 'MUAT JAGUNG CURAH',     rate: 15,     unit: 'per_kg'  },
-  { name: 'CURAH',                 rate: 10,     unit: 'per_kg'  },
-  { name: 'OPER SAK',              rate: 20,     unit: 'per_kg'  },
-  { name: 'PINDAHAN',              rate: 10,     unit: 'per_kg'  },
-  { name: 'BAL',                   rate: 10,     unit: 'per_kg'  },
-  { name: 'STAPEL',                rate: 10,     unit: 'per_kg'  },
-  { name: 'SEROK JAGUNG',          rate: 20,     unit: 'per_kg'  },
-  { name: 'JEMUR JAGUNG',          rate: 70,     unit: 'per_kg'  },
-  { name: 'KERO JAGUNG',           rate: 20,     unit: 'per_kg'  },
-  { name: 'CURAH AMPAS HALUS',     rate: 20,     unit: 'per_kg'  },
-  { name: 'OPER SAK AMPAS HALUS',  rate: 30,     unit: 'per_kg'  },
-  { name: 'KARUNG DEDAK POLES',    rate: 20,     unit: 'per_kg'  },
-  { name: 'PRODUKSI ARANG CANGKANG', rate: 60,  unit: 'per_kg'  },
-  { name: 'BONGKARAN DEDAK',       rate: 2500,   unit: 'per_ton' },
-  { name: 'MUAT DEDAK',            rate: 2000,   unit: 'per_ton' },
-  { name: 'KARUNG AMPAS JAGUNG',   rate: 2000,   unit: 'per_ton' },
-  { name: 'PINDAHAN AMPAS JAGUNG', rate: 1000,   unit: 'per_ton' },
-  { name: 'TIMBANG DEDAK POLES',   rate: 2500,   unit: 'per_ton' },
-  { name: 'DEDAK JAGUNG',          rate: 3000,   unit: 'per_ton' },
-  { name: 'CONTENER',              rate: 300000, unit: 'flat'    },
-  { name: 'SEROK AMPAS',           rate: 100000, unit: 'flat'    },
-];
-
-function calcLaborCost(activity: string, netKg: number): number {
-  const row = INBOUND_LABOR_RATES.find(r => r.name === activity);
-  if (!row) return 0;
-  if (row.unit === 'flat') return row.rate;
-  if (row.unit === 'per_ton') return Math.round((netKg / 1000) * row.rate);
-  return Math.round(netKg * row.rate);
-}
 import ConfirmModal from './ConfirmModal';
 import WhatsAppModal from './WhatsAppModal';
-import { CircleArrowDown as ArrowDownCircle, CirclePlus as PlusCircle, Search, Calendar, Scale, Hammer, Percent, Archive, Download, Printer, CreditCard as Edit2, X, MessageCircle } from 'lucide-react';
+import { ArrowDownCircle, PlusCircle, Search, Calendar, Scale, Hammer, Percent, Archive, Download, Printer, Edit2, X, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { exportToCSV, printPDFReport, printCombinedSlip, getHTMLForPDF } from '../utils/exportHelper';
 import { buildInboundWAText, sendWhatsAppMessage } from '../utils/whatsappHelper';
@@ -136,37 +92,9 @@ export default function InboundModule({
   const [bagDeductionPercent, setBagDeductionPercent] = useState(1.00);
   const [moistureContent, setMoistureContent] = useState(14.0);
   const [warehouseSection, setWarehouseSection] = useState("Gudang Jagung Tengah");
-  const [laborCost, setLaborCost] = useState(0);
+  const [laborCost, setLaborCost] = useState(350000);
   const [price, setPrice] = useState(0);
   const [driverName, setDriverName] = useState("");
-  const [refaksiRegion, setRefaksiRegion] = useState<RefaksiRegion>('LOKAL');
-  const [laborActivity, setLaborActivity] = useState('BONGKARAN');
-  const [laborManualOverride, setLaborManualOverride] = useState(false);
-
-  // Computed: refaksi & net weight
-  const computedRefaksi = useMemo(() => {
-    if (commodity === 'JAGUNG') return mockCornMoistureRefaksi(moistureContent, refaksiRegion);
-    return { refaksiPercent: 0, description: 'Tidak ada refaksi' };
-  }, [commodity, moistureContent, refaksiRegion]);
-
-  const computedNetWeight = useMemo(() => {
-    const rawNet = grossWeight - tareWeight;
-    const bagDed = rawNet * (bagDeductionPercent / 100);
-    const refDed = rawNet * (computedRefaksi.refaksiPercent / 100);
-    return Math.round(rawNet - bagDed - refDed);
-  }, [grossWeight, tareWeight, bagDeductionPercent, computedRefaksi]);
-
-  // Auto-calculate labor cost from activity + net weight
-  const computedLaborCost = useMemo(() => {
-    return calcLaborCost(laborActivity, computedNetWeight);
-  }, [laborActivity, computedNetWeight]);
-
-  // Sync laborCost when auto-calculated value changes (unless user manually overrode)
-  React.useEffect(() => {
-    if (!laborManualOverride) {
-      setLaborCost(computedLaborCost);
-    }
-  }, [computedLaborCost, laborManualOverride]);
 
   // When a weighing ticket is chosen, automatically fill details!
   const handleTicketChange = (ticketId: string) => {
@@ -190,8 +118,16 @@ export default function InboundModule({
       return;
     }
 
-    const fNet = computedNetWeight;
-    const refaksiPercentage = computedRefaksi.refaksiPercent;
+    // Determine refaksi KA
+    const refaksiPercentage = commodity === 'JAGUNG' 
+      ? mockCornMoistureRefaksi(moistureContent).refaksiPercent
+      : 0;
+
+    // Calculate netto
+    const rawNet = grossWeight - tareWeight;
+    const bagDeduction = rawNet * (bagDeductionPercent / 100);
+    const refaksiDeduction = rawNet * (refaksiPercentage / 100);
+    const fNet = Math.round(rawNet - bagDeduction - refaksiDeduction);
 
     const tkNo = tickets.find(t => t.id === selectedTicketId)?.ticketNo;
     const existing = records.find(r => r.id === editingId);
@@ -250,12 +186,9 @@ export default function InboundModule({
     setBagDeductionPercent(1.00);
     setMoistureContent(14.0);
     setWarehouseSection("Gudang Jagung Tengah");
-    setLaborCost(0);
+    setLaborCost(350000);
     setPrice(0);
     setDriverName("");
-    setRefaksiRegion('LOKAL');
-    setLaborActivity('BONGKARAN');
-    setLaborManualOverride(false);
     setEditingId(null);
   };
 
@@ -494,64 +427,6 @@ export default function InboundModule({
                   />
                 </div>
               </div>
-
-              {commodity === 'JAGUNG' && (
-                <div>
-                  <label className="block text-neutral-600 mb-1">Tabel Refaksi KA</label>
-                  <div className="flex gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setRefaksiRegion('LOKAL')}
-                      className={`flex-1 py-1.5 rounded text-[10px] font-bold border transition cursor-pointer ${
-                        refaksiRegion === 'LOKAL'
-                          ? 'bg-emerald-600 text-white border-emerald-600'
-                          : 'bg-neutral-50 text-neutral-600 border-neutral-200 hover:bg-neutral-100'
-                      }`}
-                    >
-                      LOKAL
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setRefaksiRegion('BONE')}
-                      className={`flex-1 py-1.5 rounded text-[10px] font-bold border transition cursor-pointer ${
-                        refaksiRegion === 'BONE'
-                          ? 'bg-blue-600 text-white border-blue-600'
-                          : 'bg-neutral-50 text-neutral-600 border-neutral-200 hover:bg-neutral-100'
-                      }`}
-                    >
-                      BONE (Luar)
-                    </button>
-                  </div>
-                  <p className="text-[9px] text-neutral-400 mt-1 italic">
-                    Refaksi: {computedRefaksi.refaksiPercent}% ({computedRefaksi.description})
-                  </p>
-                </div>
-              )}
-
-              {/* Live Calculation Preview */}
-              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-lg p-3">
-                <div className="text-[10px] font-bold text-emerald-700 mb-2 uppercase tracking-wider">Pratinjau Perhitungan</div>
-                <div className="space-y-1 text-[10px] text-neutral-600">
-                  <div className="flex justify-between">
-                    <span>Bruto - Tara:</span>
-                    <span className="font-mono font-semibold">{(grossWeight - tareWeight).toLocaleString('id-ID')} Kg</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Pot. Karung ({bagDeductionPercent}%):</span>
-                    <span className="font-mono text-red-500">-{Math.round((grossWeight - tareWeight) * (bagDeductionPercent / 100)).toLocaleString('id-ID')} Kg</span>
-                  </div>
-                  {commodity === 'JAGUNG' && computedRefaksi.refaksiPercent > 0 && (
-                    <div className="flex justify-between">
-                      <span>Refaksi KA ({computedRefaksi.refaksiPercent}%):</span>
-                      <span className="font-mono text-red-500">-{Math.round((grossWeight - tareWeight) * (computedRefaksi.refaksiPercent / 100)).toLocaleString('id-ID')} Kg</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between border-t border-emerald-200 pt-1 mt-1">
-                    <span className="font-bold text-emerald-800">NETTO BERSIH:</span>
-                    <span className="font-mono font-black text-emerald-700 text-[11px]">{computedNetWeight.toLocaleString('id-ID')} Kg</span>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Sec 3: Offloading and placement */}
@@ -570,59 +445,13 @@ export default function InboundModule({
                 </div>
 
                 <div>
-                  <label className="block text-neutral-600 mb-1">Jenis Aktivitas Buruh</label>
-                  <select
-                    value={laborActivity}
-                    onChange={(e) => {
-                      setLaborActivity(e.target.value);
-                      setLaborManualOverride(false);
-                    }}
+                  <label className="block text-neutral-600 mb-1">Biaya Buruh Panggul Bongkar (Rp)</label>
+                  <input
+                    type="text"
+                    value={formatNumberInput(laborCost)}
+                    onChange={(e) => setLaborCost(parseNumberInput(e.target.value))}
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600"
-                  >
-                    {INBOUND_LABOR_RATES.map(r => (
-                      <option key={r.name} value={r.name}>
-                        {r.name} ({r.unit === 'flat' ? `Rp ${r.rate.toLocaleString('id-ID')}/unit` : r.unit === 'per_ton' ? `Rp ${r.rate.toLocaleString('id-ID')}/ton` : `Rp ${r.rate}/kg`})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Biaya Buruh (Otomatis)</div>
-                      <div className="text-[9px] text-amber-600 mt-0.5">
-                        {(() => {
-                          const rate = INBOUND_LABOR_RATES.find(r => r.name === laborActivity);
-                          if (!rate) return '';
-                          if (rate.unit === 'flat') return `Tarif tetap: Rp ${rate.rate.toLocaleString('id-ID')}`;
-                          if (rate.unit === 'per_ton') return `${computedNetWeight.toLocaleString('id-ID')} Kg / 1000 x Rp ${rate.rate.toLocaleString('id-ID')}`;
-                          return `${computedNetWeight.toLocaleString('id-ID')} Kg x Rp ${rate.rate}`;
-                        })()}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="font-black text-amber-800 text-sm">Rp {laborCost.toLocaleString('id-ID')}</span>
-                    </div>
-                  </div>
-                  {laborManualOverride && (
-                    <div className="mt-2 pt-2 border-t border-amber-200">
-                      <label className="block text-[9px] text-amber-600 mb-1">Override manual (Rp):</label>
-                      <input
-                        type="text"
-                        value={formatNumberInput(laborCost)}
-                        onChange={(e) => setLaborCost(parseNumberInput(e.target.value))}
-                        className="w-full bg-white border border-amber-300 rounded px-2 py-1 text-[10px] focus:outline-none focus:border-amber-500"
-                      />
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setLaborManualOverride(!laborManualOverride)}
-                    className="mt-1.5 text-[9px] text-amber-600 hover:text-amber-800 underline cursor-pointer"
-                  >
-                    {laborManualOverride ? 'Kembali ke otomatis' : 'Edit manual'}
-                  </button>
+                  />
                 </div>
                 <div>
                   <label className="block text-neutral-600 mb-1">Harga Satuan (Rp/Kg)</label>
@@ -803,7 +632,6 @@ export default function InboundModule({
                             setWarehouseSection(r.warehouseSection);
                             setLaborCost(r.laborCost);
                             setDriverName(r.driverName || "");
-                            setLaborManualOverride(true);
                             setShowAddForm(true);
                           }}
                           className="text-neutral-400 hover:text-blue-600 transition p-1 cursor-pointer"
