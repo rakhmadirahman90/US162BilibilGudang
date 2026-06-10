@@ -5,11 +5,11 @@
 
 import React, { useState } from 'react';
 import { InboundRecord, WeighbridgeTicket, VehicleRecord, SupplierRecord, EmployeeRecord } from '../types';
-import { mockCornMoistureRefaksi } from '../data';
+import { mockCornMoistureRefaksi, RefaksiRegion } from '../data';
 import { useLanguage } from '../i18n/LanguageContext';
 import ConfirmModal from './ConfirmModal';
 import WhatsAppModal from './WhatsAppModal';
-import { ArrowDownCircle, PlusCircle, Search, Calendar, Scale, Hammer, Percent, Archive, Download, Printer, Edit2, X, MessageCircle } from 'lucide-react';
+import { CircleArrowDown as ArrowDownCircle, CirclePlus as PlusCircle, Search, Calendar, Scale, Hammer, Percent, Archive, Download, Printer, CreditCard as Edit2, X, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { exportToCSV, printPDFReport, printCombinedSlip, getHTMLForPDF } from '../utils/exportHelper';
 import { buildInboundWAText, sendWhatsAppMessage } from '../utils/whatsappHelper';
@@ -95,6 +95,7 @@ export default function InboundModule({
   const [laborCost, setLaborCost] = useState(350000);
   const [price, setPrice] = useState(0);
   const [driverName, setDriverName] = useState("");
+  const [refaksiRegion, setRefaksiRegion] = useState<RefaksiRegion>('LOKAL');
 
   // When a weighing ticket is chosen, automatically fill details!
   const handleTicketChange = (ticketId: string) => {
@@ -119,8 +120,8 @@ export default function InboundModule({
     }
 
     // Determine refaksi KA
-    const refaksiPercentage = commodity === 'JAGUNG' 
-      ? mockCornMoistureRefaksi(moistureContent).refaksiPercent
+    const refaksiPercentage = commodity === 'JAGUNG'
+      ? mockCornMoistureRefaksi(moistureContent, refaksiRegion).refaksiPercent
       : 0;
 
     // Calculate netto
@@ -189,6 +190,7 @@ export default function InboundModule({
     setLaborCost(350000);
     setPrice(0);
     setDriverName("");
+    setRefaksiRegion('LOKAL');
     setEditingId(null);
   };
 
@@ -427,6 +429,39 @@ export default function InboundModule({
                   />
                 </div>
               </div>
+
+              {commodity === 'JAGUNG' && (
+                <div>
+                  <label className="block text-neutral-600 mb-1">Tabel Refaksi KA</label>
+                  <div className="flex gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setRefaksiRegion('LOKAL')}
+                      className={`flex-1 py-1.5 rounded text-[10px] font-bold border transition cursor-pointer ${
+                        refaksiRegion === 'LOKAL'
+                          ? 'bg-emerald-600 text-white border-emerald-600'
+                          : 'bg-neutral-50 text-neutral-600 border-neutral-200 hover:bg-neutral-100'
+                      }`}
+                    >
+                      LOKAL
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRefaksiRegion('BONE')}
+                      className={`flex-1 py-1.5 rounded text-[10px] font-bold border transition cursor-pointer ${
+                        refaksiRegion === 'BONE'
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-neutral-50 text-neutral-600 border-neutral-200 hover:bg-neutral-100'
+                      }`}
+                    >
+                      BONE (Luar)
+                    </button>
+                  </div>
+                  <p className="text-[9px] text-neutral-400 mt-1 italic">
+                    Refaksi: {mockCornMoistureRefaksi(moistureContent, refaksiRegion).refaksiPercent}% ({mockCornMoistureRefaksi(moistureContent, refaksiRegion).description})
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Sec 3: Offloading and placement */}

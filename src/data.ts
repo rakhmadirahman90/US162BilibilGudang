@@ -23,20 +23,60 @@ import {
   FinanceCategoryRecord
 } from './types';
 
-// Standard Corn Moisture Deduction (Refaksi KA Jagung) Table lookup helper
-export const mockCornMoistureRefaksi = (moisture: number): { refaksiPercent: number; description: string } => {
-  if (moisture <= 14.0) return { refaksiPercent: 0, description: "Kadar Air Standar (Aman)" };
-  if (moisture <= 14.5) return { refaksiPercent: 0.5, description: "Kadar Air Ringan" };
-  if (moisture <= 15.0) return { refaksiPercent: 1.0, description: "Kadar Air Ringan" };
-  if (moisture <= 15.5) return { refaksiPercent: 1.8, description: "Kadar Air Sedang" };
-  if (moisture <= 16.0) return { refaksiPercent: 2.5, description: "Kadar Air Sedang" };
-  if (moisture <= 17.0) return { refaksiPercent: 4.0, description: "Kadar Air Tinggi" };
-  if (moisture <= 18.0) return { refaksiPercent: 5.5, description: "Kadar Air Tinggi" };
-  if (moisture <= 19.0) return { refaksiPercent: 7.0, description: "Kadar Air Sangat Tinggi" };
-  if (moisture <= 20.0) return { refaksiPercent: 9.0, description: "Wajib Pengeringan / Poles" };
-  // Above 20%
-  const excessive = 9.0 + (moisture - 20) * 1.5;
-  return { refaksiPercent: Math.min(25, parseFloat(excessive.toFixed(1))), description: "Basah Ekstrim - Potongan Tinggi" };
+// Official Refaksi KA Jagung tables - Per Tanggal 19 Januari 2026
+// Source: Gudang 162 Parepare - Tabel Refaksi Kadar Air
+export type RefaksiRegion = 'LOKAL' | 'BONE';
+
+export const cornRefaksiTable: Record<RefaksiRegion, { maxMoisture: number; refaksiPercent: number; description: string }[]> = {
+  LOKAL: [
+    { maxMoisture: 16.00, refaksiPercent: 0.0,  description: "Kadar Air Standar (Aman)" },
+    { maxMoisture: 17.00, refaksiPercent: 1.0,  description: "Kadar Air Ringan" },
+    { maxMoisture: 18.00, refaksiPercent: 2.2,  description: "Kadar Air Sedang" },
+    { maxMoisture: 19.00, refaksiPercent: 3.4,  description: "Kadar Air Sedang" },
+    { maxMoisture: 20.00, refaksiPercent: 4.5,  description: "Kadar Air Tinggi" },
+    { maxMoisture: 21.00, refaksiPercent: 5.0,  description: "Kadar Air Tinggi" },
+    { maxMoisture: 22.00, refaksiPercent: 6.2,  description: "Kadar Air Sangat Tinggi" },
+    { maxMoisture: 23.00, refaksiPercent: 7.4,  description: "Kadar Air Sangat Tinggi" },
+    { maxMoisture: 24.00, refaksiPercent: 8.6,  description: "Wajib Pengeringan" },
+    { maxMoisture: 25.00, refaksiPercent: 11.3, description: "Wajib Pengeringan" },
+    { maxMoisture: 26.00, refaksiPercent: 12.5, description: "Basah Tinggi - Proses Dryer" },
+    { maxMoisture: 27.00, refaksiPercent: 13.7, description: "Basah Tinggi - Proses Dryer" },
+    { maxMoisture: 28.00, refaksiPercent: 15.7, description: "Basah Ekstrim" },
+    { maxMoisture: 29.00, refaksiPercent: 16.5, description: "Basah Ekstrim" },
+    { maxMoisture: 30.00, refaksiPercent: 18.7, description: "Basah Ekstrim - Potongan Sangat Tinggi" },
+  ],
+  BONE: [
+    { maxMoisture: 16.00, refaksiPercent: 0.0,  description: "Kadar Air Standar (Aman)" },
+    { maxMoisture: 17.00, refaksiPercent: 1.0,  description: "Kadar Air Ringan" },
+    { maxMoisture: 18.00, refaksiPercent: 2.2,  description: "Kadar Air Sedang" },
+    { maxMoisture: 19.00, refaksiPercent: 3.4,  description: "Kadar Air Sedang" },
+    { maxMoisture: 20.00, refaksiPercent: 4.5,  description: "Kadar Air Tinggi" },
+    { maxMoisture: 21.00, refaksiPercent: 5.0,  description: "Kadar Air Tinggi" },
+    { maxMoisture: 22.00, refaksiPercent: 6.2,  description: "Kadar Air Sangat Tinggi" },
+    { maxMoisture: 23.00, refaksiPercent: 7.4,  description: "Kadar Air Sangat Tinggi" },
+    { maxMoisture: 24.00, refaksiPercent: 8.6,  description: "Wajib Pengeringan" },
+    { maxMoisture: 25.00, refaksiPercent: 10.3, description: "Wajib Pengeringan" },
+    { maxMoisture: 26.00, refaksiPercent: 11.5, description: "Basah Tinggi - Proses Dryer" },
+    { maxMoisture: 27.00, refaksiPercent: 12.7, description: "Basah Tinggi - Proses Dryer" },
+    { maxMoisture: 28.00, refaksiPercent: 14.7, description: "Basah Ekstrim" },
+    { maxMoisture: 29.00, refaksiPercent: 15.5, description: "Basah Ekstrim" },
+    { maxMoisture: 30.00, refaksiPercent: 17.7, description: "Basah Ekstrim - Potongan Sangat Tinggi" },
+    { maxMoisture: 31.00, refaksiPercent: 19.3, description: "Basah Ekstrim - Potongan Sangat Tinggi" },
+  ]
+};
+
+export const mockCornMoistureRefaksi = (moisture: number, region: RefaksiRegion = 'LOKAL'): { refaksiPercent: number; description: string } => {
+  const table = cornRefaksiTable[region];
+  for (const row of table) {
+    if (moisture <= row.maxMoisture) {
+      return { refaksiPercent: row.refaksiPercent, description: row.description };
+    }
+  }
+  // Above maximum in table
+  const lastRow = table[table.length - 1];
+  const excess = moisture - lastRow.maxMoisture;
+  const extraPercent = parseFloat((lastRow.refaksiPercent + excess * 1.5).toFixed(1));
+  return { refaksiPercent: Math.min(30, extraPercent), description: "Basah Ekstrim - Potongan Sangat Tinggi" };
 };
 
 export const initialWeighbridgeTickets: WeighbridgeTicket[] = [
