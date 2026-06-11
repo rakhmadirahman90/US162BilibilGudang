@@ -470,6 +470,9 @@ export default function App() {
       setLocal((prev) => {
         const next = typeof update === 'function' ? update(prev) : update;
         
+        // 0. Persist to localStorage for offline reliability
+        localStorage.setItem(`bilibili_${collectionName}`, JSON.stringify(next));
+
         // 1. Save new or edited docs
         next.forEach(newItem => {
           const oldItem = prev.find(p => p.id === newItem.id);
@@ -1717,9 +1720,9 @@ export default function App() {
                       </div>
                     </div>
 
-                <DashboardProductShowcase />
+                <DashboardProductShowcase products={products} />
 
-                    {/* Poles, Kipasan, & Gas Dryer Lane */},TargetContent:
+                    {/* Poles, Kipasan, & Gas Dryer Lane */}
                     <div>
                       {(() => {
                         const activeProcessingKg = serviceRecords.reduce((acc, s) => acc + s.weight, 0);

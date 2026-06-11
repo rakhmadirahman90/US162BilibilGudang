@@ -1,8 +1,12 @@
 import React from 'react';
-import { initialProducts as products } from '../data';
 import { Package, TrendingUp } from 'lucide-react';
+import { ProductRecord } from '../types';
 
-export default function DashboardProductShowcase() {
+interface Props {
+  products: ProductRecord[];
+}
+
+export default function DashboardProductShowcase({ products }: Props) {
   return (
     <div className="mt-8">
       <h3 className="text-xl font-bold text-neutral-900 mb-5 px-1 flex items-center gap-2">
@@ -13,8 +17,15 @@ export default function DashboardProductShowcase() {
         {products.map(p => (
           <div key={p.id} className="min-w-[260px] bg-white p-5 rounded-2xl border border-neutral-100 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center gap-3 mb-4">
-               <div className="bg-emerald-50 p-2.5 rounded-xl text-emerald-600">
-                 <Package className="w-5 h-5" />
+               {/* Thumbnail display */}
+               <div className="w-10 h-10 bg-emerald-50 rounded-xl overflow-hidden border border-emerald-100 flex items-center justify-center shrink-0">
+                 {p.imageUrl ? (
+                   <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" onError={(e) => e.currentTarget.style.display = 'none'} />
+                 ) : (
+                   <div className="text-emerald-600">
+                     <Package className="w-5 h-5" />
+                   </div>
+                 )}
                </div>
                <span className="font-extrabold text-sm text-neutral-900 truncate">{p.name}</span>
             </div>

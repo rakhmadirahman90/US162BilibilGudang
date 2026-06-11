@@ -9,10 +9,21 @@ interface Props {
 
 export default function ProductModule({ products }: Props) {
   return (
-    <div className="p-6 h-full overflow-y-auto">
-      <h2 className="text-2xl font-bold mb-8 text-neutral-900 border-b pb-4">Produk Unggulan US Bilibili 162</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map(p => (
+    <div className="p-6 h-full overflow-y-auto bg-[#fafafa]">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-10 text-center md:text-left flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-neutral-200 pb-8">
+          <div>
+            <h2 className="text-3xl font-black text-neutral-900 tracking-tight mb-2">Produk Unggulan</h2>
+            <p className="text-neutral-500 font-medium">Katalog hasil bumi berkualitas tinggi dari US Bilibili 162</p>
+          </div>
+          <div className="bg-emerald-600/10 text-emerald-700 px-4 py-2 rounded-full text-xs font-black flex items-center gap-2 border border-emerald-100">
+            <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+            LIVE STOCK: {products.length} ITEM
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {products.map(p => (
           <div key={p.id} className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm hover:shadow-lg transition-all duration-300">
             <div className="flex items-center gap-4 mb-5">
               <div className="bg-emerald-50 p-3 rounded-xl text-emerald-600">
@@ -22,13 +33,30 @@ export default function ProductModule({ products }: Props) {
             </div>
             
             {/* Image display */}
-            <div className="mb-4 aspect-video bg-neutral-100 rounded-lg flex items-center justify-center border border-neutral-200 overflow-hidden">
+            <div className="mb-4 aspect-video bg-neutral-100 rounded-lg flex items-center justify-center border border-neutral-200 overflow-hidden relative group">
               {p.imageUrl ? (
-                <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="text-neutral-400 text-xs text-center p-2">
-                  <Package className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  Belum ada gambar
+                <img 
+                  src={p.imageUrl} 
+                  alt={p.name} 
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const parent = e.currentTarget.parentElement;
+                    if (parent) {
+                      const fallback = parent.querySelector('.image-fallback');
+                      if (fallback) fallback.classList.remove('hidden');
+                    }
+                  }}
+                />
+              ) : null}
+              <div className={`image-fallback ${p.imageUrl ? 'hidden' : ''} text-neutral-400 text-xs text-center p-2`}>
+                <Package className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                <span className="font-bold uppercase tracking-widest text-[10px]">Belum ada gambar</span>
+              </div>
+              
+              {p.stockAvailable <= 0 && (
+                <div className="absolute top-2 right-2 bg-rose-600 text-white text-[9px] font-black px-2 py-1 rounded shadow-lg uppercase tracking-tighter z-10">
+                  Stok Habis
                 </div>
               )}
             </div>
@@ -58,6 +86,7 @@ export default function ProductModule({ products }: Props) {
           </div>
         ))}
       </div>
+     </div>
     </div>
   );
 }

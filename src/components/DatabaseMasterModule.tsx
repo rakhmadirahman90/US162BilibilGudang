@@ -194,7 +194,7 @@ export default function DatabaseMasterModule({
   const [productPrice, setProductPrice] = useState<number>(0);
   const [productStock, setProductStock] = useState<number>(0);
   const [productImageUrl, setProductImageUrl] = useState('');
-  const [isCompresing, setIsCompressing] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
 
   // Handler helpers
   const triggerToast = (msg: string, type: 'success' | 'error' | 'info' | 'warning' = 'success') => {
@@ -279,7 +279,14 @@ export default function DatabaseMasterModule({
       // Convert to Base64 for preview/storage
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProductImageUrl(reader.result as string);
+        const result = reader.result as string;
+        if (result) {
+          setProductImageUrl(result);
+        }
+        setIsCompressing(false);
+      };
+      reader.onerror = () => {
+        triggerToast('Gagal membaca file gambar', 'error');
         setIsCompressing(false);
       };
       reader.readAsDataURL(compressed);
@@ -296,8 +303,14 @@ export default function DatabaseMasterModule({
       return;
     }
 
+    if (isCompressing) {
+      triggerToast('Mohon tunggu, gambar sedang diproses...', 'warning');
+      return;
+    }
+
     const executeSave = () => {
       const characteristicsArray = productCharacteristics.split(',').map(c => c.trim()).filter(c => c !== '');
+      const finalImageUrl = productImageUrl?.trim() || '';
       
       if (editingId) {
         setProducts(prev => prev.map(p => p.id === editingId ? {
@@ -308,7 +321,7 @@ export default function DatabaseMasterModule({
           characteristics: characteristicsArray,
           pricePerKg: Number(productPrice),
           stockAvailable: Number(productStock),
-          imageUrl: productImageUrl.trim()
+          imageUrl: finalImageUrl
         } : p));
         triggerToast(`Produk ${productName} diperbarui!`, 'success');
       } else {
@@ -320,7 +333,7 @@ export default function DatabaseMasterModule({
           characteristics: characteristicsArray,
           pricePerKg: Number(productPrice),
           stockAvailable: Number(productStock),
-          imageUrl: productImageUrl.trim()
+          imageUrl: finalImageUrl
         };
         setProducts(prev => [newProd, ...prev]);
         triggerToast(`Produk ${productName} berhasil ditambahkan!`, 'success');
@@ -1865,7 +1878,7 @@ export default function DatabaseMasterModule({
                               <span className="text-[8px] text-neutral-400 font-bold uppercase">No Image</span>
                             </div>
                           )}
-                          {isCompresing && (
+                          {isCompressing && (
                             <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
                               <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
                             </div>
@@ -1887,8 +1900,8 @@ export default function DatabaseMasterModule({
                         </div>
                       </div>
                     </div>
-                    <button type="submit" disabled={isCompresing} className="bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-400 text-white font-bold px-6 py-2 rounded-lg text-xs flex items-center justify-center gap-1 shrink-0 cursor-pointer h-[38px] transition-all active:scale-95 shadow-sm mt-auto">
-                      <Check className="w-3.5 h-3.5" /> SIMPAN
+                    <button type="submit" disabled={isCompressing} className="bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-400 text-white font-bold px-8 py-2 rounded-lg text-xs flex items-center justify-center gap-1.5 shrink-0 cursor-pointer h-[38px] transition-all active:scale-95 shadow-md mt-auto">
+                      <Check className="w-4 h-4" /> SIMPAN PRODUK
                     </button>
                   </div>
                 </div>
