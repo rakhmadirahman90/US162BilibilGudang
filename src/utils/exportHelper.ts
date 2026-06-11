@@ -246,7 +246,7 @@ export function printPDFReport(
 
 const COMMON_SLIP_STYLE = `
   @page {
-    size: A4 portrait;
+    size: 105mm 138mm;
     margin: 0mm !important;
   }
 
@@ -260,12 +260,12 @@ const COMMON_SLIP_STYLE = `
     width: 100% !important;
     height: 100% !important;
     font-family: 'Courier', 'Courier New', 'Consolas', 'Monaco', monospace !important;
-    font-size: 10pt;
+    font-size: 7.5pt;
     color: #000000 !important;
     background-color: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
-    line-height: 1.35;
+    line-height: 1.15;
     text-align: left;
     /* CRITICAL FOR DOT MATRIX: Turn off pixel smoothing entirely to keep output pure solid black/sharp pixels */
     -webkit-font-smoothing: none !important;
@@ -276,20 +276,23 @@ const COMMON_SLIP_STYLE = `
 
   .slip {
     width: 105mm !important;
-    height: 148.5mm !important;
-    margin: 0 auto !important;
-    padding: 7mm 6mm !important;
+    min-height: 135mm !important;
+    margin: 0 !important;
+    padding: 0mm 1mm !important;
     background: #ffffff !important;
     display: block !important;
     box-sizing: border-box !important;
     page-break-after: avoid;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
   }
 
   @media print {
     @page {
-      size: A4 portrait;
+      size: 105mm 138mm;
       margin: 0 !important;
     }
     
@@ -300,20 +303,28 @@ const COMMON_SLIP_STYLE = `
       margin: 0 !important;
       padding: 0 !important;
       text-align: left !important;
+      display: block !important;
+      position: absolute !important;
+      top: 0mm !important;
+      left: 0mm !important;
       font-family: 'Courier', 'Courier New', 'Consolas', 'Monaco', monospace !important;
       -webkit-font-smoothing: none !important;
       -moz-osx-font-smoothing: none !important;
       font-smooth: never !important;
       text-rendering: optimizeSpeed !important;
+      overflow: hidden !important;
     }
 
     .slip {
       margin: 0 !important;
-      padding: 7mm 6mm !important;
+      padding: 0 !important;
       border: none !important;
       box-shadow: none !important;
       page-break-inside: avoid;
-      float: left !important;
+      position: absolute !important;
+      top: 2.5mm !important;
+      left: 4.5mm !important;
+      width: 105mm !important;
     }
 
     * {
@@ -337,16 +348,16 @@ const COMMON_SLIP_STYLE = `
   .header {
     display: table;
     width: 100%;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     text-align: left;
   }
   .header-logo {
     display: table-cell;
-    width: 32px;
-    max-width: 32px;
-    height: 28px;
+    width: 28px;
+    max-width: 28px;
+    height: 24px;
     vertical-align: middle;
-    padding-right: 5px;
+    padding-right: 4px;
     object-fit: contain;
     filter: grayscale(100%) contrast(200%);
     image-rendering: pixelated;
@@ -356,41 +367,41 @@ const COMMON_SLIP_STYLE = `
     vertical-align: middle;
   }
   .header-title {
-    font-size: 11pt;
-    font-weight: 900;
+    font-size: 9.5pt;
+    font-weight: 950;
     color: #000000;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    line-height: 1.1;
+    letter-spacing: 0.3px;
+    line-height: 1.05;
   }
   .header-subtitle {
-    font-size: 8pt;
+    font-size: 7.5pt;
     color: #000000;
-    line-height: 1.25;
-    margin-top: 2px;
+    line-height: 1.15;
+    margin-top: 1px;
   }
 
   /* DIVIDERS (Thicker to avoid blurry or faint horizontal lines on Epson ribbon) */
   .divider-line {
     border: none;
     border-top: 1.5px solid #000000;
-    margin: 4px 0;
+    margin: 2px 0;
   }
   .divider-double {
     border: none;
-    border-top: 3.5px double #000000;
-    margin: 4px 0;
+    border-top: 3px double #000000;
+    margin: 2px 0;
   }
 
   /* TICKET TYPE LABEL */
   .ticket-type {
-    font-size: 10pt;
+    font-size: 8.5pt;
     font-weight: 900;
     color: #000000;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin: 3px 0;
-    line-height: 1.1;
+    letter-spacing: 0.5px;
+    margin: 2px 0;
+    line-height: 1.05;
     text-align: center;
   }
 
@@ -399,47 +410,47 @@ const COMMON_SLIP_STYLE = `
     display: table;
     width: 100%;
     table-layout: fixed;
-    margin: 3.5px 0;
+    margin: 2px 0;
   }
   .flex span {
     display: table-cell;
-    font-size: 9pt;
+    font-size: 7.5pt;
     color: #000000;
     vertical-align: top;
-    line-height: 1.25;
+    line-height: 1.15;
   }
   .flex span.label {
-    width: 44%;
+    width: 46%;
     text-align: left;
     font-weight: bold;
     white-space: nowrap;
   }
   .flex span.value {
-    width: 56%;
+    width: 54%;
     text-align: left;
     font-weight: 900;
     word-break: break-word;
   }
   .flex span.label-heavy {
-    width: 44%;
-    font-weight: 900;
-    font-size: 9.5pt;
+    width: 46%;
+    font-weight: 950;
+    font-size: 8pt;
   }
   .flex span.value-heavy {
-    width: 56%;
-    font-weight: 900;
-    font-size: 9.5pt;
+    width: 54%;
+    font-weight: 950;
+    font-size: 8pt;
     text-align: left;
   }
 
   /* WEIGHT TIMESTAMP */
   .weight-time {
-    font-size: 8pt;
+    font-size: 7.2pt;
     color: #000000;
     text-align: left;
-    margin: 0 0 2px 0;
+    margin: 0;
     font-style: italic;
-    line-height: 1.1;
+    line-height: 1.05;
     padding-left: 2px;
   }
 
@@ -448,31 +459,31 @@ const COMMON_SLIP_STYLE = `
     display: table;
     width: 100%;
     table-layout: fixed;
-    padding: 3px 0;
+    padding: 2px 0;
   }
   .netto-label {
     display: table-cell;
-    width: 44%;
-    font-size: 10pt;
-    font-weight: 900;
+    width: 46%;
+    font-size: 8.5pt;
+    font-weight: 950;
     vertical-align: middle;
   }
   .netto-val {
     display: table-cell;
-    width: 56%;
-    font-size: 11.5pt;
-    font-weight: 900;
+    width: 54%;
+    font-size: 9.5pt;
+    font-weight: 950;
     text-align: left;
     vertical-align: middle;
   }
 
   /* NOTES */
   .notes-box {
-    font-size: 8.5pt;
+    font-size: 7.2pt;
     border: 1.5px solid #000000;
-    padding: 3px 5px;
-    margin: 4px 0;
-    line-height: 1.25;
+    padding: 2px 4px;
+    margin: 2px 0;
+    line-height: 1.15;
     word-break: break-word;
     font-weight: bold;
   }
@@ -482,40 +493,40 @@ const COMMON_SLIP_STYLE = `
     display: table;
     width: 100%;
     table-layout: fixed;
-    margin-top: 8px;
+    margin-top: 4px;
   }
   .signatures > div {
     display: table-cell;
     width: 50%;
     text-align: left;
-    font-size: 9pt;
+    font-size: 7.5pt;
     padding: 0 4px;
     vertical-align: top;
-    line-height: 1.2;
+    line-height: 1.1;
     font-weight: bold;
   }
   .signature-space {
-    height: 22px;
+    height: 14px;
     display: block;
   }
   .signature-line {
     border-top: 1.5px solid #000000;
-    margin: 3px 0 0 0;
+    margin: 2px 0 0 0;
     width: 90%;
     font-weight: 900;
-    font-size: 9pt;
-    padding-top: 2px;
+    font-size: 7.5pt;
+    padding-top: 1px;
     text-align: left;
   }
 
   /* FOOTER */
   .footer-msg {
     text-align: center;
-    font-size: 8pt;
-    margin-top: 6px;
-    line-height: 1.2;
+    font-size: 7.2pt;
+    margin-top: 4px;
+    line-height: 1.15;
     border-top: 1.5px dashed #000000;
-    padding-top: 4px;
+    padding-top: 2px;
     font-weight: bold;
   }
 `;
@@ -557,15 +568,12 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
       <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
       <div class="header-text">
         <div class="header-title">GUDANG US BILIBILI 162</div>
-        <div class="header-subtitle">
-          Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
-          Kabupaten Pinrang, Sulawesi Selatan | TELP - 085244466009
-        </div>
+        <div class="header-subtitle">Jl. Poros Pinrang-Parepare, Suppa, Kab. Pinrang | WA: 085244466009</div>
       </div>
     </div>
 
     <div class="divider-line"></div>
-    <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 5px;">RESI KAS TERPADU</div>
+    <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 3px;">RESI KAS TERPADU</div>
     <div class="divider-line"></div>
 
     <div class="flex"><span class="label">No. Tiket :</span><span class="value">${record.ticketNo || '-'}</span></div>
@@ -585,8 +593,7 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
     <div class="divider-line"></div>
 
     <!-- KUALITAS -->
-    <div class="flex"><span class="label">Kadar Air (${record.commodity}) :</span><span class="value">${(record.moistureContent || 0).toFixed(1)} %</span></div>
-    <div class="flex"><span class="label">Biji Mati, Jamur dsb :</span><span class="value">0.0 %</span></div>
+    <div class="flex"><span class="label">KA &amp; Kualitas (${record.commodity}) :</span><span class="value">KA: ${(record.moistureContent || 0).toFixed(1)}% | Biji Mati: 0.0%</span></div>
 
     <div class="divider-line"></div>
 
@@ -637,15 +644,12 @@ export function printOutboundSlip(record: OutboundRecord, staffName: string = "A
       <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
       <div class="header-text">
         <div class="header-title">GUDANG US BILIBILI 162</div>
-        <div class="header-subtitle">
-          Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
-          Kabupaten Pinrang, Sulawesi Selatan | TELP - 085244466009
-        </div>
+        <div class="header-subtitle">Jl. Poros Pinrang-Parepare, Suppa, Kab. Pinrang | WA: 085244466009</div>
       </div>
     </div>
 
     <div class="divider-line"></div>
-    <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 5px;">RESIDENSI PENGIRIMAN</div>
+    <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 3px;">RESIDENSI PENGIRIMAN</div>
     <div class="divider-line"></div>
 
     <div class="flex"><span class="label">No. Invoice :</span><span class="value">${record.invoiceNo}</span></div>
@@ -691,15 +695,12 @@ export function printRiceStockSlip(record: RiceStockRecord, staffName: string = 
       <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
       <div class="header-text">
         <div class="header-title">GUDANG US BILIBILI 162</div>
-        <div class="header-subtitle">
-          Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
-          Kabupaten Pinrang, Sulawesi Selatan | TELP - 085244466009
-        </div>
+        <div class="header-subtitle">Jl. Poros Pinrang-Parepare, Suppa, Kab. Pinrang | WA: 085244466009</div>
       </div>
     </div>
 
     <div class="divider-line"></div>
-    <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 5px;">RESIDENSI MUTASI STOK</div>
+    <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 3px;">RESIDENSI MUTASI STOK</div>
     <div class="divider-line"></div>
 
     <div class="flex"><span class="label">ID Mutasi :</span><span class="value">#${record.id.slice(-6)}</span></div>
@@ -745,15 +746,12 @@ export function printServiceSlip(record: ServiceRecord, staffName: string = "Asm
       <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
       <div class="header-text">
         <div class="header-title">GUDANG US BILIBILI 162</div>
-        <div class="header-subtitle">
-          Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
-          Kabupaten Pinrang, Sulawesi Selatan | TELP - 085244466009
-        </div>
+        <div class="header-subtitle">Jl. Poros Pinrang-Parepare, Suppa, Kab. Pinrang | WA: 085244466009</div>
       </div>
     </div>
 
     <div class="divider-line"></div>
-    <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 5px;">RESIDENSI JASA LAYANAN</div>
+    <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 3px;">RESIDENSI JASA LAYANAN</div>
     <div class="divider-line"></div>
 
     <div class="flex"><span class="label">ID Layanan :</span><span class="value">#${record.id.slice(-6)}</span></div>
@@ -810,10 +808,7 @@ export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Asma")
       <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
       <div class="header-text">
         <div class="header-title">GUDANG US BILIBILI 162</div>
-        <div class="header-subtitle">
-          Jl. Poros Pinrang - Parepare, Kel. Watang, Kec. Suppa<br/>
-          Kabupaten Pinrang, Sulawesi Selatan | TELP - 085244466009
-        </div>
+        <div class="header-subtitle">Jl. Poros Pinrang-Parepare, Suppa, Kab. Pinrang | WA: 085244466009</div>
       </div>
     </div>
 

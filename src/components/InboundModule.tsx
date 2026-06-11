@@ -104,6 +104,21 @@ export default function InboundModule({
   const [price, setPrice] = useState(0);
   const [driverName, setDriverName] = useState("");
 
+  // Automatically update laborCost when grossWeight or selectedLaborId changes
+  React.useEffect(() => {
+    if (selectedLaborId) {
+      const labor = laborRates.find(l => l.id === selectedLaborId);
+      if (labor) {
+        if (labor.rateType === 'FLAT') {
+          setLaborCost(labor.rate);
+        } else {
+          // New formula: Berat bruto (grossWeight) * upah buruh (labor.rate)
+          setLaborCost(Math.round(grossWeight * labor.rate));
+        }
+      }
+    }
+  }, [selectedLaborId, grossWeight, laborRates]);
+
   // When a weighing ticket is chosen, automatically fill details!
   const handleTicketChange = (ticketId: string) => {
     setSelectedTicketId(ticketId);
@@ -488,16 +503,11 @@ export default function InboundModule({
                         if (id) {
                           const labor = laborRates.find(l => l.id === id);
                           if (labor) {
-                            const refPercentage = commodity === 'JAGUNG' ? getRefaksiByRule(moistureContent, cornMoistureRules, refaksiType).refaksiPercent : 0;
-                            const rNet = grossWeight - tareWeight;
-                            const bagDed = rNet * (bagDeductionPercent / 100);
-                            const refDed = rNet * (refPercentage / 100);
-                            const computedNet = rNet - bagDed - refDed;
-                            
                             if (labor.rateType === 'FLAT') {
                               setLaborCost(labor.rate);
                             } else {
-                              setLaborCost(Math.round(computedNet * labor.rate));
+                              // Formula requested: Berat Bruto (grossWeight) * Upah Buruh Rate
+                              setLaborCost(Math.round(grossWeight * labor.rate));
                             }
                           }
                         } else {
@@ -564,7 +574,7 @@ export default function InboundModule({
                 const refDed = rNet * (refPercentage / 100);
                 const computedNet = Math.max(0, Math.round(rNet - bagDed - refDed));
                 const purchaseTotal = computedNet * price;
-                const subTotalFinal = Math.max(0, purchaseTotal - laborCost);
+                const subTotalFinal = purchaseTotal - laborCost;
 
                 return (
                   <>
