@@ -1565,11 +1565,14 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.05, ease: "easeOut" }}
                 id="card-metric-corn" 
-                className="bg-white border border-neutral-200 p-4.5 rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-between group"
+                className={`bg-white border ${cornStockBalance <= 5000 ? 'border-red-300' : 'border-neutral-200'} p-4.5 rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-between group`}
               >
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.cornStock || 'Stok Jagung Silo'}</span>
-                  <span className="text-xl sm:text-2xl font-black text-amber-650 font-mono tracking-tight">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.cornStock || 'Stok Jagung Silo'}</span>
+                    {cornStockBalance <= 5000 && <AlertCircle className="w-3 h-3 text-red-500 animate-pulse" />}
+                  </div>
+                  <span className={`text-xl sm:text-2xl font-black ${cornStockBalance <= 5000 ? 'text-red-600' : 'text-amber-650'} font-mono tracking-tight`}>
                     {cornStockBalance.toLocaleString('id-ID')} <span className="text-xs text-neutral-400 font-normal">{t.kgNetto || 'Kg'}</span>
                   </span>
                   <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1">
@@ -1578,8 +1581,8 @@ export default function App() {
                     <span className="text-red-500 font-semibold">Out: {totalOutboundCorn.toLocaleString('id-ID')}</span>
                   </div>
                 </div>
-                <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center border border-amber-100 group-hover:scale-110 transition duration-300 shrink-0">
-                  <Package className="text-amber-500 w-5 h-5" />
+                <div className={`w-10 h-10 ${cornStockBalance <= 5000 ? 'bg-red-50' : 'bg-amber-50'} rounded-lg flex items-center justify-center border ${cornStockBalance <= 5000 ? 'border-red-100' : 'border-amber-100'} group-hover:scale-110 transition duration-300 shrink-0`}>
+                  <Package className={`${cornStockBalance <= 5000 ? 'text-red-500' : 'text-amber-500'} w-5 h-5`} />
                 </div>
               </motion.div>
 
@@ -1589,11 +1592,14 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.12, ease: "easeOut" }}
                 id="card-metric-rice" 
-                className="bg-white border border-neutral-200 p-4.5 rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-between group"
+                className={`bg-white border ${riceStockBalance <= 2000 ? 'border-red-300' : 'border-neutral-200'} p-4.5 rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-between group`}
               >
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.riceStockLabel || 'Stok Beras Gudang'}</span>
-                  <span className="text-xl sm:text-2xl font-black text-emerald-800 font-mono tracking-tight">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.riceStockLabel || 'Stok Beras Gudang'}</span>
+                    {riceStockBalance <= 2000 && <AlertCircle className="w-3 h-3 text-red-500 animate-pulse" />}
+                  </div>
+                  <span className={`text-xl sm:text-2xl font-black ${riceStockBalance <= 2000 ? 'text-red-600' : 'text-emerald-800'} font-mono tracking-tight`}>
                     {riceStockBalance.toLocaleString('id-ID')} <span className="text-xs text-neutral-400 font-normal">{t.kgNetto || 'Kg'}</span>
                   </span>
                   <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1">
@@ -1602,8 +1608,8 @@ export default function App() {
                     <span className="text-red-500 font-semibold">Out: {totalOutboundRice.toLocaleString('id-ID')}</span>
                   </div>
                 </div>
-                <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center border border-emerald-100 group-hover:scale-110 transition duration-300 shrink-0">
-                  <Package className="text-emerald-600 w-5 h-5" />
+                <div className={`w-10 h-10 ${riceStockBalance <= 2000 ? 'bg-red-50' : 'bg-emerald-50'} rounded-lg flex items-center justify-center border ${riceStockBalance <= 2000 ? 'border-red-100' : 'border-emerald-100'} group-hover:scale-110 transition duration-300 shrink-0`}>
+                  <Package className={`${riceStockBalance <= 2000 ? 'text-red-500' : 'text-emerald-600'} w-5 h-5`} />
                 </div>
               </motion.div>
 

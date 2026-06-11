@@ -324,8 +324,8 @@ const COMMON_SLIP_STYLE = `
       page-break-inside: avoid;
       position: absolute !important;
       top: 0mm !important;
-      left: 4.5mm !important;
-      width: 100mm !important;
+      left: 10mm !important;
+      width: 80mm !important;
     }
 
     * {
@@ -408,37 +408,34 @@ const COMMON_SLIP_STYLE = `
 
   /* DATA ROWS */
   .flex {
-    display: table;
+    display: block;
     width: 100%;
-    table-layout: fixed;
-    margin: 2px 0;
+    margin: 1px 0;
   }
   .flex span {
-    display: table-cell;
+    display: inline-block;
     font-size: 7.5pt;
     color: #000000;
-    vertical-align: top;
-    line-height: 1.5 !important;
+    line-height: 1.2 !important;
   }
   .flex span.label {
-    width: 46%;
+    width: 48%;
     text-align: left;
     font-weight: bold;
-    white-space: nowrap;
+    padding-right: 2px;
   }
   .flex span.value {
-    width: 54%;
+    width: 52%;
     text-align: left;
     font-weight: 900;
-    word-break: break-word;
   }
   .flex span.label-heavy {
-    width: 46%;
+    width: 48%;
     font-weight: 950;
     font-size: 8pt;
   }
   .flex span.value-heavy {
-    width: 54%;
+    width: 52%;
     font-weight: 950;
     font-size: 8pt;
     text-align: left;
@@ -565,58 +562,55 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
 </head>
 <body>
   <div class="slip">
-    <div class="header" style="text-align: center; display: block;">
-      <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2px;">
-        <img src="${bilibiliLogo}" alt="US Bilibili 162" style="width: 40px; height: auto;" />
+    <div class="header" style="display: block; margin-bottom: 2px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <img src="${bilibiliLogo}" alt="Logo" style="width: 32px; height: auto;" />
         <div style="text-align: left;">
-          <div class="header-title" style="font-size: 11pt; font-weight: 950; letter-spacing: 0.5px; text-transform: uppercase; line-height: 1.1;">US Bilibili 162</div>
-          <div class="header-subtitle" style="font-size: 7.5pt; font-weight: normal; line-height: 1.2;">
-            Jalan Poros Pinrang-Polman KM. 12<br/>
-            Desa Bilibili, Kec. Suppa, Kab. Pinrang
+          <div class="header-title" style="font-size: 10pt; font-weight: 950; text-transform: uppercase;">US Bilibili 162</div>
+          <div class="header-subtitle" style="font-size: 7pt; font-weight: normal; line-height: 1.1;">
+            Jalan Poros Pinrang-Polman KM. 12<br/>Desa Bilibili, Suppa, Kab. Pinrang
           </div>
         </div>
       </div>
     </div>
 
-    <div class="divider-line" style="margin-top: 4px; margin-bottom: 4px;"></div>
+    <div class="divider-line" style="margin: 2px 0 !important;"></div>
 
-    <div class="flex"><span class="label">Tanggal :</span><span class="value" style="text-align: right !important;">${formatReceiptDate(record.date)}</span></div>
-    <div class="flex"><span class="label">No. Tiket/Ref :</span><span class="value" style="text-align: right !important;">${record.ticketNo || '-'}</span></div>
-    <div class="flex"><span class="label">No. Polisi :</span><span class="value" style="text-align: right !important;">${record.vehicleNo}</span></div>
-    <div class="flex"><span class="label">Suplier :</span><span class="value" style="text-align: right !important;">${record.supplier}</span></div>
-    <div class="flex"><span class="label">Komoditas :</span><span class="value" style="text-align: right !important;">${record.commodity}</span></div>
+    <div class="flex"><span class="label">Tgl. Cetak</span><span class="value">: ${formatReceiptDate(record.date)}</span></div>
+    <div class="flex"><span class="label">No. Tiket</span><span class="value">: ${record.ticketNo || '-'}</span></div>
+    <div class="flex"><span class="label">No. Polisi</span><span class="value">: ${record.vehicleNo}</span></div>
+    <div class="flex"><span class="label">Supplier</span><span class="value">: ${record.supplier}</span></div>
+    <div class="flex"><span class="label">Komoditas</span><span class="value">: ${record.commodity}</span></div>
 
-    <div class="divider-line" style="margin-top: 4px; margin-bottom: 4px;"></div>
+    <div class="divider-line" style="margin: 2px 0 !important;"></div>
 
-    <div class="flex"><span class="label">BERAT BRUTO :</span><span class="value" style="text-align: right !important;">${bruto.toLocaleString('id-ID')} Kg</span></div>
-    <div class="flex"><span class="label">BERAT TARA :</span><span class="value" style="text-align: right !important;">${tara.toLocaleString('id-ID')} Kg</span></div>
-    <div class="flex"><span class="label">Pot. Karung (${record.bagDeductionPercent ?? 0}%) :</span><span class="value" style="text-align: right !important;">-${potKrg.toLocaleString('id-ID')} Kg</span></div>
-    <div class="flex"><span class="label">Refaksi KA (${record.refaksiKaPercent ?? 0}%) :</span><span class="value" style="text-align: right !important;">-${potRefaksi.toLocaleString('id-ID')} Kg</span></div>
+    <div class="flex"><span class="label">BRUTO</span><span class="value">: ${bruto.toLocaleString('id-ID')} Kg</span></div>
+    <div class="flex"><span class="label">TARA</span><span class="value">: ${tara.toLocaleString('id-ID')} Kg</span></div>
+    <div class="flex"><span class="label">Pot. Karung</span><span class="value">: -${potKrg.toLocaleString('id-ID')} Kg (${record.bagDeductionPercent ?? 0}%)</span></div>
+    <div class="flex"><span class="label">Refaksi KA</span><span class="value">: -${potRefaksi.toLocaleString('id-ID')} Kg (${record.refaksiKaPercent ?? 0}%)</span></div>
 
-    <div class="divider-line" style="margin-top: 4px; margin-bottom: 4px;"></div>
-    <div class="flex" style="font-weight: 950; font-size: 8.5pt;"><span class="label" style="font-weight: 950;">BERAT NETTO :</span><span class="value" style="font-weight: 950; text-align: right !important;">${net.toLocaleString('id-ID')} KG</span></div>
-    <div class="divider-line" style="margin-top: 4px; margin-bottom: 4px;"></div>
+    <div class="divider-line" style="margin: 2px 0 !important;"></div>
+    <div class="flex" style="font-weight: 950; font-size: 8.5pt;"><span class="label">NETTO</span><span class="value" style="font-weight: 950;">: ${net.toLocaleString('id-ID')} KG</span></div>
+    <div class="divider-line" style="margin: 2px 0 !important;"></div>
 
-    <div class="flex"><span class="label">HARGA BELI :</span><span class="value" style="text-align: right !important;">Rp ${(record.price ?? 0).toLocaleString('id-ID')}/Kg</span></div>
-    <div class="flex"><span class="label">HARGA BRUTO :</span><span class="value" style="text-align: right !important;">Rp ${(net * (record.price ?? 0)).toLocaleString('id-ID')}</span></div>
-    <div class="flex"><span class="label">BIAYA BURUH PANGGUL :</span><span class="value" style="text-align: right !important;">-Rp ${(record.laborCost ?? 0).toLocaleString('id-ID')}</span></div>
+    <div class="flex"><span class="label">HARGA BELI</span><span class="value">: Rp ${(record.price ?? 0).toLocaleString('id-ID')}/Kg</span></div>
+    <div class="flex"><span class="label">TOTAL BRUTO</span><span class="value">: Rp ${(net * (record.price ?? 0)).toLocaleString('id-ID')}</span></div>
+    <div class="flex"><span class="label">BIAYA BURUH</span><span class="value">: -Rp ${(record.laborCost ?? 0).toLocaleString('id-ID')}</span></div>
 
-    <div class="divider-line" style="margin-top: 4px; margin-bottom: 4px;"></div>
-    <div class="flex" style="font-weight: 950; font-size: 9pt; background-color: #fafafa; padding: 3px 2px;"><span class="label" style="font-weight: 950;">TOTAL HARUS DIBAYAR :</span><span class="value" style="font-weight: 950; text-align: right !important; color: #000000 !important;">Rp ${(record.totalPrice ?? 0).toLocaleString('id-ID')}</span></div>
-    <div class="divider-line" style="margin-top: 4px; margin-bottom: 4px;"></div>
+    <div class="divider-line" style="margin: 2px 0 !important;"></div>
+    <div class="flex" style="font-weight: 950; font-size: 9pt;"><span class="label">TOTAL BAYAR</span><span class="value" style="font-weight: 950;">: Rp ${(record.totalPrice ?? 0).toLocaleString('id-ID')}</span></div>
+    <div class="divider-line" style="margin: 2px 0 !important;"></div>
 
-    <div class="signatures" style="margin-top: 8px; width: 100%; display: table; table-layout: fixed;">
-      <div style="display: table-cell; width: 50%; text-align: center !important; vertical-align: top; padding: 0 4px; font-size: 7.5pt; font-weight: bold; line-height: 1.1;">
+    <div class="signatures" style="margin-top: 6px; width: 100%; display: table; table-layout: fixed;">
+      <div style="display: table-cell; width: 50%; text-align: center !important; vertical-align: top; padding: 0 2px; font-size: 7.5pt; font-weight: bold;">
         Staff 162
-        <div style="margin-top: 18px; font-weight: bold; text-align: center !important;">${staffName}</div>
-        <div style="border-top: 1.2px solid #000; width: 85%; margin: 2px auto 0 auto;"></div>
-        <div style="margin-top: 2px; text-align: center !important;">(         )</div>
+        <div style="margin-top: 14px; font-weight: bold; text-align: center !important;">( ${staffName} )</div>
+        <div style="border-top: 1.2px solid #000; width: 85%; margin: 1px auto 0 auto;"></div>
       </div>
-      <div style="display: table-cell; width: 50%; text-align: center !important; vertical-align: top; padding: 0 4px; font-size: 7.5pt; font-weight: bold; line-height: 1.1;">
+      <div style="display: table-cell; width: 50%; text-align: center !important; vertical-align: top; padding: 0 2px; font-size: 7.5pt; font-weight: bold;">
         Sopir / Pembawa
-        <div style="margin-top: 18px; font-weight: bold; text-align: center !important;">&nbsp;</div>
-        <div style="border-top: 1.2px solid #000; width: 85%; margin: 2px auto 0 auto;"></div>
-        <div style="margin-top: 2px; text-align: center !important;">(         )</div>
+        <div style="margin-top: 14px; font-weight: bold; text-align: center !important;">( &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; )</div>
+        <div style="border-top: 1.2px solid #000; width: 85%; margin: 1px auto 0 auto;"></div>
       </div>
     </div>
 
