@@ -554,59 +554,70 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
   const tara = record.tareWeight;
   const rawNet = bruto - tara;
   const net = record.netWeight;
-  const potKrg = rawNet * (record.bagDeductionPercent / 100);
-  const potRefaksi = rawNet * (record.refaksiKaPercent / 100);
+  const potKrg = Math.round(rawNet * (record.bagDeductionPercent / 100));
+  const potRefaksi = Math.round(rawNet * (record.refaksiKaPercent / 100));
 
   const htmlContent = `<!DOCTYPE html>
 <html>
 <head>
-  <title>Resi Terpadu #${record.ticketNo || record.id.slice(-6)}</title>
+  <title>Resi Penerimaan #${record.ticketNo || record.id.slice(-6)}</title>
   <style>${COMMON_SLIP_STYLE}</style>
 </head>
 <body>
   <div class="slip">
-    <div class="header">
-      <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
-      <div class="header-text">
-        <div class="header-title">US BILIBILI 162</div>
+    <div class="header" style="text-align: center; display: block;">
+      <div class="header-title" style="text-align: center; font-size: 11pt; font-weight: 950; letter-spacing: 0.5px; text-transform: uppercase;">CV. BILIBILI 162</div>
+      <div class="header-subtitle" style="text-align: center; font-size: 7.5pt; margin-top: 1px; font-weight: normal; line-height: 1.2;">
+        Jalan Poros Pinrang-Polman KM. 12<br/>
+        Desa Bilibili, Kec. Suppa, Kab. Pinrang
       </div>
     </div>
 
-    <div class="divider-line"></div>
-    <div class="ticket-type">RESI KAS TERPADU</div>
-    <div class="divider-line"></div>
+    <div class="divider-line" style="margin-top: 4px; margin-bottom: 4px;"></div>
 
-    <div class="flex"><span class="label">Tiket/Tgl :</span><span class="value">${record.ticketNo || '-'} / ${formatReceiptDate(record.date).split(' ')[0]}</span></div>
-    <div class="flex"><span class="label">Pol / Mitra :</span><span class="value">${record.vehicleNo} / ${record.supplier}</span></div>
-    <div class="flex"><span class="label">Barang :</span><span class="value">${record.commodity}</span></div>
+    <div class="flex"><span class="label">Tanggal :</span><span class="value" style="text-align: right !important;">${formatReceiptDate(record.date)}</span></div>
+    <div class="flex"><span class="label">No. Tiket/Ref :</span><span class="value" style="text-align: right !important;">${record.ticketNo || '-'}</span></div>
+    <div class="flex"><span class="label">No. Polisi :</span><span class="value" style="text-align: right !important;">${record.vehicleNo}</span></div>
+    <div class="flex"><span class="label">Suplier :</span><span class="value" style="text-align: right !important;">${record.supplier}</span></div>
+    <div class="flex"><span class="label">Komoditas :</span><span class="value" style="text-align: right !important;">${record.commodity}</span></div>
 
-    <div class="divider-line"></div>
+    <div class="divider-line" style="margin-top: 4px; margin-bottom: 4px;"></div>
 
-    <div class="flex"><span class="label-heavy">Bruto/Tara :</span><span class="value-heavy">${bruto.toLocaleString('id-ID')} / ${tara.toLocaleString('id-ID')} Kg</span></div>
-    
-    ${record.commodity === 'JAGUNG' ? `
-      <div class="flex"><span class="label">Kadar Air (KA):</span><span class="value">${(record.moistureContent || 0).toFixed(1)}%</span></div>
-      <div class="flex"><span class="label">Potongan/Ref :</span><span class="value">${(record.refaksiKaPercent || 0).toFixed(1)}%</span></div>
-      <div class="flex"><span class="label">Pot. Karung :</span><span class="value">${(record.bagDeductionPercent || 0).toFixed(1)}%</span></div>
-      <div class="flex"><span class="label">Biji Mati/Jamur :</span><span class="value">0.0% / 0.0%</span></div>
-    ` : `
-      <div class="flex"><span class="label">KA/BijiMati :</span><span class="value">${(record.moistureContent || 0).toFixed(1)}% / 0.0%</span></div>
-    `}
+    <div class="flex"><span class="label">BERAT BRUTO :</span><span class="value" style="text-align: right !important;">${bruto.toLocaleString('id-ID')} Kg</span></div>
+    <div class="flex"><span class="label">BERAT TARA :</span><span class="value" style="text-align: right !important;">${tara.toLocaleString('id-ID')} Kg</span></div>
+    <div class="flex"><span class="label">Pot. Karung (${record.bagDeductionPercent}%) :</span><span class="value" style="text-align: right !important;">-${potKrg.toLocaleString('id-ID')} Kg</span></div>
+    <div class="flex"><span class="label">Refaksi KA (${record.refaksiKaPercent}%) :</span><span class="value" style="text-align: right !important;">-${potRefaksi.toLocaleString('id-ID')} Kg</span></div>
 
-    <div class="divider-line"></div>
+    <div class="divider-line" style="margin-top: 4px; margin-bottom: 4px;"></div>
+    <div class="flex" style="font-weight: 950; font-size: 8.5pt;"><span class="label" style="font-weight: 950;">BERAT NETTO :</span><span class="value" style="font-weight: 950; text-align: right !important;">${net.toLocaleString('id-ID')} KG</span></div>
+    <div class="divider-line" style="margin-top: 4px; margin-bottom: 4px;"></div>
 
-    <div class="flex"><span class="label">Netto (Bersih):</span><span class="value" style="font-weight: 950; font-size: 8.5pt;">${net.toLocaleString('id-ID')} Kg</span></div>
-    <div class="flex"><span class="label">Bayar Netto :</span><span class="value" style="font-weight: 950; color: #0284c7;">Rp ${(record.totalPrice || 0).toLocaleString('id-ID')}</span></div>
+    <div class="flex"><span class="label">HARGA BELI :</span><span class="value" style="text-align: right !important;">Rp ${(record.price || 0).toLocaleString('id-ID')}/Kg</span></div>
+    <div class="flex"><span class="label">HARGA BRUTO :</span><span class="value" style="text-align: right !important;">Rp ${(net * (record.price || 0)).toLocaleString('id-ID')}</span></div>
+    <div class="flex"><span class="label">BIAYA BURUH PANGGUL :</span><span class="value" style="text-align: right !important;">-Rp ${(record.laborCost || 0).toLocaleString('id-ID')}</span></div>
 
-    <div class="divider-line"></div>
+    <div class="divider-line" style="margin-top: 4px; margin-bottom: 4px;"></div>
+    <div class="flex" style="font-weight: 950; font-size: 9pt; background-color: #fafafa; padding: 3px 2px;"><span class="label" style="font-weight: 950;">TOTAL HARUS DIBAYAR :</span><span class="value" style="font-weight: 950; text-align: right !important; color: #000000 !important;">Rp ${(record.totalPrice || 0).toLocaleString('id-ID')}</span></div>
+    <div class="divider-line" style="margin-top: 4px; margin-bottom: 4px;"></div>
 
-    <div class="signatures">
-      <div>Petugas<div class="signature-space"></div><div class="signature-line">${staffName}</div></div>
-      <div>Sopir<div class="signature-space"></div><div class="signature-line">( )</div></div>
+    <div class="signatures" style="margin-top: 8px; width: 100%; display: table; table-layout: fixed;">
+      <div style="display: table-cell; width: 50%; text-align: center !important; vertical-align: top; padding: 0 4px; font-size: 7.5pt; font-weight: bold; line-height: 1.1;">
+        Staff 162
+        <div style="margin-top: 18px; font-weight: bold; text-align: center !important;">${staffName}</div>
+        <div style="border-top: 1.2px solid #000; width: 85%; margin: 2px auto 0 auto;"></div>
+        <div style="margin-top: 2px; text-align: center !important;">(         )</div>
+      </div>
+      <div style="display: table-cell; width: 50%; text-align: center !important; vertical-align: top; padding: 0 4px; font-size: 7.5pt; font-weight: bold; line-height: 1.1;">
+        Sopir / Pembawa
+        <div style="margin-top: 18px; font-weight: bold; text-align: center !important;">&nbsp;</div>
+        <div style="border-top: 1.2px solid #000; width: 85%; margin: 2px auto 0 auto;"></div>
+        <div style="margin-top: 2px; text-align: center !important;">(         )</div>
+      </div>
     </div>
 
-    <div class="footer-msg">
-      * Terimakasih *
+    <div class="footer-msg" style="margin-top: 10px; border-top: 1.2px dashed #000; padding-top: 4px; text-align: center;">
+      * Terimakasih atas kerjasamanya *<br/>
+      Aplikasi Timbangan GSC GST-9700 v2.0
     </div>
   </div>
 </body>
