@@ -267,7 +267,7 @@ export default function WeighbridgeModule({
     setConfirmModal({
       isOpen: true,
       title: t.confirmCompleteTimbang2,
-      message: `Apakah Anda yakin ingin memproses Timbang 2 (Selesai) untuk tiket #${selectedTicket.ticketNo} dengan berat tare ${simulatorWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg?`,
+      message: `Apakah Anda yakin ingin memproses Timbang 2 (Selesai) untuk tiket #${selectedTicket.ticketNo} dengan berat tare ${(simulatorWeight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg?`,
       type: 'EDIT',
       onConfirm: () => {
         executeTimbang2();

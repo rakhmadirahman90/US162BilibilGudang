@@ -32,11 +32,11 @@ export default function DashboardProductShowcase({ products }: Props) {
             <div className="flex justify-between items-end">
               <div>
                 <p className="text-neutral-500 text-[10px] uppercase font-black tracking-wider mb-0.5">HARGA PER KG</p>
-                <p className="text-emerald-700 font-bold text-sm">RP {p.pricePerKg.toLocaleString('id-ID')}</p>
+                <p className="text-emerald-700 font-bold text-sm">RP {(p.pricePerKg ?? 0).toLocaleString('id-ID')}</p>
               </div>
               <div className="text-right">
                 <p className="text-neutral-500 text-[10px] uppercase font-black tracking-wider mb-0.5">LOGISTIK FISIK</p>
-                <p className="text-neutral-800 font-bold text-sm">{p.stockAvailable.toLocaleString('id-ID')} KG</p>
+                <p className="text-neutral-800 font-bold text-sm">{(p.stockAvailable ?? 0).toLocaleString('id-ID')} KG</p>
               </div>
             </div>
           </div>

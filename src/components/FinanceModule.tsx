@@ -90,9 +90,9 @@ export default function FinanceModule({
       d.date,
       d.supplierName,
       d.description,
-      `Rp ${d.totalDebt.toLocaleString('id-ID')}`,
-      `Rp ${d.paidAmount.toLocaleString('id-ID')}`,
-      `Rp ${d.remainingBalance.toLocaleString('id-ID')}`,
+      `Rp ${(d.totalDebt ?? 0).toLocaleString('id-ID')}`,
+      `Rp ${(d.paidAmount ?? 0).toLocaleString('id-ID')}`,
+      `Rp ${(d.remainingBalance ?? 0).toLocaleString('id-ID')}`,
       d.status === 'LUNAS' ? 'LUNAS' : 'SISA UTANG'
     ]);
     const totalDebt = debts.reduce((sum, d) => sum + d.totalDebt, 0);
@@ -100,9 +100,9 @@ export default function FinanceModule({
     const totalRemaining = debts.reduce((sum, d) => sum + d.remainingBalance, 0);
     const summaries = [
       { label: 'Total Transaksi Utang', value: `${debts.length} Pihak` },
-      { label: 'Total Utang Kumulatif', value: `Rp ${totalDebt.toLocaleString('id-ID')}` },
-      { label: 'Total Rekening Terbayar', value: `Rp ${totalPaid.toLocaleString('id-ID')}` },
-      { label: 'Sisa Saldo Terutang', value: `Rp ${totalRemaining.toLocaleString('id-ID')}` }
+      { label: 'Total Utang Kumulatif', value: `Rp ${(totalDebt ?? 0).toLocaleString('id-ID')}` },
+      { label: 'Total Rekening Terbayar', value: `Rp ${(totalPaid ?? 0).toLocaleString('id-ID')}` },
+      { label: 'Sisa Saldo Terutang', value: `Rp ${(totalRemaining ?? 0).toLocaleString('id-ID')}` }
     ];
     printPDFReport('Laporan Buku Utang Aliansi Tani', headers, rows, summaries);
   };
@@ -132,15 +132,15 @@ export default function FinanceModule({
       f.category,
       f.description,
       f.bankAccount,
-      f.type === 'DEBIT' ? `Rp ${f.amount.toLocaleString('id-ID')}` : '-',
-      f.type === 'KREDIT' ? `Rp ${f.amount.toLocaleString('id-ID')}` : '-'
+      f.type === 'DEBIT' ? `Rp ${(f.amount ?? 0).toLocaleString('id-ID')}` : '-',
+      f.type === 'KREDIT' ? `Rp ${(f.amount ?? 0).toLocaleString('id-ID')}` : '-'
     ]);
     const totalDebit = finances.filter(f => f.type === 'DEBIT').reduce((sum, f) => sum + f.amount, 0);
     const totalKredit = finances.filter(f => f.type === 'KREDIT').reduce((sum, f) => sum + f.amount, 0);
     const summaries = [
       { label: 'Total Transaksi Mutasi', value: `${finances.length} Alur` },
-      { label: 'Total Dana Masuk (Debit)', value: `Rp ${totalDebit.toLocaleString('id-ID')}` },
-      { label: 'Total Dana Keluar (Kredit)', value: `Rp ${totalKredit.toLocaleString('id-ID')}` },
+      { label: 'Total Dana Masuk (Debit)', value: `Rp ${(totalDebit ?? 0).toLocaleString('id-ID')}` },
+      { label: 'Total Dana Keluar (Kredit)', value: `Rp ${(totalKredit ?? 0).toLocaleString('id-ID')}` },
       { label: 'Selisih Net Saldo Bersih', value: `Rp ${(totalDebit - totalKredit).toLocaleString('id-ID')}` }
     ];
     printPDFReport('Buku Mutasi Kas & Saluran Rekening', headers, rows, summaries);
@@ -201,7 +201,7 @@ export default function FinanceModule({
     setConfirmModal({
       isOpen: true,
       title: "Konfirmasi Tambah Transaksi Mutasi",
-      message: `Apakah Anda yakin ingin menambahkan transaksi mutasi ${finType === 'DEBIT' ? 'Pemasukan (Debit)' : 'Pengeluaran (Kredit)'} sebesar Rp ${finAmount.toLocaleString('id-ID')} untuk '${finDesc}'?`,
+      message: `Apakah Anda yakin ingin menambahkan transaksi mutasi ${finType === 'DEBIT' ? 'Pemasukan (Debit)' : 'Pengeluaran (Kredit)'} sebesar Rp ${(finAmount ?? 0).toLocaleString('id-ID')} untuk '${finDesc}'?`,
       type: 'ADD',
       onConfirm: () => {
         executeAddFinance();
@@ -247,7 +247,7 @@ export default function FinanceModule({
       title: editingDebtId ? "Konfirmasi Ubah Utang" : "Konfirmasi Pencatatan Utang",
       message: editingDebtId
         ? `Apakah Anda yakin ingin memperbarui catatan utang kepada ${supplierName.toUpperCase()}?`
-        : `Apakah Anda yakin ingin mencatatkan kewajiban utang baru kepada supplier ${supplierName.toUpperCase()} sebesar Rp ${debtAmount.toLocaleString('id-ID')}?`,
+        : `Apakah Anda yakin ingin mencatatkan kewajiban utang baru kepada supplier ${supplierName.toUpperCase()} sebesar Rp ${(debtAmount ?? 0).toLocaleString('id-ID')}?`,
       type: editingDebtId ? 'EDIT' : 'ADD',
       onConfirm: () => {
         executeSave();
@@ -290,7 +290,7 @@ export default function FinanceModule({
       title: editingFinId ? "Konfirmasi Ubah Mutasi" : "Konfirmasi Tambah Transaksi Mutasi",
       message: editingFinId
         ? `Apakah Anda yakin ingin memperbarui catatan mutasi transaksi '${finDesc}'?`
-        : `Apakah Anda yakin ingin menambahkan transaksi mutasi ${finType === 'DEBIT' ? 'Pemasukan (Debit)' : 'Pengeluaran (Kredit)'} sebesar Rp ${finAmount.toLocaleString('id-ID')} untuk '${finDesc}'?`,
+        : `Apakah Anda yakin ingin menambahkan transaksi mutasi ${finType === 'DEBIT' ? 'Pemasukan (Debit)' : 'Pengeluaran (Kredit)'} sebesar Rp ${(finAmount ?? 0).toLocaleString('id-ID')} untuk '${finDesc}'?`,
       type: editingFinId ? 'EDIT' : 'ADD',
       onConfirm: () => {
         executeSave();
@@ -316,13 +316,13 @@ export default function FinanceModule({
 
     const executePayBroker = () => {
       onAddFinance(newFin);
-      (window as any).__showToast?.(`Komisi Makelar ${activeBroker.name} sebesar Rp ${calculatedCommission.toLocaleString('id-ID')} berhasil dicatat dalam Buku Mutasi!`, "success");
+      (window as any).__showToast?.(`Komisi Makelar ${activeBroker.name} sebesar Rp ${(calculatedCommission ?? 0).toLocaleString('id-ID')} berhasil dicatat dalam Buku Mutasi!`, "success");
     };
 
     setConfirmModal({
       isOpen: true,
       title: "Konfirmasi Bayar Komisi Makelar",
-      message: `Apakah Anda yakin ingin membayar komisi makelar untuk ${activeBroker.name} sebesar Rp ${calculatedCommission.toLocaleString('id-ID')}?`,
+      message: `Apakah Anda yakin ingin membayar komisi makelar untuk ${activeBroker.name} sebesar Rp ${(calculatedCommission ?? 0).toLocaleString('id-ID')}?`,
       type: 'PAY',
       onConfirm: () => {
         executePayBroker();
@@ -344,7 +344,7 @@ export default function FinanceModule({
     setConfirmModal({
       isOpen: true,
       title: "Konfirmasi Cicilan Utang",
-      message: `Apakah Anda yakin ingin melakukan pembayaran cicilan utang kepada ${supplier} sebesar Rp ${payAmount.toLocaleString('id-ID')}?`,
+      message: `Apakah Anda yakin ingin melakukan pembayaran cicilan utang kepada ${supplier} sebesar Rp ${(payAmount ?? 0).toLocaleString('id-ID')}?`,
       type: 'PAY',
       onConfirm: () => {
         executePayDebt();
@@ -632,15 +632,15 @@ export default function FinanceModule({
                 </div>
                 <div className="flex justify-between items-center py-1 border-b border-neutral-200/50">
                   <span className="text-neutral-500">VOLUME CARGO NETTO:</span>
-                  <span className="font-black">{brokerCargoWeight.toLocaleString('id-ID')} KG</span>
+                  <span className="font-black">{(brokerCargoWeight ?? 0).toLocaleString('id-ID')} KG</span>
                 </div>
                 <div className="flex justify-between items-center py-1 border-b border-neutral-200/50">
                   <span className="text-neutral-500">TARIF F FEE (NETTO):</span>
-                  <span className="font-black text-neutral-600">RP {brokerRate} / KG</span>
+                  <span className="font-black text-neutral-600">RP {(brokerRate ?? 0)} / KG</span>
                 </div>
                 <div className="mt-3 flex justify-between items-center text-sm font-black bg-emerald-50 border border-emerald-100 p-3 text-emerald-950 rounded-lg shadow-inner">
                   <span className="tracking-tighter">TOTAL KOMISI TERHUTANG:</span>
-                  <span className="text-emerald-700 text-lg font-black tracking-tighter">RP {calculatedCommission.toLocaleString('id-ID')}</span>
+                  <span className="text-emerald-700 text-lg font-black tracking-tighter">RP {(calculatedCommission ?? 0).toLocaleString('id-ID')}</span>
                 </div>
               </div>
 

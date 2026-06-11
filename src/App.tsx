@@ -851,7 +851,7 @@ export default function App() {
   const handleAddDebt = (debt: DebtRecord) => {
     setDebts(prev => [debt, ...prev]);
     saveOnline('debts', debt);
-    showToast(`Sukses mencatatkan utang kepada ${debt.supplierName} sebesar Rp ${debt.totalDebt.toLocaleString('id-ID')}!`, 'success');
+    showToast(`Sukses mencatatkan utang kepada ${debt.supplierName} sebesar Rp ${(debt.totalDebt ?? 0).toLocaleString('id-ID')}!`, 'success');
   };
 
   const handleUpdateDebt = (debt: DebtRecord) => {
@@ -908,13 +908,13 @@ export default function App() {
     saveOnline('debts', updatedDebt);
     saveOnline('finances', newFin);
 
-    showToast(`Pembayaran cicilan utang kepada ${supplier} sebesar Rp ${amount.toLocaleString('id-ID')} berhasil dicatat!`, 'success');
+    showToast(`Pembayaran cicilan utang kepada ${supplier} sebesar Rp ${(amount ?? 0).toLocaleString('id-ID')} berhasil dicatat!`, 'success');
   };
 
   const handleAddFinance = (fin: FinancialRecord) => {
     setFinances(prev => [fin, ...prev]);
     saveOnline('finances', fin);
-    showToast(`Mutasi kas ${fin.type === 'DEBIT' ? 'Pemasukan' : 'Pengeluaran'} Rp ${fin.amount.toLocaleString('id-ID')} berhasil disimpan!`, 'success');
+    showToast(`Mutasi kas ${fin.type === 'DEBIT' ? 'Pemasukan' : 'Pengeluaran'} Rp ${(fin.amount ?? 0).toLocaleString('id-ID')} berhasil disimpan!`, 'success');
   };
 
   const handleUpdateFinance = (fin: FinancialRecord) => {
@@ -1289,7 +1289,7 @@ export default function App() {
             }`}
           >
             <LayoutDashboard className="w-4 h-4" />
-            01. {t.dashboard}
+            01. RINGKASAN DASHBOARD
           </button>
  
           <button
@@ -1301,7 +1301,7 @@ export default function App() {
             }`}
           >
             <Scale className="w-4 h-4 text-blue-500" />
-            02. {t.weighbridge}
+            02. JEMBATAN TIMBANGAN
           </button>
  
           <button
@@ -1313,7 +1313,7 @@ export default function App() {
             }`}
           >
             <ArrowDownCircle className="w-4 h-4 text-emerald-600" />
-            03. {t.inbound}
+            03. PENERIMAAN BARANG MASUK
           </button>
  
           <button
@@ -1325,7 +1325,7 @@ export default function App() {
             }`}
           >
             <ArrowUpCircle className="w-4 h-4 text-blue-600" />
-            04. {t.outbound}
+            04. PENGIRIMAN BARANG KELUAR
           </button>
  
           <button
@@ -1337,7 +1337,7 @@ export default function App() {
             }`}
           >
             <Wind className="w-4 h-4 text-sky-500" />
-            05. {t.services}
+            05. JASA POLES & KIPAS (BLOWER)
           </button>
  
           <button
@@ -1349,7 +1349,7 @@ export default function App() {
             }`}
           >
             <Percent className="w-4 h-4 text-amber-500" />
-            06. {t.moisture}
+            06. POTONGAN REFAKSI KADAR AIR
           </button>
  
           <button
@@ -1373,7 +1373,7 @@ export default function App() {
             }`}
           >
             <Package className="w-4 h-4 text-emerald-600" />
-            08. {t.riceStock}
+            08. BUKU STOK LOGISTIK BERAS
           </button>
  
           {sessionUser?.role === 'admin' && (
@@ -1386,7 +1386,7 @@ export default function App() {
               }`}
             >
               <DollarSign className="w-4 h-4 text-emerald-600" />
-              09. {t.finance}
+              09. MANAJEMEN KEUANGAN & KAS
             </button>
           )}
   
@@ -1399,7 +1399,7 @@ export default function App() {
             }`}
           >
             <Package className="w-4 h-4 text-emerald-600" />
-            10. {t.products}
+            10. KATALOG PRODUK AKTIF
           </button>
  
           {sessionUser?.role === 'admin' && (
@@ -1413,7 +1413,7 @@ export default function App() {
                 }`}
               >
                 <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
-                11. {t.reports}
+                11. LAPORAN REKAPITULASI
               </button>
      
               <button
@@ -1425,7 +1425,7 @@ export default function App() {
                 }`}
               >
                 <Database className="w-4 h-4 text-rose-500" />
-                12. {t.database}
+                12. DATA MASTER SISTEM
               </button>
             </>
           )}
@@ -1571,17 +1571,17 @@ export default function App() {
               >
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.cornStock || 'STOK JAGUNG SILO'}</span>
-                    {cornStockBalance <= 5000 && <AlertCircle className="w-3 h-3 text-red-500 animate-pulse" />}
-                  </div>
-                  <span className={`text-xl sm:text-2xl font-black ${cornStockBalance <= 5000 ? 'text-red-600' : 'text-amber-650'} font-mono tracking-tight`}>
-                    {cornStockBalance.toLocaleString('id-ID')} <span className="text-xs text-neutral-400 font-normal">{t.kgNetto || 'Kg'}</span>
-                  </span>
-                  <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1 uppercase font-black">
-                    <span className="text-[#10b981] font-semibold">MASUK: {totalInboundCorn.toLocaleString('id-ID')}</span>
-                    <span className="text-neutral-300">|</span>
-                    <span className="text-red-500 font-semibold">KELUAR: {totalOutboundCorn.toLocaleString('id-ID')}</span>
-                  </div>
+                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.cornStock || 'STOK JAGUNG GUDANG'}</span>
+                  {cornStockBalance <= 5000 && <AlertCircle className="w-3 h-3 text-red-500 animate-pulse" />}
+                </div>
+                <span className={`text-xl sm:text-2xl font-black ${cornStockBalance <= 5000 ? 'text-red-600' : 'text-amber-650'} font-mono tracking-tight`}>
+                  {(cornStockBalance ?? 0).toLocaleString('id-ID')} <span className="text-xs text-neutral-400 font-normal">{t.kgNetto || 'Kg'}</span>
+                </span>
+                <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1 uppercase font-black">
+                  <span className="text-[#10b981] font-semibold">MSK: {(totalInboundCorn ?? 0).toLocaleString('id-ID')}</span>
+                  <span className="text-neutral-300">|</span>
+                  <span className="text-red-500 font-semibold">KLR: {(totalOutboundCorn ?? 0).toLocaleString('id-ID')}</span>
+                </div>
                 </div>
                 <div className={`w-10 h-10 ${cornStockBalance <= 5000 ? 'bg-red-50' : 'bg-amber-50'} rounded-lg flex items-center justify-center border ${cornStockBalance <= 5000 ? 'border-red-100' : 'border-amber-100'} group-hover:scale-110 transition duration-300 shrink-0`}>
                   <Package className={`${cornStockBalance <= 5000 ? 'text-red-500' : 'text-amber-500'} w-5 h-5`} />
@@ -1598,17 +1598,17 @@ export default function App() {
               >
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.riceStockLabel || 'LOGISTIK BERAS MASUK'}</span>
-                    {riceStockBalance <= 2000 && <AlertCircle className="w-3 h-3 text-red-500 animate-pulse" />}
-                  </div>
-                  <span className={`text-xl sm:text-2xl font-black ${riceStockBalance <= 2000 ? 'text-red-600' : 'text-emerald-800'} font-mono tracking-tight`}>
-                    {riceStockBalance.toLocaleString('id-ID')} <span className="text-xs text-neutral-400 font-normal">{t.kgNetto || 'Kg'}</span>
-                  </span>
-                  <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1 uppercase font-black">
-                    <span className="text-[#10b981] font-semibold">MASUK: {totalInboundRice.toLocaleString('id-ID')}</span>
-                    <span className="text-neutral-300">|</span>
-                    <span className="text-red-500 font-semibold">KELUAR: {totalOutboundRice.toLocaleString('id-ID')}</span>
-                  </div>
+                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.riceStockLabel || 'STOK BERAS GUDANG'}</span>
+                  {riceStockBalance <= 2000 && <AlertCircle className="w-3 h-3 text-red-500 animate-pulse" />}
+                </div>
+                <span className={`text-xl sm:text-2xl font-black ${riceStockBalance <= 2000 ? 'text-red-600' : 'text-emerald-800'} font-mono tracking-tight`}>
+                  {(riceStockBalance ?? 0).toLocaleString('id-ID')} <span className="text-xs text-neutral-400 font-normal">{t.kgNetto || 'Kg'}</span>
+                </span>
+                <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1 uppercase font-black">
+                  <span className="text-[#10b981] font-semibold">MSK: {(totalInboundRice ?? 0).toLocaleString('id-ID')}</span>
+                  <span className="text-neutral-300">|</span>
+                  <span className="text-red-500 font-semibold">KLR: {(totalOutboundRice ?? 0).toLocaleString('id-ID')}</span>
+                </div>
                 </div>
                 <div className={`w-10 h-10 ${riceStockBalance <= 2000 ? 'bg-red-50' : 'bg-emerald-50'} rounded-lg flex items-center justify-center border ${riceStockBalance <= 2000 ? 'border-red-100' : 'border-emerald-100'} group-hover:scale-110 transition duration-300 shrink-0`}>
                   <Package className={`${riceStockBalance <= 2000 ? 'text-red-500' : 'text-emerald-600'} w-5 h-5`} />
@@ -1653,10 +1653,10 @@ export default function App() {
                   {sessionUser?.role === 'admin' ? (
                     <>
                       <span className={`text-base sm:text-[17px] font-black font-mono tracking-tight ${netKasBalance >= 0 ? 'text-emerald-700' : 'text-red-500'}`}>
-                        Rp {netKasBalance.toLocaleString('id-ID')}
+                        Rp {(netKasBalance ?? 0).toLocaleString('id-ID')}
                       </span>
                       <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1">
-                        <span className="font-bold font-mono text-[9px] text-red-500">{t.supplierDebt || 'Hutang AP'}: Rp {totalOutstandingDebts.toLocaleString('id-ID')}</span>
+                        <span className="font-bold font-mono text-[9px] text-red-500">{t.supplierDebt || 'Hutang AP'}: Rp {(totalOutstandingDebts ?? 0).toLocaleString('id-ID')}</span>
                       </div>
                     </>
                   ) : (
@@ -1695,7 +1695,7 @@ export default function App() {
                     <div>
                       <div className="flex justify-between text-xs font-semibold text-neutral-600 mb-1">
                         <span className="flex items-center gap-1 font-sans text-neutral-700">🌽 Silo Jagung Utama (Maks. 55.000 Kg)</span>
-                        <span className="font-mono text-neutral-800">{cornStockBalance.toLocaleString('id-ID')} Kg ({Math.min(100, Math.round((cornStockBalance / 55000) * 100)) || 0}%)</span>
+                        <span className="font-mono text-neutral-800">{(cornStockBalance ?? 0).toLocaleString('id-ID')} Kg ({Math.min(100, Math.round((cornStockBalance / 55000) * 100)) || 0}%)</span>
                       </div>
                       <div className="w-full bg-neutral-100 h-3 rounded-full overflow-hidden border border-neutral-200">
                         <div 
@@ -1709,7 +1709,7 @@ export default function App() {
                     <div>
                       <div className="flex justify-between text-xs font-semibold text-neutral-600 mb-1">
                         <span className="flex items-center gap-1 font-sans text-neutral-700">🌾 Gudang Beras Utama (Maks. 110.000 Kg)</span>
-                        <span className="font-mono text-neutral-800">{riceStockBalance.toLocaleString('id-ID')} Kg ({Math.min(100, Math.round((riceStockBalance / 110000) * 100)) || 0}%)</span>
+                        <span className="font-mono text-neutral-800">{(riceStockBalance ?? 0).toLocaleString('id-ID')} Kg ({Math.min(100, Math.round((riceStockBalance / 110000) * 100)) || 0}%)</span>
                       </div>
                       <div className="w-full bg-neutral-100 h-3 rounded-full overflow-hidden border border-neutral-200">
                         <div 
@@ -1730,7 +1730,7 @@ export default function App() {
                           <>
                             <div className="flex justify-between text-xs font-semibold text-neutral-600 mb-1">
                               <span className="flex items-center gap-1 font-sans text-neutral-700">⚙️ Unit Poles & Dryer Gas (Beban Kumulatif)</span>
-                              <span className="font-mono text-neutral-800">{activeProcessingKg.toLocaleString('id-ID')} Kg ({percent}%)</span>
+                              <span className="font-mono text-neutral-800">{(activeProcessingKg ?? 0).toLocaleString('id-ID')} Kg ({percent}%)</span>
                             </div>
                             <div className="w-full bg-neutral-100 h-3 rounded-full overflow-hidden border border-neutral-200">
                               <div 
@@ -1786,7 +1786,7 @@ export default function App() {
                       <div className="relative pt-4">
                         <div className="w-full h-44 sm:h-52 flex items-end justify-between px-2 sm:px-6 relative border-b border-neutral-200">
                           <div className="absolute left-0 right-0 top-0 h-full flex flex-col justify-between pointer-events-none text-[8px] sm:text-[9px] font-mono text-neutral-400">
-                            <div className="border-t border-dashed border-neutral-200 w-full pt-1">{(maxVal).toLocaleString('id-ID')} Kg</div>
+                            <div className="border-t border-dashed border-neutral-200 w-full pt-1">{(maxVal ?? 0).toLocaleString('id-ID')} Kg</div>
                             <div className="border-t border-dashed border-neutral-200 w-full pt-1">{(maxVal * 0.75).toLocaleString('id-ID')} Kg</div>
                             <div className="border-t border-dashed border-neutral-200 w-full pt-1">{(maxVal * 0.5).toLocaleString('id-ID')} Kg</div>
                             <div className="border-t border-dashed border-neutral-200 w-full pt-1">{(maxVal * 0.25).toLocaleString('id-ID')} Kg</div>
@@ -1800,7 +1800,7 @@ export default function App() {
                                 <div className="flex items-end gap-1.5 w-full justify-center h-full pb-1">
                                   <div className="group/bar relative flex flex-col items-center justify-end w-4 sm:w-6 transition-all">
                                     <div className="absolute -top-7 scale-0 group-hover/bar:scale-100 bg-[#122345] text-white font-mono text-[9px] px-1.5 py-0.5 rounded shadow z-40 whitespace-nowrap transition duration-200 leading-none">
-                                      {d.inbound.toLocaleString('id-ID')} Kg
+                                      {(d.inbound ?? 0).toLocaleString('id-ID')} Kg
                                     </div>
                                     <div 
                                       className="bg-gradient-to-t from-emerald-600 to-emerald-400 hover:opacity-90 w-full rounded-t transition-all shadow-sm duration-500"
@@ -1810,7 +1810,7 @@ export default function App() {
 
                                   <div className="group/bar relative flex flex-col items-center justify-end w-4 sm:w-6 transition-all">
                                     <div className="absolute -top-7 scale-0 group-hover/bar:scale-100 bg-[#122345] text-white font-mono text-[9px] px-1.5 py-0.5 rounded shadow z-40 whitespace-nowrap transition duration-200 leading-none">
-                                      {d.outbound.toLocaleString('id-ID')} Kg
+                                      {(d.outbound ?? 0).toLocaleString('id-ID')} Kg
                                     </div>
                                     <div 
                                       className="bg-gradient-to-t from-sky-600 to-sky-400 hover:opacity-90 w-full rounded-t transition-all shadow-sm duration-500"
@@ -1858,7 +1858,7 @@ export default function App() {
                                 <p className="text-[10px] text-neutral-500 font-mono mt-0.5">{d.description}</p>
                               </div>
                               <div className="text-right">
-                                <span className="font-mono font-black text-red-700">Rp {d.remainingBalance.toLocaleString('id-ID')}</span>
+                                <span className="font-mono font-black text-red-700">Rp {(d.remainingBalance ?? 0).toLocaleString('id-ID')}</span>
                                 <p className="text-[9px] text-neutral-500 leading-none">Sisa Tagihan</p>
                               </div>
                             </div>
@@ -2055,14 +2055,14 @@ export default function App() {
                             <td className="py-2.5 px-3 font-mono font-semibold text-neutral-700">{r.ticketNo || '-'}</td>
                             <td className="py-2.5 px-3 font-bold text-neutral-800">{r.vehicleNo}</td>
                             <td className="py-2.5 px-3 text-neutral-800 font-semibold">{r.supplier}</td>
-                            <td className="text-right py-2.5 px-3 font-black text-emerald-700 font-mono">{r.netWeight.toLocaleString('id-ID')} Kg</td>
+                            <td className="p-2 text-right font-black text-emerald-700 font-mono">{(r.netWeight ?? 0).toLocaleString('id-ID')} Kg</td>
                             <td className="py-2.5 px-3 text-center">
                               <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${r.moistureContent > 16.0 ? 'bg-red-100 text-red-650 font-bold' : 'bg-green-50 text-green-700 font-bold border border-green-200 px-1 py-0.5'}`}>
                                 {r.moistureContent}%
                               </span>
                             </td>
                             <td className="py-2.5 px-3 text-neutral-500 font-medium">{r.warehouseSection}</td>
-                            <td className="text-right py-2.5 px-3 font-black font-mono text-neutral-800">Rp {r.totalPrice.toLocaleString('id-ID')}</td>
+                            <td className="text-right py-2.5 px-3 font-black font-mono text-neutral-800">Rp {(r.totalPrice ?? 0).toLocaleString('id-ID')}</td>
                           </tr>
                         ))
                       )}
@@ -2096,7 +2096,7 @@ export default function App() {
                             <td className="py-2.5 px-3 text-neutral-800 font-semibold">{r.vehicleNo}</td>
                             <td className="py-2.5 px-3 text-neutral-800 font-bold">{r.buyer}</td>
                             <td className="py-2.5 px-3 font-semibold text-neutral-700">{r.commodity}</td>
-                            <td className="text-right py-2.5 px-3 font-black text-blue-750 font-mono">{r.totalWeight.toLocaleString('id-ID')} Kg</td>
+                            <td className="text-right py-2.5 px-3 font-black text-blue-750 font-mono">{(r.totalWeight ?? 0).toLocaleString('id-ID')} Kg</td>
                             <td className="py-2.5 px-3 text-neutral-500 font-medium">{r.destination}</td>
                             <td className="py-2.5 px-3 text-center">
                               <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${r.status === 'SHIPPED' ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700'}`}>
@@ -2137,9 +2137,9 @@ export default function App() {
                               <span className="bg-sky-50 text-sky-700 px-1.5 py-0.5 rounded text-[10px] font-bold">{s.serviceType}</span>
                             </td>
                             <td className="py-2.5 px-3 font-medium text-neutral-600">{s.commodity}</td>
-                            <td className="text-right py-2.5 px-3 font-mono">{s.weight.toLocaleString('id-ID')} Kg</td>
+                            <td className="text-right py-2.5 px-3 font-mono">{(s.weight ?? 0).toLocaleString('id-ID')} Kg</td>
                             <td className="text-right py-2.5 px-3 font-mono">Rp {s.ratePerKg}</td>
-                            <td className="text-right py-2.5 px-3 font-black text-sky-800 font-mono">Rp {s.totalFee.toLocaleString('id-ID')}</td>
+                            <td className="text-right py-2.5 px-3 font-black text-sky-800 font-mono">Rp {(s.totalFee ?? 0).toLocaleString('id-ID')}</td>
                             <td className="py-2.5 px-3 text-center">
                               <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${s.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-650'}`}>
                                 {s.paymentStatus}
@@ -2184,7 +2184,7 @@ export default function App() {
                             <td className="py-2.5 px-3 text-neutral-800 font-medium">{f.description}</td>
                             <td className="py-2.5 px-3 text-neutral-600 font-semibold">{f.partyName || '-'}</td>
                             <td className={`text-right py-2.5 px-3 font-black font-mono ${f.type === 'DEBIT' ? 'text-emerald-700' : 'text-rose-700'}`}>
-                              Rp {f.amount.toLocaleString('id-ID')}
+                              Rp {(f.amount ?? 0).toLocaleString('id-ID')}
                             </td>
                             <td className="py-2.5 px-3 font-mono text-neutral-500">{f.bankAccount}</td>
                           </tr>

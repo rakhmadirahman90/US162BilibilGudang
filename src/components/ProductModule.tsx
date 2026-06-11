@@ -24,12 +24,12 @@ export default function ProductModule({ products }: Props) {
         </div>
       </div>
 
-      {/* Grid Layout - Extremely Dense to fit the screen */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-1.5">
+      {/* Grid Layout - Extremely Dense and fluid to fit the screen */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-1.5 overflow-y-auto max-h-[80vh] custom-scrollbar p-1">
         {products.map(p => (
-          <div key={p.id} className="group bg-white rounded-lg border border-neutral-200 shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden h-fit">
-            {/* Image Preview - Smaller aspect for compactness */}
-            <div className="aspect-square bg-neutral-50 flex items-center justify-center border-b border-neutral-100 overflow-hidden relative">
+          <div key={p.id} className="group bg-white rounded-lg border border-neutral-200 shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden h-fit max-w-[140px] mx-auto w-full">
+            {/* Image Preview - smaller and tighter */}
+            <div className="aspect-[4/3] bg-neutral-50 flex items-center justify-center border-b border-neutral-100 overflow-hidden relative">
               {p.imageUrl ? (
                 <img 
                   src={p.imageUrl} 
@@ -66,13 +66,13 @@ export default function ProductModule({ products }: Props) {
                 <div className="flex justify-between items-center border-b border-neutral-50 pb-0.5">
                   <span className="text-[5px] font-black text-neutral-400 uppercase">RP/KG</span>
                   <span className="font-black text-emerald-700 text-[9px] tabular-nums tracking-tighter">
-                    {p.pricePerKg.toLocaleString('id-ID')}
+                    {(p.pricePerKg ?? 0).toLocaleString('id-ID')}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-[5px] font-black text-neutral-400 uppercase">STOK</span>
                   <p className="text-neutral-800 font-extrabold text-[9px] tabular-nums tracking-tighter leading-none">
-                    {p.stockAvailable.toLocaleString('id-ID')} <span className="text-[6px] text-neutral-400 uppercase">KG</span>
+                    {(p.stockAvailable ?? 0).toLocaleString('id-ID')} <span className="text-[6px] text-neutral-400 uppercase">KG</span>
                   </p>
                 </div>
               </div>
