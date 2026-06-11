@@ -440,7 +440,7 @@ export default function FinanceModule({
                     type="text"
                     value={supplierName}
                     onChange={(e) => setSupplierName(e.target.value)}
-                    placeholder="Contoh: H. Sudirman - Sidrap"
+                    placeholder="Contoh: H. Wawan - Sidrap"
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
                   />
                 </div>

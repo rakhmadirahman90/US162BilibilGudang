@@ -191,7 +191,7 @@ export const initialInboundRecords: InboundRecord[] = [
     date: "2026-06-08",
     ticketNo: "021230",
     vehicleNo: "DD 9188 CD",
-    supplier: "H. Sudirman - Sidrap",
+    supplier: "H. Wawan - Sidrap",
     commodity: "JAGUNG",
     grossWeight: 14650,
     tareWeight: 4250,
@@ -316,7 +316,7 @@ export const initialDebtRecords: DebtRecord[] = [
   {
     id: "debt-1",
     date: "2026-06-06",
-    supplierName: "H. Sudirman - Sidrap",
+    supplierName: "H. Wawan - Sidrap",
     description: "Utang Jagung Pipil Basah 14,650 Kg (No. Tiket 021230)",
     totalDebt: 65000000,
     paidAmount: 40000000,
@@ -415,7 +415,7 @@ export const initialVehicles: VehicleRecord[] = [
 ];
 
 export const initialSuppliers: SupplierRecord[] = [
-  { id: "sup-1", name: "H. Sudirman - Sidrap", phone: "0813-5566-2211", address: "Jl. Poros Sidrap - Wajo Km 12", mainCommodity: "JAGUNG" },
+  { id: "sup-1", name: "H. Wawan - Sidrap", phone: "0813-5566-2211", address: "Jl. Poros Sidrap - Wajo Km 12", mainCommodity: "JAGUNG" },
   { id: "sup-2", name: "Kelompok Tani Harapan", phone: "0852-9900-1122", address: "Kec. Larompong Timur, Luwu", mainCommodity: "GABAH" },
   { id: "sup-3", name: "Bpk. Rahmat", phone: "0823-1122-3344", address: "Tamping, Luwu", mainCommodity: "JAGUNG" },
   { id: "sup-4", name: "CV Indo Tani Abadi", phone: "0812-7788-9900", address: "Palopo, Sulsel", mainCommodity: "LAINNYA" }

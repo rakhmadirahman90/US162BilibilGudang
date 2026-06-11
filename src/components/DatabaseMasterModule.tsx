@@ -1161,7 +1161,7 @@ export default function DatabaseMasterModule({
                     value={supplierName}
                     onChange={(e) => setSupplierName(e.target.value)}
                     className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-bold focus:border-indigo-500 outline-none text-neutral-800"
-                    placeholder="Contoh: Haji Sudirman"
+                    placeholder="Contoh: Haji Wawan"
                   />
                 </div>
                 <div>

@@ -214,7 +214,7 @@ export function printPDFReport(
             <p style="margin: 0; font-size: 10px; color: #444;">Disetujui Oleh,</p>
             <p style="margin: 5px 0 0 0; font-size: 10px; font-weight: bold; text-transform: uppercase;">Pimpinan / Kepala Gudang</p>
             <div style="height: 55px; border-bottom: 1.5px solid #222; margin: 15px auto 5px auto; width: 180px;"></div>
-            <p style="margin: 0; font-size: 9px; color: #555; font-style: italic;">( H. Sudirman / Perwakilan )</p>
+            <p style="margin: 0; font-size: 9px; color: #555; font-style: italic;">( H. Wawan / Perwakilan )</p>
           </div>
 
           <div style="width: 250px; text-align: center;">
