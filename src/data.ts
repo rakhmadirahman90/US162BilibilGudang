@@ -402,9 +402,29 @@ export const initialFinancialRecords: FinancialRecord[] = [
 export const initialEmployeeRecords: EmployeeRecord[] = [
   { id: "emp-1", name: "Wahyu", role: "KARYAWAN", phone: "0812-4455-9001" },
   { id: "emp-2", name: "Dedi", role: "KARYAWAN", phone: "0812-4455-9002" },
-  { id: "emp-3", name: "Ridwan", role: "MAKELAR", phone: "0853-2211-1622", ratePerKg: 50 },
-  { id: "emp-4", name: "Kamaludin", role: "MAKELAR", phone: "0853-2211-1633", ratePerKg: 30 },
-  { id: "emp-5", name: "Mandor Haris", role: "BURUH", phone: "0821-8877-1622" }
+  { id: "emp-3", name: "BABA", role: "MAKELAR", phone: "-", ratePerKg: 50 },
+  { id: "emp-4", name: "DOYO", role: "MAKELAR", phone: "-", ratePerKg: 40 },
+  { id: "emp-25", name: "ANDI", role: "MAKELAR", phone: "-", ratePerKg: 30 },
+  { id: "emp-5", name: "ALDI", role: "BURUH", phone: "-" },
+  { id: "emp-6", name: "AHMAD", role: "BURUH", phone: "-" },
+  { id: "emp-7", name: "JAYA", role: "BURUH", phone: "-" },
+  { id: "emp-8", name: "TAPA", role: "BURUH", phone: "-" },
+  { id: "emp-9", name: "DG TAJU", role: "BURUH", phone: "-" },
+  { id: "emp-10", name: "ANTO", role: "BURUH", phone: "-" },
+  { id: "emp-11", name: "DG LALA", role: "BURUH", phone: "-" },
+  { id: "emp-12", name: "MANGUNG", role: "BURUH", phone: "-" },
+  { id: "emp-13", name: "LAMANG", role: "BURUH", phone: "-" },
+  { id: "emp-14", name: "ANSAR", role: "BURUH", phone: "-" },
+  { id: "emp-15", name: "DG BAHA", role: "BURUH", phone: "-" },
+  { id: "emp-16", name: "ARMAN", role: "BURUH", phone: "-" },
+  { id: "emp-17", name: "DADO", role: "BURUH", phone: "-" },
+  { id: "emp-18", name: "NAWIR", role: "BURUH", phone: "-" },
+  { id: "emp-19", name: "ACO", role: "BURUH", phone: "-" },
+  { id: "emp-20", name: "MISBA", role: "BURUH", phone: "-" },
+  { id: "emp-21", name: "DG NUTU", role: "BURUH", phone: "-" },
+  { id: "emp-22", name: "DG TAMMU", role: "BURUH", phone: "-" },
+  { id: "emp-23", name: "DG GESSIN", role: "BURUH", phone: "-" },
+  { id: "emp-24", name: "ELI", role: "BURUH", phone: "-" }
 ];
 
 export const initialVehicles: VehicleRecord[] = [
@@ -462,9 +482,9 @@ export const initialBankAccounts: BankRecord[] = [
 ];
 
 export const initialBrokers: BrokerRecord[] = [
-  { id: 'bro-1', name: 'Pak Ridwan', phone: '0852-4411-2299', commissionRate: 50, address: 'Pinrang' },
-  { id: 'bro-2', name: 'H. Kamal', phone: '0812-9900-1122', commissionRate: 40, address: 'Sidrap' },
-  { id: 'bro-3', name: 'Ucu Broker', phone: '0853-2211-1622', commissionRate: 60, address: 'Suppa' }
+  { id: 'bro-1', name: 'BABA', phone: '-', commissionRate: 50, address: 'Suppa' },
+  { id: 'bro-2', name: 'DOYO', phone: '-', commissionRate: 40, address: 'Sidrap' },
+  { id: 'bro-3', name: 'ANDI', phone: '-', commissionRate: 30, address: 'Pinrang' }
 ];
 
 export const initialStorageLocations: LocationRecord[] = [
