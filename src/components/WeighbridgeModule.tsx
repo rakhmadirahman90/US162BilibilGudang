@@ -981,11 +981,11 @@ export default function WeighbridgeModule({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white border border-neutral-300 rounded-xl p-6 w-full max-w-md shadow-2xl relative"
+              className="bg-white border border-neutral-300 rounded-xl p-4 w-full max-w-sm shadow-2xl relative"
             >
               <div className="flex justify-between items-start border-b border-neutral-100 pb-3 mb-4">
-                <span className="font-bold text-neutral-800 flex items-center gap-1.5">
-                  <Printer className="text-emerald-600 w-5 h-5" />
+                <span className="font-bold text-neutral-800 flex items-center gap-1.5 uppercase text-xs tracking-widest">
+                  <Printer className="text-emerald-600 w-4 h-4" />
                   {t.printSlipPreview}
                 </span>
                 <button 
@@ -996,103 +996,104 @@ export default function WeighbridgeModule({
                 </button>
               </div>
 
-              {/* Realistic thermal slip slip paper component */}
-              <div className="bg-neutral-50 p-4 border border-dashed border-neutral-300 rounded font-mono text-[11px] text-neutral-800 leading-relaxed shadow-inner">
-                <div className="text-center border-b border-neutral-300 pb-2 mb-2">
-                  <div className="font-bold text-sm tracking-widest text-emerald-950">{t.thermalSlipHeader}</div>
-                  <div className="text-[9px]">{t.thermalSlipAddress}</div>
-                  <div className="text-[9px]">{t.thermalSlipCity}</div>
-                  <div className="text-[9px] mt-0.5">{t.thermalSlipPhone}</div>
+              <div className="bg-neutral-50 p-3 border border-dashed border-neutral-300 rounded font-mono text-[10px] text-neutral-800 leading-tight shadow-inner">
+                <div className="text-center border-b border-neutral-300 pb-1 mb-2">
+                  <div className="font-bold text-xs tracking-widest text-emerald-950">{t.thermalSlipHeader}</div>
+                  <div className="text-[8px] opacity-70">{t.thermalSlipAddress}</div>
+                  <div className="text-[8px] opacity-70">{t.thermalSlipCity}</div>
+                  <div className="text-[8px] opacity-70 mt-0.5">{t.thermalSlipPhone}</div>
                 </div>
 
-                <div className="flex justify-between">
-                  <span>No. Tiket :</span>
-                  <span className="font-bold font-mono">{printTicket.ticketNo}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>No. Polisi:</span>
-                  <span className="font-bold">{printTicket.policeNo}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Mitra/Agen:</span>
-                  <span className="font-semibold">{printTicket.agency}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Nama Barang:</span>
-                  <span className="font-semibold">{printTicket.goodsName}</span>
+                <div className="space-y-0.5 mb-2">
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">No. Tiket :</span>
+                    <span className="font-bold font-mono">{printTicket.ticketNo}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">No. Polisi:</span>
+                    <span className="font-bold">{printTicket.policeNo}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">Mitra/Agen:</span>
+                    <span className="font-semibold">{printTicket.agency}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-neutral-500">Barang:</span>
+                    <span className="font-semibold">{printTicket.goodsName}</span>
+                  </div>
                 </div>
                 
-                <div className="border-t border-neutral-300 my-2 pt-2" />
+                <div className="border-t border-neutral-300 my-1.5 pt-1.5" />
 
-                <div className="flex justify-between font-bold">
+                <div className="flex justify-between font-bold text-[9px]">
                   <span>{t.weigh1Label} ({language === 'id' ? 'Masuk' : 'Inbound'})</span>
                   <span>{printTicket.timbang1Weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg</span>
                 </div>
-                <div className="text-[10px] text-neutral-500 text-right">
+                <div className="text-[9px] text-neutral-500 text-right opacity-70">
                   {printTicket.timbang1Time}
                 </div>
 
-                <div className="flex justify-between font-bold mt-1">
+                <div className="flex justify-between font-bold mt-0.5 text-[9px]">
                   <span>{t.weigh2Label} ({language === 'id' ? 'Keluar' : 'Outbound'})</span>
                   <span>{printTicket.timbang2Weight > 0 ? `${printTicket.timbang2Weight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg` : '- -'}</span>
                 </div>
                 {printTicket.timbang2Time && (
-                  <div className="text-[10px] text-neutral-500 text-right">
+                  <div className="text-[9px] text-neutral-500 text-right opacity-70">
                     {printTicket.timbang2Time}
                   </div>
                 )}
 
-                <div className="border-t border-neutral-300 my-2 pt-2" />
+                <div className="border-t border-neutral-300 my-1.5 pt-1.5 space-y-0.5">
+                  <div className="flex justify-between text-[9px]">
+                    <span className="uppercase">{t.grossWeightLabel} :</span>
+                    <span>{(printTicket.timbang1Weight).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg</span>
+                  </div>
+                  <div className="flex justify-between text-[9px]">
+                    <span className="uppercase">{t.tareWeightLabel} :</span>
+                    <span>{printTicket.tareWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg</span>
+                  </div>
+                  <div className="flex justify-between text-[9px] text-neutral-500 italic">
+                    <span>Pot. Karung ({printTicket.bagDeductionPercent.toFixed(2)}%):</span>
+                    <span>- {Math.round((printTicket.grossWeight - printTicket.tareWeight) * (printTicket.bagDeductionPercent/100))} kg</span>
+                  </div>
+                  <div className="flex justify-between text-[9px] text-neutral-500 italic">
+                    <span>Pot. Refaksi ({printTicket.refaksiPercent.toFixed(2)}%):</span>
+                    <span>- {Math.round((printTicket.grossWeight - printTicket.tareWeight) * (printTicket.refaksiPercent/100))} kg</span>
+                  </div>
+                </div>
 
-                <div className="flex justify-between">
-                  <span>{t.grossWeightLabel.toUpperCase()} :</span>
-                  <span>{(printTicket.timbang1Weight).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>{t.tareWeightLabel.toUpperCase()} :</span>
-                  <span>{printTicket.tareWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg</span>
-                </div>
-                <div className="flex justify-between text-neutral-600">
-                  <span>Pot. Karung ({printTicket.bagDeductionPercent.toFixed(2)}%):</span>
-                  <span>- {Math.round((printTicket.grossWeight - printTicket.tareWeight) * (printTicket.bagDeductionPercent/100))} kg</span>
-                </div>
-                <div className="flex justify-between text-neutral-600">
-                  <span>Pot. Refaksi ({printTicket.refaksiPercent.toFixed(2)}%):</span>
-                  <span>- {Math.round((printTicket.grossWeight - printTicket.tareWeight) * (printTicket.refaksiPercent/100))} kg</span>
-                </div>
+                <div className="border-b-2 border-double border-neutral-400 my-1.5" />
 
-                <div className="border-b-2 border-double border-neutral-400 my-2" />
-
-                <div className="flex justify-between font-extrabold text-sm text-emerald-950">
-                  <span>{t.netWeightLabel.toUpperCase()} :</span>
+                <div className="flex justify-between font-extrabold text-[11px] text-emerald-950">
+                  <span className="uppercase">{t.netWeightLabel} :</span>
                   <span>{calculateNetWeight(printTicket.timbang1Weight, printTicket.timbang2Weight, printTicket.bagDeductionPercent, printTicket.refaksiPercent).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} KG</span>
                 </div>
 
                 {printTicket.notes && (
-                  <div className="mt-3 text-[10px] text-neutral-600 bg-white p-1 rounded border border-neutral-200">
+                  <div className="mt-2 text-[9px] text-neutral-600 bg-white/70 p-1 rounded border border-neutral-200">
                     <strong>Catatan:</strong> {printTicket.notes}
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4 text-center mt-6 text-[9px]">
+                <div className="grid grid-cols-2 gap-4 text-center mt-5 text-[9px]">
                     <div>
-                      <p className="mb-8">{t.riceStockTitle === 'Rincian Stok Beras' ? 'Penerima Staff 162' : 'Staff 162'}</p>
+                      <p className="mb-6">{t.riceStockTitle === 'Rincian Stok Beras' ? 'Penerima Staff 162' : 'Staff 162'}</p>
                       <p className="border-t border-neutral-400 pt-1 font-bold">{staffName}</p>
                     </div>
                   <div>
-                    <p className="mb-8">Sopir / Pembawa</p>
+                    <p className="mb-6">Sopir / Pembawa</p>
                     <p className="border-t border-neutral-400 pt-1 font-bold">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</p>
                   </div>
                 </div>
 
-                <div className="text-center text-[8px] text-neutral-400 mt-4 border-t border-neutral-200 pt-2 italic">
+                <div className="text-center text-[7px] text-neutral-400 mt-2 border-t border-neutral-200 pt-2 italic">
                   * Terimakasih atas kerjasamanya *<br />
-                  Aplikasi Timbangan GSC GST-9700 Jembatan Timbang v2.0
+                  Aplikasi Timbangan GSC GST-9700 v2.0
                 </div>
               </div>
 
               {/* Action buttons */}
-              <div className="mt-4 flex gap-2">
+              <div className="mt-3 flex gap-2">
                 <button 
                   onClick={() => {
                     printSlip(printTicket, staffName);

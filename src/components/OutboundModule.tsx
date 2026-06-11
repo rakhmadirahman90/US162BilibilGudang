@@ -596,7 +596,7 @@ export default function OutboundModule({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white border border-neutral-300 rounded-xl p-6 w-full max-w-md shadow-2xl relative"
+              className="bg-white border border-neutral-300 rounded-xl p-4 w-full max-w-sm shadow-2xl relative"
             >
               <div className="flex justify-between items-start border-b border-neutral-100 pb-3 mb-4">
                 <span className="font-bold text-neutral-800 flex items-center gap-1.5 uppercase text-xs tracking-widest">
@@ -611,14 +611,14 @@ export default function OutboundModule({
                 </button>
               </div>
 
-              <div className="bg-neutral-50 p-4 border border-dashed border-neutral-300 rounded font-mono text-[10px] text-neutral-800 leading-relaxed shadow-inner">
-                <div className="text-center border-b border-neutral-300 pb-2 mb-3">
+              <div className="bg-neutral-50 p-3 border border-dashed border-neutral-300 rounded font-mono text-[10px] text-neutral-800 leading-tight shadow-inner">
+                <div className="text-center border-b border-neutral-300 pb-1 mb-2">
                   <div className="font-bold text-xs tracking-widest text-emerald-950">CV. BILIBILI 162</div>
                   <div className="text-[8px] opacity-70">Jalan Poros Pinrang-Polman KM. 12</div>
                   <div className="text-[8px] opacity-70">Desa Bilibili, Kec. Suppa, Kab. Pinrang</div>
                 </div>
 
-                <div className="space-y-1 mb-3">
+                <div className="space-y-0.5 mb-2">
                   <div className="flex justify-between">
                     <span className="text-neutral-500">Tanggal :</span>
                     <span className="font-bold">{formatReceiptDate(previewRecord.date)}</span>
@@ -641,18 +641,18 @@ export default function OutboundModule({
                   </div>
                 </div>
 
-                <div className="border-y border-neutral-200 py-3 my-2 bg-white/50 px-2 rounded">
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-neutral-500">BARANG :</span>
+                <div className="border-y border-neutral-200 py-2 my-1.5 bg-white/50 px-2 rounded">
+                  <div className="flex justify-between items-center text-[9px]">
+                    <span className="font-bold text-neutral-500 uppercase">Barang :</span>
                     <span className="font-black text-neutral-800">{previewRecord.commodity}</span>
                   </div>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="font-bold text-neutral-500">TOTAL BERAT :</span>
-                    <span className="font-black text-emerald-600 text-[12px]">{(previewRecord.totalWeight ?? 0).toLocaleString('id-ID')} KG</span>
+                  <div className="flex justify-between items-center mt-1 text-[9px]">
+                    <span className="font-bold text-neutral-500 uppercase">Total Berat :</span>
+                    <span className="font-black text-emerald-600 text-[11px]">{(previewRecord.totalWeight ?? 0).toLocaleString('id-ID')} KG</span>
                   </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-4 text-center text-[9px]">
+                <div className="mt-3 grid grid-cols-2 gap-4 text-center text-[9px]">
                   <div>
                     <p className="mb-2">Staff 162</p>
                     <input
@@ -668,18 +668,18 @@ export default function OutboundModule({
                     </datalist>
                   </div>
                   <div>
-                    <p className="mb-8">Sopir / Pembawa</p>
+                    <p className="mb-6">Sopir / Pembawa</p>
                     <p className="border-t border-neutral-400 pt-1 font-bold">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</p>
                   </div>
                 </div>
 
-                <div className="text-center mt-4 opacity-50 italic text-[7px]">
+                <div className="text-center mt-2 opacity-50 italic text-[7px]">
                   * Terimakasih atas kerjasamanya *<br/>
                   Aplikasi Timbangan GSC GST-9700 v2.0
                 </div>
               </div>
 
-              <div className="mt-4 flex gap-2">
+              <div className="mt-3 flex gap-2">
                 <button 
                   onClick={() => {
                     printOutboundSlip(previewRecord, staffName);

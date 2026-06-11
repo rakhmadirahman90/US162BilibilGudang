@@ -319,7 +319,7 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white border border-neutral-300 rounded-xl p-6 w-full max-w-md shadow-2xl relative"
+              className="bg-white border border-neutral-300 rounded-xl p-4 w-full max-w-sm shadow-2xl relative"
             >
               <div className="flex justify-between items-start border-b border-neutral-100 pb-3 mb-4">
                 <span className="font-bold text-neutral-800 flex items-center gap-1.5 uppercase text-xs tracking-widest">
@@ -334,14 +334,14 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
                 </button>
               </div>
 
-              <div className="bg-neutral-50 p-4 border border-dashed border-neutral-300 rounded font-mono text-[10px] text-neutral-800 leading-relaxed shadow-inner">
-                <div className="text-center border-b border-neutral-300 pb-2 mb-3">
+              <div className="bg-neutral-50 p-3 border border-dashed border-neutral-300 rounded font-mono text-[10px] text-neutral-800 leading-tight shadow-inner">
+                <div className="text-center border-b border-neutral-300 pb-1 mb-2">
                   <div className="font-bold text-xs tracking-widest text-emerald-950">US Bilibili 162</div>
                   <div className="text-[8px] opacity-70">Jalan Poros Pinrang-Polman KM. 12</div>
                   <div className="text-[8px] opacity-70">Desa Bilibili, Kec. Suppa, Kab. Pinrang</div>
                 </div>
 
-                <div className="space-y-1 mb-3">
+                <div className="space-y-0.5 mb-2">
                   <div className="flex justify-between">
                     <span className="text-neutral-500">Tanggal :</span>
                     <span className="font-bold">{formatReceiptDate(previewRecord.date)}</span>
@@ -356,26 +356,26 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
                   </div>
                 </div>
 
-                <div className="border-t border-neutral-200 pt-2 space-y-1">
-                  <div className="flex justify-between">
-                    <span>NAMA ITEM :</span>
+                <div className="border-t border-neutral-200 pt-1.5 space-y-0.5">
+                  <div className="flex justify-between text-[9px]">
+                    <span className="uppercase">Nama Item :</span>
                     <span className="font-black">{previewRecord.itemName}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>MASUK :</span>
+                  <div className="flex justify-between text-[9px]">
+                    <span className="uppercase">Masuk :</span>
                     <span className="font-bold text-emerald-600">{(previewRecord.inWeight ?? 0).toLocaleString('id-ID')} Kg</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>KELUAR :</span>
+                  <div className="flex justify-between text-[9px]">
+                    <span className="uppercase">Keluar :</span>
                     <span className="font-bold text-red-600">{(previewRecord.outWeight ?? 0).toLocaleString('id-ID')} Kg</span>
                   </div>
-                  <div className="flex justify-between font-bold border-t border-neutral-200 mt-1 pt-1">
-                    <span>JUMLAH COLLY :</span>
+                  <div className="flex justify-between font-bold border-t border-neutral-200 mt-1 pt-1 text-[9px]">
+                    <span className="uppercase">Jumlah Colly :</span>
                     <span>{(previewRecord.colly ?? 0).toLocaleString('id-ID')}</span>
                   </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-4 text-center text-[9px]">
+                <div className="mt-3 grid grid-cols-2 gap-4 text-center text-[9px]">
                   <div>
                     <p className="mb-2">Staff 162</p>
                     <input
@@ -391,18 +391,18 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
                     </datalist>
                   </div>
                   <div>
-                    <p className="mb-8">Penerima / Driver</p>
+                    <p className="mb-6">Penerima / Driver</p>
                     <p className="border-t border-neutral-400 pt-1 font-bold">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</p>
                   </div>
                 </div>
 
-                <div className="text-center mt-4 opacity-50 italic text-[7px]">
+                <div className="text-center mt-2 opacity-50 italic text-[7px]">
                   * Terimakasih atas kerjasamanya *<br/>
                   Aplikasi Stok Beras US Bilibili 162
                 </div>
               </div>
 
-              <div className="mt-4 flex gap-2">
+              <div className="mt-3 flex gap-2">
                 <button 
                   onClick={() => {
                     printRiceStockSlip(previewRecord, staffName);

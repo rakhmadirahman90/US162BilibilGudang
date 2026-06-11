@@ -846,7 +846,7 @@ export default function InboundModule({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white border border-neutral-300 rounded-xl p-6 w-full max-w-md shadow-2xl relative"
+              className="bg-white border border-neutral-300 rounded-xl p-4 w-full max-w-sm shadow-2xl relative"
             >
               <div className="flex justify-between items-start border-b border-neutral-100 pb-3 mb-4">
                 <span className="font-bold text-neutral-800 flex items-center gap-1.5 uppercase text-xs tracking-widest">
@@ -861,14 +861,14 @@ export default function InboundModule({
                 </button>
               </div>
 
-              <div className="bg-neutral-50 p-4 border border-dashed border-neutral-300 rounded font-mono text-[10px] text-neutral-800 leading-relaxed shadow-inner">
-                <div className="text-center border-b border-neutral-300 pb-2 mb-3">
+              <div className="bg-neutral-50 p-3 border border-dashed border-neutral-300 rounded font-mono text-[10px] text-neutral-800 leading-tight shadow-inner">
+                <div className="text-center border-b border-neutral-300 pb-1 mb-2">
                   <div className="font-bold text-xs tracking-widest text-emerald-950">CV. BILIBILI 162</div>
                   <div className="text-[8px] opacity-70">Jalan Poros Pinrang-Polman KM. 12</div>
                   <div className="text-[8px] opacity-70">Desa Bilibili, Kec. Suppa, Kab. Pinrang</div>
                 </div>
 
-                <div className="space-y-1 mb-3">
+                <div className="space-y-0.5 mb-2">
                   <div className="flex justify-between">
                     <span className="text-neutral-500">Tanggal :</span>
                     <span className="font-bold">{formatReceiptDate(previewRecord.date)}</span>
@@ -891,7 +891,7 @@ export default function InboundModule({
                   </div>
                 </div>
 
-                <div className="border-t border-neutral-200 pt-2 space-y-1">
+                <div className="border-t border-neutral-200 pt-1.5 space-y-0.5">
                   <div className="flex justify-between">
                     <span>BERAT BRUTO :</span>
                     <span className="font-bold">{(previewRecord.grossWeight ?? 0).toLocaleString('id-ID')} Kg</span>
@@ -914,7 +914,7 @@ export default function InboundModule({
                   </div>
                 </div>
 
-                <div className="border-t border-neutral-250 pt-2 space-y-1">
+                <div className="border-t border-neutral-250 pt-1.5 space-y-0.5">
                   <div className="flex justify-between text-neutral-600">
                     <span>HARGA BELI :</span>
                     <span className="font-bold">Rp {(previewRecord.price ?? 0).toLocaleString('id-ID')}/Kg</span>
@@ -933,7 +933,7 @@ export default function InboundModule({
                   </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-4 text-center text-[9px]">
+                <div className="mt-3 grid grid-cols-2 gap-4 text-center text-[9px]">
                   <div>
                     <p className="mb-2">Staff 162</p>
                     <input
@@ -954,13 +954,13 @@ export default function InboundModule({
                   </div>
                 </div>
 
-                <div className="text-center mt-4 opacity-50 italic text-[7px]">
+                <div className="text-center mt-2 opacity-50 italic text-[7px]">
                   * Terimakasih atas kerjasamanya *<br/>
                   Aplikasi Timbangan GSC GST-9700 v2.0
                 </div>
               </div>
 
-              <div className="mt-4 flex gap-2">
+              <div className="mt-3 flex gap-2">
                 <button 
                   onClick={() => {
                     const tk = tickets.find(t => t.ticketNo === previewRecord.ticketNo);
