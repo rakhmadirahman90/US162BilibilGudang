@@ -246,7 +246,7 @@ export function printPDFReport(
 
 const COMMON_SLIP_STYLE = `
   @page {
-    size: 105mm 138mm;
+    size: auto;
     margin: 0mm !important;
   }
 
@@ -265,7 +265,7 @@ const COMMON_SLIP_STYLE = `
     background-color: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
-    line-height: 1.0;
+    line-height: 1.5 !important;
     text-align: left;
     /* CRITICAL FOR DOT MATRIX: Turn off pixel smoothing entirely to keep output pure solid black/sharp pixels */
     -webkit-font-smoothing: none !important;
@@ -275,7 +275,7 @@ const COMMON_SLIP_STYLE = `
   }
 
   .slip {
-    width: 105mm !important;
+    width: 100mm !important;
     min-height: 135mm !important;
     margin: 0 !important;
     padding: 0mm 1mm !important;
@@ -292,7 +292,7 @@ const COMMON_SLIP_STYLE = `
 
   @media print {
     @page {
-      size: 105mm 138mm;
+      size: auto;
       margin: 0 !important;
     }
     
@@ -313,6 +313,7 @@ const COMMON_SLIP_STYLE = `
       font-smooth: never !important;
       text-rendering: optimizeSpeed !important;
       overflow: hidden !important;
+      line-height: 1.5 !important;
     }
 
     .slip {
@@ -417,7 +418,7 @@ const COMMON_SLIP_STYLE = `
     font-size: 7.5pt;
     color: #000000;
     vertical-align: top;
-    line-height: 1.15;
+    line-height: 1.5 !important;
   }
   .flex span.label {
     width: 46%;
