@@ -48,9 +48,20 @@ export function useSyncCollection<T extends { id: string }>(
         // 1. Perform initial check (one-time fetch)
         const snap = await getDocs(colRef);
         
+        // Deduplicate items helper to prevent duplicate key rendering warnings
+        const deduplicate = (items: T[]): T[] => {
+          const seen = new Set<string>();
+          return items.filter(item => {
+            if (!item || !item.id) return false;
+            if (seen.has(item.id)) return false;
+            seen.add(item.id);
+            return true;
+          });
+        };
+
         if (snap.empty) {
           // Firestore is empty. Seed it with the current localState (which contains either cached edits or initial static data).
-          const itemsToSeed = localState.length > 0 ? localState : initialStaticData;
+          const itemsToSeed = deduplicate(localState.length > 0 ? localState : initialStaticData);
           if (itemsToSeed.length > 0) {
             console.log(`[FirebaseSync] Seeding collection "${collectionName}" with ${itemsToSeed.length} items`);
             const batch = writeBatch(db);
@@ -66,7 +77,7 @@ export function useSyncCollection<T extends { id: string }>(
           snap.forEach(docSnap => {
             onlineItems.push(docSnap.data() as T);
           });
-          setLocalState(onlineItems);
+          setLocalState(deduplicate(onlineItems));
           console.log(`[FirebaseSync] Imported ${onlineItems.length} items for "${collectionName}" from Firestore`);
         }
 
@@ -81,7 +92,7 @@ export function useSyncCollection<T extends { id: string }>(
           
           // Only update if we have completed initialization to avoid wiping out during transition
           if (isInitialized.current) {
-            setLocalState(updatedItems);
+            setLocalState(deduplicate(updatedItems));
           }
         }, (error) => {
           console.error(`[FirebaseSync] Subscription error for ${collectionName}:`, error);

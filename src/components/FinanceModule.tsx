@@ -181,7 +181,7 @@ export default function FinanceModule({
       return;
     }
     const newFin: FinancialRecord = {
-      id: `fin-${Date.now()}`,
+      id: `fin-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
       date: new Date().toISOString().split('T')[0],
       type: finType,
       category: finCategory,
@@ -220,7 +220,7 @@ export default function FinanceModule({
 
     const existing = debts.find(d => d.id === editingDebtId);
     const newDebt: DebtRecord = {
-      id: editingDebtId || `debt-${Date.now()}`,
+      id: editingDebtId || `debt-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
       date: existing ? existing.date : new Date().toISOString().split('T')[0],
       supplierName: supplierName.toUpperCase(),
       description: debtDesc,
@@ -263,7 +263,7 @@ export default function FinanceModule({
       return;
     }
     const newFin: FinancialRecord = {
-      id: editingFinId || `fin-${Date.now()}`,
+      id: editingFinId || `fin-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
       date: finances.find(f => f.id === editingFinId)?.date || new Date().toISOString().split('T')[0],
       type: finType,
       category: finCategory,
@@ -304,7 +304,7 @@ export default function FinanceModule({
     if (!activeBroker) return;
     const desc = `Pembayaran Komisi Makelar ${activeBroker.name} atas berat jagung ${brokerCargoWeight.toLocaleString('id-ID')} Kg (Tarif Rp ${brokerRate}/Kg)`;
     const newFin: FinancialRecord = {
-      id: `fin-${Date.now()}`,
+      id: `fin-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
       date: new Date().toISOString().split('T')[0],
       type: 'KREDIT',
       category: 'MAKELAR',

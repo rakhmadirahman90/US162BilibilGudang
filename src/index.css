@@ -1,9 +1,51 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;810&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+body {
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.015em;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-display), var(--font-sans);
+  letter-spacing: -0.025em;
+}
+
+/* Enhances readability of number-heavy tables via spacing inside monospace letters */
+.font-mono {
+  font-family: var(--font-mono), monospace !important;
+  letter-spacing: -0.025em;
+}
+
+/* Safe contrast booster for input fields & labels inside white cards */
+label {
+  font-weight: 600;
+  color: #374151 !important; /* Premium Slate-700 instead of pale gray */
+}
+
+input, select, textarea {
+  font-family: var(--font-sans);
+}
+
+/* Beautiful custom subtle glow and subtle text styling for premium look */
+.text-glow-premium {
+  text-shadow: 0 0 30px rgba(16, 185, 129, 0.12);
+}
+
+/* Ensure secondary sub-labels on light elements stay readable */
+.bg-white .text-neutral-400,
+.bg-neutral-50 .text-neutral-400,
+.bg-slate-50 .text-neutral-400 {
+  color: #525252 !important; /* Elevate pale 400 to rich high-contrast gray-600 */
 }
 
 @keyframes shrink {

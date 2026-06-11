@@ -259,25 +259,32 @@ const COMMON_SLIP_STYLE = `
   html, body {
     width: 100% !important;
     height: 100% !important;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 8.5pt;
-    color: #000000;
+    font-family: 'Courier', 'Courier New', 'Consolas', 'Monaco', monospace !important;
+    font-size: 10pt;
+    color: #000000 !important;
     background-color: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
-    line-height: 1;
+    line-height: 1.35;
     text-align: left;
+    /* CRITICAL FOR DOT MATRIX: Turn off pixel smoothing entirely to keep output pure solid black/sharp pixels */
+    -webkit-font-smoothing: none !important;
+    -moz-osx-font-smoothing: none !important;
+    font-smooth: never !important;
+    text-rendering: optimizeSpeed !important;
   }
 
   .slip {
     width: 105mm !important;
     height: 148.5mm !important;
     margin: 0 auto !important;
-    padding: 8mm 6mm !important;
+    padding: 7mm 6mm !important;
     background: #ffffff !important;
     display: block !important;
     box-sizing: border-box !important;
     page-break-after: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   @media print {
@@ -293,11 +300,16 @@ const COMMON_SLIP_STYLE = `
       margin: 0 !important;
       padding: 0 !important;
       text-align: left !important;
+      font-family: 'Courier', 'Courier New', 'Consolas', 'Monaco', monospace !important;
+      -webkit-font-smoothing: none !important;
+      -moz-osx-font-smoothing: none !important;
+      font-smooth: never !important;
+      text-rendering: optimizeSpeed !important;
     }
 
     .slip {
       margin: 0 !important;
-      padding: 8mm 6mm !important;
+      padding: 7mm 6mm !important;
       border: none !important;
       box-shadow: none !important;
       page-break-inside: avoid;
@@ -309,8 +321,15 @@ const COMMON_SLIP_STYLE = `
       background: transparent !important;
       border-color: #000000 !important;
       box-shadow: none !important;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+      -webkit-font-smoothing: none !important;
+      -moz-osx-font-smoothing: none !important;
+      font-smooth: never !important;
+      text-rendering: optimizeSpeed !important;
+    }
+
+    /* Force all colors to pure deep black to prevent dot matrix dither patterns (unclear dots) */
+    .netto-val, .value, .value-heavy, .header-title, .header-subtitle, .netto-label, .ticket-type, .signatures div, .footer-msg {
+      color: #000000 !important;
     }
   }
 
@@ -318,58 +337,61 @@ const COMMON_SLIP_STYLE = `
   .header {
     display: table;
     width: 100%;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
     text-align: left;
   }
   .header-logo {
     display: table-cell;
-    width: 35px;
-    max-width: 35px;
-    height: 30px;
+    width: 32px;
+    max-width: 32px;
+    height: 28px;
     vertical-align: middle;
-    padding-right: 6px;
+    padding-right: 5px;
     object-fit: contain;
+    filter: grayscale(100%) contrast(200%);
+    image-rendering: pixelated;
   }
   .header-text {
     display: table-cell;
     vertical-align: middle;
   }
   .header-title {
-    font-size: 9pt;
-    font-weight: bold;
+    font-size: 11pt;
+    font-weight: 900;
     color: #000000;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    line-height: 1;
+    line-height: 1.1;
   }
   .header-subtitle {
-    font-size: 7pt;
+    font-size: 8pt;
     color: #000000;
-    line-height: 1;
+    line-height: 1.25;
     margin-top: 2px;
   }
 
-  /* DIVIDERS */
+  /* DIVIDERS (Thicker to avoid blurry or faint horizontal lines on Epson ribbon) */
   .divider-line {
     border: none;
-    border-top: 1px solid #000000;
-    margin: 2px 0;
+    border-top: 1.5px solid #000000;
+    margin: 4px 0;
   }
   .divider-double {
     border: none;
-    border-top: 3px double #000000;
-    margin: 2px 0;
+    border-top: 3.5px double #000000;
+    margin: 4px 0;
   }
 
   /* TICKET TYPE LABEL */
   .ticket-type {
-    font-size: 8pt;
-    font-weight: bold;
+    font-size: 10pt;
+    font-weight: 900;
     color: #000000;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin: 2px 0;
-    line-height: 1;
+    letter-spacing: 0.8px;
+    margin: 3px 0;
+    line-height: 1.1;
+    text-align: center;
   }
 
   /* DATA ROWS */
@@ -377,47 +399,48 @@ const COMMON_SLIP_STYLE = `
     display: table;
     width: 100%;
     table-layout: fixed;
-    margin: 1px 0;
+    margin: 3.5px 0;
   }
   .flex span {
     display: table-cell;
-    font-size: 7.5pt;
+    font-size: 9pt;
     color: #000000;
     vertical-align: top;
-    line-height: 1;
+    line-height: 1.25;
   }
   .flex span.label {
-    width: 40%;
+    width: 44%;
     text-align: left;
-    font-weight: normal;
+    font-weight: bold;
     white-space: nowrap;
   }
   .flex span.value {
-    width: 60%;
+    width: 56%;
     text-align: left;
-    font-weight: bold;
+    font-weight: 900;
     word-break: break-word;
   }
   .flex span.label-heavy {
-    width: 40%;
-    font-weight: bold;
-    font-size: 8pt;
+    width: 44%;
+    font-weight: 900;
+    font-size: 9.5pt;
   }
   .flex span.value-heavy {
-    width: 60%;
-    font-weight: bold;
-    font-size: 8pt;
+    width: 56%;
+    font-weight: 900;
+    font-size: 9.5pt;
     text-align: left;
   }
 
   /* WEIGHT TIMESTAMP */
   .weight-time {
-    font-size: 7pt;
+    font-size: 8pt;
     color: #000000;
     text-align: left;
-    margin: 0 0 1px 0;
+    margin: 0 0 2px 0;
     font-style: italic;
-    line-height: 1;
+    line-height: 1.1;
+    padding-left: 2px;
   }
 
   /* NETTO ROW */
@@ -425,32 +448,33 @@ const COMMON_SLIP_STYLE = `
     display: table;
     width: 100%;
     table-layout: fixed;
-    padding: 1px 0;
+    padding: 3px 0;
   }
   .netto-label {
     display: table-cell;
-    width: 40%;
-    font-size: 8.5pt;
-    font-weight: bold;
+    width: 44%;
+    font-size: 10pt;
+    font-weight: 900;
     vertical-align: middle;
   }
   .netto-val {
     display: table-cell;
-    width: 60%;
-    font-size: 10pt;
-    font-weight: bold;
+    width: 56%;
+    font-size: 11.5pt;
+    font-weight: 900;
     text-align: left;
     vertical-align: middle;
   }
 
   /* NOTES */
   .notes-box {
-    font-size: 7pt;
-    border: 1px solid #000000;
-    padding: 2px 4px;
-    margin: 2px 0;
-    line-height: 1;
+    font-size: 8.5pt;
+    border: 1.5px solid #000000;
+    padding: 3px 5px;
+    margin: 4px 0;
+    line-height: 1.25;
     word-break: break-word;
+    font-weight: bold;
   }
 
   /* SIGNATURES */
@@ -458,39 +482,41 @@ const COMMON_SLIP_STYLE = `
     display: table;
     width: 100%;
     table-layout: fixed;
-    margin-top: 4px;
+    margin-top: 8px;
   }
   .signatures > div {
     display: table-cell;
     width: 50%;
     text-align: left;
-    font-size: 7.5pt;
-    padding: 0 2px;
+    font-size: 9pt;
+    padding: 0 4px;
     vertical-align: top;
-    line-height: 1;
+    line-height: 1.2;
+    font-weight: bold;
   }
   .signature-space {
-    height: 15px;
+    height: 22px;
     display: block;
   }
   .signature-line {
-    border-top: 1px solid #000000;
-    margin: 2px 0 0 0;
+    border-top: 1.5px solid #000000;
+    margin: 3px 0 0 0;
     width: 90%;
-    font-weight: bold;
-    font-size: 7.5pt;
+    font-weight: 900;
+    font-size: 9pt;
     padding-top: 2px;
     text-align: left;
   }
 
   /* FOOTER */
   .footer-msg {
-    text-align: left;
-    font-size: 6.5pt;
-    margin-top: 4px;
-    line-height: 1;
-    border-top: 1px dashed #000000;
-    padding-top: 2px;
+    text-align: center;
+    font-size: 8pt;
+    margin-top: 6px;
+    line-height: 1.2;
+    border-top: 1.5px dashed #000000;
+    padding-top: 4px;
+    font-weight: bold;
   }
 `;
 // GANTI DENGAN JENDELA BARU AGAR PREVIEW MUNCUL & TIDAK DIBLOKIR BROWSER

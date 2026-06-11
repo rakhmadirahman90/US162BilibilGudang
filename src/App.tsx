@@ -285,12 +285,24 @@ export default function App() {
 
   const [debts, setDebts] = useState<DebtRecord[]>(() => {
     const saved = localStorage.getItem('bilibili_debts');
-    return saved ? JSON.parse(saved) : initialDebtRecords;
+    const parsed: DebtRecord[] = saved ? JSON.parse(saved) : initialDebtRecords;
+    const seen = new Set();
+    return parsed.filter(d => {
+      if (!d || !d.id || seen.has(d.id)) return false;
+      seen.add(d.id);
+      return true;
+    });
   });
 
   const [finances, setFinances] = useState<FinancialRecord[]>(() => {
     const saved = localStorage.getItem('bilibili_finances');
-    return saved ? JSON.parse(saved) : initialFinancialRecords;
+    const parsed: FinancialRecord[] = saved ? JSON.parse(saved) : initialFinancialRecords;
+    const seen = new Set();
+    return parsed.filter(f => {
+      if (!f || !f.id || seen.has(f.id)) return false;
+      seen.add(f.id);
+      return true;
+    });
   });
 
   const [employees, setEmployees] = useState<EmployeeRecord[]>(() => {
@@ -708,7 +720,7 @@ export default function App() {
     
     // Auto-update Rice Stock
     const newStock: RiceStockRecord = {
-      id: `stock-${Date.now()}`,
+      id: `stock-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
       date: rec.date,
       policeNo: rec.vehicleNo,
       description: `Penerimaan ${rec.commodity} dari ${rec.supplier}`,
@@ -746,7 +758,7 @@ export default function App() {
 
     // Auto-update Rice Stock
     const newStock: RiceStockRecord = {
-      id: `stock-${Date.now()}`,
+      id: `stock-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
       date: rec.date,
       policeNo: rec.vehicleNo,
       description: `Pengiriman ${rec.commodity} ke ${rec.buyer}`,
@@ -824,34 +836,42 @@ export default function App() {
 
   const handlePayDebt = (id: string, amount: number) => {
     const target = debts.find(d => d.id === id);
-    const supplier = target ? target.supplierName : 'Supplier';
-    setDebts(prev => prev.map(d => {
-      if (d.id === id) {
-        const paid = d.paidAmount + amount;
-        const remaining = Math.max(0, d.totalDebt - paid);
-        const status = remaining === 0 ? 'LUNAS' : 'BELUM_LUNAS';
-        
-        // Log in finances
-        const newFin: FinancialRecord = {
-          id: `fin-${Date.now()}`,
-          date: new Date().toISOString().split('T')[0],
-          type: 'KREDIT',
-          category: 'OPERASIONAL',
-          description: `Pembayaran cicilan utang kepada ${d.supplierName}`,
-          partyName: d.supplierName,
-          amount: amount,
-          bankAccount: 'Kas Gudang Tunai'
-        };
-        setFinances(prev => [newFin, ...prev]);
+    if (!target) return;
 
-        const updatedDebt = { ...d, paidAmount: paid, remainingBalance: remaining, status };
-        saveOnline('debts', updatedDebt);
-        saveOnline('finances', newFin);
+    const supplier = target.supplierName;
+    const paid = target.paidAmount + amount;
+    const remaining = Math.max(0, target.totalDebt - paid);
+    const status = remaining === 0 ? 'LUNAS' : 'BELUM_LUNAS';
 
-        return updatedDebt;
-      }
-      return d;
-    }));
+    // Generate a thoroughly unique ID by appending a timestamp and a random integer
+    const uniqueFinId = `fin-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    
+    // Log in finances
+    const newFin: FinancialRecord = {
+      id: uniqueFinId,
+      date: new Date().toISOString().split('T')[0],
+      type: 'KREDIT',
+      category: 'OPERASIONAL',
+      description: `Pembayaran cicilan utang kepada ${target.supplierName}`,
+      partyName: target.supplierName,
+      amount: amount,
+      bankAccount: 'Kas Gudang Tunai'
+    };
+
+    const updatedDebt = { ...target, paidAmount: paid, remainingBalance: remaining, status };
+
+    // Update both states safely outside of individual updater blocks
+    setDebts(prev => prev.map(d => d.id === id ? updatedDebt : d));
+    setFinances(prev => {
+      // De-duplicate just in case to be absolutely safe
+      if (prev.some(f => f.id === uniqueFinId)) return prev;
+      return [newFin, ...prev];
+    });
+
+    // Save online outside of any state mapping
+    saveOnline('debts', updatedDebt);
+    saveOnline('finances', newFin);
+
     showToast(`Pembayaran cicilan utang kepada ${supplier} sebesar Rp ${amount.toLocaleString('id-ID')} berhasil dicatat!`, 'success');
   };
 
@@ -1416,7 +1436,13 @@ export default function App() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="dash-kpi-metrics-grid">
               
               {/* Corn Stock Card */}
-              <div id="card-metric-corn" className="bg-white border border-neutral-200 p-4.5 rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-between group">
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.05, ease: "easeOut" }}
+                id="card-metric-corn" 
+                className="bg-white border border-neutral-200 p-4.5 rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-between group"
+              >
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.cornStock || 'Stok Jagung Silo'}</span>
                   <span className="text-xl sm:text-2xl font-black text-amber-650 font-mono tracking-tight">
@@ -1431,10 +1457,16 @@ export default function App() {
                 <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center border border-amber-100 group-hover:scale-110 transition duration-300 shrink-0">
                   <Package className="text-amber-500 w-5 h-5" />
                 </div>
-              </div>
+              </motion.div>
 
               {/* Rice Stock Card */}
-              <div id="card-metric-rice" className="bg-white border border-neutral-200 p-4.5 rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-between group">
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.12, ease: "easeOut" }}
+                id="card-metric-rice" 
+                className="bg-white border border-neutral-200 p-4.5 rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-between group"
+              >
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.riceStockLabel || 'Stok Beras Gudang'}</span>
                   <span className="text-xl sm:text-2xl font-black text-emerald-800 font-mono tracking-tight">
@@ -1449,10 +1481,13 @@ export default function App() {
                 <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center border border-emerald-100 group-hover:scale-110 transition duration-300 shrink-0">
                   <Package className="text-emerald-600 w-5 h-5" />
                 </div>
-              </div>
+              </motion.div>
 
               {/* Active Weighbridge Queue Card */}
-              <div 
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.19, ease: "easeOut" }}
                 id="card-metric-weighbridge" 
                 onClick={() => setActiveTab('TIMBANG')}
                 className="bg-white border border-neutral-200 p-4.5 rounded-xl shadow-sm hover:shadow hover:border-blue-300 transition-all flex items-center justify-between group cursor-pointer"
@@ -1471,10 +1506,16 @@ export default function App() {
                 <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center border border-blue-100 group-hover:scale-110 transition duration-300 shrink-0">
                   <Scale className="text-blue-600 w-5 h-5 animate-pulse" />
                 </div>
-              </div>
+              </motion.div>
 
               {/* Financial & Net Kas Card */}
-              <div id="card-metric-cash" className="bg-white border border-neutral-200 p-4.5 rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-between group">
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.26, ease: "easeOut" }}
+                id="card-metric-cash" 
+                className="bg-white border border-neutral-200 p-4.5 rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-between group"
+              >
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.cashBalance || 'Kas & Keuangan Tunai'}</span>
                   {sessionUser?.role === 'admin' ? (
@@ -1500,7 +1541,7 @@ export default function App() {
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center border group-hover:scale-110 transition duration-300 shrink-0 ${sessionUser?.role === 'admin' && netKasBalance < 0 ? 'bg-red-50 border-red-100' : 'bg-emerald-50 border-emerald-100'}`}>
                   <DollarSign className={`w-5 h-5 ${sessionUser?.role === 'admin' && netKasBalance < 0 ? 'text-red-500' : 'text-emerald-600'}`} />
                 </div>
-              </div>
+              </motion.div>
 
             </div>
 
