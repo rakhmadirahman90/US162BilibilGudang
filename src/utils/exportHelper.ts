@@ -323,7 +323,7 @@ const COMMON_SLIP_STYLE = `
       box-shadow: none !important;
       page-break-inside: avoid;
       position: absolute !important;
-      top: 0mm !important;
+      top: 6mm !important;
       left: 10mm !important;
       width: 80mm !important;
     }
