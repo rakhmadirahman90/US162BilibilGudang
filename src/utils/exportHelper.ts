@@ -550,26 +550,31 @@ function printInNewWindow(htmlContent: string) {
 }
 
 export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTicket | undefined, staffName: string = "Asma") {
-  const bruto = record.grossWeight;
-  const tara = record.tareWeight;
+  const bruto = record.grossWeight ?? 0;
+  const tara = record.tareWeight ?? 0;
   const rawNet = bruto - tara;
-  const net = record.netWeight;
-  const potKrg = Math.round(rawNet * (record.bagDeductionPercent / 100));
-  const potRefaksi = Math.round(rawNet * (record.refaksiKaPercent / 100));
+  const net = record.netWeight ?? 0;
+  const potKrg = Math.round(rawNet * ((record.bagDeductionPercent ?? 0) / 100));
+  const potRefaksi = Math.round(rawNet * ((record.refaksiKaPercent ?? 0) / 100));
 
   const htmlContent = `<!DOCTYPE html>
 <html>
 <head>
-  <title>Resi Penerimaan #${record.ticketNo || record.id.slice(-6)}</title>
+  <title>Resi Penerimaan #${record.ticketNo || (record.id ? record.id.slice(-6) : '000000')}</title>
   <style>${COMMON_SLIP_STYLE}</style>
 </head>
 <body>
   <div class="slip">
     <div class="header" style="text-align: center; display: block;">
-      <div class="header-title" style="text-align: center; font-size: 11pt; font-weight: 950; letter-spacing: 0.5px; text-transform: uppercase;">CV. BILIBILI 162</div>
-      <div class="header-subtitle" style="text-align: center; font-size: 7.5pt; margin-top: 1px; font-weight: normal; line-height: 1.2;">
-        Jalan Poros Pinrang-Polman KM. 12<br/>
-        Desa Bilibili, Kec. Suppa, Kab. Pinrang
+      <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2px;">
+        <img src="${bilibiliLogo}" alt="US Bilibili 162" style="width: 40px; height: auto;" />
+        <div style="text-align: left;">
+          <div class="header-title" style="font-size: 11pt; font-weight: 950; letter-spacing: 0.5px; text-transform: uppercase; line-height: 1.1;">US Bilibili 162</div>
+          <div class="header-subtitle" style="font-size: 7.5pt; font-weight: normal; line-height: 1.2;">
+            Jalan Poros Pinrang-Polman KM. 12<br/>
+            Desa Bilibili, Kec. Suppa, Kab. Pinrang
+          </div>
+        </div>
       </div>
     </div>
 
@@ -585,19 +590,19 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
 
     <div class="flex"><span class="label">BERAT BRUTO :</span><span class="value" style="text-align: right !important;">${bruto.toLocaleString('id-ID')} Kg</span></div>
     <div class="flex"><span class="label">BERAT TARA :</span><span class="value" style="text-align: right !important;">${tara.toLocaleString('id-ID')} Kg</span></div>
-    <div class="flex"><span class="label">Pot. Karung (${record.bagDeductionPercent}%) :</span><span class="value" style="text-align: right !important;">-${potKrg.toLocaleString('id-ID')} Kg</span></div>
-    <div class="flex"><span class="label">Refaksi KA (${record.refaksiKaPercent}%) :</span><span class="value" style="text-align: right !important;">-${potRefaksi.toLocaleString('id-ID')} Kg</span></div>
+    <div class="flex"><span class="label">Pot. Karung (${record.bagDeductionPercent ?? 0}%) :</span><span class="value" style="text-align: right !important;">-${potKrg.toLocaleString('id-ID')} Kg</span></div>
+    <div class="flex"><span class="label">Refaksi KA (${record.refaksiKaPercent ?? 0}%) :</span><span class="value" style="text-align: right !important;">-${potRefaksi.toLocaleString('id-ID')} Kg</span></div>
 
     <div class="divider-line" style="margin-top: 4px; margin-bottom: 4px;"></div>
     <div class="flex" style="font-weight: 950; font-size: 8.5pt;"><span class="label" style="font-weight: 950;">BERAT NETTO :</span><span class="value" style="font-weight: 950; text-align: right !important;">${net.toLocaleString('id-ID')} KG</span></div>
     <div class="divider-line" style="margin-top: 4px; margin-bottom: 4px;"></div>
 
-    <div class="flex"><span class="label">HARGA BELI :</span><span class="value" style="text-align: right !important;">Rp ${(record.price || 0).toLocaleString('id-ID')}/Kg</span></div>
-    <div class="flex"><span class="label">HARGA BRUTO :</span><span class="value" style="text-align: right !important;">Rp ${(net * (record.price || 0)).toLocaleString('id-ID')}</span></div>
-    <div class="flex"><span class="label">BIAYA BURUH PANGGUL :</span><span class="value" style="text-align: right !important;">-Rp ${(record.laborCost || 0).toLocaleString('id-ID')}</span></div>
+    <div class="flex"><span class="label">HARGA BELI :</span><span class="value" style="text-align: right !important;">Rp ${(record.price ?? 0).toLocaleString('id-ID')}/Kg</span></div>
+    <div class="flex"><span class="label">HARGA BRUTO :</span><span class="value" style="text-align: right !important;">Rp ${(net * (record.price ?? 0)).toLocaleString('id-ID')}</span></div>
+    <div class="flex"><span class="label">BIAYA BURUH PANGGUL :</span><span class="value" style="text-align: right !important;">-Rp ${(record.laborCost ?? 0).toLocaleString('id-ID')}</span></div>
 
     <div class="divider-line" style="margin-top: 4px; margin-bottom: 4px;"></div>
-    <div class="flex" style="font-weight: 950; font-size: 9pt; background-color: #fafafa; padding: 3px 2px;"><span class="label" style="font-weight: 950;">TOTAL HARUS DIBAYAR :</span><span class="value" style="font-weight: 950; text-align: right !important; color: #000000 !important;">Rp ${(record.totalPrice || 0).toLocaleString('id-ID')}</span></div>
+    <div class="flex" style="font-weight: 950; font-size: 9pt; background-color: #fafafa; padding: 3px 2px;"><span class="label" style="font-weight: 950;">TOTAL HARUS DIBAYAR :</span><span class="value" style="font-weight: 950; text-align: right !important; color: #000000 !important;">Rp ${(record.totalPrice ?? 0).toLocaleString('id-ID')}</span></div>
     <div class="divider-line" style="margin-top: 4px; margin-bottom: 4px;"></div>
 
     <div class="signatures" style="margin-top: 8px; width: 100%; display: table; table-layout: fixed;">
@@ -784,12 +789,12 @@ export function printServiceSlip(record: ServiceRecord, staffName: string = "Asm
 }
 
 export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Asma") {
-  const bruto = ticket.timbang1Weight;
-  const tara = ticket.timbang2Weight;
-  const net = ticket.netWeight || 0;
+  const bruto = ticket.timbang1Weight ?? 0;
+  const tara = ticket.timbang2Weight ?? 0;
+  const net = ticket.netWeight ?? 0;
   const rawNet = bruto - tara;
-  const potKrg = rawNet * (ticket.bagDeductionPercent / 100);
-  const potRefaksi = rawNet * (ticket.refaksiPercent / 100);
+  const potKrg = rawNet * ((ticket.bagDeductionPercent ?? 0) / 100);
+  const potRefaksi = rawNet * ((ticket.refaksiPercent ?? 0) / 100);
 
   const htmlContent = `<!DOCTYPE html>
 <html>
@@ -826,8 +831,8 @@ export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Asma")
 
     <div class="flex"><span class="label">BERAT BRUTO :</span><span class="value">${bruto.toLocaleString('id-ID')} kg</span></div>
     <div class="flex"><span class="label">BERAT TARA :</span><span class="value">${tara.toLocaleString('id-ID')} kg</span></div>
-    <div class="flex"><span class="label">Pot. Karung (${ticket.bagDeductionPercent.toFixed(2)}%):</span><span class="value">- ${potKrg.toLocaleString('id-ID')} kg</span></div>
-    <div class="flex"><span class="label">Pot. Refaksi (${ticket.refaksiPercent.toFixed(2)}%):</span><span class="value">- ${potRefaksi.toLocaleString('id-ID')} kg</span></div>
+    <div class="flex"><span class="label">Pot. Karung (${(ticket.bagDeductionPercent ?? 0).toFixed(2)}%):</span><span class="value">- ${potKrg.toLocaleString('id-ID')} kg</span></div>
+    <div class="flex"><span class="label">Pot. Refaksi (${(ticket.refaksiPercent ?? 0).toFixed(2)}%):</span><span class="value">- ${potRefaksi.toLocaleString('id-ID')} kg</span></div>
 
     <div class="divider-line"></div>
 

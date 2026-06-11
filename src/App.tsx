@@ -2192,7 +2192,7 @@ export default function App() {
                   />
                 </div>
                 <div>
-                  <h4 className="font-bold text-sm text-yellow-350">Informasi Alur Jembatan Timbang & Refaksi C.V Bilibili 162</h4>
+                  <h4 className="font-bold text-sm text-yellow-350">Informasi Alur Jembatan Timbang & Refaksi US Bilibili 162</h4>
                   <p className="text-xs text-emerald-200 mt-0.5 max-w-2xl leading-relaxed">
                     Sistem dikonfigurasi penuh dengan emulator digital sensor beban GST-9700. Gunakan simulator berat fisik di dalam Tab Timbangan untuk mencocokkan Truk Tronton pengantar. Susut berat akibat jamur / air diolah otomatis berdasar tabel potongan kadar air.
                   </p>

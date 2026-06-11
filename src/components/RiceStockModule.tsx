@@ -336,7 +336,7 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
 
               <div className="bg-neutral-50 p-4 border border-dashed border-neutral-300 rounded font-mono text-[10px] text-neutral-800 leading-relaxed shadow-inner">
                 <div className="text-center border-b border-neutral-300 pb-2 mb-3">
-                  <div className="font-bold text-xs tracking-widest text-emerald-950">CV. BILIBILI 162</div>
+                  <div className="font-bold text-xs tracking-widest text-emerald-950">US Bilibili 162</div>
                   <div className="text-[8px] opacity-70">Jalan Poros Pinrang-Polman KM. 12</div>
                   <div className="text-[8px] opacity-70">Desa Bilibili, Kec. Suppa, Kab. Pinrang</div>
                 </div>
@@ -398,7 +398,7 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
 
                 <div className="text-center mt-4 opacity-50 italic text-[7px]">
                   * Terimakasih atas kerjasamanya *<br/>
-                  Aplikasi Stok Beras CV. Bilibili 162
+                  Aplikasi Stok Beras US Bilibili 162
                 </div>
               </div>
 

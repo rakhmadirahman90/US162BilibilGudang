@@ -15,6 +15,7 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
   const [phone, setPhone] = useState('');
   const [withPdf, setWithPdf] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [pdfDownloadUrl, setPdfDownloadUrl] = useState<string | null>(null);
 
   // Clear phone field on unmount or re-open
   useEffect(() => {
@@ -22,33 +23,28 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
       setPhone('');
       setWithPdf(true);
       setIsGenerating(false);
+      setPdfDownloadUrl(null);
     }
   }, [isOpen]);
 
-  const handleSend = async () => {
-    if (!phone.trim()) {
-      alert('Silakan isi Nomor WhatsApp penerima');
-      return;
-    }
+  const generateAndUploadPdf = async () => {
+    if (!withPdf || !pdfHtml || pdfDownloadUrl || isGenerating) return;
 
-    let finalMsg = defaultText;
+    setIsGenerating(true);
+    setPdfDownloadUrl(null);
 
-    if (withPdf && pdfHtml) {
-      setIsGenerating(true);
-      
+    try {
       const parser = new DOMParser();
       const parsedDoc = parser.parseFromString(pdfHtml, 'text/html');
       const slip = parsedDoc.querySelector('.slip') || parsedDoc.body;
-      
-      // Extract and clean styles so they don't leak globally or shrink our active document layout
+
       let stylesText = Array.from(parsedDoc.querySelectorAll('style'))
         .map(style => style.innerHTML)
         .join('\n');
-      
+
       stylesText = stylesText.replace(/html,\s*body/gi, '.pdf-slip-wrapper');
       stylesText = stylesText.replace(/\bbody\b/gi, '.pdf-slip-wrapper');
-      
-      // Combine styles and slip inner HTML into a clean, standalone, styled container string
+
       const cleanHtml = `
         <div class="pdf-slip-wrapper" style="width: 105mm; height: 148mm; box-sizing: border-box; background-color: #ffffff; padding: 0; margin: 0; overflow: hidden; position: relative;">
           <style>
@@ -60,98 +56,94 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
             }
+            .slip {
+               height: auto !important;
+               min-height: auto !important;
+            }
           </style>
-          <div class="slip" style="border: none !important; box-shadow: none !important; border-radius: 0 !important; margin: 0 !important; width: 105mm !important; height: 148mm !important; box-sizing: border-box !important; padding: 10mm !important; background-color: #ffffff !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important;">
+          <div class="slip" style="border: none !important; box-shadow: none !important; border-radius: 0 !important; margin: 0 !important; width: 105mm !important; box-sizing: border-box !important; padding: 5mm !important; background-color: #ffffff !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important;">
             ${slip.innerHTML}
           </div>
         </div>
       `;
 
-      try {
-        const opt = {
-          margin:       0,
-          filename:     pdfFileName || 'Resi.pdf',
-          image:        { type: 'jpeg' as const, quality: 0.80 }, // Dynamic compression standard: 0.80 provides amazing readability but decreases file sizes by 70%+
-          html2canvas:  { 
-            scale: 1.5, // 1.5 is perfect resolution for 105x148mm (A6 size), rendering fast with lightweight image overhead
-            useCORS: true, 
-            logging: false, 
-            letterRendering: true 
-          },
-          jsPDF:        { 
-            unit: 'mm', 
-            format: [105, 148] as [number, number], 
-            orientation: 'portrait' as const,
-            compress: true // Compressed inside jsPDF engine
-          }
-        };
-        const pdfBlob = await html2pdf().set(opt).from(cleanHtml).output('blob');
-        
-        let uploadUrl = '';
+      const opt = {
+        margin:       0,
+        filename:     pdfFileName || 'Resi.pdf',
+        image:        { type: 'jpeg' as const, quality: 0.8 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false, letterRendering: true, windowWidth: 400 },
+        jsPDF:        { unit: 'mm', format: 'a6', orientation: 'portrait' as const, compress: true }
+      };
 
-        // Coba upload ke file.io terlebih dahulu (CORS-friendly, link langsung, tanpa registrasi)
+      const pdfBlob = await html2pdf().set(opt).from(cleanHtml).output('blob');
+      
+      let uploadUrl = '';
+
+      // Try file.io
+      try {
+        const formDataIo = new FormData();
+        formDataIo.append('file', pdfBlob, pdfFileName || 'Resi.pdf');
+        const res = await fetch('https://file.io', { method: 'POST', body: formDataIo });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.link) uploadUrl = json.link;
+        }
+      } catch (ioErr) { console.warn(ioErr); }
+
+      // Try tmpfiles.org
+      if (!uploadUrl) {
         try {
-          const formDataIo = new FormData();
-          formDataIo.append('file', pdfBlob, pdfFileName || 'Resi.pdf');
-          const res = await fetch('https://file.io', {
-            method: 'POST',
-            body: formDataIo
-          });
+          const formDataTmp = new FormData();
+          formDataTmp.append('file', pdfBlob, pdfFileName || 'Resi.pdf');
+          const res = await fetch('https://tmpfiles.org/api/v1/upload', { method: 'POST', body: formDataTmp });
           if (res.ok) {
             const json = await res.json();
-            if (json.success && json.link) {
-              uploadUrl = json.link;
-              console.log("PDF uploaded successfully to file.io:", uploadUrl);
+            if (json.status === 'success' && json.data?.url) {
+              uploadUrl = json.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
             }
           }
-        } catch (ioErr) {
-          console.warn("file.io upload failed, trying tmpfiles.org:", ioErr);
-        }
-
-        // Coba upload ke tmpfiles.org jika file.io gagal
-        if (!uploadUrl) {
-          try {
-            const formDataTmp = new FormData();
-            formDataTmp.append('file', pdfBlob, pdfFileName || 'Resi.pdf');
-            const res = await fetch('https://tmpfiles.org/api/v1/upload', {
-              method: 'POST',
-              body: formDataTmp
-            });
-            if (res.ok) {
-              const json = await res.json();
-              if (json.status === 'success' && json.data?.url) {
-                uploadUrl = json.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
-                console.log("PDF uploaded successfully to tmpfiles.org:", uploadUrl);
-              }
-            }
-          } catch (tmpErr) {
-            console.warn("tmpfiles.org upload failed:", tmpErr);
-          }
-        }
-
-        if (uploadUrl) {
-          finalMsg += `\n\n⬇️ *Unduh File PDF Resi:*\n${uploadUrl}`;
-        } else {
-          // Fallback ke unduhan lokal manual jika kedua server upload gagal
-          console.warn("Satu atau lebih server upload tidak dapat dijangkau. Mengunduh secara manual.");
-          await html2pdf().set(opt).from(cleanHtml).save();
-        }
-      } catch (err) {
-        console.warn("Gagal memproses/mengunggah PDF resi, mengunduh secara manual sebagai cadangan:", err);
-        // Fallback ke unduhan lokal manual
-        try {
-          const opt = { 
-            margin: 0, 
-            filename: pdfFileName || 'Resi.pdf', 
-            image: { type: 'jpeg' as const, quality: 0.80 },
-            html2canvas: { scale: 1.5, useCORS: true, logging: false }, 
-            jsPDF: { unit: 'mm', format: [105, 148] as [number, number], orientation: 'portrait' as const, compress: true } 
-          };
-          await html2pdf().set(opt).from(cleanHtml).save();
-        } catch(e) {}
-      } finally {
-        setIsGenerating(false);
+        } catch (tmpErr) { console.warn(tmpErr); }
       }
+
+      setPdfDownloadUrl(uploadUrl || 'manual-fallback');
+    } catch (err) {
+      console.warn("Gagal memproses/mengunggah PDF:", err);
+      setPdfDownloadUrl('error-fallback');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      generateAndUploadPdf();
+    }
+  }, [isOpen, withPdf]);
+
+  const handleSend = async () => {
+    if (!phone.trim()) {
+      alert('Silakan isi Nomor WhatsApp penerima');
+      return;
+    }
+
+    // Wait if still generating
+    if (withPdf && isGenerating) {
+        // This won't be easily reachable as button is disabled
+        return;
+    }
+
+    let finalMsg = defaultText;
+
+    if (withPdf && pdfDownloadUrl) {
+        if (pdfDownloadUrl === 'manual-fallback' || pdfDownloadUrl === 'error-fallback') {
+            alert('Terjadi kesalahan saat membuat PDF. Silakan kirim pesan saja, atau periksa koneksi.');
+        } else {
+            finalMsg += `\n\n⬇️ *Unduh File PDF Resi:*\n${pdfDownloadUrl}`;
+        }
+    } else if (withPdf && !isGenerating && !pdfDownloadUrl) {
+        // Edge case: if somehow it didn't generate but tried
+        alert("Mohon tunggu proses penyiapan PDF selesai.");
+        return;
     }
 
     onSend(phone, finalMsg);
@@ -234,11 +226,11 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
           </button>
           <button 
             onClick={handleSend}
-            disabled={!phone.trim() || isGenerating}
+            disabled={!phone.trim() || (isGenerating && withPdf)}
             className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-400 disabled:cursor-wait text-white text-xs font-bold rounded-lg flex items-center gap-2 shadow-md transition-all active:scale-95"
           >
-            {isGenerating ? (
-              <span className="flex items-center gap-2">Generating PDF...</span>
+            {withPdf && isGenerating ? (
+              <span className="flex items-center gap-2"><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Menyiapkan...</span>
             ) : (
               <><Send className="w-3.5 h-3.5" /> Kirim Sekarang</>
             )}
