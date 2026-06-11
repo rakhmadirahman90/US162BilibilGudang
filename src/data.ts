@@ -22,7 +22,8 @@ import {
   CustomerRecord,
   FinanceCategoryRecord,
   LaborRateRecord,
-  CornMoistureRule
+  CornMoistureRule,
+  ProductRecord
 } from './types';
 
 export const initialLaborRates: LaborRateRecord[] = [
@@ -491,5 +492,10 @@ export const initialFinanceCategories: FinanceCategoryRecord[] = [
   { id: 'fcat-8', name: 'PEMBELIAN_STOK', type: 'KREDIT' },
   { id: 'fcat-9', name: 'LISTRIK_BBM', type: 'KREDIT' },
   { id: 'fcat-10', name: 'LAINNYA', type: 'BOTH' }
+];
+
+export const initialProducts: ProductRecord[] = [
+  { id: '1', name: 'Beras Premium US Bilibili', category: 'BERAS', description: 'Beras pilihan dengan tingkat kepulenan tinggi, diproses secara modern.', characteristics: ['Pulen', 'Warna Putih Alami', 'Tanpa Pemutih' , 'Higienis'], pricePerKg: 15500, stockAvailable: 5500, imageUrl: '' },
+  { id: '2', name: 'Jagung Pipil Super', category: 'JAGUNG', description: 'Jagung kualitas ekspor dengan kadar air rendah dan kebersihan terjaga.', characteristics: ['Biji Penuh', 'Kadar Air 14%', 'Bersih dari Kotoran', 'Warna Kuning Cerah'], pricePerKg: 6800, stockAvailable: 15000, imageUrl: '' },
 ];
 

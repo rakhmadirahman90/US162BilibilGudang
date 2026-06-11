@@ -68,6 +68,9 @@ service cloud.firestore {
     match /locations/{locationId} {
       allow read, write: if isSignedIn() && isValidId(locationId);
     }
+    match /products/{productId} {
+      allow read, write: if isSignedIn() && isValidId(productId);
+    }
     match /laborRates/{laborRateId} {
       allow read, write: if isSignedIn() && isValidId(laborRateId);
     }

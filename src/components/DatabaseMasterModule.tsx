@@ -11,7 +11,8 @@ import {
   CustomerRecord,
   FinanceCategoryRecord,
   LaborRateRecord,
-  CornMoistureRule
+  CornMoistureRule,
+  ProductRecord
 } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import ConfirmModal from './ConfirmModal';
@@ -31,8 +32,12 @@ import {
   Database,
   Landmark,
   UserCheck,
-  MapPin
+  MapPin,
+  Package,
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react';
+import { compressImage } from '../utils/imageUtils';
 
 interface DatabaseMasterModuleProps {
   vehicles: VehicleRecord[];
@@ -59,6 +64,8 @@ interface DatabaseMasterModuleProps {
   setLaborRates: React.Dispatch<React.SetStateAction<LaborRateRecord[]>>;
   cornMoistureRules: CornMoistureRule[];
   setCornMoistureRules: React.Dispatch<React.SetStateAction<CornMoistureRule[]>>;
+  products: ProductRecord[];
+  setProducts: React.Dispatch<React.SetStateAction<ProductRecord[]>>;
 }
 
 export default function DatabaseMasterModule({
@@ -85,11 +92,13 @@ export default function DatabaseMasterModule({
   laborRates,
   setLaborRates,
   cornMoistureRules,
-  setCornMoistureRules
+  setCornMoistureRules,
+  products,
+  setProducts
 }: DatabaseMasterModuleProps) {
   const { t, language } = useLanguage();
   // Tabs for the database master
-  type DbTab = 'VEHICLES' | 'SUPPLIERS' | 'BUYERS' | 'EMPLOYEES' | 'COMMODITIES' | 'BANKS' | 'BROKERS' | 'LOCATIONS' | 'CUSTOMERS' | 'FINANCE_CATS' | 'LABOR_RATES';
+  type DbTab = 'VEHICLES' | 'SUPPLIERS' | 'BUYERS' | 'EMPLOYEES' | 'COMMODITIES' | 'BANKS' | 'BROKERS' | 'LOCATIONS' | 'CUSTOMERS' | 'FINANCE_CATS' | 'LABOR_RATES' | 'PRODUCTS';
   const [activeSubTab, setActiveSubTab] = useState<DbTab>('VEHICLES');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -177,6 +186,16 @@ export default function DatabaseMasterModule({
   const [laborRateType, setLaborRateType] = useState<'PER_KG' | 'FLAT'>('PER_KG');
   const [laborRateVal, setLaborRateVal] = useState<number>(0);
 
+  // Products
+  const [productName, setProductName] = useState('');
+  const [productCategory, setProductCategory] = useState<'BERAS' | 'JAGUNG' | 'LAINNYA'>('BERAS');
+  const [productDescription, setProductDescription] = useState('');
+  const [productCharacteristics, setProductCharacteristics] = useState('');
+  const [productPrice, setProductPrice] = useState<number>(0);
+  const [productStock, setProductStock] = useState<number>(0);
+  const [productImageUrl, setProductImageUrl] = useState('');
+  const [isCompresing, setIsCompressing] = useState(false);
+
   // Handler helpers
   const triggerToast = (msg: string, type: 'success' | 'error' | 'info' | 'warning' = 'success') => {
     (window as any).__showToast?.(msg, type);
@@ -237,6 +256,116 @@ export default function DatabaseMasterModule({
     setLaborActivityName('');
     setLaborRateType('PER_KG');
     setLaborRateVal(0);
+
+    setProductName('');
+    setProductCategory('BERAS');
+    setProductDescription('');
+    setProductCharacteristics('');
+    setProductPrice(0);
+    setProductStock(0);
+    setProductImageUrl('');
+    setIsCompressing(false);
+  };
+
+  // --- PRODUCT ACTIONS ---
+  const handleProductImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsCompressing(true);
+      const compressed = await compressImage(file);
+      
+      // Convert to Base64 for preview/storage
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProductImageUrl(reader.result as string);
+        setIsCompressing(false);
+      };
+      reader.readAsDataURL(compressed);
+    } catch (err) {
+      triggerToast('Gagal kompresi gambar', 'error');
+      setIsCompressing(false);
+    }
+  };
+
+  const handleSaveProduct = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!productName.trim()) {
+      triggerToast('Nama Produk wajib diisi!', 'error');
+      return;
+    }
+
+    const executeSave = () => {
+      const characteristicsArray = productCharacteristics.split(',').map(c => c.trim()).filter(c => c !== '');
+      
+      if (editingId) {
+        setProducts(prev => prev.map(p => p.id === editingId ? {
+          ...p,
+          name: productName.trim(),
+          category: productCategory,
+          description: productDescription.trim(),
+          characteristics: characteristicsArray,
+          pricePerKg: Number(productPrice),
+          stockAvailable: Number(productStock),
+          imageUrl: productImageUrl.trim()
+        } : p));
+        triggerToast(`Produk ${productName} diperbarui!`, 'success');
+      } else {
+        const newProd: ProductRecord = {
+          id: `prod-${Date.now()}`,
+          name: productName.trim(),
+          category: productCategory,
+          description: productDescription.trim(),
+          characteristics: characteristicsArray,
+          pricePerKg: Number(productPrice),
+          stockAvailable: Number(productStock),
+          imageUrl: productImageUrl.trim()
+        };
+        setProducts(prev => [newProd, ...prev]);
+        triggerToast(`Produk ${productName} berhasil ditambahkan!`, 'success');
+      }
+      handleCancel();
+    };
+
+    setConfirmModal({
+      isOpen: true,
+      title: editingId ? 'Konfirmasi Ubah Produk' : 'Konfirmasi Tambah Produk',
+      message: editingId 
+        ? `Apakah Anda yakin ingin menyimpan perubahan data untuk produk ${productName}?`
+        : `Apakah Anda yakin ingin menambahkan produk baru ${productName}?`,
+      type: editingId ? 'EDIT' : 'ADD',
+      onConfirm: () => {
+        executeSave();
+        closeConfirm();
+      }
+    });
+  };
+
+  const handleEditProduct = (p: ProductRecord) => {
+    setEditingId(p.id);
+    setProductName(p.name);
+    setProductCategory(p.category);
+    setProductDescription(p.description);
+    setProductCharacteristics(p.characteristics.join(', '));
+    setProductPrice(p.pricePerKg);
+    setProductStock(p.stockAvailable);
+    setProductImageUrl(p.imageUrl || '');
+    setIsAddingNew(false);
+  };
+
+  const handleDeleteProduct = (id: string, name: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Konfirmasi Hapus Produk',
+      message: `Apakah Anda yakin ingin menghapus produk ${name} secara permanen?`,
+      type: 'DELETE',
+      onConfirm: () => {
+        setProducts(prev => prev.filter(p => p.id !== id));
+        triggerToast(`Produk ${name} telah dihapus.`, 'success');
+        closeConfirm();
+      }
+    });
   };
 
   // --- VEHICLE ACTIONS ---
@@ -1078,6 +1207,18 @@ export default function DatabaseMasterModule({
           <Users className="w-3.5 h-3.5" />
           👷 Data Buruh ({laborRates.length})
         </button>
+
+        <button
+          onClick={() => { setActiveSubTab('PRODUCTS'); setSearchQuery(''); handleCancel(); }}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+            activeSubTab === 'PRODUCTS'
+              ? 'bg-emerald-700 text-white shadow-sm'
+              : 'text-neutral-600 hover:bg-neutral-100'
+          }`}
+        >
+          <Package className="w-3.5 h-3.5" />
+          🛍️ Produk ({products.length})
+        </button>
       </div>
 
       {/* Main Panel Content split into Form & List */}
@@ -1597,8 +1738,7 @@ export default function DatabaseMasterModule({
               </form>
             )}
 
-            {/* Form: FINANCE_CATS */}
-            {activeSubTab === 'FINANCE_CATS' && (
+             {activeSubTab === 'FINANCE_CATS' && (
               <form onSubmit={handleSaveFinanceCategory} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                 <div>
                   <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Nama Kategori Keuangan</label>
@@ -1631,6 +1771,130 @@ export default function DatabaseMasterModule({
               </form>
             )}
 
+            {/* Form: PRODUCTS */}
+            {activeSubTab === 'PRODUCTS' && (
+              <form onSubmit={handleSaveProduct} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-sans">
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Nama Produk</label>
+                    <input
+                      type="text"
+                      required
+                      value={productName}
+                      onChange={(e) => setProductName(e.target.value)}
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-bold focus:border-indigo-500 outline-none text-neutral-800"
+                      placeholder="Contoh: Beras Premium US Bilibili"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Kategori</label>
+                    <select
+                      value={productCategory}
+                      onChange={(e) => setProductCategory(e.target.value as any)}
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-2 py-2 text-xs font-semibold focus:border-indigo-500 outline-none text-neutral-800"
+                    >
+                      <option value="BERAS">BERAS</option>
+                      <option value="JAGUNG">JAGUNG</option>
+                      <option value="LAINNYA">LAINNYA</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Harga Jual (Rp/Kg)</label>
+                    <input
+                      type="number"
+                      required
+                      value={productPrice || ''}
+                      onChange={(e) => setProductPrice(Number(e.target.value))}
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs focus:border-indigo-500 outline-none text-neutral-800 font-mono"
+                      placeholder="Contoh: 15500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Deskripsi Produk</label>
+                    <textarea
+                      value={productDescription}
+                      onChange={(e) => setProductDescription(e.target.value)}
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs focus:border-indigo-500 outline-none text-neutral-800 min-h-[60px]"
+                      placeholder="Jelaskan detail mengenai produk ini..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Karakteristik (Pisahkan dengan koma)</label>
+                    <textarea
+                      value={productCharacteristics}
+                      onChange={(e) => setProductCharacteristics(e.target.value)}
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs focus:border-indigo-500 outline-none text-neutral-800 min-h-[60px]"
+                      placeholder="Contoh: Pulen, Tanpa Pemutih, Wangi Alami"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end font-sans">
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Stok Tersedia (Kg)</label>
+                    <input
+                      type="number"
+                      value={productStock || ''}
+                      onChange={(e) => setProductStock(Number(e.target.value))}
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs focus:border-indigo-500 outline-none text-neutral-800 font-mono"
+                      placeholder="Contoh: 5000"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="grow">
+                      <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Gambar Produk</label>
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-20 h-20 bg-neutral-100 rounded-lg overflow-hidden border border-neutral-300 flex items-center justify-center group">
+                          {productImageUrl ? (
+                            <>
+                              <img src={productImageUrl} alt="Preview" className="w-full h-full object-cover" />
+                              <button 
+                                type="button"
+                                onClick={() => setProductImageUrl('')}
+                                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </>
+                          ) : (
+                            <div className="text-center">
+                              <ImageIcon className="w-5 h-5 text-neutral-400 mx-auto" />
+                              <span className="text-[8px] text-neutral-400 font-bold uppercase">No Image</span>
+                            </div>
+                          )}
+                          {isCompresing && (
+                            <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                              <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="grow">
+                          <label className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-lg text-xs font-bold cursor-pointer transition-colors border border-neutral-300">
+                            <Upload className="w-3.5 h-3.5" />
+                            {productImageUrl ? 'Ganti Foto' : 'Pilih Foto'}
+                            <input 
+                              type="file" 
+                              className="hidden" 
+                              accept="image/*"
+                              onChange={handleProductImageUpload}
+                            />
+                          </label>
+                          <p className="text-[9px] text-neutral-400 mt-1 font-medium">PNG, JPG. Kompresi otomatis aktif.</p>
+                        </div>
+                      </div>
+                    </div>
+                    <button type="submit" disabled={isCompresing} className="bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-400 text-white font-bold px-6 py-2 rounded-lg text-xs flex items-center justify-center gap-1 shrink-0 cursor-pointer h-[38px] transition-all active:scale-95 shadow-sm mt-auto">
+                      <Check className="w-3.5 h-3.5" /> SIMPAN
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+
           </div>
         )}
 
@@ -1640,7 +1904,14 @@ export default function DatabaseMasterModule({
             <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-2.5" />
             <input
               type="text"
-              placeholder={`Cari dari data master ${activeSubTab === 'VEHICLES' ? 'No. Polisi' : activeSubTab === 'SUPPLIERS' ? 'Supplier' : activeSubTab === 'BUYERS' ? 'Pembeli' : activeSubTab === 'EMPLOYEES' ? 'Nama' : 'Komoditas'}...`}
+              placeholder={`Cari dari data master ${
+                activeSubTab === 'VEHICLES' ? 'No. Polisi' : 
+                activeSubTab === 'SUPPLIERS' ? 'Supplier' : 
+                activeSubTab === 'BUYERS' ? 'Pembeli' : 
+                activeSubTab === 'EMPLOYEES' ? 'Nama' : 
+                activeSubTab === 'PRODUCTS' ? 'Produk' :
+                'Komoditas'
+              }...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-1.5 text-xs bg-white border border-neutral-300 rounded-lg outline-none focus:border-indigo-500 text-neutral-700"
@@ -1655,6 +1926,7 @@ export default function DatabaseMasterModule({
             {activeSubTab === 'BANKS' && `Total: ${banks.length} Saluran Kas`}
             {activeSubTab === 'BROKERS' && `Total: ${brokers.length} Makelar Aktif`}
             {activeSubTab === 'LOCATIONS' && `Total: ${locations.length} Lokasi Operasional`}
+            {activeSubTab === 'PRODUCTS' && `Total: ${products.length} Varian Produk`}
           </div>
         </div>
 
@@ -2160,6 +2432,84 @@ export default function DatabaseMasterModule({
                       </td>
                     </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* GRID: PRODUCTS */}
+        {activeSubTab === 'PRODUCTS' && (
+          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs min-w-[800px]">
+              <thead>
+                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                  <th className="p-3 font-semibold">Produk</th>
+                  <th className="p-3 font-semibold">Kategori</th>
+                  <th className="p-3 font-semibold">Harga</th>
+                  <th className="p-3 font-semibold">Stok</th>
+                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-150">
+                {products
+                  .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(p => (
+                    <tr key={p.id} className="hover:bg-slate-50 text-neutral-800 group">
+                      <td className="p-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center overflow-hidden shrink-0 border border-neutral-200">
+                            {p.imageUrl ? (
+                              <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <Package className="w-5 h-5 text-neutral-400" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-extrabold text-indigo-900">{p.name}</p>
+                            <p className="text-[10px] text-neutral-500 truncate max-w-[200px]">{p.description}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black tracking-tighter ${
+                          p.category === 'BERAS' ? 'bg-blue-100 text-blue-700' :
+                          p.category === 'JAGUNG' ? 'bg-amber-100 text-amber-700' : 'bg-neutral-100 text-neutral-700'
+                        }`}>
+                          {p.category}
+                        </span>
+                      </td>
+                      <td className="p-3 font-mono font-bold text-neutral-700">Rp {p.pricePerKg.toLocaleString('id-ID')}</td>
+                      <td className="p-3">
+                        <div className="flex flex-col">
+                          <span className="font-mono font-bold text-neutral-900">{p.stockAvailable.toLocaleString('id-ID')} Kg</span>
+                          <div className="w-16 h-1 bg-neutral-100 rounded-full mt-1 overflow-hidden">
+                            <div 
+                              className={`h-full ${p.stockAvailable > 5000 ? 'bg-emerald-500' : p.stockAvailable > 1000 ? 'bg-amber-500' : 'bg-rose-500'}`}
+                              style={{ width: `${Math.min(100, (p.stockAvailable / 10000) * 100)}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div className="flex gap-1.5 justify-center opacity-40 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => handleEditProduct(p)} className="bg-white hover:bg-blue-50 text-neutral-400 hover:text-blue-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer" title="Edit Produk">
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => handleDeleteProduct(p.id, p.name)} className="bg-white hover:bg-rose-50 text-neutral-400 hover:text-rose-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer" title="Hapus Produk">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                ))}
+                {products.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="p-10 text-center">
+                      <Package className="w-10 h-10 text-neutral-200 mx-auto mb-2" />
+                      <p className="text-neutral-400 font-bold uppercase tracking-widest text-[10px]">Belum ada data produk</p>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

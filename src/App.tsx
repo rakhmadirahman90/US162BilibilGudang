@@ -25,7 +25,8 @@ import {
   CustomerRecord,
   FinanceCategoryRecord,
   LaborRateRecord,
-  CornMoistureRule
+  CornMoistureRule,
+  ProductRecord
 } from './types';
 import { 
   initialWeighbridgeTickets, 
@@ -46,7 +47,8 @@ import {
   initialCustomers,
   initialFinanceCategories,
   initialLaborRates,
-  initialCornMoistureRules
+  initialCornMoistureRules,
+  initialProducts
 } from './data';
 
 // Import our modular subcomponents
@@ -58,6 +60,8 @@ import MoistureRefaksiModule from './components/MoistureRefaksiModule';
 import DryerModule, { DryerRecord } from './components/DryerModule';
 import FinanceModule from './components/FinanceModule';
 import ReportsModule from './components/ReportsModule';
+import ProductModule from './components/ProductModule';
+import DashboardProductShowcase from './components/DashboardProductShowcase';
 import DatabaseMasterModule from './components/DatabaseMasterModule';
 import RiceStockModule from './components/RiceStockModule';
 import { useLanguage } from './i18n/LanguageContext';
@@ -373,6 +377,12 @@ export default function App() {
     return saved ? JSON.parse(saved) : initialCornMoistureRules;
   });
 
+  const [products, setProducts] = useState<ProductRecord[]>(() => {
+    const saved = localStorage.getItem('bilibili_products');
+    return saved ? JSON.parse(saved) : initialProducts;
+  });
+
+
   const [dryerRecords, setDryerRecords] = useState<DryerRecord[]>(() => {
     const saved = localStorage.getItem('bilibili_dryer_records');
     return saved ? JSON.parse(saved) : [];
@@ -448,6 +458,7 @@ export default function App() {
   useSyncCollection('financeCategories', financeCategories, setFinanceCategories, initialFinanceCategories);
   useSyncCollection('laborRates', laborRates, setLaborRates, initialLaborRates);
   useSyncCollection('cornMoistureRules', cornMoistureRules, setCornMoistureRules, initialCornMoistureRules);
+  useSyncCollection('products', products, setProducts, initialProducts);
   useSyncCollection('dryerRecords', dryerRecords, setDryerRecords, []);
 
   // --- SYNCHRONIZED MASTER SETTERS WRAPPER ---
@@ -481,6 +492,7 @@ export default function App() {
   };
 
   const syncedSetVehicles = createSyncedSetter('vehicles', setVehicles);
+  const syncedSetProducts = createSyncedSetter('products', setProducts);
   const syncedSetSuppliers = createSyncedSetter('suppliers', setSuppliers);
   const syncedSetBuyers = createSyncedSetter('buyers', setBuyers);
   const syncedSetEmployees = createSyncedSetter('employees', setEmployees);
@@ -549,7 +561,7 @@ export default function App() {
   };
 
   // Active navigational tab
-  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE' | 'STOK_BERAS' | 'LAPORAN' | 'DATABASE' | 'DRYER'>('DASHBOARD');
+  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE' | 'STOK_BERAS' | 'LAPORAN' | 'DATABASE' | 'DRYER' | 'PRODUK'>('DASHBOARD');
   
   // Guard against direct tab loading by unauthorised roles
   useEffect(() => {
@@ -1375,6 +1387,18 @@ export default function App() {
             <Package className="w-4 h-4 text-emerald-600" />
             9. {t.riceStock}
           </button>
+  
+          <button
+            onClick={() => setActiveTab('PRODUK')}
+            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+              activeTab === 'PRODUK' 
+                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
+                : 'border-transparent text-neutral-500 hover:text-neutral-800'
+            }`}
+          >
+            <Package className="w-4 h-4 text-emerald-600" />
+            10. Produk
+          </button>
  
           {sessionUser?.role === 'admin' && (
             <>
@@ -1687,7 +1711,9 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* Poles, Kipasan, & Gas Dryer Lane */}
+                <DashboardProductShowcase />
+
+                    {/* Poles, Kipasan, & Gas Dryer Lane */},TargetContent:
                     <div>
                       {(() => {
                         const activeProcessingKg = serviceRecords.reduce((acc, s) => acc + s.weight, 0);
@@ -2339,6 +2365,8 @@ export default function App() {
             setLaborRates={syncedSetLaborRates}
             cornMoistureRules={cornMoistureRules}
             setCornMoistureRules={syncedSetCornMoistureRules}
+            products={products}
+            setProducts={syncedSetProducts}
           />
         )}
 
@@ -2352,6 +2380,9 @@ export default function App() {
             onDeleteRecord={handleDeleteRiceStock}
           />
         )}
+
+        {/* VIEW 11: PRODUK */}
+        {activeTab === 'PRODUK' && <ProductModule sessionUser={sessionUser} products={products} />}
 
       </main>
 

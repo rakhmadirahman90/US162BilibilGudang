@@ -248,6 +248,21 @@
       },
       "required": ["id", "name", "commissionRate"]
     },
+    "Product": {
+      "title": "Product",
+      "description": "Product catalog with images",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "pricePerKg": { "type": "number" },
+        "stockAvailable": { "type": "number" },
+        "imageUrl": { "type": "string" }
+      },
+      "required": ["id", "name", "category", "pricePerKg", "stockAvailable"]
+    },
     "LocationRecord": {
       "title": "LocationRecord",
       "description": "Warehouse floors, dryers and bins storage layout",
@@ -278,6 +293,7 @@
     "riceStockRecords": { "schema": "RiceStockRecord", "description": "Stock balance card histories" },
     "banks": { "schema": "BankRecord", "description": "Bank account catalogs" },
     "brokers": { "schema": "BrokerRecord", "description": "Master registered agents" },
+    "products": { "schema": "Product", "description": "Product inventory and catalog" },
     "locations": { "schema": "LocationRecord", "description": "Storage physical zones" }
   }
 }

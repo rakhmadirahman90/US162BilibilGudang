@@ -194,3 +194,14 @@ export interface LaborRateRecord {
   rate: number;
 }
 
+export interface ProductRecord {
+  id: string;
+  name: string;
+  category: 'BERAS' | 'JAGUNG' | 'LAINNYA';
+  description: string;
+  characteristics: string[];
+  pricePerKg: number;
+  stockAvailable: number;
+  imageUrl?: string;
+}
+
