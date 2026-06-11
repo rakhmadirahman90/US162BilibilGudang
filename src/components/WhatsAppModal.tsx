@@ -116,7 +116,11 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
 
   useEffect(() => {
     if (isOpen) {
-      generateAndUploadPdf();
+      // Small timeout to allow the modal to render/animate before starting heavy work
+      const timer = setTimeout(() => {
+        generateAndUploadPdf();
+      }, 300);
+      return () => clearTimeout(timer);
     }
   }, [isOpen, withPdf]);
 

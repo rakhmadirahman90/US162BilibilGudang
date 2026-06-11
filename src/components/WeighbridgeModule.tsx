@@ -337,16 +337,16 @@ export default function WeighbridgeModule({
       t.policeNo,
       t.goodsName,
       t.agency,
-      `${t.timbang1Weight.toLocaleString('id-ID')} Kg`,
-      t.timbang2Weight > 0 ? `${t.timbang2Weight.toLocaleString('id-ID')} Kg` : '-',
-      `${t.netWeight.toLocaleString('id-ID')} Kg`
+      `${(t.timbang1Weight ?? 0).toLocaleString('id-ID')} Kg`,
+      (t.timbang2Weight ?? 0) > 0 ? `${(t.timbang2Weight ?? 0).toLocaleString('id-ID')} Kg` : '-',
+      `${(t.netWeight ?? 0).toLocaleString('id-ID')} Kg`
     ]);
-    const totalNetWeight = filteredTickets.reduce((sum, t) => sum + t.netWeight, 0);
-    const totalGrossWeight = filteredTickets.reduce((sum, t) => sum + t.timbang1Weight, 0);
+    const totalNetWeight = filteredTickets.reduce((sum, t) => sum + (t.netWeight ?? 0), 0);
+    const totalGrossWeight = filteredTickets.reduce((sum, t) => sum + (t.timbang1Weight ?? 0), 0);
     const summaries = [
       { label: 'Total Transaksi', value: `${filteredTickets.length} Tiket` },
-      { label: 'Total Berat Kotor (Gross)', value: `${totalGrossWeight.toLocaleString('id-ID')} Kg` },
-      { label: 'Total Netto Bersih', value: `${totalNetWeight.toLocaleString('id-ID')} Kg` }
+      { label: 'Total Berat Kotor (Gross)', value: `${(totalGrossWeight ?? 0).toLocaleString('id-ID')} Kg` },
+      { label: 'Total Netto Bersih', value: `${(totalNetWeight ?? 0).toLocaleString('id-ID')} Kg` }
     ];
     printPDFReport('Laporan Jembatan Timbang Seng', headers, rows, summaries);
   };
