@@ -260,12 +260,12 @@ const COMMON_SLIP_STYLE = `
     width: 100% !important;
     height: 100% !important;
     font-family: 'Courier', 'Courier New', 'Consolas', 'Monaco', monospace !important;
-    font-size: 7.5pt;
+    font-size: 6.5pt;
     color: #000000 !important;
     background-color: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
-    line-height: 1.15;
+    line-height: 1.0;
     text-align: left;
     /* CRITICAL FOR DOT MATRIX: Turn off pixel smoothing entirely to keep output pure solid black/sharp pixels */
     -webkit-font-smoothing: none !important;
@@ -322,9 +322,9 @@ const COMMON_SLIP_STYLE = `
       box-shadow: none !important;
       page-break-inside: avoid;
       position: absolute !important;
-      top: 2.5mm !important;
+      top: 0mm !important;
       left: 4.5mm !important;
-      width: 105mm !important;
+      width: 100mm !important;
     }
 
     * {
@@ -567,62 +567,45 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
     <div class="header">
       <img class="header-logo" src="${bilibiliLogo}" alt="US BILIBILI 162" />
       <div class="header-text">
-        <div class="header-title">GUDANG US BILIBILI 162</div>
-        <div class="header-subtitle">Jl. Poros Pinrang-Parepare, Suppa, Kab. Pinrang | WA: 085244466009</div>
+        <div class="header-title">US BILIBILI 162</div>
       </div>
     </div>
 
     <div class="divider-line"></div>
-    <div class="ticket-type" style="background: none; padding: 0; margin-bottom: 3px;">RESI KAS TERPADU</div>
+    <div class="ticket-type">RESI KAS TERPADU</div>
     <div class="divider-line"></div>
 
-    <div class="flex"><span class="label">No. Tiket :</span><span class="value">${record.ticketNo || '-'}</span></div>
-    <div class="flex"><span class="label">Tanggal :</span><span class="value">${formatReceiptDate(record.date)}</span></div>
-    <div class="flex"><span class="label">No. Polisi:</span><span class="value">${record.vehicleNo}</span></div>
-    <div class="flex"><span class="label">Mitra/Agen:</span><span class="value">${record.supplier}</span></div>
-    <div class="flex"><span class="label">Nama Barang:</span><span class="value">${record.commodity}</span></div>
-
-    <div class="divider-line"></div>
-
-    <div class="flex"><span class="label-heavy">TIMBANG I (Masuk)</span><span class="value-heavy">${bruto.toLocaleString('id-ID')} Kg</span></div>
-    <div class="weight-time">${ticket?.timbang1Time || '-'}</div>
-
-    <div class="flex"><span class="label-heavy">TIMBANG II (Keluar)</span><span class="value-heavy">${tara > 0 ? tara.toLocaleString('id-ID') + ' Kg' : '- -'}</span></div>
-    <div class="weight-time">${ticket?.timbang2Time || '-'}</div>
+    <div class="flex"><span class="label">Tiket/Tgl :</span><span class="value">${record.ticketNo || '-'} / ${formatReceiptDate(record.date).split(' ')[0]}</span></div>
+    <div class="flex"><span class="label">Pol / Mitra :</span><span class="value">${record.vehicleNo} / ${record.supplier}</span></div>
+    <div class="flex"><span class="label">Barang :</span><span class="value">${record.commodity}</span></div>
 
     <div class="divider-line"></div>
 
-    <!-- KUALITAS -->
-    <div class="flex"><span class="label">KA &amp; Kualitas (${record.commodity}) :</span><span class="value">KA: ${(record.moistureContent || 0).toFixed(1)}% | Biji Mati: 0.0%</span></div>
+    <div class="flex"><span class="label-heavy">Bruto/Tara :</span><span class="value-heavy">${bruto.toLocaleString('id-ID')} / ${tara.toLocaleString('id-ID')} Kg</span></div>
+    
+    ${record.commodity === 'JAGUNG' ? `
+      <div class="flex"><span class="label">Kadar Air (KA):</span><span class="value">${(record.moistureContent || 0).toFixed(1)}%</span></div>
+      <div class="flex"><span class="label">Potongan/Ref :</span><span class="value">${(record.refaksiKaPercent || 0).toFixed(1)}%</span></div>
+      <div class="flex"><span class="label">Pot. Karung :</span><span class="value">${(record.bagDeductionPercent || 0).toFixed(1)}%</span></div>
+      <div class="flex"><span class="label">Biji Mati/Jamur :</span><span class="value">0.0% / 0.0%</span></div>
+    ` : `
+      <div class="flex"><span class="label">KA/BijiMati :</span><span class="value">${(record.moistureContent || 0).toFixed(1)}% / 0.0%</span></div>
+    `}
 
     <div class="divider-line"></div>
 
-    <div class="flex"><span class="label">BERAT BRUTO :</span><span class="value">${bruto.toLocaleString('id-ID')} kg</span></div>
-    <div class="flex"><span class="label">BERAT TARA :</span><span class="value">${tara.toLocaleString('id-ID')} kg</span></div>
-    <div class="flex"><span class="label">Pot. Karung (${record.bagDeductionPercent.toFixed(2)}%) :</span><span class="value">- ${potKrg.toLocaleString('id-ID')} kg</span></div>
-    <div class="flex"><span class="label">Pot. Ref/Air (${record.refaksiKaPercent.toFixed(2)}%) :</span><span class="value">- ${potRefaksi.toLocaleString('id-ID')} kg</span></div>
-
-    <div class="divider-line"></div>
-
-    <div class="flex"><span class="label">BERAT NETTO :</span><span class="value" style="font-weight: bold;">${net.toLocaleString('id-ID')} KG</span></div>
-    <div class="flex"><span class="label">HARGA / KG :</span><span class="value" style="font-weight: bold;">Rp ${(record.price || 0).toLocaleString('id-ID')}</span></div>
-    <div class="flex"><span class="label">SUB TOTAL :</span><span class="value">Rp ${(net * (record.price || 0)).toLocaleString('id-ID')}</span></div>
-    <div class="flex"><span class="label">BIAYA BURUH :</span><span class="value">- Rp ${(record.laborCost || 0).toLocaleString('id-ID')}</span></div>
-
-    <div class="divider-line"></div>
-
-    <div class="netto-row" style="margin-top: 4px; padding-top: 4px; padding-bottom: 4px;"><span class="netto-label">TOTAL SISA (BAYAR) :</span><span class="netto-val" style="color: #0284c7; font-size: 11pt;">Rp ${(record.totalPrice || 0).toLocaleString('id-ID')}</span></div>
+    <div class="flex"><span class="label">Netto (Bersih):</span><span class="value" style="font-weight: 950; font-size: 8.5pt;">${net.toLocaleString('id-ID')} Kg</span></div>
+    <div class="flex"><span class="label">Bayar Netto :</span><span class="value" style="font-weight: 950; color: #0284c7;">Rp ${(record.totalPrice || 0).toLocaleString('id-ID')}</span></div>
 
     <div class="divider-line"></div>
 
     <div class="signatures">
-      <div>Penerima Staff 162<div class="signature-space"></div><div class="signature-line">${staffName}</div></div>
-      <div>Sopir / Pembawa<div class="signature-space"></div><div class="signature-line">(          )</div></div>
+      <div>Petugas<div class="signature-space"></div><div class="signature-line">${staffName}</div></div>
+      <div>Sopir<div class="signature-space"></div><div class="signature-line">( )</div></div>
     </div>
 
     <div class="footer-msg">
-      * Terimakasih atas kerjasamanya *<br/>
-      Aplikasi Timbangan GSC GST-9700 Jembatan Timbang v2.0
+      * Terimakasih *
     </div>
   </div>
 </body>
