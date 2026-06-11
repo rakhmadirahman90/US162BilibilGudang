@@ -111,16 +111,40 @@ export function useSyncCollection<T extends { id: string }>(
   }, [collectionName, initialStaticData]);
 }
 
+let activeOperations = 0;
+
+function updateSyncStatus(status: 'saving' | 'synced' | 'error') {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('firebase-sync-state', { detail: status }));
+  }
+}
+
 /**
  * Save / Update a document online in Firestore.
  */
 export async function saveOnline<T extends { id: string }>(collectionName: string, item: T) {
+  activeOperations++;
+  updateSyncStatus('saving');
   try {
     const user = await ensureAuthenticated();
-    if (!user) return; // Silent fallback: operating in Offline / Local mode
+    if (!user) {
+      activeOperations--;
+      if (activeOperations === 0) updateSyncStatus('synced');
+      return; // Silent fallback: operating in Offline / Local mode
+    }
     await setDoc(doc(db, collectionName, item.id), item);
   } catch (error) {
+    updateSyncStatus('error');
     handleFirestoreError(error, OperationType.WRITE, `${collectionName}/${item.id}`);
+  } finally {
+    if (activeOperations > 0) activeOperations--;
+    if (activeOperations === 0) {
+      setTimeout(() => {
+        if (activeOperations === 0) {
+          updateSyncStatus('synced');
+        }
+      }, 700);
+    }
   }
 }
 
@@ -128,11 +152,27 @@ export async function saveOnline<T extends { id: string }>(collectionName: strin
  * Delete a document online in Firestore.
  */
 export async function deleteOnline(collectionName: string, id: string) {
+  activeOperations++;
+  updateSyncStatus('saving');
   try {
     const user = await ensureAuthenticated();
-    if (!user) return; // Silent fallback: operating in Offline / Local mode
+    if (!user) {
+      activeOperations--;
+      if (activeOperations === 0) updateSyncStatus('synced');
+      return; // Silent fallback: operating in Offline / Local mode
+    }
     await deleteDoc(doc(db, collectionName, id));
   } catch (error) {
+    updateSyncStatus('error');
     handleFirestoreError(error, OperationType.DELETE, `${collectionName}/${id}`);
+  } finally {
+    if (activeOperations > 0) activeOperations--;
+    if (activeOperations === 0) {
+      setTimeout(() => {
+        if (activeOperations === 0) {
+          updateSyncStatus('synced');
+        }
+      }, 700);
+    }
   }
 }

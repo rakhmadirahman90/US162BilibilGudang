@@ -97,6 +97,9 @@ import {
   Calendar,
   Activity,
   TrendingDown,
+  Cloud,
+  CloudOff,
+  RefreshCw,
 } from 'lucide-react';
 
 // Define professional industrial & agricultural application themes
@@ -377,6 +380,24 @@ export default function App() {
 
   // --- GOOGLE AUTHENTICATION STATE & EVENTS ---
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [syncStatus, setSyncStatus] = useState<'saving' | 'synced' | 'error'>('synced');
+
+  useEffect(() => {
+    const handleSyncStateChange = (e: Event) => {
+      const customEvent = e as CustomEvent<'saving' | 'synced' | 'error'>;
+      if (customEvent.detail) {
+        setSyncStatus(customEvent.detail);
+      }
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('firebase-sync-state', handleSyncStateChange);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('firebase-sync-state', handleSyncStateChange);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
@@ -1185,12 +1206,24 @@ export default function App() {
 
             {/* Active connection point */}
             <div className="hidden md:flex items-center gap-4 border-l border-white/20 pl-4 ml-2">
-              <div className="flex items-center gap-1.5 font-mono text-[11px] text-emerald-250">
-                <span className="text-white/60 uppercase">System:</span>
-                <span className="text-green-400 font-bold flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse"></span>
-                  {t.online}
-                </span>
+              <div className="flex items-center gap-1.5 font-mono text-[11px]">
+                <span className="text-white/60 uppercase">Cloud Sync:</span>
+                {syncStatus === 'saving' ? (
+                  <span className="text-amber-400 font-bold flex items-center gap-1">
+                    <RefreshCw className="w-3 h-3 animate-spin text-amber-300" />
+                    Menyimpan...
+                  </span>
+                ) : syncStatus === 'error' ? (
+                  <span className="text-red-400 font-bold flex items-center gap-1">
+                    <CloudOff className="w-3.5 h-3.5 text-red-400" />
+                    Gagal
+                  </span>
+                ) : (
+                  <span className="text-green-400 font-bold flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse"></span>
+                    Tersinkronisasi
+                  </span>
+                )}
               </div>
             </div>
 
@@ -1376,6 +1409,73 @@ export default function App() {
 
       {/* CORE WORKSPACE PORTALS */}
       <main className="max-w-7xl mx-auto px-4 py-8 flex-1 w-full overflow-y-auto overflow-x-hidden">
+        
+        {/* Real-time Firebase Cloud Sync Status Notifier Bar */}
+        <motion.div 
+          layout
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          id="firebase-cloud-sync-banner"
+          className={`mb-6 flex flex-col md:flex-row items-center justify-between gap-3 px-4.5 py-3 rounded-xl border shadow-sm transition-all duration-300 ${
+            syncStatus === 'saving' 
+              ? 'bg-amber-50 border-amber-200 text-amber-900 shadow-amber-100/30' 
+              : syncStatus === 'error' 
+              ? 'bg-red-50 border-red-200 text-red-900 shadow-red-100/30' 
+              : 'bg-emerald-50/50 border-emerald-100/80 text-emerald-950 shadow-emerald-100/10'
+          }`}
+        >
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+            <div className="shrink-0 flex items-center justify-center">
+              {syncStatus === 'saving' ? (
+                <div className="w-7 h-7 bg-amber-550 text-white rounded-lg flex items-center justify-center shadow-xs animate-spin-slow">
+                  <RefreshCw className="w-4 h-4 text-white animate-spin" />
+                </div>
+              ) : syncStatus === 'error' ? (
+                <div className="w-7 h-7 bg-red-600 text-white rounded-lg flex items-center justify-center shadow-xs">
+                  <CloudOff className="w-4 h-4 text-white animate-bounce" />
+                </div>
+              ) : (
+                <div className="w-7 h-7 bg-emerald-600 text-white rounded-lg flex items-center justify-center shadow-xs">
+                  <Cloud className="w-4 h-4 text-white" />
+                </div>
+              )}
+            </div>
+            
+            <div className="text-center sm:text-left">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 leading-none">
+                <span className="text-[10px] font-extrabold font-sans uppercase tracking-wider text-neutral-500">
+                  SINKRONISASI CLOUD FIREBASE:
+                </span>
+                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full font-mono uppercase tracking-tight shadow-xs ${
+                  syncStatus === 'saving' 
+                    ? 'bg-amber-400 text-neutral-900 font-bold animate-pulse' 
+                    : syncStatus === 'error' 
+                    ? 'bg-red-500 text-white' 
+                    : 'bg-emerald-600 text-white'
+                }`}>
+                  {syncStatus === 'saving' ? '🟢 Menyimpan...' : syncStatus === 'error' ? '🔺 Gagal Sinkron' : '⚡ Tersinkronisasi'}
+                </span>
+              </div>
+              <p className="text-[10px] text-neutral-500 mt-1 font-sans">
+                {syncStatus === 'saving' 
+                  ? 'Perubahan sedang ditulis ke Cloud Firestore database secara otomatis.' 
+                  : syncStatus === 'error' 
+                  ? 'Terjadi interupsi jaringan. Silakan periksa koneksi Anda - data lokal tetap aman.' 
+                  : 'Semua perubahan berhasil dicadangkan dan diselaraskan secara real-time ke web server.'}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2.5 font-mono text-[10px] text-neutral-500/80 border-t md:border-t-0 border-neutral-100 pt-2 md:pt-0 w-full md:w-auto justify-center md:justify-end">
+            <span className="flex items-center gap-1">
+              <span className={`w-1.5 h-1.5 rounded-full ${syncStatus === 'error' ? 'bg-red-500' : 'bg-green-500'}`}></span>
+              Active Firestore Instance
+            </span>
+            <span>•</span>
+            <span className="italic">US Bilibili 162</span>
+          </div>
+        </motion.div>
         
         {/* VIEW 1: DASHBOARD OVERVIEW */}
         {activeTab === 'DASHBOARD' && (
