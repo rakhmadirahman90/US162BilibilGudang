@@ -12,7 +12,9 @@ import {
   FinanceCategoryRecord,
   LaborRateRecord,
   CornMoistureRule,
-  ProductRecord
+  ProductRecord,
+  UserAccount,
+  ActivityLog
 } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import ConfirmModal from './ConfirmModal';
@@ -35,7 +37,17 @@ import {
   MapPin,
   Package,
   Upload,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ShieldCheck,
+  FileText,
+  Settings,
+  Key,
+  UserMinus,
+  UserPlus,
+  History,
+  RotateCcw,
+  CloudDownload,
+  ShieldAlert
 } from 'lucide-react';
 import { compressImage } from '../utils/imageUtils';
 
@@ -66,6 +78,10 @@ interface DatabaseMasterModuleProps {
   setCornMoistureRules: React.Dispatch<React.SetStateAction<CornMoistureRule[]>>;
   products: ProductRecord[];
   setProducts: React.Dispatch<React.SetStateAction<ProductRecord[]>>;
+  users: UserAccount[];
+  setUsers: React.Dispatch<React.SetStateAction<UserAccount[]>>;
+  activityLogs: ActivityLog[];
+  logAction: (module: string, action: string, details: string) => void;
 }
 
 export default function DatabaseMasterModule({
@@ -94,11 +110,15 @@ export default function DatabaseMasterModule({
   cornMoistureRules,
   setCornMoistureRules,
   products,
-  setProducts
+  setProducts,
+  users,
+  setUsers,
+  activityLogs,
+  logAction
 }: DatabaseMasterModuleProps) {
   const { t, language } = useLanguage();
   // Tabs for the database master
-  type DbTab = 'VEHICLES' | 'SUPPLIERS' | 'BUYERS' | 'EMPLOYEES' | 'COMMODITIES' | 'BANKS' | 'BROKERS' | 'LOCATIONS' | 'CUSTOMERS' | 'FINANCE_CATS' | 'LABOR_RATES' | 'PRODUCTS';
+  type DbTab = 'VEHICLES' | 'SUPPLIERS' | 'BUYERS' | 'EMPLOYEES' | 'COMMODITIES' | 'BANKS' | 'BROKERS' | 'LOCATIONS' | 'CUSTOMERS' | 'FINANCE_CATS' | 'LABOR_RATES' | 'PRODUCTS' | 'USERS' | 'LOGS' | 'SYSTEM';
   const [activeSubTab, setActiveSubTab] = useState<DbTab>('VEHICLES');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -196,6 +216,13 @@ export default function DatabaseMasterModule({
   const [productImageUrl, setProductImageUrl] = useState('');
   const [isCompressing, setIsCompressing] = useState(false);
 
+  // Users
+  const [userUsername, setUserUsername] = useState('');
+  const [userPassword, setUserPassword] = useState('');
+  const [userFullName, setUserFullName] = useState('');
+  const [userRole, setUserRole] = useState<'admin' | 'operator' | 'karyawan' | 'pimpinan'>('operator');
+  const [userIsActive, setUserIsActive] = useState(true);
+
   // Handler helpers
   const triggerToast = (msg: string, type: 'success' | 'error' | 'info' | 'warning' = 'success') => {
     (window as any).__showToast?.(msg, type);
@@ -265,6 +292,12 @@ export default function DatabaseMasterModule({
     setProductStock(0);
     setProductImageUrl('');
     setIsCompressing(false);
+
+    setUserUsername('');
+    setUserPassword('');
+    setUserFullName('');
+    setUserRole('operator');
+    setUserIsActive(true);
   };
 
   // --- PRODUCT ACTIONS ---
@@ -1055,6 +1088,129 @@ export default function DatabaseMasterModule({
     });
   };
 
+  // --- USER ACTIONS ---
+  const handleSaveUser = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userUsername.trim() || !userFullName.trim()) {
+      triggerToast('Username dan Nama Lengkap wajib diisi!', 'error');
+      return;
+    }
+
+    const executeSave = () => {
+      if (editingId) {
+        setUsers(prev => prev.map(u => u.id === editingId ? {
+          ...u,
+          username: userUsername.trim().toLowerCase(),
+          password: userPassword.trim() || u.password,
+          fullName: userFullName.trim(),
+          role: userRole,
+          isActive: userIsActive
+        } : u));
+        logAction('SYSTEM', 'EDIT_USER', `Update user ${userUsername}`);
+        triggerToast(`User ${userUsername} diperbarui!`, 'success');
+      } else {
+        if (users.some(u => u.username === userUsername.trim().toLowerCase())) {
+          triggerToast(`Username ${userUsername} sudah terdaftar!`, 'error');
+          return;
+        }
+        const newUser: UserAccount = {
+          id: `u-${Date.now()}`,
+          username: userUsername.trim().toLowerCase(),
+          password: userPassword.trim() || '12345',
+          fullName: userFullName.trim(),
+          role: userRole,
+          isActive: userIsActive
+        };
+        setUsers(prev => [...prev, newUser]);
+        logAction('SYSTEM', 'ADD_USER', `Daftarkan user baru ${userUsername}`);
+        triggerToast(`User ${userUsername} berhasil ditambahkan!`, 'success');
+      }
+      handleCancel();
+    };
+
+    setConfirmModal({
+      isOpen: true,
+      title: editingId ? 'Konfirmasi Edit User' : 'Konfirmasi User Baru',
+      message: `Simpan data akun untuk ${userFullName}?`,
+      type: editingId ? 'EDIT' : 'ADD',
+      onConfirm: () => { executeSave(); closeConfirm(); }
+    });
+  };
+
+  const handleEditUser = (u: UserAccount) => {
+    setEditingId(u.id);
+    setUserUsername(u.username);
+    setUserPassword('');
+    setUserFullName(u.fullName);
+    setUserRole(u.role);
+    setUserIsActive(u.isActive);
+    setIsAddingNew(false);
+  };
+
+  const handleDeleteUser = (id: string, name: string) => {
+    if (name === 'admin') {
+      triggerToast('Tidak dapat menghapus user Administrator Utama!', 'error');
+      return;
+    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hapus Akun User',
+      message: `Hapus akun ${name} secara permanen?`,
+      type: 'DELETE',
+      onConfirm: () => {
+        setUsers(prev => prev.filter(u => u.id !== id));
+        logAction('SYSTEM', 'DELETE_USER', `Hapus user ${name}`);
+        triggerToast(`User ${name} dihapus.`, 'success');
+        closeConfirm();
+      }
+    });
+  };
+
+  // --- SYSTEM ACTIONS ---
+  const handleResetDatabase = () => {
+    setConfirmModal({
+      isOpen: true,
+      title: '⚠ RESET SELURUH DATABASE',
+      message: 'Apakah Anda yakin ingin menghapus SELURUH data pada aplikasi ini? Tindakan ini tidak dapat dibatalkan (Irreversible).',
+      type: 'DELETE',
+      onConfirm: () => {
+        localStorage.clear();
+        logAction('SYSTEM', 'RESET_DB', 'Melakukan Reset Database Total');
+        triggerToast('Database telah di-reset. Melakukan Reload...', 'warning');
+        setTimeout(() => window.location.reload(), 2000);
+      }
+    });
+  };
+
+  const handleExportData = () => {
+    const data = {
+      users,
+      vehicles,
+      suppliers,
+      buyers,
+      employees,
+      commodities,
+      banks,
+      brokers,
+      locations,
+      customers,
+      financeCategories,
+      laborRates,
+      products,
+      activityLogs,
+      timestamp: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bilibili_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    logAction('SYSTEM', 'EXPORT', 'Melakukan Export/Backup Database');
+    triggerToast('Database berhasil diexport ke JSON.', 'success');
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-md border border-neutral-100 overflow-hidden font-sans">
       
@@ -1231,6 +1387,42 @@ export default function DatabaseMasterModule({
         >
           <Package className="w-3.5 h-3.5" />
           KATALOG PRODUK ({products.length})
+        </button>
+
+        <button
+          onClick={() => { setActiveSubTab('USERS'); setSearchQuery(''); handleCancel(); }}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer uppercase ${
+            activeSubTab === 'USERS'
+              ? 'bg-emerald-700 text-white shadow-sm'
+              : 'text-neutral-600 hover:bg-neutral-100'
+          }`}
+        >
+          <ShieldCheck className="w-3.5 h-3.5" />
+          MANAJEMEN USER ({users.length})
+        </button>
+
+        <button
+          onClick={() => { setActiveSubTab('LOGS'); setSearchQuery(''); handleCancel(); }}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer uppercase ${
+            activeSubTab === 'LOGS'
+              ? 'bg-blue-700 text-white shadow-sm'
+              : 'text-neutral-600 hover:bg-neutral-100'
+          }`}
+        >
+          <History className="w-3.5 h-3.5" />
+          LOG AKTIVITAS SISTEM
+        </button>
+
+        <button
+          onClick={() => { setActiveSubTab('SYSTEM'); setSearchQuery(''); handleCancel(); }}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer uppercase ${
+            activeSubTab === 'SYSTEM'
+              ? 'bg-neutral-800 text-white shadow-sm'
+              : 'text-neutral-600 hover:bg-neutral-100'
+          }`}
+        >
+          <Settings className="w-3.5 h-3.5" />
+          PEMELIHARAAN SISTEM
         </button>
       </div>
 
@@ -1908,6 +2100,119 @@ export default function DatabaseMasterModule({
               </form>
             )}
 
+            {/* Form: USERS */}
+            {activeSubTab === 'USERS' && (
+              <form onSubmit={handleSaveUser} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end font-sans">
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5 text-emerald-700">Username Login</label>
+                    <input
+                      type="text"
+                      required
+                      value={userUsername}
+                      onChange={(e) => setUserUsername(e.target.value.toLowerCase())}
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-bold focus:border-emerald-500 outline-none text-neutral-800"
+                      placeholder="e.g., operator_malam"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5 text-emerald-700">Password</label>
+                    <div className="relative">
+                      <input
+                        type="password"
+                        value={userPassword}
+                        onChange={(e) => setUserPassword(e.target.value)}
+                        className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs focus:border-emerald-500 outline-none text-neutral-800"
+                        placeholder={editingId ? 'Kosongkan jika tak diubah' : 'Min. 5 karakter'}
+                      />
+                      <Key className="w-3 h-3 absolute right-3 top-2.5 text-neutral-400" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Nama Lengkap User</label>
+                    <input
+                      type="text"
+                      required
+                      value={userFullName}
+                      onChange={(e) => setUserFullName(e.target.value)}
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-bold focus:border-emerald-500 outline-none text-neutral-800 uppercase"
+                      placeholder="Nama Lengkap Karyawan"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5">Role / Hak Akses</label>
+                    <select
+                      value={userRole}
+                      onChange={(e) => setUserRole(e.target.value as any)}
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-2 py-2 text-xs font-bold focus:border-emerald-500 outline-none text-neutral-800"
+                    >
+                      <option value="operator">OPERATOR (Timbangan/Logistik)</option>
+                      <option value="karyawan">KARYAWAN (Stok/Administrasi)</option>
+                      <option value="pimpinan">PIMPINAN (Laporan/Keuangan)</option>
+                      <option value="admin">ADMINISTRATOR (Superadmin)</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between bg-emerald-50/50 p-3 rounded-lg border border-emerald-100">
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="checkbox" 
+                      id="user-active" 
+                      checked={userIsActive}
+                      onChange={(e) => setUserIsActive(e.target.checked)}
+                      className="w-4 h-4 accent-emerald-600"
+                    />
+                    <label htmlFor="user-active" className="text-xs font-bold text-emerald-800 select-none cursor-pointer">
+                      Akun Aktif (Bisa Login)
+                    </label>
+                  </div>
+                  <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-2 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95">
+                    <Check className="w-4 h-4" /> SIMPAN PENGGUNA
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Form: SYSTEM RESET (Special) */}
+            {activeSubTab === 'SYSTEM' && (
+              <div className="space-y-4">
+                <div className="bg-rose-50 border border-rose-200 p-4 rounded-xl flex items-start gap-4">
+                  <ShieldAlert className="w-10 h-10 text-rose-600 shrink-0" />
+                  <div>
+                    <h4 className="text-sm font-black text-rose-900 uppercase tracking-tight">Area Berbahaya: Reset Database</h4>
+                    <p className="text-[11px] text-rose-700 font-medium leading-relaxed mt-1">
+                      Fitur ini akan menghapus seluruh data transaksi, master data, dan log aktivitas dari penyimpanan lokal perangkat ini. 
+                      Gunakan hanya jika Anda ingin memulai database dari nol kembali.
+                    </p>
+                    <button 
+                      onClick={handleResetDatabase}
+                      className="mt-3 bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-black px-4 py-2 rounded-lg transition-all shadow-lg active:scale-95 flex items-center gap-2 uppercase tracking-wide"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      Hapus & Reset Seluruh Data
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl flex items-start gap-4">
+                  <CloudDownload className="w-10 h-10 text-blue-600 shrink-0" />
+                  <div>
+                    <h4 className="text-sm font-black text-blue-900 uppercase tracking-tight">Backup & Ekspor Metadata</h4>
+                    <p className="text-[11px] text-blue-700 font-medium leading-relaxed mt-1">
+                      Unduh seluruh data master dan log sistem dalam format JSON. File ini dapat digunakan sebagai arsip cadangan (Back-up) manual.
+                    </p>
+                    <button 
+                      onClick={handleExportData}
+                      className="mt-3 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black px-4 py-2 rounded-lg transition-all shadow-lg active:scale-95 flex items-center gap-2 uppercase tracking-wide"
+                    >
+                      <CloudDownload className="w-3.5 h-3.5" />
+                      Ekspor Database ke JSON
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
           </div>
         )}
 
@@ -2514,7 +2819,7 @@ export default function DatabaseMasterModule({
                         </div>
                       </td>
                     </tr>
-                ))}
+                  ))}
                 {products.length === 0 && (
                   <tr>
                     <td colSpan={5} className="p-10 text-center">
@@ -2525,6 +2830,129 @@ export default function DatabaseMasterModule({
                 )}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* GRID: USERS */}
+        {activeSubTab === 'USERS' && (
+          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
+            <table className="w-full text-left border-collapse text-xs min-w-[800px]">
+              <thead>
+                <tr className="bg-[#064e3b] text-white uppercase font-mono tracking-wider text-[10px] border-b border-rose-900/10">
+                  <th className="p-3 font-semibold">Identitas User</th>
+                  <th className="p-3 font-semibold">Username Login</th>
+                  <th className="p-3 font-semibold">Hak Akses / Role</th>
+                  <th className="p-3 font-semibold text-center">Status Keaktifan</th>
+                  <th className="p-3 font-semibold">Login Terakhir</th>
+                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-150">
+                {users
+                  .filter(u => u.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || u.username.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(u => (
+                    <tr key={u.id} className="hover:bg-slate-50 text-neutral-800 group">
+                      <td className="p-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-[10px]">
+                            <Users className="w-3.5 h-3.5" />
+                          </div>
+                          <span className="font-extrabold text-neutral-900 uppercase leading-none">{u.fullName}</span>
+                        </div>
+                      </td>
+                      <td className="p-3 font-mono font-bold text-emerald-700">{u.username}</td>
+                      <td className="p-3">
+                        <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black tracking-wide uppercase ${
+                          u.role === 'admin' ? 'bg-amber-100 text-amber-700' :
+                          u.role === 'pimpinan' ? 'bg-emerald-100 text-emerald-700' :
+                          u.role === 'operator' ? 'bg-indigo-100 text-indigo-700' : 'bg-neutral-100 text-neutral-700'
+                        }`}>
+                          {u.role}
+                        </span>
+                      </td>
+                      <td className="p-3 text-center">
+                        <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${u.isActive ? 'bg-emerald-500 text-white' : 'bg-neutral-300 text-white'}`}>
+                          {u.isActive ? 'AKTIF' : 'NON-AKTIF'}
+                        </span>
+                      </td>
+                      <td className="p-3 font-mono text-[9px] text-neutral-500">
+                        {u.lastLogin ? new Date(u.lastLogin).toLocaleString('id-ID') : '-'}
+                      </td>
+                      <td className="p-3">
+                        <div className="flex gap-1.5 justify-center opacity-40 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => handleEditUser(u)} className="bg-white hover:bg-emerald-50 text-neutral-400 hover:text-emerald-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer" title="Edit Akun">
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => handleDeleteUser(u.id, u.username)} disabled={u.username === 'admin'} className="bg-white hover:bg-rose-50 text-neutral-400 hover:text-rose-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-30" title="Hapus Akun">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* LIST: ACTIVITY LOGS */}
+        {activeSubTab === 'LOGS' && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-black text-blue-900 uppercase flex items-center gap-1.5 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                <History className="w-3 h-3" /> Rekaman Aktivitas Pengguna (Log Sistem)
+              </span>
+            </div>
+            <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
+              <table className="w-full text-left border-collapse text-xs min-w-[900px]">
+                <thead>
+                  <tr className="bg-slate-800 text-white uppercase font-mono tracking-wider text-[9px] border-b border-slate-700">
+                    <th className="p-2.5 font-semibold">Waktu / Tanggal</th>
+                    <th className="p-2.5 font-semibold">Pengguna</th>
+                    <th className="p-2.5 font-semibold">Modul</th>
+                    <th className="p-2.5 font-semibold">Tindakan</th>
+                    <th className="p-2.5 font-semibold">Detail Kejadian</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100 bg-white">
+                  {activityLogs
+                    .filter(log => 
+                      log.details.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                      log.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      log.module.toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+                    .map(log => (
+                      <tr key={log.id} className="hover:bg-slate-50 text-[11px] text-neutral-700">
+                        <td className="p-2.5 font-mono text-[9px] text-neutral-400 font-bold whitespace-nowrap">
+                          {new Date(log.timestamp).toLocaleString('id-ID')}
+                        </td>
+                        <td className="p-2.5 font-bold">
+                          <span className="block text-indigo-900">{log.username}</span>
+                          <span className="text-[8px] uppercase tracking-tighter text-neutral-400 font-black">{log.role}</span>
+                        </td>
+                        <td className="p-2.5 font-black font-mono">
+                          <span className="bg-neutral-100 px-1.5 py-0.5 rounded text-[9px] text-neutral-600">{log.module}</span>
+                        </td>
+                        <td className="p-2.5">
+                           <span className={`font-black text-[10px] px-2 py-0.5 rounded ${
+                             log.action === 'AUTH' ? 'text-blue-600' :
+                             log.action.includes('DELETE') ? 'text-rose-600' :
+                             log.action.includes('ADD') ? 'text-emerald-600' : 'text-neutral-600'
+                           }`}>
+                             {log.action}
+                           </span>
+                        </td>
+                        <td className="p-2.5 italic text-neutral-500 font-medium">
+                          {log.details}
+                        </td>
+                      </tr>
+                    ))}
+                  {activityLogs.length === 0 && (
+                    <tr><td colSpan={5} className="p-10 text-center text-neutral-400 uppercase font-bold text-[10px]">Belum ada rekaman aktivitas</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 

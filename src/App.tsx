@@ -26,7 +26,9 @@ import {
   FinanceCategoryRecord,
   LaborRateRecord,
   CornMoistureRule,
-  ProductRecord
+  ProductRecord,
+  UserAccount,
+  ActivityLog
 } from './types';
 import { 
   initialWeighbridgeTickets, 
@@ -388,6 +390,22 @@ export default function App() {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [users, setUsers] = useState<UserAccount[]>(() => {
+    const saved = localStorage.getItem('bilibili_users');
+    if (saved) return JSON.parse(saved);
+    return [
+      { id: 'u1', username: 'admin', role: 'admin', fullName: 'Administrator Utama', isActive: true },
+      { id: 'u2', username: 'pimpinan', role: 'pimpinan', fullName: 'Direktur Utama', isActive: true },
+      { id: 'u3', username: 'operator', role: 'operator', fullName: 'Operator Timbangan', isActive: true },
+      { id: 'u4', username: 'karyawan', role: 'karyawan', fullName: 'Staf Administrasi', isActive: true },
+    ];
+  });
+
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(() => {
+    const saved = localStorage.getItem('bilibili_logs');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   // --- GOOGLE AUTHENTICATION STATE & EVENTS ---
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [syncStatus, setSyncStatus] = useState<'saving' | 'synced' | 'error'>('synced');
@@ -508,11 +526,14 @@ export default function App() {
   const syncedSetLaborRates = createSyncedSetter('laborRates', setLaborRates);
   const syncedSetCornMoistureRules = createSyncedSetter('cornMoistureRules', setCornMoistureRules);
   const syncedSetDryerRecords = createSyncedSetter('dryerRecords', setDryerRecords);
+  const syncedSetUsers = createSyncedSetter('users', setUsers);
+  const syncedSetLogs = createSyncedSetter('activityLogs', setActivityLogs);
 
   // --- CREDENTIALS AUTHENTICATION STATE & LOGIC ---
   interface SessionUser {
+    id?: string;
     username: string;
-    role: 'admin' | 'operator';
+    role: 'admin' | 'operator' | 'karyawan' | 'pimpinan';
   }
 
   const [sessionUser, setSessionUser] = useState<SessionUser | null>(() => {
@@ -535,32 +556,72 @@ export default function App() {
     e.preventDefault();
     setLoginError('');
 
-    const u = loginUsername.trim().toLowerCase();
-    const p = loginPassword;
+    const uInput = loginUsername.trim().toLowerCase();
+    const pInput = loginPassword;
 
-    if (u === 'admin' && p === 'admin123') {
-      const user: SessionUser = { username: 'admin', role: 'admin' };
-      localStorage.setItem('bilibili_session_user', JSON.stringify(user));
-      setSessionUser(user);
-      setLoginUsername('');
-      setLoginPassword('');
-      showToast("Selamat datang! Login sukses sebagai Administrator.", "success");
-    } else if (u === 'operator' && p === 'operator123') {
-      const user: SessionUser = { username: 'operator', role: 'operator' };
-      localStorage.setItem('bilibili_session_user', JSON.stringify(user));
-      setSessionUser(user);
-      setLoginUsername('');
-      setLoginPassword('');
-      showToast("Selamat datang! Login sukses sebagai Operator.", "success");
+    // Check against DB users
+    const matchedUser = users.find(u => u.username === uInput);
+
+    if (matchedUser) {
+      // Basic password check - in real app, use hashing
+      // For this app, we'll allow standard passwords if not set in DB user yet
+      const expectedPass = matchedUser.password || 
+        (matchedUser.username === 'admin' ? 'admin123' : 
+         matchedUser.username === 'pimpinan' ? 'pimpinan123' : 
+         matchedUser.username === 'operator' ? 'operator123' : 
+         matchedUser.username === 'karyawan' ? 'karyawan123' : '12345');
+
+      if (pInput === expectedPass) {
+        if (!matchedUser.isActive) {
+          setLoginError("Akun Anda telah dinonaktifkan!");
+          return;
+        }
+
+        const sessionUser: SessionUser = { 
+          id: matchedUser.id,
+          username: matchedUser.username, 
+          role: matchedUser.role 
+        };
+        localStorage.setItem('bilibili_session_user', JSON.stringify(sessionUser));
+        setSessionUser(sessionUser);
+        
+        // Update last login
+        setUsers(prev => prev.map(u => u.id === matchedUser.id ? { ...u, lastLogin: new Date().toISOString() } : u));
+        
+        setLoginUsername('');
+        setLoginPassword('');
+        showToast(`Selamat datang ${matchedUser.fullName}! Login sukses.`, "success");
+        
+        logAction('AUTH', 'LOGIN', `User ${matchedUser.username} login ke sistem`);
+      } else {
+        setLoginError("Password salah!");
+      }
     } else {
-      setLoginError("Username atau password salah!");
+      setLoginError("Username tidak ditemukan!");
     }
   };
 
   const handleSessionLogout = () => {
+    if (sessionUser) {
+      logAction('AUTH', 'LOGOUT', `User ${sessionUser.username} logout`);
+    }
     localStorage.removeItem('bilibili_session_user');
     setSessionUser(null);
     showToast("Berhasil Logout dari akun gudang.", "success");
+  };
+
+  const logAction = (module: string, action: string, details: string) => {
+    const newLog: ActivityLog = {
+      id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      timestamp: new Date().toISOString(),
+      userId: sessionUser?.id || 'system',
+      username: sessionUser?.username || 'GUEST',
+      role: sessionUser?.role || 'NONE',
+      action,
+      module,
+      details
+    };
+    setActivityLogs(prev => [newLog, ...prev].slice(0, 5000)); // Keep last 5000 logs
   };
 
   // Active navigational tab
@@ -568,10 +629,22 @@ export default function App() {
   
   // Guard against direct tab loading by unauthorised roles
   useEffect(() => {
-    if (sessionUser && sessionUser.role === 'operator') {
-      if (activeTab === 'FINANCE' || activeTab === 'LAPORAN' || activeTab === 'DATABASE') {
-        setActiveTab('DASHBOARD');
-        showToast("Akses Ditolak: Hanya Admin yang dapat mengakses menu Keuangan, Laporan, atau Database Master!", "warning");
+    if (sessionUser) {
+      if (sessionUser.role === 'operator') {
+        if (['FINANCE', 'LAPORAN', 'DATABASE'].includes(activeTab)) {
+          setActiveTab('DASHBOARD');
+          showToast("Akses Ditolak: Hanya Admin yang dapat mengakses menu Keuangan, Laporan, atau Database Master!", "warning");
+        }
+      } else if (sessionUser.role === 'karyawan') {
+        if (['SERVICES', 'REFAKSI', 'FINANCE', 'LAPORAN', 'DATABASE', 'DRYER'].includes(activeTab)) {
+          setActiveTab('DASHBOARD');
+          showToast("Akses Ditolak: Karyawan hanya memiliki akses ke Timbangan, Logistik, dan Stok Beras!", "warning");
+        }
+      } else if (sessionUser.role === 'pimpinan') {
+        if (['TIMBANG', 'MASUK', 'KELUAR', 'SERVICES', 'REFAKSI', 'DATABASE', 'DRYER'].includes(activeTab)) {
+          setActiveTab('DASHBOARD');
+          showToast("Akses Ditolak: Pimpinan hanya dapat mengakses Ringkasan Dashboard, Laporan, dan Manajemen Keuangan!", "warning");
+        }
       }
     }
   }, [activeTab, sessionUser]);
@@ -719,6 +792,14 @@ export default function App() {
     localStorage.setItem('bilibili_finance_categories', JSON.stringify(financeCategories));
   }, [financeCategories]);
 
+  useEffect(() => {
+    localStorage.setItem('bilibili_users', JSON.stringify(users));
+  }, [users]);
+
+  useEffect(() => {
+    localStorage.setItem('bilibili_logs', JSON.stringify(activityLogs));
+  }, [activityLogs]);
+
   // --- COMPONENT ACTION CALLBACKS WITH REALTIME ONLINE MUTATORS ---
   const handleAddTicket = (tk: WeighbridgeTicket) => {
     setTickets(prev => [tk, ...prev]);
@@ -739,8 +820,8 @@ export default function App() {
   };
 
   const handleDeleteTicket = (id: string) => {
-    if (sessionUser?.role !== 'admin') {
-      showToast("Gagal: Hanya Admin yang diperbolehkan menghapus tiket timbang!", "error");
+    if (!['admin', 'pimpinan'].includes(sessionUser?.role || '')) {
+      showToast("Gagal: Hanya Admin atau Pimpinan yang diperbolehkan menghapus tiket timbang!", "error");
       return;
     }
     const target = tickets.find(t => t.id === id);
@@ -779,8 +860,8 @@ export default function App() {
   };
 
   const handleDeleteInbound = (id: string) => {
-    if (sessionUser?.role !== 'admin') {
-      showToast("Gagal: Hanya Admin yang diperbolehkan menghapus catatan barang masuk!", "error");
+    if (!['admin', 'pimpinan'].includes(sessionUser?.role || '')) {
+      showToast("Gagal: Hanya Admin atau Pimpinan yang diperbolehkan menghapus catatan barang masuk!", "error");
       return;
     }
     setInboundRecords(prev => prev.filter(r => r.id !== id));
@@ -817,8 +898,8 @@ export default function App() {
   };
 
   const handleDeleteOutbound = (id: string) => {
-    if (sessionUser?.role !== 'admin') {
-      showToast("Gagal: Hanya Admin yang diperbolehkan menghapus catatan barang keluar!", "error");
+    if (!['admin', 'pimpinan'].includes(sessionUser?.role || '')) {
+      showToast("Gagal: Hanya Admin atau Pimpinan yang diperbolehkan menghapus catatan barang keluar!", "error");
       return;
     }
     setOutboundRecords(prev => prev.filter(r => r.id !== id));
@@ -839,8 +920,8 @@ export default function App() {
   };
 
   const handleDeleteService = (id: string) => {
-    if (sessionUser?.role !== 'admin') {
-      showToast("Gagal: Hanya Admin yang diperbolehkan menghapus catatan layanan jasa!", "error");
+    if (!['admin', 'pimpinan'].includes(sessionUser?.role || '')) {
+      showToast("Gagal: Hanya Admin atau Pimpinan yang diperbolehkan menghapus catatan layanan jasa!", "error");
       return;
     }
     setServiceRecords(prev => prev.filter(r => r.id !== id));
@@ -861,8 +942,8 @@ export default function App() {
   };
 
   const handleDeleteDebt = (id: string) => {
-    if (sessionUser?.role !== 'admin') {
-      showToast("Gagal: Hanya Admin yang diperbolehkan menghapus catatan utang!", "error");
+    if (!['admin', 'pimpinan'].includes(sessionUser?.role || '')) {
+      showToast("Gagal: Hanya Admin atau Pimpinan yang diperbolehkan menghapus catatan utang!", "error");
       return;
     }
     setDebts(prev => prev.filter(d => d.id !== id));
@@ -924,8 +1005,8 @@ export default function App() {
   };
 
   const handleDeleteFinance = (id: string) => {
-    if (sessionUser?.role !== 'admin') {
-      showToast("Gagal: Hanya Admin yang diperbolehkan menghapus transaksi keuangan!", "error");
+    if (!['admin', 'pimpinan'].includes(sessionUser?.role || '')) {
+      showToast("Gagal: Hanya Admin atau Pimpinan yang diperbolehkan menghapus transaksi keuangan!", "error");
       return;
     }
     setFinances(prev => prev.filter(f => f.id !== id));
@@ -946,8 +1027,8 @@ export default function App() {
   };
 
   const handleDeleteRiceStock = (id: string) => {
-    if (sessionUser?.role !== 'admin') {
-      showToast("Gagal: Hanya Admin yang diperbolehkan menghapus catatan stok beras!", "error");
+    if (!['admin', 'pimpinan'].includes(sessionUser?.role || '')) {
+      showToast("Gagal: Hanya Admin atau Pimpinan yang diperbolehkan menghapus catatan stok beras!", "error");
       return;
     }
     setRiceStockRecords(prev => prev.filter(r => r.id !== id));
@@ -1188,15 +1269,17 @@ export default function App() {
 
             {/* Credentials Authentication Status */}
             <div className="flex items-center gap-1.5 font-sans">
-              {sessionUser ? (
-                <div className="flex items-center gap-2">
-                  <span className={`text-[9px] sm:text-[10px] px-2 py-0.5 rounded font-black font-mono tracking-wide uppercase shadow-sm ${
-                    sessionUser.role === 'admin'
-                      ? 'bg-amber-500 text-neutral-900 border border-amber-400'
-                      : 'bg-indigo-600 text-white border border-indigo-500'
-                  }`}>
-                    {sessionUser.role === 'admin' ? '🛡️ ADMIN' : '👤 OPERATOR' }
-                  </span>
+    {sessionUser ? (
+      <div className="flex items-center gap-2">
+        <span className={`text-[9px] sm:text-[10px] px-2 py-0.5 rounded font-black font-mono tracking-wide uppercase shadow-sm ${
+          sessionUser.role === 'admin'
+            ? 'bg-amber-500 text-neutral-900 border border-amber-400'
+            : sessionUser.role === 'pimpinan'
+            ? 'bg-emerald-500 text-white border border-emerald-400'
+            : 'bg-indigo-600 text-white border border-indigo-500'
+        }`}>
+          {sessionUser.role === 'admin' ? '🛡️ ADMIN' : sessionUser.role === 'pimpinan' ? '💼 PIMPINAN' : sessionUser.role === 'karyawan' ? '👤 KARYAWAN' : '👤 OPERATOR' }
+        </span>
                   <span className="text-[11px] text-yellow-350 font-bold max-w-[90px] truncate hidden md:inline" title={sessionUser.username}>
                     {sessionUser.username}
                   </span>
@@ -1292,77 +1375,89 @@ export default function App() {
             01. RINGKASAN DASHBOARD
           </button>
  
-          <button
-            onClick={() => setActiveTab('TIMBANG')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
-              activeTab === 'TIMBANG' 
-                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg} shadow-sm` 
-                : 'border-transparent text-neutral-500 hover:text-neutral-800'
-            }`}
-          >
-            <Scale className="w-4 h-4 text-blue-500" />
-            02. JEMBATAN TIMBANGAN
-          </button>
+          {['admin', 'operator', 'karyawan', 'pimpinan'].includes(sessionUser?.role || '') && (
+            <button
+              onClick={() => setActiveTab('TIMBANG')}
+              className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
+                activeTab === 'TIMBANG' 
+                  ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg} shadow-sm` 
+                  : 'border-transparent text-neutral-500 hover:text-neutral-800'
+              }`}
+            >
+              <Scale className="w-4 h-4 text-blue-500" />
+              02. JEMBATAN TIMBANGAN
+            </button>
+          )}
  
-          <button
-            onClick={() => setActiveTab('MASUK')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
-              activeTab === 'MASUK' 
-                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
-                : 'border-transparent text-neutral-500 hover:text-neutral-800'
-            }`}
-          >
-            <ArrowDownCircle className="w-4 h-4 text-emerald-600" />
-            03. PENERIMAAN BARANG MASUK
-          </button>
+          {['admin', 'operator', 'karyawan', 'pimpinan'].includes(sessionUser?.role || '') && (
+            <button
+              onClick={() => setActiveTab('MASUK')}
+              className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
+                activeTab === 'MASUK' 
+                  ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
+                  : 'border-transparent text-neutral-500 hover:text-neutral-800'
+              }`}
+            >
+              <ArrowDownCircle className="w-4 h-4 text-emerald-600" />
+              03. PENERIMAAN BARANG MASUK
+            </button>
+          )}
  
-          <button
-            onClick={() => setActiveTab('KELUAR')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
-              activeTab === 'KELUAR' 
-                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
-                : 'border-transparent text-neutral-500 hover:text-neutral-800'
-            }`}
-          >
-            <ArrowUpCircle className="w-4 h-4 text-blue-600" />
-            04. PENGIRIMAN BARANG KELUAR
-          </button>
+          {['admin', 'operator', 'karyawan', 'pimpinan'].includes(sessionUser?.role || '') && (
+            <button
+              onClick={() => setActiveTab('KELUAR')}
+              className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
+                activeTab === 'KELUAR' 
+                  ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
+                  : 'border-transparent text-neutral-500 hover:text-neutral-800'
+              }`}
+            >
+              <ArrowUpCircle className="w-4 h-4 text-blue-600" />
+              04. PENGIRIMAN BARANG KELUAR
+            </button>
+          )}
  
-          <button
-            onClick={() => setActiveTab('SERVICES')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
-              activeTab === 'SERVICES' 
-                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
-                : 'border-transparent text-neutral-500 hover:text-neutral-800'
-            }`}
-          >
-            <Wind className="w-4 h-4 text-sky-500" />
-            05. JASA POLES & KIPAS (BLOWER)
-          </button>
+          {['admin', 'operator', 'pimpinan'].includes(sessionUser?.role || '') && (
+            <button
+              onClick={() => setActiveTab('SERVICES')}
+              className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
+                activeTab === 'SERVICES' 
+                  ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
+                  : 'border-transparent text-neutral-500 hover:text-neutral-800'
+              }`}
+            >
+              <Wind className="w-4 h-4 text-sky-500" />
+              05. JASA POLES & KIPAS (BLOWER)
+            </button>
+          )}
  
-          <button
-            onClick={() => setActiveTab('REFAKSI')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
-              activeTab === 'REFAKSI' 
-                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
-                : 'border-transparent text-neutral-500 hover:text-neutral-800'
-            }`}
-          >
-            <Percent className="w-4 h-4 text-amber-500" />
-            06. POTONGAN REFAKSI KADAR AIR
-          </button>
+          {['admin', 'operator', 'pimpinan'].includes(sessionUser?.role || '') && (
+            <button
+              onClick={() => setActiveTab('REFAKSI')}
+              className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
+                activeTab === 'REFAKSI' 
+                  ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
+                  : 'border-transparent text-neutral-500 hover:text-neutral-800'
+              }`}
+            >
+              <Percent className="w-4 h-4 text-amber-500" />
+              06. POTONGAN REFAKSI KADAR AIR
+            </button>
+          )}
  
-          <button
-            onClick={() => setActiveTab('DRYER')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
-              activeTab === 'DRYER' 
-                ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
-                : 'border-transparent text-neutral-500 hover:text-neutral-800'
-            }`}
-          >
-            <Wind className="w-4 h-4 text-orange-500" />
-            07. DRYER JAGUNG
-          </button>
+          {['admin', 'operator', 'pimpinan'].includes(sessionUser?.role || '') && (
+            <button
+              onClick={() => setActiveTab('DRYER')}
+              className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
+                activeTab === 'DRYER' 
+                  ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
+                  : 'border-transparent text-neutral-500 hover:text-neutral-800'
+              }`}
+            >
+              <Wind className="w-4 h-4 text-orange-500" />
+              07. DRYER JAGUNG
+            </button>
+          )}
  
           <button
             onClick={() => setActiveTab('STOK_BERAS')}
@@ -1376,7 +1471,7 @@ export default function App() {
             08. BUKU STOK LOGISTIK BERAS
           </button>
  
-          {sessionUser?.role === 'admin' && (
+          {['admin', 'pimpinan'].includes(sessionUser?.role || '') && (
             <button
               onClick={() => setActiveTab('FINANCE')}
               className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
@@ -1402,32 +1497,32 @@ export default function App() {
             10. KATALOG PRODUK AKTIF
           </button>
  
+          {['admin', 'pimpinan'].includes(sessionUser?.role || '') && (
+            <button
+              onClick={() => setActiveTab('LAPORAN')}
+              className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
+                activeTab === 'LAPORAN' 
+                  ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
+                  : 'border-transparent text-neutral-500 hover:text-neutral-800'
+              }`}
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
+              11. LAPORAN REKAPITULASI
+            </button>
+          )}
+
           {sessionUser?.role === 'admin' && (
-            <>
-              <button
-                onClick={() => setActiveTab('LAPORAN')}
-                className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
-                  activeTab === 'LAPORAN' 
-                    ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
-                    : 'border-transparent text-neutral-500 hover:text-neutral-800'
-                }`}
-              >
-                <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
-                11. LAPORAN REKAPITULASI
-              </button>
-     
-              <button
-                onClick={() => setActiveTab('DATABASE')}
-                className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
-                  activeTab === 'DATABASE' 
-                    ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
-                    : 'border-transparent text-neutral-500 hover:text-neutral-800'
-                }`}
-              >
-                <Database className="w-4 h-4 text-rose-500" />
-                12. DATA MASTER SISTEM
-              </button>
-            </>
+            <button
+              onClick={() => setActiveTab('DATABASE')}
+              className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
+                activeTab === 'DATABASE' 
+                  ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
+                  : 'border-transparent text-neutral-500 hover:text-neutral-800'
+              }`}
+            >
+              <Database className="w-4 h-4 text-rose-500" />
+              12. DATA MASTER SISTEM
+            </button>
           )}
 
         </div>
@@ -1650,7 +1745,7 @@ export default function App() {
               >
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.cashBalance || 'Kas & Keuangan Tunai'}</span>
-                  {sessionUser?.role === 'admin' ? (
+                  {['admin', 'pimpinan'].includes(sessionUser?.role || '') ? (
                     <>
                       <span className={`text-base sm:text-[17px] font-black font-mono tracking-tight ${netKasBalance >= 0 ? 'text-emerald-700' : 'text-red-500'}`}>
                         Rp {(netKasBalance ?? 0).toLocaleString('id-ID')}
@@ -1665,13 +1760,13 @@ export default function App() {
                         Rp ••••••••
                       </span>
                       <div className="flex items-center gap-1.5 text-[10px] text-neutral-400 font-semibold mt-1 font-mono">
-                        <span>🔒 {language === 'id' ? 'Khusus Administrator' : 'Administrator Only'}</span>
+                        <span>🔒 {language === 'id' ? 'Khusus Pimpinan' : 'Management Only'}</span>
                       </div>
                     </>
                   )}
                 </div>
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center border group-hover:scale-110 transition duration-300 shrink-0 ${sessionUser?.role === 'admin' && netKasBalance < 0 ? 'bg-red-50 border-red-100' : 'bg-emerald-50 border-emerald-100'}`}>
-                  <DollarSign className={`w-5 h-5 ${sessionUser?.role === 'admin' && netKasBalance < 0 ? 'text-red-500' : 'text-emerald-600'}`} />
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center border group-hover:scale-110 transition duration-300 shrink-0 ${['admin', 'pimpinan'].includes(sessionUser?.role || '') && netKasBalance < 0 ? 'bg-red-50 border-red-100' : 'bg-emerald-50 border-emerald-100'}`}>
+                  <DollarSign className={`w-5 h-5 ${['admin', 'pimpinan'].includes(sessionUser?.role || '') && netKasBalance < 0 ? 'text-red-500' : 'text-emerald-600'}`} />
                 </div>
               </motion.div>
 
@@ -1965,7 +2060,7 @@ export default function App() {
                   >
                     Layanan Jasa Poles
                   </button>
-                  {sessionUser?.role === 'admin' && (
+                  {['admin', 'pimpinan'].includes(sessionUser?.role || '') && (
                     <button 
                       id="dash-feed-tab-finance"
                       onClick={() => setDashFeedTab('FINANCE')}
@@ -2375,6 +2470,10 @@ export default function App() {
             setCornMoistureRules={syncedSetCornMoistureRules}
             products={products}
             setProducts={syncedSetProducts}
+            users={users}
+            setUsers={syncedSetUsers}
+            activityLogs={activityLogs}
+            logAction={logAction}
           />
         )}
 

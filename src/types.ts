@@ -205,3 +205,24 @@ export interface ProductRecord {
   imageUrl?: string;
 }
 
+export interface UserAccount {
+  id: string;
+  username: string;
+  password?: string;
+  role: 'admin' | 'operator' | 'karyawan' | 'pimpinan';
+  fullName: string;
+  isActive: boolean;
+  lastLogin?: string;
+}
+
+export interface ActivityLog {
+  id: string;
+  timestamp: string;
+  userId: string;
+  username: string;
+  role: string;
+  action: string;
+  module: string;
+  details: string;
+}
+
