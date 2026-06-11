@@ -356,11 +356,11 @@ export default function FinanceModule({
   return (
     <div className="flex flex-col gap-6">
 
-      {/* Financial sub navigation matching folders */}
+      {/* FINANCIAL SUB NAVIGATION MATCHING FOLDERS */}
       <div className="flex border-b border-neutral-200">
         <button
           onClick={() => setActiveSubTab('UTANG')}
-          className={`px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
+          className={`px-4 py-2 text-xs font-bold transition-all cursor-pointer uppercase ${
             activeSubTab === 'UTANG' 
               ? 'border-b-2 border-emerald-600 text-emerald-800 bg-emerald-50/50' 
               : 'text-neutral-500 hover:text-neutral-800'
@@ -370,7 +370,7 @@ export default function FinanceModule({
         </button>
         <button
           onClick={() => setActiveSubTab('MAKELAR')}
-          className={`px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
+          className={`px-4 py-2 text-xs font-bold transition-all cursor-pointer uppercase ${
             activeSubTab === 'MAKELAR' 
               ? 'border-b-2 border-emerald-600 text-emerald-800 bg-emerald-50/50' 
               : 'text-neutral-500 hover:text-neutral-800'
@@ -380,7 +380,7 @@ export default function FinanceModule({
         </button>
         <button
           onClick={() => setActiveSubTab('MUTASI')}
-          className={`px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
+          className={`px-4 py-2 text-xs font-bold transition-all cursor-pointer uppercase ${
             activeSubTab === 'MUTASI' 
               ? 'border-b-2 border-emerald-600 text-emerald-800 bg-emerald-50/50' 
               : 'text-neutral-500 hover:text-neutral-800'
@@ -395,11 +395,11 @@ export default function FinanceModule({
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
             <div>
-              <h3 className="font-bold text-neutral-800 text-sm flex items-center gap-1.5">
+              <h3 className="font-bold text-neutral-800 text-sm flex items-center gap-1.5 uppercase">
                 <CreditCard className="text-emerald-600 w-4.5 h-4.5" />
                 {t.debtsArchivesTitle}
               </h3>
-              <p className="text-xs text-neutral-500 mt-0.5">
+              <p className="text-[10px] text-neutral-400 mt-0.5 uppercase">
                 {t.debtsSubTitle}
               </p>
             </div>
@@ -408,23 +408,23 @@ export default function FinanceModule({
               <button
                 onClick={handleExportDebtExcel}
                 title={t.exportExcel}
-                className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer uppercase"
               >
-                <Download className="w-3.5 h-3.5" /> {t.exportExcel}
+                <Download className="w-3 h-3" /> EXPORT EXCEL
               </button>
               <button
                 onClick={handlePrintDebtPDF}
                 title={t.printReportsPDF}
-                className="flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
+                className="flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer uppercase"
               >
-                <Printer className="w-3.5 h-3.5" /> {t.printReportsPDF}
+                <Printer className="w-3 h-3" /> PRINT PDF
               </button>
               <button
                 onClick={() => setShowDebtForm(!showDebtForm)}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg flex items-center gap-1 cursor-pointer shadow"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[10px] px-3.5 py-2 rounded-lg flex items-center gap-1 cursor-pointer shadow uppercase"
               >
                 <PlusCircle className="w-3.5 h-3.5" />
-                {showDebtForm ? t.closeFormLabel : t.recordNewDebtLabel}
+                {showDebtForm ? 'TUTUP FORM' : 'CATAT UTANG BARU'}
               </button>
             </div>
           </div>
@@ -432,44 +432,44 @@ export default function FinanceModule({
           {/* Form write debt */}
           {showDebtForm && (
             <div className="bg-white border border-neutral-200 shadow-sm rounded-xl p-5">
-              <h4 className="font-bold text-neutral-800 text-xs mb-3">Tambah Catatan Utang Baru</h4>
-              <form onSubmit={handleSaveDebt} className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+              <h4 className="font-black text-neutral-800 text-xs mb-3 uppercase tracking-tight">FORMULIR CATATAN UTANG SUPPLIER BARU</h4>
+              <form onSubmit={handleSaveDebt} className="grid grid-cols-1 md:grid-cols-4 gap-4 text-[11px]">
                 <div>
-                  <label className="block text-neutral-600 mb-1">Nama Petani / Suplier</label>
+                  <label className="block text-neutral-600 mb-1 font-bold uppercase">NAMA PETANI / SUPPLIER</label>
                   <input
                     type="text"
                     value={supplierName}
-                    onChange={(e) => setSupplierName(e.target.value)}
-                    placeholder="Contoh: H. Wawan - Sidrap"
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
+                    onChange={(e) => setSupplierName(e.target.value.toUpperCase())}
+                    placeholder="CONTOH: H. WAWAN - SIDRAP"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none font-bold uppercase"
                   />
                 </div>
                 <div>
-                  <label className="block text-neutral-600 mb-1">Uraian / Perincian</label>
+                  <label className="block text-neutral-600 mb-1 font-bold uppercase">URAIAN / PERINCIAN TRANSAKSI</label>
                   <input
                     type="text"
                     value={debtDesc}
-                    onChange={(e) => setDebtDesc(e.target.value)}
-                    placeholder="Contoh: Utang Jagung Pipit KA 16.8% (Ticket 021230)"
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
+                    onChange={(e) => setDebtDesc(e.target.value.toUpperCase())}
+                    placeholder="CONTOH: UTANG JAGUNG PIPIL KA 16.8% (TIKET 021230)"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none font-bold uppercase"
                   />
                 </div>
                 <div>
                   <SmartNumberInput
                     value={debtAmount}
                     onChange={setDebtAmount}
-                    label="Jumlah Nilai Utang"
+                    label="JUMLAH TOTAL NILAI UTANG"
                     mode="currency"
-                    unit="Rp"
+                    unit="RP"
                     presets={[1000000, 5000000, 10000000, 25000000]}
                   />
                 </div>
                 <div className="flex items-end">
                   <button
                     type="submit"
-                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg cursor-pointer"
+                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2 rounded-lg cursor-pointer uppercase transition-all shadow-md"
                   >
-                    {editingDebtId ? 'Simpan Perubahan' : 'Simpan Buku Utang'}
+                    {editingDebtId ? 'SIMPAN PERUBAHAN UTANG' : 'SIMPAN BUKU UTANG BARU'}
                   </button>
                 </div>
               </form>
@@ -480,19 +480,19 @@ export default function FinanceModule({
           <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden shadow-sm">
             <div className="overflow-x-auto custom-scrollbar">
               <table className="w-full text-left text-xs text-neutral-600 min-w-[900px]">
-                <thead className="bg-neutral-50 text-neutral-500 font-semibold uppercase tracking-wider border-b border-neutral-200">
+                <thead className="bg-neutral-50 text-neutral-500 font-bold uppercase tracking-wider border-b border-neutral-200">
                   <tr>
-                    <th className="py-2.5 px-3">Tanggal Terbit</th>
-                    <th className="py-2.5 px-3">Suplier Pemilik</th>
-                    <th className="py-2.5 px-3">Rincian Transaksi</th>
-                    <th className="text-right py-2.5 px-3">Total Utang (Rp)</th>
-                    <th className="text-right py-2.5 px-3">Jumlah Dibayar (Rp)</th>
-                    <th className="text-right py-2.5 px-3">Sisa Utang (Sald)</th>
-                    <th className="text-center py-2.5 px-3 font-semibold">Status</th>
-                    <th className="text-center py-2.5 px-3">Cicil Bayar / Aksi</th>
+                    <th className="py-2.5 px-3">TANGGAL TERBIT</th>
+                    <th className="py-2.5 px-3">SUPPLIER PEMILIK</th>
+                    <th className="py-2.5 px-3">RINCIAN TRANSAKSI</th>
+                    <th className="text-right py-2.5 px-3">TOTAL UTANG (RP)</th>
+                    <th className="text-right py-2.5 px-3">JUMLAH DIBAYAR (RP)</th>
+                    <th className="text-right py-2.5 px-3 font-black">SISA SALDO (RP)</th>
+                    <th className="text-center py-2.5 px-3 font-semibold">STATUS</th>
+                    <th className="text-right py-2.5 px-4">AKSI</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-100">
+                <tbody className="divide-y divide-neutral-100 uppercase">
                   {debts.map((d) => (
                     <tr key={d.id} className="hover:bg-neutral-50 transition-colors">
                       <td className="py-2.5 px-3 text-neutral-500 font-mono text-[11px] whitespace-nowrap">
@@ -501,32 +501,33 @@ export default function FinanceModule({
                           {d.date}
                         </div>
                       </td>
-                      <td className="py-2.5 px-3 font-bold text-neutral-800">{d.supplierName}</td>
-                      <td className="py-2.5 px-3 text-neutral-600">{d.description}</td>
-                      <td className="text-right py-2.5 px-3 font-bold font-mono">Rp {(d.totalDebt ?? 0).toLocaleString('id-ID')}</td>
-                      <td className="text-right py-2.5 px-3 text-emerald-600 font-bold font-mono">Rp {(d.paidAmount ?? 0).toLocaleString('id-ID')}</td>
-                      <td className="text-right py-2.5 px-3 font-black font-mono text-red-600">Rp {(d.remainingBalance ?? 0).toLocaleString('id-ID')}</td>
+                      <td className="py-2.5 px-3 font-black text-neutral-900">{d.supplierName}</td>
+                      <td className="py-2.5 px-3 text-neutral-600 font-medium">{d.description}</td>
+                      <td className="text-right py-2.5 px-3 font-bold font-mono">{(d.totalDebt ?? 0).toLocaleString('id-ID')}</td>
+                      <td className="text-right py-2.5 px-3 text-emerald-600 font-bold font-mono">{(d.paidAmount ?? 0).toLocaleString('id-ID')}</td>
+                      <td className="text-right py-2.5 px-3 font-black font-mono text-red-600">{(d.remainingBalance ?? 0).toLocaleString('id-ID')}</td>
                       <td className="text-center py-2.5 px-3">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-black tracking-tighter ${
                           d.status === 'LUNAS' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700 animate-pulse'
                         }`}>
                           {d.status === 'LUNAS' ? 'LUNAS ✅' : 'BELUM LUNAS'}
                         </span>
                       </td>
-                      <td className="py-2.5 px-3 text-center">
-                        <div className="flex gap-2 justify-center items-center">
+                      <td className="py-2.5 px-4 text-right">
+                        <div className="flex gap-2 justify-end items-center">
                           {d.status === 'BELUM_LUNAS' && (
                             payingDebtId === d.id ? (
-                              <div className="flex items-center gap-1.5 justify-center" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex items-center gap-1.5 justify-end" onClick={(e) => e.stopPropagation()}>
                                 <input
                                   type="text"
                                   value={formatNumberInput(payAmount)}
                                   onChange={(e) => setPayAmount(parseNumberInput(e.target.value))}
-                                  className="bg-neutral-50 border border-neutral-300 text-red-600 font-bold p-1 rounded font-mono text-xs w-28 text-center"
+                                  className="bg-neutral-50 border border-neutral-300 text-red-600 font-black p-1 rounded font-mono text-xs w-28 text-right outline-none ring-1 ring-blue-500"
+                                  autoFocus
                                 />
                                 <button
                                   onClick={() => triggerDebtPaymentSubmit(d.id)}
-                                  className="bg-emerald-600 text-white font-bold p-1 rounded hover:bg-emerald-500 text-[10px]"
+                                  className="bg-blue-600 text-white font-black px-2 py-1.5 rounded hover:bg-blue-500 text-[10px] uppercase"
                                 >
                                   OK
                                 </button>
@@ -534,9 +535,9 @@ export default function FinanceModule({
                             ) : (
                               <button
                                 onClick={() => { setPayingDebtId(d.id); setPayAmount(d.remainingBalance); }}
-                                className="text-xs bg-[#e4f0fd] hover:bg-[#cbe3fd] text-blue-700 font-bold px-2 py-1 rounded transition"
+                                className="text-[10px] bg-blue-600 hover:bg-blue-500 text-white font-black px-3 py-1 rounded transition uppercase shadow-sm"
                               >
-                                Bayar
+                                BAYAR CICILAN
                               </button>
                             )
                           )}
@@ -548,8 +549,8 @@ export default function FinanceModule({
                               setDebtAmount(d.totalDebt);
                               setShowDebtForm(true);
                             }}
-                            className="text-neutral-400 hover:text-blue-600 transition p-1 cursor-pointer"
-                            title="Ubah Utang"
+                            className="text-neutral-400 hover:text-blue-600 transition p-1 cursor-pointer bg-neutral-100 rounded"
+                            title="UBAH DATA"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
@@ -557,8 +558,8 @@ export default function FinanceModule({
                             onClick={() => {
                               setConfirmModal({
                                 isOpen: true,
-                                title: "Konfirmasi Hapus Utang",
-                                message: `Apakah Anda yakin ingin menghapus catatan utang kepada ${d.supplierName}?`,
+                                title: "KONFIRMASI HAPUS DATA UTANG",
+                                message: `APAKAH ANDA YAKIN INGIN MENGHAPUS CATATAN UTANG BERJALAN KEPADA ${d.supplierName.toUpperCase()}?`,
                                 type: 'DELETE',
                                 onConfirm: () => {
                                   onDeleteDebt(d.id);
@@ -566,8 +567,8 @@ export default function FinanceModule({
                                 }
                               });
                             }}
-                            className="text-neutral-400 hover:text-red-650 text-red-600 transition p-1 font-bold cursor-pointer"
-                            title="Hapus Utang"
+                            className="text-neutral-400 hover:text-red-600 transition p-1 cursor-pointer bg-neutral-100 rounded"
+                            title="HAPUS DATA"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -582,31 +583,31 @@ export default function FinanceModule({
         </div>
       )}
 
-      {/* TAB 2: BURUH & MAKELAR 2026 */}
+      {/* TAB 2: BURUH & MAKELAR */}
       {activeSubTab === 'MAKELAR' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* Left Panel: Commission Calculator */}
-          <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm">
-            <h3 className="font-bold text-neutral-800 text-sm flex items-center gap-1.5 border-b border-neutral-100 pb-2 mb-3">
+          <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-md">
+            <h3 className="font-black text-neutral-900 text-sm flex items-center gap-1.5 border-b border-neutral-100 pb-2 mb-3 uppercase tracking-tight">
               <Users className="text-emerald-600 w-4.5 h-4.5" />
-              Kalkulator Komisi Makelar & Buruh Bilibili
+              KALKULATOR KOMISI MAKELAR & BURUH PANGGUL
             </h3>
-            <p className="text-xs text-neutral-500 mb-4">
-              Hitung komisi agen makelar pembawa pasokan tani beralaskan total berat netto timbangan dikali tarif operasional.
+            <p className="text-[10px] text-neutral-400 font-bold uppercase mb-4 leading-relaxed">
+              OTOMATISASI PERHITUNGAN FEE AGEN MAKELAR BERDASARKAN TOTAL BERAT NETTO CARGO GUDANG DIKALI TARIF OPERASIONAL STANDAR US BILIBILI.
             </p>
 
-            <div className="flex flex-col gap-4 text-xs">
+            <div className="flex flex-col gap-4 text-xs font-bold uppercase">
               <div>
-                <label className="block text-neutral-600 mb-1">Pilih Makelar / Agen Aktif</label>
+                <label className="block text-neutral-500 mb-1 text-[10px]">PILIH MAKELAR / AGEN REKANAN AKTIF</label>
                 <select
                   value={selectedBrokerId}
                   onChange={(e) => setSelectedBrokerId(e.target.value)}
-                  className="w-full bg-neutral-50 border border-neutral-300 rounded p-2 focus:bg-white focus:outline-none"
+                  className="w-full bg-neutral-50 border border-neutral-300 rounded p-2 focus:bg-white focus:outline-none font-black text-neutral-800"
                 >
                   {employees.filter(e => e.role === 'MAKELAR').map(e => (
                     <option key={e.id} value={e.id}>
-                      {e.name} (Makelar Jagung - Tarif Rp {e.ratePerKg}/Kg)
+                      {e.name.toUpperCase()} (TARIF RP {e.ratePerKg}/KG)
                     </option>
                   ))}
                 </select>
@@ -616,75 +617,75 @@ export default function FinanceModule({
                 <SmartNumberInput
                   value={brokerCargoWeight}
                   onChange={setBrokerCargoWeight}
-                  label="Total Hasil Berat Netto Timbangan"
+                  label="TOTAL VOLUME BERAT CARGO NETTO (KG)"
                   mode="weight"
-                  unit="Kg"
+                  unit="KG"
                   presets={[5000, 10000, 15000, 20000]}
                 />
               </div>
 
               {/* Math outcome display */}
-              <div className="bg-neutral-50 border border-neutral-150 rounded-lg p-4 font-mono">
-                <div className="flex justify-between items-center py-1">
-                  <span>Nama Makelar:</span>
-                  <span className="font-bold text-neutral-800">{activeBroker?.name || 'Belum Terpilih'}</span>
+              <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4 font-mono text-[11px]">
+                <div className="flex justify-between items-center py-1 border-b border-neutral-200/50">
+                  <span className="text-neutral-500">NAMA MAKELAR:</span>
+                  <span className="font-black text-neutral-900">{activeBroker?.name.toUpperCase() || 'BELUM TERPILIH'}</span>
                 </div>
-                <div className="flex justify-between items-center py-1">
-                  <span>Volume Jagung Netto:</span>
-                  <span className="font-bold">{brokerCargoWeight.toLocaleString('id-ID')} Kg</span>
+                <div className="flex justify-between items-center py-1 border-b border-neutral-200/50">
+                  <span className="text-neutral-500">VOLUME CARGO NETTO:</span>
+                  <span className="font-black">{brokerCargoWeight.toLocaleString('id-ID')} KG</span>
                 </div>
-                <div className="flex justify-between items-center py-1">
-                  <span>Fee Standard US Bilibili:</span>
-                  <span className="font-bold text-neutral-600">Rp {brokerRate} / Kg</span>
+                <div className="flex justify-between items-center py-1 border-b border-neutral-200/50">
+                  <span className="text-neutral-500">TARIF F FEE (NETTO):</span>
+                  <span className="font-black text-neutral-600">RP {brokerRate} / KG</span>
                 </div>
-                <div className="border-t border-neutral-200 my-2 pt-2 flex justify-between items-center text-sm font-bold bg-amber-50 p-2 text-amber-950 rounded">
-                  <span>TOTAL KOMISI MAKELAR:</span>
-                  <span className="text-emerald-700 text-base font-black">Rp {calculatedCommission.toLocaleString('id-ID')}</span>
+                <div className="mt-3 flex justify-between items-center text-sm font-black bg-emerald-50 border border-emerald-100 p-3 text-emerald-950 rounded-lg shadow-inner">
+                  <span className="tracking-tighter">TOTAL KOMISI TERHUTANG:</span>
+                  <span className="text-emerald-700 text-lg font-black tracking-tighter">RP {calculatedCommission.toLocaleString('id-ID')}</span>
                 </div>
               </div>
 
               <button
                 onClick={handlePayBrokerCommission}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs cursor-pointer shadow text-center"
+                className="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-black py-3 rounded-lg text-[11px] cursor-pointer shadow-lg text-center uppercase tracking-widest transition-all active:scale-95"
               >
-                Bayar & Catat Di Buku Kas Pas (Mutasi)
+                KONFIRMASI BAYAR & CATAT BUKU KAS
               </button>
             </div>
           </div>
 
           {/* Right Panel: Employee List registry */}
-          <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm">
-            <h3 className="font-bold text-neutral-800 text-sm flex items-center gap-1.5 border-b border-neutral-100 pb-2 mb-3">
+          <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-md">
+            <h3 className="font-black text-neutral-900 text-sm flex items-center gap-1.5 border-b border-neutral-100 pb-2 mb-3 uppercase tracking-tight">
               <Users className="text-indigo-600 w-4.5 h-4.5" />
-              Petugas Gudang & Makelar Terdaftar (9. BURUH & KARYAWAN)
+              DATABASE PETUGAS GUDANG & MAKELAR REKANAN
             </h3>
             
             <div className="overflow-x-auto custom-scrollbar">
-              <table className="w-full text-left text-xs min-w-[500px]">
-                <thead className="bg-neutral-50 text-neutral-500 font-semibold border-b border-neutral-200">
+              <table className="w-full text-left text-[10px] min-w-[500px]">
+                <thead className="bg-neutral-50 text-neutral-500 font-black border-b border-neutral-200 uppercase tracking-tighter">
                   <tr>
-                    <th className="py-2 px-3">Nama Petugas</th>
-                    <th className="py-2 px-3">Golongan / Jabatan</th>
-                    <th className="py-2 px-3">Kontak Hubungi</th>
-                    <th className="text-right py-2 px-3">Tarif Standard Fee Komisi</th>
+                    <th className="py-2 px-3">NAMA LENGKAP</th>
+                    <th className="py-2 px-3">DIVISI / JABATAN</th>
+                    <th className="py-2 px-3">KONTAK / HP</th>
+                    <th className="text-right py-2 px-3">TARIF KOMISI (RP/KG)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-100 text-neutral-600">
+                <tbody className="divide-y divide-neutral-100 text-neutral-600 font-bold uppercase transition-all">
                   {employees.map(e => (
-                    <tr key={e.id} className="hover:bg-neutral-50">
-                      <td className="py-2 px-3 font-bold text-neutral-800">{e.name}</td>
-                      <td className="py-2 px-3">
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
+                    <tr key={e.id} className="hover:bg-indigo-50/30 transition-colors">
+                      <td className="py-2.5 px-3 font-black text-neutral-900">{e.name.toUpperCase()}</td>
+                      <td className="py-2.5 px-3">
+                        <span className={`px-2 py-0.5 rounded text-[8px] font-black tracking-tighter ${
                           e.role === 'MAKELAR' ? 'bg-amber-100 text-amber-800' :
                           e.role === 'BURUH' ? 'bg-orange-100 text-orange-800' :
-                          'bg-indigo-100 text-indigo-805'
+                          'bg-indigo-100 text-indigo-700'
                         }`}>
                           {e.role}
                         </span>
                       </td>
-                      <td className="py-2 px-3 font-mono text-neutral-500">{e.phone || '- -'}</td>
-                      <td className="text-right py-2 px-3 font-mono font-medium text-emerald-600">
-                        {e.ratePerKg ? `Rp ${e.ratePerKg.toLocaleString('id-ID')} / Kg` : 'Gaji Mingguan Staff'}
+                      <td className="py-2.5 px-3 font-mono text-neutral-400">{e.phone || '--'}</td>
+                      <td className="text-right py-2.5 px-3 font-mono font-black text-emerald-600">
+                        {e.ratePerKg ? `${e.ratePerKg.toLocaleString('id-ID')}` : '-'}
                       </td>
                     </tr>
                   ))}
@@ -692,65 +693,63 @@ export default function FinanceModule({
               </table>
             </div>
 
-            <p className="text-[10px] text-neutral-400 italic text-center mt-5 bg-neutral-50 p-2 rounded">
-              💡 Upah buruh bongkar muat dihitung per truk masuk & keluar, sementara gaji tim poles / kipas tuntas per mingguan.
-            </p>
+            <div className="text-[9px] text-neutral-400 font-bold italic text-center mt-5 bg-neutral-50 border border-neutral-100 p-2.5 rounded-lg uppercase tracking-tight leading-relaxed">
+              SISTEM US BILIBILI 162 : UPAH BURUH BONGKAR MUAT DIHITUNG PER TRUK MASUK & KELUAR, GAJI STAFF TETAP DIBAYARKAN PER MINGGU MELALUI KEUANGAN PUSAT.
+            </div>
           </div>
 
         </div>
       )}
 
-      {/* TAB 3: MUTASI REKENING 2026 */}
+      {/* TAB 3: MUTASI KAS REKENING */}
       {activeSubTab === 'MUTASI' && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
             <div>
-              <h3 className="font-bold text-neutral-800 text-sm flex items-center gap-2">
-                <Landmark className="text-emerald-605 w-5 h-5" />
-                {t.financeEntryTitle}
+              <h3 className="font-black text-neutral-900 text-sm flex items-center gap-2 uppercase tracking-tight">
+                <Landmark className="text-emerald-700 w-5 h-5" />
+                BUKU MUTASI KAS & SALURAN REKENING TERPADU
               </h3>
-              <p className="text-xs text-neutral-500 mt-0.5">
-                {t.financeSubTitle}
+              <p className="text-[10px] text-neutral-500 font-bold mt-0.5 uppercase">
+                REKAMAN ALUR KAS MASUK (DEBIT) DAN KAS KELUAR (KREDIT) REAL-TIME MELALUI BERBAGAI SALURAN REKENING PERUSAHAAN.
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={handleExportFinanceExcel}
-                title={t.exportExcel}
-                className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer uppercase shadow-sm"
               >
-                <Download className="w-3.5 h-3.5" /> {t.exportExcel}
+                <Download className="w-3 h-3" /> EXPORT EXCEL
               </button>
               <button
                 onClick={handlePrintFinancePDF}
-                title={t.printReportsPDF}
-                className="flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer"
+                className="flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition cursor-pointer uppercase shadow-sm"
               >
-                <Printer className="w-3.5 h-3.5" /> {t.printReportsPDF}
+                <Printer className="w-3 h-3" /> PRINT PDF
               </button>
               <button
                 onClick={() => setShowFinForm(!showFinForm)}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg flex items-center gap-1 cursor-pointer shadow"
+                className="bg-emerald-700 hover:bg-emerald-600 text-white font-black text-[10px] px-3.5 py-2 rounded-lg flex items-center gap-1 cursor-pointer shadow-lg uppercase tracking-wider"
               >
                 <PlusCircle className="w-3.5 h-3.5" />
-                {showFinForm ? t.closeFormLabel : t.recordNewFinanceLabel}
+                {showFinForm ? 'TUTUP FORM' : 'CATAT MUTASI BARU'}
               </button>
             </div>
           </div>
 
           {/* Form input mutasi */}
           {showFinForm && (
-            <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm">
-              <h4 className="font-bold text-neutral-800 text-xs mb-3">Catat Finansial Mutasi Kas</h4>
-              <form onSubmit={handleSaveFinance} className="grid grid-cols-1 md:grid-cols-5 gap-3.5 text-xs">
+            <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-lg">
+              <h4 className="font-black text-neutral-900 text-xs mb-3 uppercase border-b border-neutral-100 pb-2">FORMULIR INPUT TRANSAKSI MUTASI FINANSIAL</h4>
+              <form onSubmit={handleSaveFinance} className="grid grid-cols-1 md:grid-cols-5 gap-4 text-[11px] font-bold">
                 
                 <div>
-                  <label className="block text-neutral-600 mb-1">Arah Kas</label>
+                  <label className="block text-neutral-500 mb-1 uppercase">ARAH ALIRAN KAS</label>
                   <select
                     value={finType}
                     onChange={(e) => setFinType(e.target.value as any)}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:ring-1 focus:ring-emerald-500 outline-none font-black"
                   >
                     <option value="DEBIT">MASUK / DEBIT (+)💰</option>
                     <option value="KREDIT">PENGELUARAN / KREDIT (-)💸</option>
@@ -758,77 +757,77 @@ export default function FinanceModule({
                 </div>
 
                 <div>
-                  <label className="block text-neutral-600 mb-1">Golongan Kategori</label>
+                  <label className="block text-neutral-500 mb-1 uppercase">GOLONGAN KATEGORI</label>
                   <select
                     value={finCategory}
                     onChange={(e) => setFinCategory(e.target.value)}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:ring-1 focus:ring-emerald-500 outline-none"
                   >
                     {categories.filter(c => c.type === finType || c.type === 'BOTH').map(c => (
-                      <option key={c.id} value={c.name}>{c.name}</option>
+                      <option key={c.id} value={c.name}>{c.name.toUpperCase()}</option>
                     ))}
                     {categories.length === 0 && (
                       <>
-                        <option value="OPERASIONAL">OPERASIONAL</option>
-                        <option value="GAJI_KARYAWAN">GAJI KARYAWAN</option>
-                        <option value="BURUH">UPAH BURUH</option>
+                        <option value="OPERASIONAL">OPERASIONAL GUDANG</option>
+                        <option value="GAJI_KARYAWAN">GAJI & STAFF</option>
+                        <option value="BURUH">UPAH BURUH PANGGUL</option>
                         <option value="MAKELAR">KOMISI MAKELAR</option>
                         <option value="TIMBANGAN">JASA TIMBANGAN</option>
-                        <option value="POLES_KIPAS">JASA MILLING</option>
-                        <option value="LAINNYA">LAIN-LAIN</option>
+                        <option value="POLES_KIPAS">JASA POLES & KIPAS</option>
+                        <option value="LAINNYA">LAIN-LAIN / TAK TERDUGA</option>
                       </>
                     )}
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-neutral-600 mb-1">Deskripsi Detail</label>
+                <div className="md:col-span-2">
+                  <label className="block text-neutral-500 mb-1 uppercase">DESKRIPSI / RINCIAN MUTASI</label>
                   <input
                     type="text"
                     value={finDesc}
-                    onChange={(e) => setFinDesc(e.target.value)}
-                    placeholder="Contoh: Beli BBM solar diesel mesin blower poles"
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
+                    onChange={(e) => setFinDesc(e.target.value.toUpperCase())}
+                    placeholder="CONTOH: BAYAR TAGIHAN LISTRIK GUDANG BLN MEI"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white outline-none font-black uppercase"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-neutral-600 mb-1 font-semibold">Tujuan Rek. Bank / Kas</label>
+                  <label className="block text-neutral-500 mb-1 uppercase">SUMBER DANA / REKENING</label>
                   <select
                     value={finBank}
                     onChange={(e) => setFinBank(e.target.value)}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-1.5 focus:bg-white font-black"
                   >
                     {banks.map(b => (
-                      <option key={b.id} value={b.accountName}>{b.accountName} ({b.bankName})</option>
+                      <option key={b.id} value={b.accountName}>{b.accountName.toUpperCase()} ({b.bankName.toUpperCase()})</option>
                     ))}
                     {banks.length === 0 && (
                       <>
-                        <option value="Kas Gudang Tunai">Kas Gudang Tunai (Laci Pas)</option>
-                        <option value="Mandiri Bilibili 162">Mandiri Bilibili 162 (028-xx)</option>
-                        <option value="BRI Rekening Usaha">BRI Kantor Pos Gilingan</option>
+                        <option value="KAS GUDANG TUNAI">KAS GUDANG TUNAI (CASH)</option>
+                        <option value="MANDIRI BILIBILI 162">MANDIRI BILIBILI 162</option>
+                        <option value="BRI REKENING USAHA">BRI REKENING USAHA</option>
                       </>
                     )}
                   </select>
                 </div>
 
-                <div>
+                <div className="md:col-span-3">
                   <SmartNumberInput
                     value={finAmount}
                     onChange={setFinAmount}
-                    label="Jumlah Nilai"
+                    label="JUMLAH TOTAL NILAI TRANSAKSI (RP)"
                     mode="currency"
-                    unit="Rp"
+                    unit="RP"
                     presets={[50000, 100000, 500000, 1000000, 5000000]}
                   />
                 </div>
 
-                <div className="md:col-span-5 flex justify-end mt-2 pt-2 border-t border-neutral-100">
+                <div className="md:col-span-2 flex items-end">
                   <button
                     type="submit"
-                    className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-xl transition-colors cursor-pointer text-xs uppercase tracking-wider shadow"
+                    className="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-black py-2.5 rounded-lg transition-all cursor-pointer text-xs uppercase tracking-widest shadow-lg active:scale-95"
                   >
-                    {editingFinId ? 'Simpan Transaksi Kas' : 'Tambah Transaksi Kas'}
+                    {editingFinId ? 'SIMPAN UBAH MUTASI' : 'SIMPAN TRANSAKSI KE BUKU KAS'}
                   </button>
                 </div>
 
@@ -839,38 +838,36 @@ export default function FinanceModule({
           {/* Ledger display table */}
           <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden shadow-sm">
             <div className="overflow-x-auto custom-scrollbar">
-              <table className="w-full text-left text-xs text-neutral-600 min-w-[900px]">
-                <thead className="bg-neutral-50 text-neutral-500 font-semibold uppercase tracking-wider border-b border-neutral-200">
+              <table className="w-full text-left text-[11px] text-neutral-600 min-w-[900px] uppercase">
+                <thead className="bg-neutral-50 text-neutral-400 font-black uppercase tracking-tighter border-b border-neutral-200">
                   <tr>
-                    <th className="py-2.5 px-3">Tanggal Catat</th>
-                    <th className="py-2.5 px-3">Golk Kategori</th>
-                    <th className="py-2.5 px-3">Uraian Kas Mutasi</th>
-                    <th className="py-2.5 px-3">Sasaran Pihak Terlibat</th>
-                    <th className="py-2.5 px-3">Rekening Pembayaran</th>
-                    <th className="text-right py-2.5 px-3">Pemasukan (+) (De)</th>
-                    <th className="text-center py-2.5 px-3">Aksi</th>
+                    <th className="py-3 px-3">TANGGAL</th>
+                    <th className="py-3 px-3">KATEGORI</th>
+                    <th className="py-3 px-3">URAIAN TRANSAKSI</th>
+                    <th className="py-3 px-3">SUMBER DANA</th>
+                    <th className="text-right py-3 px-3">DEBIT (+)</th>
+                    <th className="text-right py-3 px-3 font-black">KREDIT (-)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-100 font-medium">
+                <tbody className="divide-y divide-neutral-100 font-bold">
                   {finances.map((f) => {
                     const isDebit = f.type === 'DEBIT';
                     return (
                       <tr key={f.id} className="hover:bg-neutral-50 transition-colors">
-                        <td className="py-2.5 px-3 text-neutral-500 font-mono text-[11px] whitespace-nowrap">{f.date}</td>
+                        <td className="py-2.5 px-3 text-neutral-400 font-mono text-[10px] whitespace-nowrap">{f.date}</td>
                         <td className="py-2.5 px-3">
-                          <span className="bg-neutral-100 text-neutral-700 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider">
+                          <span className="bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-tighter border border-neutral-200/50">
                             {f.category.replace('_', ' ')}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 text-neutral-800">{f.description}</td>
-                        <td className="py-2.5 px-3 text-neutral-500 italic">{f.partyName || '-'}</td>
-                        <td className="py-2.5 px-3 font-semibold text-neutral-700">{f.bankAccount}</td>
+                        <td className="py-2.5 px-3 text-neutral-900 font-black">{f.description}</td>
+                        <td className="py-2.5 px-3 text-neutral-500 font-black uppercase tracking-tight">{f.bankAccount}</td>
                         
-                        <td className="text-right py-2.5 px-3 font-mono font-bold text-green-600">
-                          {isDebit ? `+Rp ${(f.amount ?? 0).toLocaleString('id-ID')}` : '-'}
+                        <td className="text-right py-2.5 px-3 font-mono font-black text-emerald-600">
+                          {isDebit ? `+ ${(f.amount ?? 0).toLocaleString('id-ID')}` : '-'}
                         </td>
-                        <td className="text-right py-2.5 px-3 font-mono font-bold text-red-600">
-                          {!isDebit ? `-Rp ${(f.amount ?? 0).toLocaleString('id-ID')}` : '-'}
+                        <td className="text-right py-2.5 px-3 font-mono font-black text-red-600">
+                          {!isDebit ? `- ${(f.amount ?? 0).toLocaleString('id-ID')}` : '-'}
                         </td>
                       </tr>
                     );

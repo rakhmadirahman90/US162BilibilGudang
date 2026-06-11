@@ -1091,146 +1091,146 @@ export default function DatabaseMasterModule({
       <div className="bg-slate-50 border-b border-neutral-200 flex flex-wrap gap-1 p-2">
         <button
           onClick={() => { setActiveSubTab('VEHICLES'); setSearchQuery(''); handleCancel(); }}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer uppercase ${
             activeSubTab === 'VEHICLES'
               ? 'bg-indigo-900 text-white shadow-sm'
               : 'text-neutral-600 hover:bg-neutral-100'
           }`}
         >
           <Truck className="w-3.5 h-3.5" />
-          🚛 Truk &amp; Nomor Polisi ({vehicles.length})
+          KENDARAAN & NO. POLISI ({vehicles.length})
         </button>
 
         <button
           onClick={() => { setActiveSubTab('SUPPLIERS'); setSearchQuery(''); handleCancel(); }}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer uppercase ${
             activeSubTab === 'SUPPLIERS'
               ? 'bg-indigo-900 text-white shadow-sm'
               : 'text-neutral-600 hover:bg-neutral-100'
           }`}
         >
           <Building2 className="w-3.5 h-3.5" />
-          🌾 Supplier Tani ({suppliers.length})
+          SUPPLIER PETANI ({suppliers.length})
         </button>
 
         <button
           onClick={() => { setActiveSubTab('BUYERS'); setSearchQuery(''); handleCancel(); }}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer uppercase ${
             activeSubTab === 'BUYERS'
               ? 'bg-indigo-900 text-white shadow-sm'
               : 'text-neutral-600 hover:bg-neutral-100'
           }`}
         >
           <Users className="w-3.5 h-3.5" />
-          🏢 Buyer / Pembeli ({buyers.length})
+          PEMBELI / BUYER ({buyers.length})
         </button>
 
         <button
           onClick={() => { setActiveSubTab('EMPLOYEES'); setSearchQuery(''); handleCancel(); }}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer uppercase ${
             activeSubTab === 'EMPLOYEES'
               ? 'bg-indigo-900 text-white shadow-sm'
               : 'text-neutral-600 hover:bg-neutral-100'
           }`}
         >
           <Briefcase className="w-3.5 h-3.5" />
-          🤝 Makelar &amp; Pegawai ({employees.length})
+          STAF & PEGAWAI ({employees.length})
         </button>
 
         <button
           onClick={() => { setActiveSubTab('COMMODITIES'); setSearchQuery(''); handleCancel(); }}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer uppercase ${
             activeSubTab === 'COMMODITIES'
               ? 'bg-indigo-900 text-white shadow-sm'
               : 'text-neutral-600 hover:bg-neutral-100'
           }`}
         >
           <Layers className="w-3.5 h-3.5" />
-          📦 Daftar Barang / Komoditas ({commodities.length})
+          DAFTAR KOMODITAS ({commodities.length})
         </button>
 
         <button
           onClick={() => { setActiveSubTab('BANKS'); setSearchQuery(''); handleCancel(); }}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer uppercase ${
             activeSubTab === 'BANKS'
               ? 'bg-rose-900 text-white shadow-sm'
               : 'text-neutral-600 hover:bg-neutral-100'
           }`}
         >
           <Landmark className="w-3.5 h-3.5" />
-          🏦 Saluran Rekening / Bank ({banks.length})
+          REKENING BANK ({banks.length})
         </button>
 
         <button
           onClick={() => { setActiveSubTab('BROKERS'); setSearchQuery(''); handleCancel(); }}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer uppercase ${
             activeSubTab === 'BROKERS'
               ? 'bg-rose-900 text-white shadow-sm'
               : 'text-neutral-600 hover:bg-neutral-100'
           }`}
         >
           <UserCheck className="w-3.5 h-3.5" />
-          🤝 Makelar / Broker ({brokers.length})
+          MAKELAR / BROKER ({brokers.length})
         </button>
 
         <button
           onClick={() => { setActiveSubTab('LOCATIONS'); setSearchQuery(''); handleCancel(); }}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer uppercase ${
             activeSubTab === 'LOCATIONS'
               ? 'bg-rose-900 text-white shadow-sm'
               : 'text-neutral-600 hover:bg-neutral-100'
           }`}
         >
           <MapPin className="w-3.5 h-3.5" />
-          📍 Lokasi / Sektor Gudang ({locations.length})
+          SEKTOR GUDANG ({locations.length})
         </button>
 
         <button
           onClick={() => { setActiveSubTab('CUSTOMERS'); setSearchQuery(''); handleCancel(); }}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer uppercase ${
             activeSubTab === 'CUSTOMERS'
               ? 'bg-rose-900 text-white shadow-sm'
               : 'text-neutral-600 hover:bg-neutral-100'
           }`}
         >
           <Users className="w-3.5 h-3.5" />
-          👥 Pelanggan Jasa ({customers.length})
+          PELANGGAN JASA ({customers.length})
         </button>
 
         <button
           onClick={() => { setActiveSubTab('FINANCE_CATS'); setSearchQuery(''); handleCancel(); }}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer uppercase ${
             activeSubTab === 'FINANCE_CATS'
               ? 'bg-rose-900 text-white shadow-sm'
               : 'text-neutral-600 hover:bg-neutral-100'
           }`}
         >
           <Layers className="w-3.5 h-3.5" />
-          📊 Kategori Keuangan ({financeCategories.length})
+          KATEGORI KEUANGAN ({financeCategories.length})
         </button>
 
         <button
           onClick={() => { setActiveSubTab('LABOR_RATES'); setSearchQuery(''); handleCancel(); }}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer uppercase ${
             activeSubTab === 'LABOR_RATES'
               ? 'bg-amber-700 text-white shadow-sm'
               : 'text-neutral-600 hover:bg-neutral-100'
           }`}
         >
           <Users className="w-3.5 h-3.5" />
-          👷 Data Buruh ({laborRates.length})
+          TARIF UPAH BURUH ({laborRates.length})
         </button>
 
         <button
           onClick={() => { setActiveSubTab('PRODUCTS'); setSearchQuery(''); handleCancel(); }}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer uppercase ${
             activeSubTab === 'PRODUCTS'
               ? 'bg-emerald-700 text-white shadow-sm'
               : 'text-neutral-600 hover:bg-neutral-100'
           }`}
         >
           <Package className="w-3.5 h-3.5" />
-          🛍️ Produk ({products.length})
+          KATALOG PRODUK ({products.length})
         </button>
       </div>
 

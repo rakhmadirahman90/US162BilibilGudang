@@ -242,8 +242,8 @@ export default function OutboundModule({
       {/* ADD COMPONENT LOGS */}
       {showAddForm && (
         <div className="bg-white border border-neutral-200 shadow-sm rounded-xl p-6">
-          <h3 className="font-bold text-neutral-800 text-sm mb-4 border-b border-neutral-100 pb-2">
-            {editingId ? 'Formulir Ubah Transaksi Barang Keluar' : 'Formulir Catat Pengiriman Barang Baru'}
+          <h3 className="font-bold text-neutral-800 text-sm mb-4 border-b border-neutral-100 pb-2 uppercase">
+            {editingId ? 'FORMULIR UBAH TRANSAKSI BARANG KELUAR' : 'FORMULIR CATAT PENGIRIMAN BARANG BARU'}
           </h3>
           <form onSubmit={handleCreateRecord} className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
             
@@ -252,46 +252,46 @@ export default function OutboundModule({
               <span className="font-bold text-neutral-500">1. REFERENSI LOGISTIK</span>
               
               <div className="bg-blue-50/50 p-3 rounded-lg border border-blue-100 flex flex-col gap-2">
-                <label className="block text-neutral-600">Ambil dari Jembatan Timbang (Opsional)</label>
+                <label className="block text-neutral-600 font-bold uppercase">AMBIL DARI JEMBATAN TIMBANG (OPSIONAL)</label>
                 <select
                   value={selectedTicketId}
                   onChange={(e) => handleTicketChange(e.target.value)}
-                  className="w-full bg-white border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-blue-600"
+                  className="w-full bg-white border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-blue-600 font-bold uppercase cursor-pointer"
                 >
-                  <option value="">-- Input Manual --</option>
+                  <option value="">-- INPUT MANUAL --</option>
                   {tickets.map(t => (
                     <option key={t.id} value={t.id}>
-                      Tiket {t.ticketNo} ({t.policeNo}) - Net {(t.netWeight ?? 0).toLocaleString('id-ID')} Kg
+                      TIKET {t.ticketNo} ({t.policeNo}) - NET {(t.netWeight ?? 0).toLocaleString('id-ID')} KG
                     </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-neutral-600 mb-1">No. Kendaraan Tronton / Truk</label>
+                <label className="block text-neutral-600 mb-1 font-bold uppercase">NOMOR KENDARAAN (PLAT)</label>
                 <input
                   type="text"
-                  placeholder="Misal: DD 8021 KK"
+                  placeholder="MISAL: DD 8021 KK"
                   value={vehicleNo}
                   onChange={(e) => setVehicleNo(e.target.value.toUpperCase())}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 uppercase"
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 uppercase font-bold transition"
                   list="outbound-vehicles"
                 />
                 <datalist id="outbound-vehicles">
                   {vehicles.map(v => (
-                    <option key={v.id} value={v.policeNo}>{v.driverName} &bull; {v.vehicleType} (Tara: {v.tareWeight}kg)</option>
+                    <option key={v.id} value={v.policeNo}>{v.driverName.toUpperCase()} &bull; {v.vehicleType.toUpperCase()} (TARA: {v.tareWeight}KG)</option>
                   ))}
                 </datalist>
               </div>
 
               <div>
-                <label className="block text-neutral-600 mb-1">No. Invoice Penjualan</label>
+                <label className="block text-neutral-600 mb-1 font-bold uppercase">NOMOR INVOICE PENJUALAN</label>
                 <input
                   type="text"
-                  placeholder="Contoh: INV-162/2026-042"
+                  placeholder="CONTOH: INV-162/2026-042"
                   value={invoiceNo}
-                  onChange={(e) => setInvoiceNo(e.target.value)}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600"
+                  onChange={(e) => setInvoiceNo(e.target.value.toUpperCase())}
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 font-bold uppercase transition"
                 />
               </div>
             </div>
@@ -302,11 +302,11 @@ export default function OutboundModule({
               
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-neutral-600 mb-1">Komoditas</label>
+                  <label className="block text-neutral-600 mb-1 font-bold uppercase">KOMODITAS</label>
                   <select
                     value={commodity}
                     onChange={(e) => setCommodity(e.target.value as any)}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 font-bold uppercase transition cursor-pointer"
                   >
                     <option value="BERAS">BERAS MOLEK 🌾</option>
                     <option value="JAGUNG">JAGUNG PIPIL 🌽</option>
@@ -315,18 +315,18 @@ export default function OutboundModule({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[#1e293b] font-semibold mb-1">Nama Pembeli (Buyer)</label>
+                  <label className="block text-[#1e293b] font-bold mb-1 uppercase">NAMA PEMBELI (BUYER)</label>
                   <input
                     type="text"
-                    placeholder="Contoh: PT Sinar Indah"
+                    placeholder="CONTOH: PT SINAR INDAH"
                     value={buyer}
-                    onChange={(e) => setBuyer(e.target.value)}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 font-bold"
+                    onChange={(e) => setBuyer(e.target.value.toUpperCase())}
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 font-bold uppercase transition"
                     list="outbound-buyers"
                   />
                   <datalist id="outbound-buyers">
                     {buyers.map(b => (
-                      <option key={b.id} value={b.name}>{b.address} &bull; PIC: {b.phone || 'N/A'}</option>
+                      <option key={b.id} value={b.name.toUpperCase()}>{b.address.toUpperCase()} &bull; PIC: {b.phone || 'N/A'}</option>
                     ))}
                   </datalist>
                 </div>
@@ -336,21 +336,21 @@ export default function OutboundModule({
                 <SmartNumberInput
                   value={totalWeight}
                   onChange={setTotalWeight}
-                  label="Total Berat Cargo Muat"
+                  label="TOTAL BERAT CARGO MUAT"
                   mode="weight"
-                  unit="Kg"
+                  unit="KG"
                   presets={[5000, 10000, 15000, 25000, 30000]}
                 />
               </div>
 
               <div>
-                <label className="block text-neutral-600 mb-1">Lokasi Tujuan / Pelabuhan</label>
+                <label className="block text-neutral-600 mb-1 font-bold uppercase">LOKASI TUJUAN / PELABUHAN</label>
                 <input
                   type="text"
-                  placeholder="Contoh: KIMA Makassar atau Pelabuhan Luwu"
+                  placeholder="CONTOH: KIMA MAKASSAR ATAU PELABUHAN LUWU"
                   value={destination}
-                  onChange={(e) => setDestination(e.target.value)}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600"
+                  onChange={(e) => setDestination(e.target.value.toUpperCase())}
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 font-bold uppercase transition"
                 />
               </div>
             </div>
@@ -364,21 +364,21 @@ export default function OutboundModule({
                   <SmartNumberInput
                     value={loadingLaborCost}
                     onChange={setLoadingLaborCost}
-                    label="Upah Buruh Pemuat (Muat Karung)"
+                    label="UPAH BURUH PEMUAT (MUAT KARUNG)"
                     mode="currency"
-                    unit="Rp"
+                    unit="RP"
                     presets={[200000, 350000, 500000, 750000]}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-neutral-600 mb-1">Status Keberangkatan</label>
+                  <label className="block text-neutral-600 mb-1 font-bold uppercase">STATUS KEBERANGKATAN</label>
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as any)}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none font-bold cursor-pointer"
                   >
-                    <option value="SHIPPED">SUDAH BRANGKAT (SHIPPED) 🚚</option>
+                    <option value="SHIPPED">SUDAH BERANGKAT (SHIPPED) 🚚</option>
                     <option value="LOADING">SEDANG DIMUAT (LOADING) ⏳</option>
                   </select>
                 </div>
@@ -387,16 +387,16 @@ export default function OutboundModule({
               <div className="flex gap-2 mt-4 pt-1 border-t border-neutral-100">
                 <button
                   type="submit"
-                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded-lg cursor-pointer animate-pulse"
+                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-2 rounded-lg cursor-pointer transition uppercase"
                 >
-                  {editingId ? 'Simpan Perubahan Transaksi' : 'Simpan Transaksi Keluar'}
+                  {editingId ? 'SIMPAN PERUBAHAN TRANSAKSI' : 'SIMPAN TRANSAKSI KELUAR'}
                 </button>
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-3 py-2 rounded-lg"
+                  className="bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold px-3 py-2 rounded-lg transition uppercase"
                 >
-                  Batal
+                  BATAL
                 </button>
               </div>
             </div>

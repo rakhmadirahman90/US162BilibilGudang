@@ -1133,7 +1133,7 @@ export default function App() {
             <div>
               <h1 className="font-extrabold tracking-tight text-base sm:text-lg flex items-center gap-1.5 font-sans">
                 {t.warehouseHeader}
-                <span className={`text-[10px] border rounded px-1.5 py-0.5 font-bold transition-all duration-300 ${theme.headerBadgeBg} ${theme.headerBadgeText} ${theme.headerBadgeBorder}`}>
+                <span className={`text-[10px] border rounded px-1.5 py-0.5 font-black transition-all duration-300 ${theme.headerBadgeBg} ${theme.headerBadgeText} ${theme.headerBadgeBorder} uppercase`}>
                   {t.centralWarehouse}
                 </span>
               </h1>
@@ -1195,7 +1195,7 @@ export default function App() {
                       ? 'bg-amber-500 text-neutral-900 border border-amber-400'
                       : 'bg-indigo-600 text-white border border-indigo-500'
                   }`}>
-                    {sessionUser.role === 'admin' ? '🛡️ Admin' : '👤 Operator'}
+                    {sessionUser.role === 'admin' ? '🛡️ ADMIN' : '👤 OPERATOR' }
                   </span>
                   <span className="text-[11px] text-yellow-350 font-bold max-w-[90px] truncate hidden md:inline" title={sessionUser.username}>
                     {sessionUser.username}
@@ -1204,7 +1204,7 @@ export default function App() {
                     onClick={handleSessionLogout}
                     className="text-[10px] font-extrabold px-2 py-1 rounded transition border border-red-500 bg-red-600 font-sans text-white hover:bg-red-700 cursor-pointer"
                   >
-                    Logout
+                    LOGOUT
                   </button>
                 </div>
               ) : null}
@@ -1224,19 +1224,19 @@ export default function App() {
               <div className="flex items-center gap-1.5 font-mono text-[11px]">
                 <span className="text-white/60 uppercase">Cloud Sync:</span>
                 {syncStatus === 'saving' ? (
-                  <span className="text-amber-400 font-bold flex items-center gap-1">
+                  <span className="text-amber-400 font-bold flex items-center gap-1 uppercase">
                     <RefreshCw className="w-3 h-3 animate-spin text-amber-300" />
-                    Menyimpan...
+                    MENYIMPAN...
                   </span>
                 ) : syncStatus === 'error' ? (
-                  <span className="text-red-400 font-bold flex items-center gap-1">
+                  <span className="text-red-400 font-bold flex items-center gap-1 uppercase">
                     <CloudOff className="w-3.5 h-3.5 text-red-400" />
-                    Gagal
+                    GAGAL
                   </span>
                 ) : (
-                  <span className="text-green-400 font-bold flex items-center gap-1">
+                  <span className="text-green-400 font-bold flex items-center gap-1 uppercase">
                     <span className="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse"></span>
-                    Tersinkronisasi
+                    TERSINKRONISASI
                   </span>
                 )}
               </div>
@@ -1280,153 +1280,152 @@ export default function App() {
       {/* TABS SELECTOR RAILS */}
       <div className="bg-white border-b border-neutral-200 shadow-sm md:sticky md:top-[74px] z-30 overflow-x-auto whitespace-nowrap custom-scrollbar">
         <div className="max-w-7xl mx-auto px-4 flex">
-          
           <button
             onClick={() => setActiveTab('DASHBOARD')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
               activeTab === 'DASHBOARD' 
                 ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
                 : 'border-transparent text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <LayoutDashboard className="w-4 h-4" />
-            1. {t.dashboard}
+            01. {t.dashboard}
           </button>
  
           <button
             onClick={() => setActiveTab('TIMBANG')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
               activeTab === 'TIMBANG' 
                 ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg} shadow-sm` 
                 : 'border-transparent text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <Scale className="w-4 h-4 text-blue-500" />
-            2. {t.weighbridge}
+            02. {t.weighbridge}
           </button>
  
           <button
             onClick={() => setActiveTab('MASUK')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
               activeTab === 'MASUK' 
                 ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
                 : 'border-transparent text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <ArrowDownCircle className="w-4 h-4 text-emerald-600" />
-            3. {t.inbound}
+            03. {t.inbound}
           </button>
  
           <button
             onClick={() => setActiveTab('KELUAR')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
               activeTab === 'KELUAR' 
                 ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
                 : 'border-transparent text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <ArrowUpCircle className="w-4 h-4 text-blue-600" />
-            4. {t.outbound}
+            04. {t.outbound}
           </button>
  
           <button
             onClick={() => setActiveTab('SERVICES')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
               activeTab === 'SERVICES' 
                 ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
                 : 'border-transparent text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <Wind className="w-4 h-4 text-sky-500" />
-            5. {t.services}
+            05. {t.services}
           </button>
  
           <button
             onClick={() => setActiveTab('REFAKSI')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
               activeTab === 'REFAKSI' 
                 ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
                 : 'border-transparent text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <Percent className="w-4 h-4 text-amber-500" />
-            6. {t.moisture} / Refaksi
+            06. {t.moisture}
           </button>
-
+ 
           <button
             onClick={() => setActiveTab('DRYER')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
               activeTab === 'DRYER' 
                 ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
                 : 'border-transparent text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <Wind className="w-4 h-4 text-orange-500" />
-            7. Dryer Jagung
+            07. DRYER JAGUNG
           </button>
- 
-          {sessionUser?.role === 'admin' && (
-            <button
-              onClick={() => setActiveTab('FINANCE')}
-              className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
-                activeTab === 'FINANCE' 
-                  ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
-                  : 'border-transparent text-neutral-500 hover:text-neutral-800'
-              }`}
-            >
-              <DollarSign className="w-4 h-4 text-emerald-600" />
-              8. {t.finance}
-            </button>
-          )}
  
           <button
             onClick={() => setActiveTab('STOK_BERAS')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
               activeTab === 'STOK_BERAS' 
                 ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
                 : 'border-transparent text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <Package className="w-4 h-4 text-emerald-600" />
-            9. {t.riceStock}
+            08. {t.riceStock}
           </button>
+ 
+          {sessionUser?.role === 'admin' && (
+            <button
+              onClick={() => setActiveTab('FINANCE')}
+              className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
+                activeTab === 'FINANCE' 
+                  ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
+                  : 'border-transparent text-neutral-500 hover:text-neutral-800'
+              }`}
+            >
+              <DollarSign className="w-4 h-4 text-emerald-600" />
+              09. {t.finance}
+            </button>
+          )}
   
           <button
             onClick={() => setActiveTab('PRODUK')}
-            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+            className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
               activeTab === 'PRODUK' 
                 ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
                 : 'border-transparent text-neutral-500 hover:text-neutral-800'
             }`}
           >
             <Package className="w-4 h-4 text-emerald-600" />
-            10. Produk
+            10. {t.products}
           </button>
  
           {sessionUser?.role === 'admin' && (
             <>
               <button
                 onClick={() => setActiveTab('LAPORAN')}
-                className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+                className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
                   activeTab === 'LAPORAN' 
                     ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
                     : 'border-transparent text-neutral-500 hover:text-neutral-800'
                 }`}
               >
                 <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
-                10. {t.reports}
+                11. {t.reports}
               </button>
      
               <button
                 onClick={() => setActiveTab('DATABASE')}
-                className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer ${
+                className={`px-5 py-3.5 text-xs font-bold transition flex items-center gap-2 border-b-2 cursor-pointer uppercase ${
                   activeTab === 'DATABASE' 
                     ? `${theme.tabActiveBorder} ${theme.tabActiveText} ${theme.tabActiveBg}` 
                     : 'border-transparent text-neutral-500 hover:text-neutral-800'
                 }`}
               >
                 <Database className="w-4 h-4 text-rose-500" />
-                10. {t.database}
+                12. {t.database}
               </button>
             </>
           )}
@@ -1435,7 +1434,7 @@ export default function App() {
       </div>
 
       {/* CORE WORKSPACE PORTALS */}
-      <main className="max-w-7xl mx-auto px-4 py-8 flex-1 w-full overflow-y-auto overflow-x-hidden">
+      <main className={`mx-auto flex-1 w-full overflow-y-auto overflow-x-hidden transition-all duration-500 custom-scrollbar ${activeTab === 'PRODUK' ? 'max-w-full px-2 py-4' : 'max-w-7xl px-4 py-8'}`}>
         
         {/* Real-time Firebase Cloud Sync Status Notifier Bar */}
         <motion.div 
@@ -1481,15 +1480,15 @@ export default function App() {
                     ? 'bg-red-500 text-white' 
                     : 'bg-emerald-600 text-white'
                 }`}>
-                  {syncStatus === 'saving' ? '🟢 Menyimpan...' : syncStatus === 'error' ? '🔺 Gagal Sinkron' : '⚡ Tersinkronisasi'}
+                  {syncStatus === 'saving' ? '🟢 MENYIMPAN...' : syncStatus === 'error' ? '🔺 GAGAL SINKRON' : '⚡ TERSINKRONISASI'}
                 </span>
               </div>
-              <p className="text-[10px] text-neutral-500 mt-1 font-sans">
+              <p className="text-[10px] text-neutral-500 mt-1 font-sans uppercase">
                 {syncStatus === 'saving' 
-                  ? 'Perubahan sedang ditulis ke Cloud Firestore database secara otomatis.' 
+                  ? 'PERUBAHAN SEDANG DITULIS KE CLOUD FIRESTORE DATABASE SECARA OTOMATIS.' 
                   : syncStatus === 'error' 
-                  ? 'Terjadi interupsi jaringan. Silakan periksa koneksi Anda - data lokal tetap aman.' 
-                  : 'Semua perubahan berhasil dicadangkan dan diselaraskan secara real-time ke web server.'}
+                  ? 'TERJADI INTERUPSI JARINGAN. SILAKAN PERIKSA KONEKSI ANDA - DATA LOKAL TETAP AMAN.' 
+                  : 'SEMUA PERUBAHAN BERHASIL DICADANGKAN DAN DISELARASKAN SECARA REAL-TIME KE WEB SERVER.'}
               </p>
             </div>
           </div>
@@ -1551,10 +1550,10 @@ export default function App() {
                 <button
                   id="btn-shortcut-inbound"
                   onClick={() => setActiveTab('MASUK')}
-                  className="bg-yellow-450 hover:bg-yellow-400 text-emerald-950 font-bold text-xs px-4 py-2.5 rounded-lg active:scale-95 transition-all cursor-pointer flex-1 sm:flex-initial text-center justify-center flex items-center gap-1"
+                  className="bg-yellow-450 hover:bg-yellow-400 text-emerald-950 font-bold text-xs px-4 py-2.5 rounded-lg active:scale-95 transition-all cursor-pointer flex-1 sm:flex-initial text-center justify-center flex items-center gap-1 uppercase"
                 >
                   <ArrowDownCircle className="w-3.5 h-3.5" />
-                  {t.recordInbound || 'Barang Masuk'}
+                  {t.recordInbound || 'BARANG MASUK'}
                 </button>
               </div>
             </div>   
@@ -1572,16 +1571,16 @@ export default function App() {
               >
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.cornStock || 'Stok Jagung Silo'}</span>
+                    <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.cornStock || 'STOK JAGUNG SILO'}</span>
                     {cornStockBalance <= 5000 && <AlertCircle className="w-3 h-3 text-red-500 animate-pulse" />}
                   </div>
                   <span className={`text-xl sm:text-2xl font-black ${cornStockBalance <= 5000 ? 'text-red-600' : 'text-amber-650'} font-mono tracking-tight`}>
                     {cornStockBalance.toLocaleString('id-ID')} <span className="text-xs text-neutral-400 font-normal">{t.kgNetto || 'Kg'}</span>
                   </span>
-                  <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1">
-                    <span className="text-[#10b981] font-semibold">In: {totalInboundCorn.toLocaleString('id-ID')}</span>
+                  <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1 uppercase font-black">
+                    <span className="text-[#10b981] font-semibold">MASUK: {totalInboundCorn.toLocaleString('id-ID')}</span>
                     <span className="text-neutral-300">|</span>
-                    <span className="text-red-500 font-semibold">Out: {totalOutboundCorn.toLocaleString('id-ID')}</span>
+                    <span className="text-red-500 font-semibold">KELUAR: {totalOutboundCorn.toLocaleString('id-ID')}</span>
                   </div>
                 </div>
                 <div className={`w-10 h-10 ${cornStockBalance <= 5000 ? 'bg-red-50' : 'bg-amber-50'} rounded-lg flex items-center justify-center border ${cornStockBalance <= 5000 ? 'border-red-100' : 'border-amber-100'} group-hover:scale-110 transition duration-300 shrink-0`}>
@@ -1599,16 +1598,16 @@ export default function App() {
               >
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.riceStockLabel || 'Stok Beras Gudang'}</span>
+                    <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.riceStockLabel || 'LOGISTIK BERAS MASUK'}</span>
                     {riceStockBalance <= 2000 && <AlertCircle className="w-3 h-3 text-red-500 animate-pulse" />}
                   </div>
                   <span className={`text-xl sm:text-2xl font-black ${riceStockBalance <= 2000 ? 'text-red-600' : 'text-emerald-800'} font-mono tracking-tight`}>
                     {riceStockBalance.toLocaleString('id-ID')} <span className="text-xs text-neutral-400 font-normal">{t.kgNetto || 'Kg'}</span>
                   </span>
-                  <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1">
-                    <span className="text-[#10b981] font-semibold">In: {totalInboundRice.toLocaleString('id-ID')}</span>
+                  <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1 uppercase font-black">
+                    <span className="text-[#10b981] font-semibold">MASUK: {totalInboundRice.toLocaleString('id-ID')}</span>
                     <span className="text-neutral-300">|</span>
-                    <span className="text-red-500 font-semibold">Out: {totalOutboundRice.toLocaleString('id-ID')}</span>
+                    <span className="text-red-500 font-semibold">KELUAR: {totalOutboundRice.toLocaleString('id-ID')}</span>
                   </div>
                 </div>
                 <div className={`w-10 h-10 ${riceStockBalance <= 2000 ? 'bg-red-50' : 'bg-emerald-50'} rounded-lg flex items-center justify-center border ${riceStockBalance <= 2000 ? 'border-red-100' : 'border-emerald-100'} group-hover:scale-110 transition duration-300 shrink-0`}>
@@ -1626,14 +1625,14 @@ export default function App() {
                 className="bg-white border border-neutral-200 p-4.5 rounded-xl shadow-sm hover:shadow hover:border-blue-300 transition-all flex items-center justify-between group cursor-pointer"
               >
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">Antrean Jembatan Timbang</span>
+                  <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">ANTREAN JEMBATAN TIMBANGAN</span>
                   <span className="text-xl sm:text-2xl font-black text-blue-800 font-mono tracking-tight flex items-center gap-1.5">
                     {tickets.filter(t => t.status === 'PENDING').length} <span className="text-[9px] text-[#2563eb] font-bold bg-blue-50 px-1.5 py-0.5 rounded leading-none">Truk</span>
                   </span>
                   <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1">
-                    <span className="text-emerald-600 font-bold">Selesai: {tickets.filter(t => t.status === 'COMPLETED').length}</span>
+                    <span className="text-emerald-600 font-bold uppercase">SELESAI: {tickets.filter(t => t.status === 'COMPLETED').length}</span>
                     <span className="text-neutral-300">•</span>
-                    <span className="text-blue-600 font-medium">Buka Unit Timbang</span>
+                    <span className="text-blue-600 font-black uppercase">BUKA UNIT TIMBANG</span>
                   </div>
                 </div>
                 <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center border border-blue-100 group-hover:scale-110 transition duration-300 shrink-0">

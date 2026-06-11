@@ -310,27 +310,27 @@ export default function InboundModule({
             <div className="flex flex-col gap-3">
               <span className="font-bold text-neutral-500">1. REFERENSI LOGISTIK</span>
               
-              <div className="bg-emerald-50/40 p-3 rounded-lg border border-emerald-100/60 flex flex-col gap-1.5 animate-fade-in">
-                <label className="block text-neutral-600">Pilih Tiket Timbang (Opsional)</label>
+              <div className="bg-emerald-50/40 p-3 rounded-lg border border-emerald-100/60 flex flex-col gap-1.5 animate-fade-in text-[10px]">
+                <label className="block text-neutral-600 font-bold">PILIH TIKET TIMBANG (OPSIONAL)</label>
                 <select
                   value={selectedTicketId}
                   onChange={(e) => handleTicketChange(e.target.value)}
                   className="w-full bg-white border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-emerald-600 transition cursor-pointer"
                 >
-                  <option value="">-- Manual Tanpa Tiket Timbang --</option>
+                  <option value="">-- INPUT MANUAL / TANPA TIKET --</option>
                   {tickets.map(t => (
                     <option key={t.id} value={t.id}>
-                      Tiket {t.ticketNo} ({t.policeNo}) - Net {(t.netWeight ?? 0).toLocaleString('id-ID')} Kg
+                      TIKET {t.ticketNo} ({t.policeNo}) - NET {(t.netWeight ?? 0).toLocaleString('id-ID')} KG
                     </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-neutral-600 mb-1">No. Kendaraan (Wajib)</label>
+                <label className="block text-neutral-600 mb-1 font-bold">NOMOR KENDARAAN (WAJIB)</label>
                 <input
                   type="text"
-                  placeholder="Contoh: DD 8214 KK"
+                  placeholder="CONTOH: DD 8214 KK"
                   value={vehicleNo}
                   onChange={(e) => {
                     const uppercaseVal = e.target.value.toUpperCase();
@@ -345,41 +345,36 @@ export default function InboundModule({
                       }
                     }
                   }}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 uppercase transition"
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 uppercase transition font-bold"
                   list="inbound-vehicles"
                 />
                 <datalist id="inbound-vehicles">
                   {vehicles.map(v => (
-                    <option key={v.id} value={v.policeNo}>{v.driverName} &bull; {v.vehicleType} (Tara: {v.tareWeight}kg)</option>
+                    <option key={v.id} value={v.policeNo}>{v.driverName.toUpperCase()} &bull; {v.vehicleType.toUpperCase()} (TARA: {v.tareWeight}KG)</option>
                   ))}
                 </datalist>
               </div>
 
               <div>
-                <label className="block text-neutral-600 mb-1">Nama Driver/Sopir</label>
+                <label className="block text-neutral-600 mb-1 font-bold">NAMA DRIVER/SOPIR</label>
                 <input
                   type="text"
-                  placeholder="Contoh: Daeng Naba"
+                  placeholder="CONTOH: DAENG NABA"
                   value={driverName}
-                  onChange={(e) => setDriverName(e.target.value)}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 transition"
+                  onChange={(e) => setDriverName(e.target.value.toUpperCase())}
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 font-bold uppercase transition"
                   list="inbound-drivers"
                 />
-                <datalist id="inbound-drivers">
-                  {vehicles.map(v => (
-                    <option key={v.id} value={v.driverName}>{v.policeNo}</option>
-                  ))}
-                </datalist>
               </div>
 
               <div>
-                <label className="block text-neutral-600 mb-1">Sektor Letak Gudang Tolak/Terima</label>
+                <label className="block text-neutral-600 mb-1 font-bold">LOKASI SEKTOR PENERIMAAN GUDANG</label>
                 <input
                   type="text"
                   value={warehouseSection}
-                  onChange={(e) => setWarehouseSection(e.target.value)}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 transition"
-                  placeholder="Misal: Gudang Utara, Silo B"
+                  onChange={(e) => setWarehouseSection(e.target.value.toUpperCase())}
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 transition font-bold uppercase"
+                  placeholder="MISAL: GUDANG UTARA, SILO B"
                 />
               </div>
             </div>
@@ -390,11 +385,11 @@ export default function InboundModule({
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-neutral-600 mb-1">Jenis Komoditas</label>
+                  <label className="block text-neutral-600 mb-1 font-bold">JENIS KOMODITAS</label>
                   <select
                     value={commodity}
                     onChange={(e) => setCommodity(e.target.value as any)}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 transition cursor-pointer"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 transition cursor-pointer font-bold"
                   >
                     <option value="JAGUNG">JAGUNG PIPIL 🌽</option>
                     <option value="BERAS">BERAS MOLEK 🌾</option>
@@ -403,18 +398,18 @@ export default function InboundModule({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-neutral-600 mb-1 font-semibold">Nama Suplier / Pemilik</label>
+                  <label className="block text-neutral-600 mb-1 font-bold">NAMA SUPLIER / PEMILIK</label>
                   <input
                     type="text"
-                    placeholder="Contoh: H. Mustamin"
+                    placeholder="CONTOH: H. MUSTAMIN"
                     value={supplier}
-                    onChange={(e) => setSupplier(e.target.value)}
+                    onChange={(e) => setSupplier(e.target.value.toUpperCase())}
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 font-bold uppercase transition"
                     list="inbound-suppliers"
                   />
                   <datalist id="inbound-suppliers">
                     {suppliers.map(s => (
-                      <option key={s.id} value={s.name}>{s.address} &bull; {s.phone}</option>
+                      <option key={s.id} value={s.name.toUpperCase()}>{s.address.toUpperCase()} &bull; {s.phone}</option>
                     ))}
                   </datalist>
                 </div>
@@ -424,17 +419,17 @@ export default function InboundModule({
                 <SmartNumberInput
                   value={grossWeight}
                   onChange={setGrossWeight}
-                  label="Berat Bruto"
+                  label="BERAT BRUTO (GROSS)"
                   mode="weight"
-                  unit="Kg"
+                  unit="KG"
                   presets={[3000, 5000, 8000, 12000]}
                 />
                 <SmartNumberInput
                   value={tareWeight}
                   onChange={setTareWeight}
-                  label="Berat Tara"
+                  label="BERAT TARA (EMPTY)"
                   mode="weight"
-                  unit="Kg"
+                  unit="KG"
                   presets={[1000, 2000, 3500, 4200]}
                 />
               </div>
@@ -443,7 +438,7 @@ export default function InboundModule({
                 <SmartNumberInput
                   value={bagDeductionPercent}
                   onChange={setBagDeductionPercent}
-                  label="Potongan Karung"
+                  label="POTONGAN KARUNG (%)"
                   mode="percent"
                   unit="%"
                   presets={[1.0, 1.25, 1.5, 2.0]}
@@ -458,14 +453,14 @@ export default function InboundModule({
                 
                 <div className="flex flex-col gap-1 w-full font-sans">
                   <div className="flex justify-between items-center mb-0.5">
-                    <span className="text-[11px] font-bold text-neutral-600">Kadar Air (KA) Jagung</span>
+                    <span className="text-[11px] font-bold text-neutral-600 uppercase">KADAR AIR (KA) JAGUNG</span>
                     {commodity === 'JAGUNG' && (
                       <button
                         type="button"
                         onClick={() => setShowMoistureModal(true)}
-                        className="text-[10px] text-emerald-600 hover:text-emerald-800 font-bold underline cursor-pointer flex items-center gap-0.5"
+                        className="text-[10px] text-emerald-600 hover:text-emerald-800 font-bold underline cursor-pointer flex items-center gap-0.5 uppercase"
                       >
-                        Aturan Potongan KA ℹ️
+                        ATURAN POTONGAN KA ℹ️
                       </button>
                     )}
                   </div>
@@ -483,10 +478,10 @@ export default function InboundModule({
                       <select
                         value={refaksiType}
                         onChange={(e) => setRefaksiType(e.target.value as 'LOKAL' | 'LUAR_DAERAH')}
-                        className="bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-neutral-700 px-2.5 rounded-xl font-bold text-xs h-[42px] outline-none transition cursor-pointer"
+                        className="bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-neutral-700 px-2.5 rounded-xl font-bold text-xs h-[42px] outline-none transition cursor-pointer uppercase"
                       >
-                        <option value="LOKAL">Lokal</option>
-                        <option value="LUAR_DAERAH">Luar</option>
+                        <option value="LOKAL">LOKAL</option>
+                        <option value="LUAR_DAERAH">LUAR</option>
                       </select>
                     )}
                   </div>
@@ -494,7 +489,7 @@ export default function InboundModule({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-2">
                   <div className="col-span-1 sm:col-span-2 lg:col-span-1 xl:col-span-2">
-                    <label className="block text-neutral-600 mb-1">Kegiatan Buruh Panggul</label>
+                    <label className="block text-neutral-600 mb-1 font-bold uppercase">PELAKSANA BURUH PANGGUL</label>
                     <select
                       value={selectedLaborId}
                       onChange={(e) => {
@@ -514,11 +509,11 @@ export default function InboundModule({
                           setLaborCost(0);
                         }
                       }}
-                      className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 transition cursor-pointer h-[38px] truncate"
+                      className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 transition cursor-pointer h-[38px] truncate font-bold uppercase"
                     >
-                      <option value="">-- Pilih Kegiatan Buruh --</option>
+                      <option value="">-- PILIH JENIS KEGIATAN BURUH --</option>
                       {laborRates.map(l => (
-                        <option key={l.id} value={l.id}>{l.activityName}</option>
+                        <option key={l.id} value={l.id}>{l.activityName.toUpperCase()}</option>
                       ))}
                     </select>
                   </div>
@@ -526,9 +521,9 @@ export default function InboundModule({
                     <SmartNumberInput
                       value={laborCost}
                       onChange={setLaborCost}
-                      label="Upah Buruh"
+                      label="UPAH BURUH"
                       mode="currency"
-                      unit="Rp"
+                      unit="RP"
                       presets={[100000, 200000]}
                     />
                   </div>
@@ -536,9 +531,9 @@ export default function InboundModule({
                     <SmartNumberInput
                       value={price}
                       onChange={setPrice}
-                      label="Harga Pembelian"
+                      label="HARGA PEMBELIAN"
                       mode="currency"
-                      unit="Rp/Kg"
+                      unit="RP/KG"
                       presets={[4500, 5000, 5200, 5500, 6000]}
                     />
                   </div>
@@ -549,15 +544,15 @@ export default function InboundModule({
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold px-3 py-2 rounded-lg transition"
+                  className="bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold px-3 py-2 rounded-lg transition uppercase"
                 >
-                  Reset
+                  RESET
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg cursor-pointer transition"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg cursor-pointer transition uppercase"
                 >
-                  {editingId ? 'Simpan' : 'Simpan Transaksi Masuk'}
+                  {editingId ? 'SIMPAN PERUBAHAN' : 'SIMPAN TRANSAKSI MASUK'}
                 </button>
               </div>
             </div>

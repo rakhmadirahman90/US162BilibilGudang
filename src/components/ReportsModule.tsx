@@ -221,9 +221,9 @@ export default function ReportsModule({
   // Export 1. Tickets
   const handleExportTicketsExcel = () => {
     const headers = [
-      'No. Tiket', 'Timbangan I', 'Timbangan II', 'No. Polisi', 'Komoditas', 
-      'Mitra / Agen', 'Berat Gross (Kg)', 'Berat Tare (Kg)', 'Pot. Karung (%)', 
-      'Refaksi KA (%)', 'Berat Netto (Kg)', 'Status', 'Catatan'
+      'NO. TIKET', 'TIMBANGAN I', 'TIMBANGAN II', 'NO. POLISI', 'KOMODITAS', 
+      'MITRA / AGEN', 'BERAT GROSS (KG)', 'BERAT TARE (KG)', 'POT. KARUNG (%)', 
+      'REFAKSI KA (%)', 'BERAT NETTO (KG)', 'STATUS', 'CATATAN'
     ];
     const rows = filteredTickets.map(t => [
       t.ticketNo,
@@ -245,7 +245,7 @@ export default function ReportsModule({
 
   const handlePrintTicketsPDF = () => {
     const headers = [
-      'No. Tiket', 'Waktu Timbang', 'No. Polisi', 'Komoditas', 'Agen / Mitra', 'Gross (Kg)', 'Netto (Kg)'
+      'NO. TIKET', 'WAKTU TIMBANG', 'NO. POLISI', 'KOMODITAS', 'AGEN / MITRA', 'GROSS (KG)', 'NETTO (KG)'
     ];
     const rows = filteredTickets.map(t => [
       t.ticketNo,
@@ -259,19 +259,19 @@ export default function ReportsModule({
     const totalGross = filteredTickets.reduce((sum, t) => sum + t.timbang1Weight, 0);
     const totalNet = filteredTickets.reduce((sum, t) => sum + t.netWeight, 0);
     const summaries = [
-      { label: 'Jumlah Antrian', value: `${filteredTickets.length} Truk` },
-      { label: 'Total Tonase Gross', value: `${totalGross.toLocaleString('id-ID')} Kg` },
-      { label: 'Total Tonase Netto', value: `${totalNet.toLocaleString('id-ID')} Kg` }
+      { label: 'JUMLAH ANTRIAN', value: `${filteredTickets.length} TRUK` },
+      { label: 'TOTAL TONASE GROSS', value: `${totalGross.toLocaleString('id-ID')} KG` },
+      { label: 'TOTAL TONASE NETTO', value: `${totalNet.toLocaleString('id-ID')} KG` }
     ];
-    printPDFReport('Laporan Rekapitulasi Jembatan Timbang', headers, rows, summaries);
+    printPDFReport('LAPORAN REKAPITULASI JEMBATAN TIMBANGAN', headers, rows, summaries);
   };
 
   // Export 2. Inbound Records
   const handleExportInboundExcel = () => {
     const headers = [
-      'Tanggal', 'No. Tiket Ref', 'No. Polisi', 'Supplier', 'Komoditas', 
-      'Tonase Gross (Kg)', 'Tonase Tare (Kg)', 'Kadar Air (%)', 'Refaksi KA (%)', 
-      'Pot. Karung (%)', 'Tonase Netto (Kg)', 'Sektor Gudang', 'Upah Buruh (Rp)'
+      'TANGGAL', 'NO. TIKET REF', 'NO. POLISI', 'SUPPLIER', 'KOMODITAS', 
+      'TONASE GROSS (KG)', 'TONASE TARE (KG)', 'KADAR AIR (%)', 'REFAKSI KA (%)', 
+      'POT. KARUNG (%)', 'TONASE NETTO (KG)', 'SEKTOR GUDANG', 'UPAH BURUH (RP)'
     ];
     const rows = filteredInbound.map(r => [
       r.date,
@@ -293,7 +293,7 @@ export default function ReportsModule({
 
   const handlePrintInboundPDF = () => {
     const headers = [
-      'Tanggal', 'No. Tiket', 'No. Polisi', 'Nama Supplier', 'Komoditas', 'Sektor Gudang', 'Netto (Kg)'
+      'TANGGAL', 'NO. TIKET', 'NO. POLISI', 'NAMA SUPPLIER', 'KOMODITAS', 'SEKTOR GUDANG', 'NETTO (KG)'
     ];
     const rows = filteredInbound.map(r => [
       r.date,
@@ -307,18 +307,18 @@ export default function ReportsModule({
     const totalInboundNet = filteredInbound.reduce((sum, r) => sum + r.netWeight, 0);
     const totalLabor = filteredInbound.reduce((sum, r) => sum + r.laborCost, 0);
     const summaries = [
-      { label: 'Total Penerimaan', value: `${filteredInbound.length} Transaksi` },
-      { label: 'Total Tonase Bersih', value: `${totalInboundNet.toLocaleString('id-ID')} Kg` },
-      { label: 'Total Ongkos Buruh', value: `Rp ${totalLabor.toLocaleString('id-ID')}` }
+      { label: 'TOTAL PENERIMAAN', value: `${filteredInbound.length} TRANSAKSI` },
+      { label: 'TOTAL TONASE BERSIH', value: `${totalInboundNet.toLocaleString('id-ID')} KG` },
+      { label: 'TOTAL ONGKOS BURUH', value: `RP ${totalLabor.toLocaleString('id-ID')}` }
     ];
-    printPDFReport('Laporan Mutasi Penerimaan Barang Masuk', headers, rows, summaries);
+    printPDFReport('LAPORAN MUTASI PENERIMAAN BARANG MASUK', headers, rows, summaries);
   };
 
   // Export 3. Outbound Records
   const handleExportOutboundExcel = () => {
     const headers = [
-      'Tanggal', 'No. Invoice', 'No. Polisi', 'Pembeli (Buyer)', 'Komoditas', 
-      'Total Tonase Netto (Kg)', 'Buruh Muat (Rp)', 'Tujuan Kota', 'Status'
+      'TANGGAL', 'NO. INVOICE', 'NO. POLISI', 'PEMBELI (BUYER)', 'KOMODITAS', 
+      'TOTAL TONASE NETTO (KG)', 'BURUH MUAT (RP)', 'TUJUAN KOTA', 'STATUS'
     ];
     const rows = filteredOutbound.map(r => [
       r.date,
@@ -336,7 +336,7 @@ export default function ReportsModule({
 
   const handlePrintOutboundPDF = () => {
     const headers = [
-      'Tanggal', 'No. Invoice', 'Pembeli (Buyer)', 'Komoditas', 'Tujuan Kota', 'Status', 'Tonase (Kg)'
+      'TANGGAL', 'NO. INVOICE', 'PEMBELI (BUYER)', 'KOMODITAS', 'TUJUAN KOTA', 'STATUS', 'TONASE (KG)'
     ];
     const rows = filteredOutbound.map(r => [
       r.date,
@@ -350,18 +350,18 @@ export default function ReportsModule({
     const totalOutboundWeight = filteredOutbound.reduce((sum, r) => sum + r.totalWeight, 0);
     const totalOutboundLabor = filteredOutbound.reduce((sum, r) => sum + r.loadingLaborCost, 0);
     const summaries = [
-      { label: 'Total Pengiriman', value: `${filteredOutbound.length} SJ` },
-      { label: 'Total Tonase Terkirim', value: `${totalOutboundWeight.toLocaleString('id-ID')} Kg` },
-      { label: 'Total Biaya Pemuatan', value: `Rp ${totalOutboundLabor.toLocaleString('id-ID')}` }
+      { label: 'TOTAL PENGIRIMAN', value: `${filteredOutbound.length} SJ` },
+      { label: 'TOTAL TONASE TERKIRIM', value: `${totalOutboundWeight.toLocaleString('id-ID')} KG` },
+      { label: 'TOTAL BIAYA PEMUATAN', value: `RP ${totalOutboundLabor.toLocaleString('id-ID')}` }
     ];
-    printPDFReport('Laporan Mutasi Pengiriman Barang Keluar', headers, rows, summaries);
+    printPDFReport('LAPORAN MUTASI PENGIRIMAN BARANG KELUAR', headers, rows, summaries);
   };
 
   // Export 4. Services Ledger
   const handleExportServicesExcel = () => {
     const headers = [
-      'Tanggal', 'Nama Pelanggan', 'Jenis Layanan', 'Keterangan Barang', 
-      'Tonase Diproses (Kg)', 'Tarif/Kg', 'Total Jasa (Rp)', 'Status Bayar', 'Operator'
+      'TANGGAL', 'NAMA PELANGGAN', 'JENIS LAYANAN', 'KETERANGAN BARANG', 
+      'TONASE DIPROSES (KG)', 'TARIF/KG', 'TOTAL JASA (RP)', 'STATUS BAYAR', 'OPERATOR'
     ];
     const rows = filteredServices.map(s => [
       s.date,
@@ -379,7 +379,7 @@ export default function ReportsModule({
 
   const handlePrintServicesPDF = () => {
     const headers = [
-      'Tanggal', 'Nama Pelanggan', 'Jenis Jasa', 'Tonase', 'Tarif', 'Total Biaya', 'Pembayaran'
+      'TANGGAL', 'NAMA PELANGGAN', 'JENIS JASA', 'TONASE', 'TARIF', 'TOTAL BIAYA', 'PEMBAYARAN'
     ];
     const rows = filteredServices.map(s => [
       s.date,
@@ -393,18 +393,18 @@ export default function ReportsModule({
     const totalProcessingWeight = filteredServices.reduce((sum, s) => sum + s.weight, 0);
     const totalServiceIncome = filteredServices.reduce((sum, s) => sum + s.totalFee, 0);
     const summaries = [
-      { label: 'Total Order Layanan', value: `${filteredServices.length} Pesanan` },
-      { label: 'Total Berat Diproses', value: `${totalProcessingWeight.toLocaleString('id-ID')} Kg` },
-      { label: 'Total Pendapatan Jasa', value: `Rp ${totalServiceIncome.toLocaleString('id-ID')}` }
+      { label: 'TOTAL ORDER LAYANAN', value: `${filteredServices.length} PESANAN` },
+      { label: 'TOTAL BERAT DIPROSES', value: `${totalProcessingWeight.toLocaleString('id-ID')} KG` },
+      { label: 'TOTAL PENDAPATAN JASA', value: `RP ${totalServiceIncome.toLocaleString('id-ID')}` }
     ];
-    printPDFReport('Laporan Layanan Jasa Poles & Kipas', headers, rows, summaries);
+    printPDFReport('LAPORAN LAYANAN JASA POLES & KIPAS', headers, rows, summaries);
   };
 
   // Export 5. General Ledger (Finance Mutasi)
   const handleExportFinancesExcel = () => {
     const headers = [
-      'Tanggal Catat', 'Kategori', 'Keterangan Transaksi', 'Jenis Aliran', 
-      'Jumlah Nomina (Rp)', 'Rekening / Kas', 'Mitra Pihak Kedua'
+      'TANGGAL CATAT', 'KATEGORI', 'KETERANGAN TRANSAKSI', 'JENIS ALIRAN', 
+      'JUMLAH NOMINA (RP)', 'REKENING / KAS', 'MITRA PIHAK KEDUA'
     ];
     const rows = filteredFinances.map(f => [
       f.date,
@@ -420,7 +420,7 @@ export default function ReportsModule({
 
   const handlePrintFinancesPDF = () => {
     const headers = [
-      'Tanggal', 'Kategori', 'Keterangan Mutasi', 'Kas / Akun', 'Masuk (Debit)', 'Keluar (Kredit)'
+      'TANGGAL', 'KATEGORI', 'KETERANGAN MUTASI', 'KAS / AKUN', 'MASUK (DEBIT)', 'KELUAR (KREDIT)'
     ];
     const rows = filteredFinances.map(f => [
       f.date,
@@ -433,19 +433,19 @@ export default function ReportsModule({
     const totalDebit = filteredFinances.filter(f => f.type === 'DEBIT').reduce((sum, f) => sum + f.amount, 0);
     const totalKredit = filteredFinances.filter(f => f.type === 'KREDIT').reduce((sum, f) => sum + f.amount, 0);
     const summaries = [
-      { label: 'Banyak Aliran Kas', value: `${filteredFinances.length} Mutasi` },
-      { label: 'Total Pemasukan (Debit)', value: `Rp ${totalDebit.toLocaleString('id-ID')}` },
-      { label: 'Total Pengeluaran (Kredit)', value: `Rp ${totalKredit.toLocaleString('id-ID')}` },
-      { label: 'Selisih Laba Bersih', value: `Rp ${(totalDebit - totalKredit).toLocaleString('id-ID')}` }
+      { label: 'BANYAK ALIRAN KAS', value: `${filteredFinances.length} MUTASI` },
+      { label: 'TOTAL PEMASUKAN (DEBIT)', value: `RP ${totalDebit.toLocaleString('id-ID')}` },
+      { label: 'TOTAL PENGELUARAN (KREDIT)', value: `RP ${totalKredit.toLocaleString('id-ID')}` },
+      { label: 'SELISIH LABA BERSIH', value: `RP ${(totalDebit - totalKredit).toLocaleString('id-ID')}` }
     ];
-    printPDFReport('Laporan Buku Keuangan dan Aliran Kas', headers, rows, summaries);
+    printPDFReport('LAPORAN BUKU KEUANGAN DAN ALIRAN KAS', headers, rows, summaries);
   };
 
   // Export 6. Rice Stock (Mutasi Stok Beras & Gilingan)
   const handleExportRiceStockExcel = () => {
     const headers = [
-      'Tanggal', 'No. Polisi', 'Keterangan', 'Nama Komoditas', 'Harga Beli (Rp/Kg)', 
-      'Karung (Colly)', 'Masuk (Kg)', 'Keluar (Kg)'
+      'TANGGAL', 'NO. POLISI', 'KETERANGAN', 'NAMA KOMODITAS', 'HARGA BELI (RP/KG)', 
+      'KARUNG (COLLY)', 'MASUK (KG)', 'KELUAR (KG)'
     ];
     const rows = filteredRiceStock.map(r => [
       r.date,
@@ -462,7 +462,7 @@ export default function ReportsModule({
 
   const handlePrintRiceStockPDF = () => {
     const headers = [
-      'Tanggal', 'No. Polisi', 'Keterangan', 'Komoditas', 'Masuk (Kg)', 'Keluar (Kg)'
+      'TANGGAL', 'NO. POLISI', 'KETERANGAN', 'KOMODITAS', 'MASUK (KG)', 'KELUAR (KG)'
     ];
     const rows = filteredRiceStock.map(r => [
       r.date,
@@ -476,19 +476,19 @@ export default function ReportsModule({
     const totalOut = filteredRiceStock.reduce((sum, r) => sum + r.outWeight, 0);
     const netBalance = totalIn - totalOut;
     const summaries = [
-      { label: 'Banyak Catatan Mutasi', value: `${filteredRiceStock.length} Baris` },
-      { label: 'Total Volume Masuk', value: `${totalIn.toLocaleString('id-ID')} Kg` },
-      { label: 'Total Volume Keluar', value: `${totalOut.toLocaleString('id-ID')} Kg` },
-      { label: 'Saldo Stok Bersih', value: `${netBalance.toLocaleString('id-ID')} Kg` }
+      { label: 'BANYAK CATATAN MUTASI', value: `${filteredRiceStock.length} BARIS` },
+      { label: 'TOTAL VOLUME MASUK', value: `${totalIn.toLocaleString('id-ID')} KG` },
+      { label: 'TOTAL VOLUME KELUAR', value: `${totalOut.toLocaleString('id-ID')} KG` },
+      { label: 'SALDO STOK BERSIH', value: `${netBalance.toLocaleString('id-ID')} KG` }
     ];
-    printPDFReport('Laporan Mutasi Buku Stok Gudang', headers, rows, summaries);
+    printPDFReport('LAPORAN MUTASI BUKU STOK GUDANG', headers, rows, summaries);
   };
 
   // Export 7. Debts (Utang Supplier)
   const handleExportDebtsExcel = () => {
     const headers = [
-      'Tanggal', 'Nama Supplier', 'Deskripsi/Keterangan', 'Total Utang (Rp)', 
-      'Sudah Dibayar (Rp)', 'Sisa Utang (Rp)', 'Status'
+      'TANGGAL', 'NAMA SUPPLIER', 'DESKRIPSI/KETERANGAN', 'TOTAL UTANG (RP)', 
+      'SUDAH DIBAYAR (RP)', 'SISA UTANG (RP)', 'STATUS'
     ];
     const rows = filteredDebts.map(d => [
       d.date,
@@ -504,7 +504,7 @@ export default function ReportsModule({
 
   const handlePrintDebtsPDF = () => {
     const headers = [
-      'Tanggal', 'Nama Pemasok', 'Keterangan Utang', 'Total Utang', 'Paid / Dibayar', 'Sisa Saldo'
+      'TANGGAL', 'NAMA PEMASOK', 'KETERANGAN UTANG', 'TOTAL UTANG', 'PAID / DIBAYAR', 'SISA SALDO'
     ];
     const rows = filteredDebts.map(d => [
       d.date,
@@ -518,12 +518,12 @@ export default function ReportsModule({
     const totalP = filteredDebts.reduce((sum, d) => sum + d.paidAmount, 0);
     const totalR = filteredDebts.reduce((sum, d) => sum + d.remainingBalance, 0);
     const summaries = [
-      { label: 'Banyak Faktur Utang', value: `${filteredDebts.length} Invoice` },
-      { label: 'Total Pembelian Utang', value: `Rp ${totalD.toLocaleString('id-ID')}` },
-      { label: 'Total Angsuran Terbayar', value: `Rp ${totalP.toLocaleString('id-ID')}` },
-      { label: 'Sisa Saldo Jatuh Tempo', value: `Rp ${totalR.toLocaleString('id-ID')}` }
+      { label: 'BANYAK FAKTUR UTANG', value: `${filteredDebts.length} INVOICE` },
+      { label: 'TOTAL PEMBELIAN UTANG', value: `RP ${totalD.toLocaleString('id-ID')}` },
+      { label: 'TOTAL ANGSURAN TERBAYAR', value: `RP ${totalP.toLocaleString('id-ID')}` },
+      { label: 'SISA SALDO JATUH TEMPO', value: `RP ${totalR.toLocaleString('id-ID')}` }
     ];
-    printPDFReport('Laporan Catatan Buku Utang Supplier', headers, rows, summaries);
+    printPDFReport('LAPORAN CATATAN BUKU UTANG SUPPLIER', headers, rows, summaries);
   };
 
   // --- EXECUTIVE EXECUTIVE CALCULATIONS FOR RINGKASAN VIEW ---

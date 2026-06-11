@@ -11,7 +11,7 @@ export default function DashboardProductShowcase({ products }: Props) {
     <div className="mt-8">
       <h3 className="text-xl font-bold text-neutral-900 mb-5 px-1 flex items-center gap-2">
         <TrendingUp className="w-5 h-5 text-emerald-600" />
-        Produk Unggulan Kami
+        PRODUK UNGGULAN KAMI
       </h3>
       <div className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide">
         {products.map(p => (
@@ -31,12 +31,12 @@ export default function DashboardProductShowcase({ products }: Props) {
             </div>
             <div className="flex justify-between items-end">
               <div>
-                <p className="text-neutral-500 text-[10px] uppercase font-bold tracking-wider mb-0.5">Harga</p>
-                <p className="text-emerald-700 font-bold text-sm">Rp {p.pricePerKg.toLocaleString('id-ID')}/Kg</p>
+                <p className="text-neutral-500 text-[10px] uppercase font-black tracking-wider mb-0.5">HARGA PER KG</p>
+                <p className="text-emerald-700 font-bold text-sm">RP {p.pricePerKg.toLocaleString('id-ID')}</p>
               </div>
               <div className="text-right">
-                <p className="text-neutral-500 text-[10px] uppercase font-bold tracking-wider mb-0.5">Stok</p>
-                <p className="text-neutral-800 font-bold text-sm">{p.stockAvailable.toLocaleString('id-ID')} Kg</p>
+                <p className="text-neutral-500 text-[10px] uppercase font-black tracking-wider mb-0.5">LOGISTIK FISIK</p>
+                <p className="text-neutral-800 font-bold text-sm">{p.stockAvailable.toLocaleString('id-ID')} KG</p>
               </div>
             </div>
           </div>

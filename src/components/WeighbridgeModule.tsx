@@ -400,19 +400,19 @@ export default function WeighbridgeModule({
           {/* Preset Buttons */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mt-3">
             <button onClick={() => applySimulatorPreset(3560)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate">
-              3,560 kg (Beras)
+              3,560 KG (BERAS)
             </button>
             <button onClick={() => applySimulatorPreset(14650)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate">
-              14,650 kg (Truk)
+              14,650 KG (TRUK BRUTO)
             </button>
             <button onClick={() => applySimulatorPreset(4250)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate">
-              4,250 kg (Empty)
+              4,250 KG (KOSONG/TARA)
             </button>
             <button onClick={() => applySimulatorPreset(12450)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate">
-              12,450 kg (Gross)
+              12,450 KG (GROSS)
             </button>
             <button onClick={() => applySimulatorPreset(3900)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate">
-              3,900 kg (Empty)
+              3,900 KG (KOSONG/TARA)
             </button>
             <button onClick={resetZero} className="bg-neutral-950 hover:bg-neutral-900 text-red-500 font-bold border border-red-950 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate leading-none">
               {t.zeroScale}
@@ -749,13 +749,13 @@ export default function WeighbridgeModule({
             <div className="border-t-2 border-[#2d4d8c] pt-2 mt-4 flex flex-col gap-4">
               <div className="flex flex-wrap gap-4 items-end">
                 <div className="flex flex-col gap-1 flex-1 min-w-[180px]">
-                  <label className="text-[9px] text-[#a0c5fc] font-bold uppercase tracking-widest">Nama Petugas / Staff 162</label>
+                  <label className="text-[9px] text-[#a0c5fc] font-bold uppercase tracking-widest">NAMA PETUGAS OPR / STAFF 162</label>
                   <input 
                     type="text" 
                     value={staffName}
                     onChange={(e) => setStaffName(e.target.value)}
-                    className="bg-[#122345] border border-[#2d4d8c] text-emerald-400 font-bold px-3 py-1 text-xs rounded outline-none focus:border-emerald-500"
-                    placeholder="Nama Staff..."
+                    className="bg-[#122345] border border-[#2d4d8c] text-emerald-400 font-bold px-3 py-1 text-xs rounded outline-none focus:border-emerald-500 uppercase"
+                    placeholder="NAMA STAFF/OPERATOR..."
                     list="master-staff"
                   />
                   <datalist id="master-staff">
@@ -794,13 +794,13 @@ export default function WeighbridgeModule({
               </div>
 
               <div className="flex flex-wrap gap-2 md:gap-x-4 text-[10px] text-cyan-200 justify-center border-t border-[#2d4d8c]/40 pt-2">
-                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F2-Timbang1</span>
-                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F3-Timbang2</span>
-                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F4-Koreksi</span>
-                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F5-Hapus</span>
-                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F6-Cari</span>
-                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F7-List</span>
-                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c] text-yellow-300 font-bold cursor-pointer" onClick={() => selectedTicket && setPrintTicket(selectedTicket)}>F8-Cetak Slip</span>
+                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F2-TIMBANG I</span>
+                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F3-TIMBANG II</span>
+                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F4-KOREKSI</span>
+                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F5-HAPUS</span>
+                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F6-CARI</span>
+                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c]">F7-LIST</span>
+                <span className="bg-[#102345] px-1.5 py-0.5 rounded border border-[#2d4d8c] text-yellow-300 font-bold cursor-pointer" onClick={() => selectedTicket && setPrintTicket(selectedTicket)}>F8-PRINT SLIP</span>
               </div>
             </div>
 
