@@ -594,6 +594,7 @@ export default function App() {
     id?: string;
     username: string;
     role: 'admin' | 'operator' | 'karyawan' | 'pimpinan';
+    allowedTabs?: string[];
   }
 
   const [sessionUser, setSessionUser] = useState<SessionUser | null>(() => {
@@ -607,6 +608,32 @@ export default function App() {
     }
     return null;
   });
+
+  // Automatically update the logged-in session user if their allowed tabs, roles, or status are changed in master database
+  React.useEffect(() => {
+    if (sessionUser) {
+      const myUser = users.find(u => u.id === sessionUser.id);
+      if (myUser) {
+        const hasTabsChanged = JSON.stringify(myUser.allowedTabs || []) !== JSON.stringify(sessionUser.allowedTabs || []);
+        const hasRoleChanged = myUser.role !== sessionUser.role;
+        const hasIsActiveChanged = !myUser.isActive;
+        
+        if (hasIsActiveChanged) {
+          handleSessionLogout();
+          showToast("Sesi akun Anda telah dinonaktifkan oleh administrator.", "warning");
+        } else if (hasTabsChanged || hasRoleChanged) {
+          const updated: SessionUser = {
+            ...sessionUser,
+            role: myUser.role,
+            allowedTabs: myUser.allowedTabs
+          };
+          localStorage.setItem('bilibili_session_user', JSON.stringify(updated));
+          setSessionUser(updated);
+          showToast("Akses menu navigasi Anda telah diperbarui oleh administrator.", "info");
+        }
+      }
+    }
+  }, [users, sessionUser]);
 
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -637,13 +664,14 @@ export default function App() {
           return;
         }
 
-        const sessionUser: SessionUser = { 
+        const sessUser: SessionUser = { 
           id: matchedUser.id,
           username: matchedUser.username, 
-          role: matchedUser.role 
+          role: matchedUser.role,
+          allowedTabs: matchedUser.allowedTabs
         };
-        localStorage.setItem('bilibili_session_user', JSON.stringify(sessionUser));
-        setSessionUser(sessionUser);
+        localStorage.setItem('bilibili_session_user', JSON.stringify(sessUser));
+        setSessionUser(sessUser);
         
         // Update last login
         setUsers(prev => prev.map(u => u.id === matchedUser.id ? { ...u, lastLogin: new Date().toISOString() } : u));
@@ -1293,22 +1321,28 @@ export default function App() {
   // RENDER NAVIGATION TABS HELPER
   const renderNavTabs = (isSidebar = false) => {
     const tabs = [
-      { id: 'DASHBOARD', name: '01. RINGKASAN DASHBOARD', icon: <LayoutDashboard className="w-4 h-4" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
-      { id: 'TIMBANG', name: '02. JEMBATAN TIMBANGAN', icon: <Scale className="w-4 h-4 text-blue-500" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
-      { id: 'MASUK', name: '03. PENERIMAAN BARANG MASUK', icon: <ArrowDownCircle className="w-4 h-4 text-emerald-600" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
-      { id: 'KELUAR', name: '04. PENGIRIMAN BARANG KELUAR', icon: <ArrowUpCircle className="w-4 h-4 text-blue-600" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
-      { id: 'SERVICES', name: '05. JASA POLES & KIPAS', icon: <Wind className="w-4 h-4 text-sky-500" />, roles: ['admin', 'operator', 'pimpinan'] },
-      { id: 'REFAKSI', name: '06. POTONGAN REFAKSI', icon: <Percent className="w-4 h-4 text-amber-500" />, roles: ['admin', 'operator', 'pimpinan'] },
-      { id: 'DRYER', name: '07. DRYER JAGUNG', icon: <Wind className="w-4 h-4 text-orange-500" />, roles: ['admin', 'operator', 'pimpinan'] },
-      { id: 'STOK_BERAS', name: '08. BUKU STOK LOGISTIK', icon: <Package className="w-4 h-4 text-emerald-600" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
-      { id: 'LAPORAN', name: '09. ANALISA & LAPORAN', icon: <FileSpreadsheet className="w-4 h-4 text-purple-500" />, roles: ['admin', 'pimpinan'] },
-      { id: 'FINANCE', name: '10. MANAJEMEN KEUANGAN', icon: <DollarSign className="w-4 h-4 text-emerald-500" />, roles: ['admin', 'pimpinan'] },
-      { id: 'PRODUK', name: '11. KATALOG PRODUK', icon: <Package className="w-4 h-4 text-amber-600" />, roles: ['admin', 'operator', 'karyawan'] },
-      { id: 'DATABASE', name: '12. DATABASE MASTER', icon: <Database className="w-4 h-4 text-neutral-500" />, roles: ['admin'] },
+      { id: 'DASHBOARD', name: 'RINGKASAN DASHBOARD', icon: <LayoutDashboard className="w-4 h-4" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
+      { id: 'TIMBANG', name: 'JEMBATAN TIMBANGAN', icon: <Scale className="w-4 h-4 text-blue-500" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
+      { id: 'MASUK', name: 'PENERIMAAN BARANG MASUK', icon: <ArrowDownCircle className="w-4 h-4 text-emerald-600" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
+      { id: 'KELUAR', name: 'PENGIRIMAN BARANG KELUAR', icon: <ArrowUpCircle className="w-4 h-4 text-blue-600" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
+      { id: 'SERVICES', name: 'JASA POLES & KIPAS', icon: <Wind className="w-4 h-4 text-sky-500" />, roles: ['admin', 'operator', 'pimpinan'] },
+      { id: 'REFAKSI', name: 'POTONGAN REFAKSI', icon: <Percent className="w-4 h-4 text-amber-500" />, roles: ['admin', 'operator', 'pimpinan'] },
+      { id: 'DRYER', name: 'DRYER JAGUNG', icon: <Wind className="w-4 h-4 text-orange-500" />, roles: ['admin', 'operator', 'pimpinan'] },
+      { id: 'STOK_BERAS', name: 'BUKU STOK LOGISTIK', icon: <Package className="w-4 h-4 text-emerald-600" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
+      { id: 'LAPORAN', name: 'ANALISA & LAPORAN', icon: <FileSpreadsheet className="w-4 h-4 text-purple-500" />, roles: ['admin', 'pimpinan'] },
+      { id: 'FINANCE', name: 'MANAJEMEN KEUANGAN', icon: <DollarSign className="w-4 h-4 text-emerald-500" />, roles: ['admin', 'pimpinan'] },
+      { id: 'PRODUK', name: 'KATALOG PRODUK', icon: <Package className="w-4 h-4 text-amber-600" />, roles: ['admin', 'operator', 'karyawan'] },
+      { id: 'DATABASE', name: 'DATABASE MASTER', icon: <Database className="w-4 h-4 text-neutral-500" />, roles: ['admin'] },
     ];
 
     return tabs.map((t) => {
-      if (!t.roles.includes(sessionUser?.role || '')) return null;
+      // If user has custom allowed navigation tabs configured, check against them. Otherwise, default to role permissions.
+      const hasCustomPermissions = sessionUser?.allowedTabs && sessionUser.allowedTabs.length > 0;
+      if (hasCustomPermissions) {
+        if (!sessionUser.allowedTabs?.includes(t.id)) return null;
+      } else {
+        if (!t.roles.includes(sessionUser?.role || '')) return null;
+      }
 
       return (
         <button

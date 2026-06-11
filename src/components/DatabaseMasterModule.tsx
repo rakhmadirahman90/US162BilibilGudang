@@ -222,6 +222,7 @@ export default function DatabaseMasterModule({
   const [userFullName, setUserFullName] = useState('');
   const [userRole, setUserRole] = useState<'admin' | 'operator' | 'karyawan' | 'pimpinan'>('operator');
   const [userIsActive, setUserIsActive] = useState(true);
+  const [userAllowedTabs, setUserAllowedTabs] = useState<string[]>([]);
 
   // Handler helpers
   const triggerToast = (msg: string, type: 'success' | 'error' | 'info' | 'warning' = 'success') => {
@@ -298,6 +299,7 @@ export default function DatabaseMasterModule({
     setUserFullName('');
     setUserRole('operator');
     setUserIsActive(true);
+    setUserAllowedTabs([]);
   };
 
   // --- PRODUCT ACTIONS ---
@@ -1104,7 +1106,8 @@ export default function DatabaseMasterModule({
           password: userPassword.trim() || u.password,
           fullName: userFullName.trim(),
           role: userRole,
-          isActive: userIsActive
+          isActive: userIsActive,
+          allowedTabs: userAllowedTabs
         } : u));
         logAction('SYSTEM', 'EDIT_USER', `Update user ${userUsername}`);
         triggerToast(`User ${userUsername} diperbarui!`, 'success');
@@ -1119,7 +1122,8 @@ export default function DatabaseMasterModule({
           password: userPassword.trim() || '12345',
           fullName: userFullName.trim(),
           role: userRole,
-          isActive: userIsActive
+          isActive: userIsActive,
+          allowedTabs: userAllowedTabs
         };
         setUsers(prev => [...prev, newUser]);
         logAction('SYSTEM', 'ADD_USER', `Daftarkan user baru ${userUsername}`);
@@ -1144,6 +1148,7 @@ export default function DatabaseMasterModule({
     setUserFullName(u.fullName);
     setUserRole(u.role);
     setUserIsActive(u.isActive);
+    setUserAllowedTabs(u.allowedTabs || []);
     setIsAddingNew(false);
   };
 
@@ -2152,6 +2157,95 @@ export default function DatabaseMasterModule({
                       <option value="admin">ADMINISTRATOR (Superadmin)</option>
                     </select>
                   </div>
+
+                  {/* CUSTOMIZE NAVBAR ACCESSIBILITY CHECKLIST */}
+                  <div className="md:col-span-4 bg-neutral-50 p-4 rounded-xl border border-neutral-200 mt-2 font-sans text-left">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 border-b border-neutral-200 pb-2.5 gap-2">
+                      <div>
+                        <h5 className="text-[11px] font-black text-neutral-700 uppercase tracking-wider flex items-center gap-1.5">
+                          <Settings className="w-3.5 h-3.5 text-emerald-600 animate-spin-slow" /> Otorisasi Akses Menu Navigasi (Navbar)
+                        </h5>
+                        <p className="text-[9px] text-neutral-500 font-bold mt-0.5 uppercase tracking-wide">
+                          Pilih menu yang diizinkan untuk diakses user ini. Jika kosong, sistem otomatis menggunakan default level Role.
+                        </p>
+                      </div>
+                      <div className="flex gap-1.5 flex-wrap">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const defaultRoles: Record<string, string[]> = {
+                              admin: ['DASHBOARD', 'TIMBANG', 'MASUK', 'KELUAR', 'SERVICES', 'REFAKSI', 'DRYER', 'STOK_BERAS', 'LAPORAN', 'FINANCE', 'PRODUK', 'DATABASE'],
+                              pimpinan: ['DASHBOARD', 'TIMBANG', 'MASUK', 'KELUAR', 'SERVICES', 'REFAKSI', 'DRYER', 'STOK_BERAS', 'LAPORAN', 'FINANCE'],
+                              operator: ['DASHBOARD', 'TIMBANG', 'MASUK', 'KELUAR', 'SERVICES', 'REFAKSI', 'DRYER', 'STOK_BERAS', 'PRODUK'],
+                              karyawan: ['DASHBOARD', 'TIMBANG', 'MASUK', 'KELUAR', 'STOK_BERAS', 'PRODUK']
+                            };
+                            setUserAllowedTabs(defaultRoles[userRole] || []);
+                            triggerToast('Berhasil mengatur menu default sesuai level Role!', 'success');
+                          }}
+                          className="bg-white hover:bg-neutral-100 border border-neutral-300 text-[10px] font-black text-emerald-700 px-2.5 py-1 rounded-[4px] transition-all hover:border-emerald-300 cursor-pointer uppercase flex items-center gap-1 active:scale-95"
+                        >
+                          Atur Default Role
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUserAllowedTabs([]);
+                            triggerToast('Akses dikembalikan menggunakan default level role.', 'info');
+                          }}
+                          className="bg-white hover:bg-neutral-100 border border-neutral-300 text-[10px] font-black text-neutral-600 px-2.5 py-1 rounded-[4px] transition-all cursor-pointer uppercase active:scale-95"
+                        >
+                          Gunakan Default
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                      {[
+                        { id: 'DASHBOARD', num: '01', name: 'Ringkasan Dashboard', rules: 'Semua Role', color: 'border-l-blue-500' },
+                        { id: 'TIMBANG', num: '02', name: 'Jembatan Timbangan', rules: 'Semua Role', color: 'border-l-indigo-500' },
+                        { id: 'MASUK', num: '03', name: 'Barang Masuk', rules: 'Semua Role', color: 'border-l-emerald-500' },
+                        { id: 'KELUAR', num: '04', name: 'Barang Keluar', rules: 'Semua Role', color: 'border-l-cyan-500' },
+                        { id: 'SERVICES', num: '05', name: 'Jasa Poles & Kipas', rules: 'Admin/Op/Pimpinan', color: 'border-l-sky-500' },
+                        { id: 'REFAKSI', num: '06', name: 'Potongan Refaksi', rules: 'Admin/Op/Pimpinan', color: 'border-l-amber-500' },
+                        { id: 'DRYER', num: '07', name: 'Dryer Jagung', rules: 'Admin/Op/Pimpinan', color: 'border-l-orange-500' },
+                        { id: 'STOK_BERAS', num: '08', name: 'Stok Logistik', rules: 'Semua Role', color: 'border-l-teal-500' },
+                        { id: 'LAPORAN', num: '09', name: 'Analisa & Laporan', rules: 'Admin/Pimpinan', color: 'border-l-purple-500' },
+                        { id: 'FINANCE', num: '10', name: 'Manajemen Keuangan', rules: 'Admin/Pimpinan', color: 'border-l-rose-500' },
+                        { id: 'PRODUK', num: '11', name: 'Katalog Produk', rules: 'Admin/Op/Karyawan', color: 'border-l-yellow-600' },
+                        { id: 'DATABASE', num: '12', name: 'Database Master', rules: 'Utamanya Admin', color: 'border-l-neutral-600' }
+                      ].map((tab) => {
+                        const isChecked = userAllowedTabs.includes(tab.id);
+                        return (
+                          <label
+                            key={tab.id}
+                            className={`flex items-start gap-2 p-2 rounded-lg border cursor-pointer select-none transition-all ${
+                              isChecked 
+                                ? 'bg-emerald-50 border-emerald-400 text-emerald-950 font-bold shadow-sm' 
+                                : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-100'
+                            } border-l-4 ${tab.color}`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setUserAllowedTabs(prev => [...prev, tab.id]);
+                                } else {
+                                  setUserAllowedTabs(prev => prev.filter(t => t !== tab.id));
+                                }
+                              }}
+                              className="w-3.5 h-3.5 accent-emerald-600 mt-1 rounded cursor-pointer"
+                            />
+                            <div className="leading-tight">
+                              <span className="text-[8px] font-black tracking-widest text-neutral-400 block uppercase leading-none mb-0.5">{tab.num}</span>
+                              <span className="text-[10px] block leading-snug">{tab.name}</span>
+                              <span className="text-[7px] text-neutral-400 uppercase font-bold tracking-tight block leading-none mt-1 bg-neutral-100 px-1 py-0.5 rounded w-max">{tab.rules}</span>
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between bg-emerald-50/50 p-3 rounded-lg border border-emerald-100">
                   <div className="flex items-center gap-2">
@@ -2862,13 +2956,26 @@ export default function DatabaseMasterModule({
                       </td>
                       <td className="p-3 font-mono font-bold text-emerald-700">{u.username}</td>
                       <td className="p-3">
-                        <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black tracking-wide uppercase ${
-                          u.role === 'admin' ? 'bg-amber-100 text-amber-700' :
-                          u.role === 'pimpinan' ? 'bg-emerald-100 text-emerald-700' :
-                          u.role === 'operator' ? 'bg-indigo-100 text-indigo-700' : 'bg-neutral-100 text-neutral-700'
-                        }`}>
-                          {u.role}
-                        </span>
+                        <div className="flex flex-col gap-1 items-start">
+                          <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black tracking-wide uppercase ${
+                            u.role === 'admin' ? 'bg-amber-100 text-amber-700' :
+                            u.role === 'pimpinan' ? 'bg-emerald-100 text-emerald-700' :
+                            u.role === 'operator' ? 'bg-indigo-100 text-indigo-700' : 'bg-neutral-100 text-neutral-700'
+                          }`}>
+                            {u.role}
+                          </span>
+                          <span className="text-[9px] font-bold text-neutral-500 uppercase tracking-tighter leading-none mt-1">
+                            {u.allowedTabs && u.allowedTabs.length > 0 ? (
+                              <span className="text-emerald-700 font-extrabold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
+                                Menu Kustom ({u.allowedTabs.length})
+                              </span>
+                            ) : (
+                              <span className="text-neutral-400">
+                                Sesuai Akses Default
+                              </span>
+                            )}
+                          </span>
+                        </div>
                       </td>
                       <td className="p-3 text-center">
                         <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${u.isActive ? 'bg-emerald-500 text-white' : 'bg-neutral-300 text-white'}`}>

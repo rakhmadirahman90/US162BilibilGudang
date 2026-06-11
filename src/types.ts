@@ -213,6 +213,7 @@ export interface UserAccount {
   fullName: string;
   isActive: boolean;
   lastLogin?: string;
+  allowedTabs?: string[];
 }
 
 export interface ActivityLog {
