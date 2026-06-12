@@ -91,9 +91,15 @@ export default function SmartNumberInput({
     
     // Normalize format based on user's intention
     if (mode === 'percent') {
-      // In percent mode, permit fractional comma entry
+      // In percent mode, permit fractional comma/dot entry
       setInputValue(cleaned);
-      const parsedFloat = parseFloat(cleaned.replace(/\./g, '').replace(',', '.'));
+      let normalized = cleaned;
+      if (normalized.includes(',') && normalized.includes('.')) {
+        normalized = normalized.replace(/\./g, '').replace(',', '.');
+      } else if (normalized.includes(',')) {
+        normalized = normalized.replace(',', '.');
+      }
+      const parsedFloat = parseFloat(normalized);
       if (!isNaN(parsedFloat)) {
         const clamped = Math.min(max, Math.max(min, parsedFloat));
         onChange(clamped);

@@ -63,7 +63,7 @@ Refaksi (KA): ${record.refaksiKaPercent}%
 Netto (Bersih): *${rawNetFormatted}-${record.refaksiKaPercent}% Kg* = *${netWeightFormatted}kg*
 
 Harga per Kg: ${formatCurrency(record.price)}
-${netWeightFormatted} × ${record.price.toLocaleString('id-ID')} = ${buyGross.toLocaleString('id-ID')}
+${netWeightFormatted}× ${record.price.toLocaleString('id-ID')} = ${buyGross.toLocaleString('id-ID')}
 Pot buruh ${rawNetFormatted} x ${laborRateVal} = ${record.laborCost.toLocaleString('id-ID')}
 Total yg harus dibayar
 ${buyGross.toLocaleString('id-ID')} - ${record.laborCost.toLocaleString('id-ID')}

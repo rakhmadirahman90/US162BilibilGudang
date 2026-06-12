@@ -782,7 +782,22 @@ export default function InboundModule({
                             setMoistureContent(r.moistureContent);
                             setWarehouseSection(r.warehouseSection);
                             setLaborCost(r.laborCost);
+                            setPrice(r.price || 0);
                             setDriverName(r.driverName || "");
+
+                            // Find matching labor rate to set selectedLaborId
+                            const cargoWeight = r.grossWeight - r.tareWeight;
+                            const matchedLabor = (laborRates || []).find(l => {
+                              if (l.rateType === 'FLAT' && l.rate === r.laborCost) return true;
+                              if (l.rateType === 'PER_KG' && Math.round(cargoWeight * l.rate) === r.laborCost) return true;
+                              return false;
+                            });
+                            setSelectedLaborId(matchedLabor ? matchedLabor.id : "");
+
+                            // Guess refaksiType based on rule
+                            const checkRuleLuar = getRefaksiByRule(r.moistureContent, cornMoistureRules || [], 'LUAR_DAERAH');
+                            setRefaksiType(checkRuleLuar.refaksiPercent === r.refaksiKaPercent ? 'LUAR_DAERAH' : 'LOKAL');
+
                             setShowAddForm(true);
                           }}
                           className="text-neutral-400 hover:text-blue-600 transition p-1 cursor-pointer"

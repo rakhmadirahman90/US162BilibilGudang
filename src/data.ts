@@ -114,6 +114,24 @@ export const mockCornMoistureRefaksi = (moisture: number): { refaksiPercent: num
 
 export const initialWeighbridgeTickets: WeighbridgeTicket[] = [
   {
+    id: "ticket-tono-1",
+    ticketNo: "021234",
+    policeNo: "DP 8242 RZ",
+    goodsName: "JAGUNG",
+    agency: "TONO",
+    timbang1Time: "10-06-2026 15:07:00",
+    timbang1Weight: 2860,
+    timbang2Time: "10-06-2026 15:07:00",
+    timbang2Weight: 1050,
+    grossWeight: 2860,
+    tareWeight: 1050,
+    bagDeductionPercent: 0.00,
+    refaksiPercent: 16.50,
+    netWeight: 1511,
+    status: "COMPLETED",
+    notes: "Jagung Pipil KA 28.4%"
+  },
+  {
     id: "ticket-1",
     ticketNo: "021232",
     policeNo: "DP 8600 AL",
@@ -188,6 +206,25 @@ export const initialWeighbridgeTickets: WeighbridgeTicket[] = [
 ];
 
 export const initialInboundRecords: InboundRecord[] = [
+  {
+    id: "inbound-tono-1",
+    date: "2026-06-10",
+    ticketNo: "021234",
+    vehicleNo: "DP 8242 RZ",
+    supplier: "TONO",
+    commodity: "JAGUNG",
+    grossWeight: 2860,
+    tareWeight: 1050,
+    refaksiKaPercent: 16.5,
+    bagDeductionPercent: 0.00,
+    netWeight: 1511,
+    moistureContent: 28.4,
+    warehouseSection: "Gudang Jagung Tengah",
+    laborCost: 54300,
+    driverName: "TONO",
+    price: 5500,
+    totalPrice: 8256200
+  },
   {
     id: "inbound-1",
     date: "2026-06-08",

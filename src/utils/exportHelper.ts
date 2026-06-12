@@ -259,13 +259,13 @@ const COMMON_SLIP_STYLE = `
   html, body {
     width: 100% !important;
     height: 100% !important;
-    font-family: 'Courier', 'Courier New', 'Consolas', 'Monaco', monospace !important;
-    font-size: 6.5pt;
+    font-family: 'Courier New', 'Courier', monospace !important;
+    font-size: 8.5pt !important;
     color: #000000 !important;
     background-color: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
-    line-height: 1.5 !important;
+    line-height: 1.4 !important;
     text-align: left;
     /* CRITICAL FOR DOT MATRIX: Turn off pixel smoothing entirely to keep output pure solid black/sharp pixels */
     -webkit-font-smoothing: none !important;
@@ -274,11 +274,15 @@ const COMMON_SLIP_STYLE = `
     text-rendering: optimizeSpeed !important;
   }
 
+  img, .header-logo {
+    display: none !important;
+  }
+
   .slip {
-    width: 100mm !important;
+    width: 80mm !important;
     min-height: 135mm !important;
     margin: 0 !important;
-    padding: 0mm 1mm !important;
+    padding: 2mm 3mm !important;
     background: #ffffff !important;
     display: block !important;
     box-sizing: border-box !important;
@@ -307,29 +311,35 @@ const COMMON_SLIP_STYLE = `
       position: absolute !important;
       top: 0mm !important;
       left: 0mm !important;
-      font-family: 'Courier', 'Courier New', 'Consolas', 'Monaco', monospace !important;
+      font-family: 'Courier New', 'Courier', monospace !important;
+      font-size: 8.5pt !important;
       -webkit-font-smoothing: none !important;
       -moz-osx-font-smoothing: none !important;
       font-smooth: never !important;
       text-rendering: optimizeSpeed !important;
       overflow: hidden !important;
-      line-height: 1.5 !important;
+      line-height: 1.4 !important;
+    }
+
+    img, .header-logo {
+      display: none !important;
     }
 
     .slip {
       margin: 0 !important;
-      padding: 0 !important;
+      padding: 2mm 3mm !important;
       border: none !important;
       box-shadow: none !important;
       page-break-inside: avoid;
       position: absolute !important;
-      top: 6mm !important;
-      left: 10mm !important;
-      width: 80mm !important;
+      top: 2mm !important;
+      left: 5mm !important;
+      width: 76mm !important;
     }
 
     * {
       color: #000000 !important;
+      font-weight: bold !important;
       background: transparent !important;
       border-color: #000000 !important;
       box-shadow: none !important;
@@ -339,70 +349,63 @@ const COMMON_SLIP_STYLE = `
       text-rendering: optimizeSpeed !important;
     }
 
-    /* Force all colors to pure deep black to prevent dot matrix dither patterns (unclear dots) */
-    .netto-val, .value, .value-heavy, .header-title, .header-subtitle, .netto-label, .ticket-type, .signatures div, .footer-msg {
+    /* Keep headings and highlights clear but avoid super thick overstriking black smudges */
+    .netto-val, .value, .value-heavy, .header-title, .netto-label, .ticket-type, .signatures div, .footer-msg {
       color: #000000 !important;
+      font-weight: 900 !important;
     }
   }
 
   /* HEADER */
   .header {
-    display: table;
+    display: block;
     width: 100%;
     margin-bottom: 2px;
     text-align: left;
   }
-  .header-logo {
-    display: table-cell;
-    width: 28px;
-    max-width: 28px;
-    height: 24px;
-    vertical-align: middle;
-    padding-right: 4px;
-    object-fit: contain;
-    filter: grayscale(100%) contrast(200%);
-    image-rendering: pixelated;
-  }
   .header-text {
-    display: table-cell;
-    vertical-align: middle;
+    display: block;
+    text-align: left;
   }
   .header-title {
-    font-size: 9.5pt;
-    font-weight: 950;
-    color: #000000;
+    font-size: 10.5pt !important;
+    font-weight: bold !important;
+    color: #000000 !important;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
-    line-height: 1.05;
+    letter-spacing: 0.2px;
+    line-height: 1.2;
+    margin-bottom: 1px;
   }
   .header-subtitle {
-    font-size: 7.5pt;
-    color: #000000;
-    line-height: 1.15;
-    margin-top: 1px;
+    font-size: 7.5pt !important;
+    color: #000000 !important;
+    line-height: 1.2;
+    font-weight: bold !important;
   }
 
-  /* DIVIDERS (Thicker to avoid blurry or faint horizontal lines on Epson ribbon) */
+  /* DIVIDERS (Simple solid borders render cleanest as pixel-perfect single/double lines on LX-310) */
   .divider-line {
-    border: none;
-    border-top: 1.5px solid #000000;
-    margin: 2px 0;
+    border: none !important;
+    border-top: 1.5px solid #000000 !important;
+    margin: 4px 0 !important;
+    height: 0 !important;
   }
   .divider-double {
-    border: none;
-    border-top: 3px double #000000;
-    margin: 2px 0;
+    border: none !important;
+    border-top: 3px double #000000 !important;
+    margin: 4px 0 !important;
+    height: 0 !important;
   }
 
   /* TICKET TYPE LABEL */
   .ticket-type {
-    font-size: 8.5pt;
-    font-weight: 900;
-    color: #000000;
+    font-size: 9pt !important;
+    font-weight: bold !important;
+    color: #000000 !important;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin: 2px 0;
-    line-height: 1.05;
+    letter-spacing: 0.2px;
+    margin: 3px 0;
+    line-height: 1.1;
     text-align: center;
   }
 
@@ -410,45 +413,45 @@ const COMMON_SLIP_STYLE = `
   .flex {
     display: block;
     width: 100%;
-    margin: 1px 0;
+    margin: 2px 0;
   }
   .flex span {
     display: inline-block;
-    font-size: 7.5pt;
-    color: #000000;
-    line-height: 1.2 !important;
+    font-size: 8.5pt !important;
+    color: #000000 !important;
+    line-height: 1.25 !important;
   }
   .flex span.label {
     width: 48%;
     text-align: left;
-    font-weight: bold;
+    font-weight: bold !important;
     padding-right: 2px;
   }
   .flex span.value {
     width: 52%;
     text-align: left;
-    font-weight: 900;
+    font-weight: bold !important;
   }
   .flex span.label-heavy {
     width: 48%;
-    font-weight: 950;
-    font-size: 8pt;
+    font-weight: bold !important;
+    font-size: 8.5pt !important;
   }
   .flex span.value-heavy {
     width: 52%;
-    font-weight: 950;
-    font-size: 8pt;
+    font-weight: bold !important;
+    font-size: 8.5pt !important;
     text-align: left;
   }
 
   /* WEIGHT TIMESTAMP */
   .weight-time {
-    font-size: 7.2pt;
-    color: #000000;
+    font-size: 7.5pt !important;
+    color: #000000 !important;
     text-align: left;
-    margin: 0;
+    margin: 1px 0 3px 0;
     font-style: italic;
-    line-height: 1.05;
+    line-height: 1.1;
     padding-left: 2px;
   }
 
@@ -457,33 +460,33 @@ const COMMON_SLIP_STYLE = `
     display: table;
     width: 100%;
     table-layout: fixed;
-    padding: 2px 0;
+    padding: 3px 0;
   }
   .netto-label {
     display: table-cell;
     width: 46%;
-    font-size: 8.5pt;
-    font-weight: 950;
+    font-size: 9pt !important;
+    font-weight: bold !important;
     vertical-align: middle;
   }
   .netto-val {
     display: table-cell;
     width: 54%;
-    font-size: 9.5pt;
-    font-weight: 950;
+    font-size: 10.5pt !important;
+    font-weight: bold !important;
     text-align: left;
     vertical-align: middle;
   }
 
   /* NOTES */
   .notes-box {
-    font-size: 7.2pt;
-    border: 1.5px solid #000000;
-    padding: 2px 4px;
-    margin: 2px 0;
-    line-height: 1.15;
+    font-size: 8pt !important;
+    border: 1px solid #000000 !important;
+    padding: 3px 5px;
+    margin: 3px 0;
+    line-height: 1.2;
     word-break: break-word;
-    font-weight: bold;
+    font-weight: bold !important;
   }
 
   /* SIGNATURES */
@@ -491,28 +494,28 @@ const COMMON_SLIP_STYLE = `
     display: table;
     width: 100%;
     table-layout: fixed;
-    margin-top: 4px;
+    margin-top: 8px;
   }
   .signatures > div {
     display: table-cell;
     width: 50%;
     text-align: left;
-    font-size: 7.5pt;
+    font-size: 8pt !important;
     padding: 0 4px;
     vertical-align: top;
-    line-height: 1.1;
-    font-weight: bold;
+    line-height: 1.2;
+    font-weight: bold !important;
   }
   .signature-space {
-    height: 14px;
+    height: 16px;
     display: block;
   }
   .signature-line {
-    border-top: 1.5px solid #000000;
+    border-top: 1px solid #000000 !important;
     margin: 2px 0 0 0;
     width: 90%;
-    font-weight: 900;
-    font-size: 7.5pt;
+    font-weight: bold !important;
+    font-size: 8pt !important;
     padding-top: 1px;
     text-align: left;
   }
@@ -520,12 +523,12 @@ const COMMON_SLIP_STYLE = `
   /* FOOTER */
   .footer-msg {
     text-align: center;
-    font-size: 7.2pt;
-    margin-top: 4px;
-    line-height: 1.15;
-    border-top: 1.5px dashed #000000;
-    padding-top: 2px;
-    font-weight: bold;
+    font-size: 7.5pt !important;
+    margin-top: 8px;
+    line-height: 1.2;
+    border-top: 1px dashed #000000 !important;
+    padding-top: 3px;
+    font-weight: bold !important;
   }
 `;
 // GANTI DENGAN JENDELA BARU AGAR PREVIEW MUNCUL & TIDAK DIBLOKIR BROWSER
