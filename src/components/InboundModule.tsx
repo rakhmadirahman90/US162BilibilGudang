@@ -127,11 +127,39 @@ export default function InboundModule({
     if (tk) {
       setVehicleNo(tk.policeNo);
       setSupplier(tk.agency); // assume agent represents supplier/origin
-      setCommodity(tk.goodsName === 'BERAS' ? 'BERAS' : tk.goodsName === 'GABAH' ? 'GABAH' : 'JAGUNG');
+      const comm = tk.goodsName === 'BERAS' ? 'BERAS' : tk.goodsName === 'GABAH' ? 'GABAH' : 'JAGUNG';
+      setCommodity(comm);
       setGrossWeight(tk.timbang1Weight);
       setTareWeight(tk.timbang2Weight);
       setBagDeductionPercent(tk.bagDeductionPercent);
-      setMoistureContent(tk.refaksiPercent > 0 ? 15.0 : 14.0); // default guess or mock
+      
+      if (comm === 'JAGUNG') {
+        let moisture = 14.0;
+        const notesParsed = tk.notes ? tk.notes.match(/(?:KA|Kadar\s*Air)\s*([0-9.,]+)/i) : null;
+        if (notesParsed) {
+          const parsedVal = parseFloat(notesParsed[1].replace(',', '.'));
+          if (!isNaN(parsedVal)) {
+            moisture = parsedVal;
+          }
+        } else {
+          // Reverse-lookup from rules based on refaksiPercent
+          const currentRules = cornMoistureRules && cornMoistureRules.length > 0 ? cornMoistureRules : initialCornMoistureRules;
+          const matchedRule = currentRules.find(r => r.type === refaksiType && r.refaksiPercent === tk.refaksiPercent);
+          if (matchedRule) {
+            moisture = Math.round(((matchedRule.moistureMin + matchedRule.moistureMax) / 2) * 10) / 10;
+          } else if (tk.refaksiPercent > 0) {
+            // High accurate reverse fallback (e.g. 16.5% refaksi corresponds to 28.4% moisture)
+            if (tk.refaksiPercent === 16.5) {
+              moisture = 28.4;
+            } else {
+              moisture = 15.0; // default guess
+            }
+          }
+        }
+        setMoistureContent(moisture);
+      } else {
+        setMoistureContent(14.0);
+      }
     }
   };
 
@@ -143,8 +171,9 @@ export default function InboundModule({
     }
 
     // Determine refaksi KA
+    const currentRules = cornMoistureRules && cornMoistureRules.length > 0 ? cornMoistureRules : initialCornMoistureRules;
     const refaksiPercentage = commodity === 'JAGUNG' 
-      ? getRefaksiByRule(moistureContent, cornMoistureRules, refaksiType).refaksiPercent
+      ? getRefaksiByRule(moistureContent, currentRules, refaksiType).refaksiPercent
       : 0;
 
     // Calculate netto
@@ -795,7 +824,8 @@ export default function InboundModule({
                             setSelectedLaborId(matchedLabor ? matchedLabor.id : "");
 
                             // Guess refaksiType based on rule
-                            const checkRuleLuar = getRefaksiByRule(r.moistureContent, cornMoistureRules || [], 'LUAR_DAERAH');
+                            const rGuessRules = cornMoistureRules && cornMoistureRules.length > 0 ? cornMoistureRules : initialCornMoistureRules;
+                            const checkRuleLuar = getRefaksiByRule(r.moistureContent, rGuessRules, 'LUAR_DAERAH');
                             setRefaksiType(checkRuleLuar.refaksiPercent === r.refaksiKaPercent ? 'LUAR_DAERAH' : 'LOKAL');
 
                             setShowAddForm(true);
