@@ -33,6 +33,10 @@ export interface InboundRecord {
   tareWeight: number;
   refaksiKaPercent: number; // Kadar Air Refaksi %
   bagDeductionPercent: number; // Potongan Karung %
+  deadKernelsPercent?: number; // Biji Mati %
+  moldPercent?: number; // Jamur %
+  smallKernelsPercent?: number; // Biji Kecil %
+  fineTrashPercent?: number; // Sampah Halus %
   netWeight: number;
   moistureContent: number; // KA % (Moisture content e.g. 14.5)
   warehouseSection: string; // Location in warehouse, e.g. 'Sektor Timur', 'Gudang Tengah'

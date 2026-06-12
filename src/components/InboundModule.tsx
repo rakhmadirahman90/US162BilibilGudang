@@ -97,6 +97,10 @@ export default function InboundModule({
   const [tareWeight, setTareWeight] = useState(4000);
   const [bagDeductionPercent, setBagDeductionPercent] = useState(1.00);
   const [moistureContent, setMoistureContent] = useState(14.0);
+  const [deadKernelsPercent, setDeadKernelsPercent] = useState(0.0);
+  const [moldPercent, setMoldPercent] = useState(0.0);
+  const [smallKernelsPercent, setSmallKernelsPercent] = useState(0.0);
+  const [fineTrashPercent, setFineTrashPercent] = useState(0.0);
   const [refaksiType, setRefaksiType] = useState<'LOKAL' | 'LUAR_DAERAH'>('LOKAL');
   const [warehouseSection, setWarehouseSection] = useState("Gudang Jagung Tengah");
   const [selectedLaborId, setSelectedLaborId] = useState("");
@@ -180,7 +184,14 @@ export default function InboundModule({
     const rawNet = grossWeight - tareWeight;
     const bagDeduction = rawNet * (bagDeductionPercent / 100);
     const refaksiDeduction = rawNet * (refaksiPercentage / 100);
-    const fNet = Math.round(rawNet - bagDeduction - refaksiDeduction);
+    const deadKernelsDeduction = commodity === 'JAGUNG' ? rawNet * (deadKernelsPercent / 100) : 0;
+    const moldDeduction = commodity === 'JAGUNG' ? rawNet * (moldPercent / 100) : 0;
+    const smallKernelsDeduction = commodity === 'JAGUNG' ? rawNet * (smallKernelsPercent / 100) : 0;
+    const fineTrashDeduction = commodity === 'JAGUNG' ? rawNet * (fineTrashPercent / 100) : 0;
+
+    const fNet = Math.max(0, Math.round(
+      rawNet - bagDeduction - refaksiDeduction - deadKernelsDeduction - moldDeduction - smallKernelsDeduction - fineTrashDeduction
+    ));
 
     const tkNo = tickets.find(t => t.id === selectedTicketId)?.ticketNo;
     const existing = records.find(r => r.id === editingId);
@@ -196,6 +207,10 @@ export default function InboundModule({
       tareWeight,
       refaksiKaPercent: refaksiPercentage,
       bagDeductionPercent,
+      deadKernelsPercent: commodity === 'JAGUNG' ? deadKernelsPercent : 0,
+      moldPercent: commodity === 'JAGUNG' ? moldPercent : 0,
+      smallKernelsPercent: commodity === 'JAGUNG' ? smallKernelsPercent : 0,
+      fineTrashPercent: commodity === 'JAGUNG' ? fineTrashPercent : 0,
       netWeight: fNet,
       moistureContent,
       warehouseSection,
@@ -238,6 +253,10 @@ export default function InboundModule({
     setTareWeight(4000);
     setBagDeductionPercent(1.00);
     setMoistureContent(14.0);
+    setDeadKernelsPercent(0.0);
+    setMoldPercent(0.0);
+    setSmallKernelsPercent(0.0);
+    setFineTrashPercent(0.0);
     setRefaksiType('LOKAL');
     setWarehouseSection("Gudang Jagung Tengah");
     setSelectedLaborId("");
@@ -260,7 +279,7 @@ export default function InboundModule({
     const headers = [
       'No. Tiket', 'Tanggal', 'No. Polisi', 'Sopir', 'Supplier', 
       'Komoditas', 'Gross (Kg)', 'Tare (Kg)', 'Netto (Kg)', 
-      'Kadar Air (%)', 'Refaksi (%)', 'Deduction Karung (%)', 'Sektor Gudang', 'Upah Buruh'
+      'Kadar Air (%)', 'Refaksi (%)', 'Biji Mati (%)', 'Jamur (%)', 'Biji Kecil (%)', 'Sampah Halus (%)', 'Deduction Karung (%)', 'Sektor Gudang', 'Upah Buruh'
     ];
     const rows = filteredRecords.map(r => [
       r.ticketNo || '',
@@ -274,6 +293,10 @@ export default function InboundModule({
       r.netWeight.toString(),
       r.moistureContent.toString(),
       r.refaksiKaPercent.toString(),
+      (r.deadKernelsPercent ?? 0).toString(),
+      (r.moldPercent ?? 0).toString(),
+      (r.smallKernelsPercent ?? 0).toString(),
+      (r.fineTrashPercent ?? 0).toString(),
       r.bagDeductionPercent.toString(),
       r.warehouseSection || '',
       r.laborCost.toString()
@@ -517,6 +540,50 @@ export default function InboundModule({
                   </div>
                 </div>
 
+                {commodity === 'JAGUNG' && (
+                  <div className="bg-amber-50/40 p-3 rounded-lg border border-amber-100/60 flex flex-col gap-2 animate-fade-in text-[10px]">
+                    <span className="font-bold text-[10px] text-amber-800 uppercase tracking-wide">POTONGAN KUALITAS LAINNYA</span>
+                    <div className="grid grid-cols-2 gap-2">
+                      <SmartNumberInput
+                        value={deadKernelsPercent}
+                        onChange={setDeadKernelsPercent}
+                        label="BIJI MATI"
+                        mode="percent"
+                        unit="%"
+                        presets={[0.0, 0.5, 1.0]}
+                        id="inbound-biji-mati"
+                      />
+                      <SmartNumberInput
+                        value={moldPercent}
+                        onChange={setMoldPercent}
+                        label="JAMUR"
+                        mode="percent"
+                        unit="%"
+                        presets={[0.0, 0.5, 1.0]}
+                        id="inbound-jamur"
+                      />
+                      <SmartNumberInput
+                        value={smallKernelsPercent}
+                        onChange={setSmallKernelsPercent}
+                        label="BIJI KECIL"
+                        mode="percent"
+                        unit="%"
+                        presets={[0.0, 0.5, 1.0]}
+                        id="inbound-biji-kecil"
+                      />
+                      <SmartNumberInput
+                        value={fineTrashPercent}
+                        onChange={setFineTrashPercent}
+                        label="SAMPAH HALUS"
+                        mode="percent"
+                        unit="%"
+                        presets={[0.0, 0.5, 1.0]}
+                        id="inbound-sampah-halus"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-2">
                   <div className="col-span-1 sm:col-span-2 lg:col-span-1 xl:col-span-2">
                     <label className="block text-neutral-600 mb-1 font-bold uppercase">PELAKSANA BURUH PANGGUL</label>
@@ -598,7 +665,11 @@ export default function InboundModule({
                   : { refaksiPercent: 0, description: 'Bukan Jagung' };
                 const refPercentage = activeRefaksiRule.refaksiPercent;
                 const refDed = rNet * (refPercentage / 100);
-                const computedNet = Math.max(0, Math.round(rNet - bagDed - refDed));
+                const deadDed = commodity === 'JAGUNG' ? rNet * (deadKernelsPercent / 100) : 0;
+                const moldDed = commodity === 'JAGUNG' ? rNet * (moldPercent / 100) : 0;
+                const smallDed = commodity === 'JAGUNG' ? rNet * (smallKernelsPercent / 100) : 0;
+                const trashDed = commodity === 'JAGUNG' ? rNet * (fineTrashPercent / 100) : 0;
+                const computedNet = Math.max(0, Math.round(rNet - bagDed - refDed - deadDed - moldDed - smallDed - trashDed));
                 const purchaseTotal = computedNet * price;
                 const subTotalFinal = purchaseTotal - laborCost;
 
@@ -624,6 +695,16 @@ export default function InboundModule({
                             <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Potongan KA ({refPercentage}%)</span>
                             <span className="font-mono text-red-400">-{Math.round(refDed).toLocaleString('id-ID')} Kg</span>
                           </div>
+
+                          {(deadKernelsPercent > 0 || moldPercent > 0 || smallKernelsPercent > 0 || fineTrashPercent > 0) && (
+                            <>
+                              <div className="w-px h-6 bg-neutral-800 hidden lg:block" />
+                              <div className="flex flex-col">
+                                <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Pot. Kualitas ({(deadKernelsPercent + moldPercent + smallKernelsPercent + fineTrashPercent).toFixed(1)}%)</span>
+                                <span className="font-mono text-red-400">-{Math.round(deadDed + moldDed + smallDed + trashDed).toLocaleString('id-ID')} Kg</span>
+                              </div>
+                            </>
+                          )}
                         </>
                       )}
 
@@ -759,6 +840,11 @@ export default function InboundModule({
                             Aman (0%)
                           </span>
                         )}
+                        {r.commodity === 'JAGUNG' && ((r.deadKernelsPercent ?? 0) > 0 || (r.moldPercent ?? 0) > 0 || (r.smallKernelsPercent ?? 0) > 0 || (r.fineTrashPercent ?? 0) > 0) && (
+                          <span className="text-[8px] text-amber-700 font-bold mt-1 bg-amber-50 border border-amber-100 px-1.5 py-0.5 rounded" title={`Mati: ${r.deadKernelsPercent || 0}%, Jamur: ${r.moldPercent || 0}%, Kecil: ${r.smallKernelsPercent || 0}%, Sampah: ${r.fineTrashPercent || 0}%`}>
+                            Kualitas: -{((r.deadKernelsPercent ?? 0) + (r.moldPercent ?? 0) + (r.smallKernelsPercent ?? 0) + (r.fineTrashPercent ?? 0)).toFixed(1)}%
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="text-right py-2.5 px-3 font-extrabold font-mono text-emerald-600">
@@ -809,6 +895,10 @@ export default function InboundModule({
                             setTareWeight(r.tareWeight);
                             setBagDeductionPercent(r.bagDeductionPercent);
                             setMoistureContent(r.moistureContent);
+                            setDeadKernelsPercent(r.deadKernelsPercent || 0.0);
+                            setMoldPercent(r.moldPercent || 0.0);
+                            setSmallKernelsPercent(r.smallKernelsPercent || 0.0);
+                            setFineTrashPercent(r.fineTrashPercent || 0.0);
                             setWarehouseSection(r.warehouseSection);
                             setLaborCost(r.laborCost);
                             setPrice(r.price || 0);
@@ -950,6 +1040,34 @@ export default function InboundModule({
                     <span>Refaksi KA ({previewRecord.refaksiKaPercent}%) :</span>
                     <span>-{( ( (previewRecord.grossWeight ?? 0) - (previewRecord.tareWeight ?? 0) ) * (previewRecord.refaksiKaPercent/100) ).toFixed(0)} Kg</span>
                   </div>
+                  {previewRecord.commodity === 'JAGUNG' && (
+                    <>
+                      {(previewRecord.deadKernelsPercent ?? 0) > 0 && (
+                        <div className="flex justify-between text-neutral-500">
+                          <span>Pot. Biji Mati ({previewRecord.deadKernelsPercent}%) :</span>
+                          <span>-{Math.round(((previewRecord.grossWeight ?? 0) - (previewRecord.tareWeight ?? 0)) * (previewRecord.deadKernelsPercent!/100)).toLocaleString('id-ID')} Kg</span>
+                        </div>
+                      )}
+                      {(previewRecord.moldPercent ?? 0) > 0 && (
+                        <div className="flex justify-between text-neutral-500">
+                          <span>Pot. Jamur ({previewRecord.moldPercent}%) :</span>
+                          <span>-{Math.round(((previewRecord.grossWeight ?? 0) - (previewRecord.tareWeight ?? 0)) * (previewRecord.moldPercent!/100)).toLocaleString('id-ID')} Kg</span>
+                        </div>
+                      )}
+                      {(previewRecord.smallKernelsPercent ?? 0) > 0 && (
+                        <div className="flex justify-between text-neutral-500">
+                          <span>Pot. Biji Kecil ({previewRecord.smallKernelsPercent}%) :</span>
+                          <span>-{Math.round(((previewRecord.grossWeight ?? 0) - (previewRecord.tareWeight ?? 0)) * (previewRecord.smallKernelsPercent!/100)).toLocaleString('id-ID')} Kg</span>
+                        </div>
+                      )}
+                      {(previewRecord.fineTrashPercent ?? 0) > 0 && (
+                        <div className="flex justify-between text-neutral-500">
+                          <span>Pot. Sampah Halus ({previewRecord.fineTrashPercent}%) :</span>
+                          <span>-{Math.round(((previewRecord.grossWeight ?? 0) - (previewRecord.tareWeight ?? 0)) * (previewRecord.fineTrashPercent!/100)).toLocaleString('id-ID')} Kg</span>
+                        </div>
+                      )}
+                    </>
+                  )}
                   <div className="flex justify-between font-black text-emerald-700 text-[11px] border-t border-neutral-200 mt-1 pt-1">
                     <span>BERAT NETTO :</span>
                     <span>{(previewRecord.netWeight ?? 0).toLocaleString('id-ID')} KG</span>

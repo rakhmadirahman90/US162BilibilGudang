@@ -556,6 +556,10 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
   const net = record.netWeight ?? 0;
   const potKrg = Math.round(rawNet * ((record.bagDeductionPercent ?? 0) / 100));
   const potRefaksi = Math.round(rawNet * ((record.refaksiKaPercent ?? 0) / 100));
+  const potBijiMati = Math.round(rawNet * ((record.deadKernelsPercent ?? 0) / 100));
+  const potJamur = Math.round(rawNet * ((record.moldPercent ?? 0) / 100));
+  const potBijiKecil = Math.round(rawNet * ((record.smallKernelsPercent ?? 0) / 100));
+  const potSampahHalus = Math.round(rawNet * ((record.fineTrashPercent ?? 0) / 100));
 
   const htmlContent = `<!DOCTYPE html>
 <html>
@@ -591,6 +595,12 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
     <div class="flex"><span class="label">TARA</span><span class="value">: ${tara.toLocaleString('id-ID')} Kg</span></div>
     <div class="flex"><span class="label">Pot. Karung</span><span class="value">: -${potKrg.toLocaleString('id-ID')} Kg (${record.bagDeductionPercent ?? 0}%)</span></div>
     <div class="flex"><span class="label">Refaksi KA</span><span class="value">: -${potRefaksi.toLocaleString('id-ID')} Kg (${record.refaksiKaPercent ?? 0}%)</span></div>
+    ${record.commodity === 'JAGUNG' ? `
+    <div class="flex"><span class="label">Pot. Biji Mati</span><span class="value">: -${potBijiMati.toLocaleString('id-ID')} Kg (${record.deadKernelsPercent ?? 0}%)</span></div>
+    <div class="flex"><span class="label">Pot. Jamur</span><span class="value">: -${potJamur.toLocaleString('id-ID')} Kg (${record.moldPercent ?? 0}%)</span></div>
+    <div class="flex"><span class="label">Pot. Biji Kecil</span><span class="value">: -${potBijiKecil.toLocaleString('id-ID')} Kg (${record.smallKernelsPercent ?? 0}%)</span></div>
+    <div class="flex"><span class="label">Pot. Sampah Halus</span><span class="value">: -${potSampahHalus.toLocaleString('id-ID')} Kg (${record.fineTrashPercent ?? 0}%)</span></div>
+    ` : ''}
 
     <div class="divider-line" style="margin: 2px 0 !important;"></div>
     <div class="flex" style="font-weight: 950; font-size: 8.5pt;"><span class="label">NETTO</span><span class="value" style="font-weight: 950;">: ${net.toLocaleString('id-ID')} KG</span></div>

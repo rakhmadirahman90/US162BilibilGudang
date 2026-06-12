@@ -44,6 +44,11 @@ export function buildInboundWAText(record: InboundRecord, tk: WeighbridgeTicket 
   if (isJagung) {
     const buyGross = record.netWeight * record.price;
     const laborRateVal = record.laborCost > 0 && rawNet > 0 ? Math.round(record.laborCost / rawNet) : 30;
+    const totQualDeduct = (record.refaksiKaPercent ?? 0) + 
+      (record.deadKernelsPercent ?? 0) + 
+      (record.moldPercent ?? 0) + 
+      (record.smallKernelsPercent ?? 0) + 
+      (record.fineTrashPercent ?? 0);
     
     return `*BUKTI MASUK BARANG*
 _Gudang Bilibili_
@@ -59,8 +64,12 @@ Tara (Kosong): ${record.tareWeight.toLocaleString('id-ID')} Kg
 Pot. Karung: ${record.bagDeductionPercent}%
 Kadar Air (KA): ${record.moistureContent}%
 Refaksi (KA): ${record.refaksiKaPercent}%
+Biji Mati: ${(record.deadKernelsPercent ?? 0)}%
+Jamur: ${(record.moldPercent ?? 0)}%
+Biji Kecil: ${(record.smallKernelsPercent ?? 0)}%
+Sampah Halus: ${(record.fineTrashPercent ?? 0)}%
  
-Netto (Bersih): *${rawNetFormatted}-${record.refaksiKaPercent}% Kg* = *${netWeightFormatted}kg*
+Netto (Bersih): *${rawNetFormatted}-${totQualDeduct}% Kg* = *${netWeightFormatted}kg*
 
 Harga per Kg: ${formatCurrency(record.price)}
 ${netWeightFormatted}× ${record.price.toLocaleString('id-ID')} = ${buyGross.toLocaleString('id-ID')}
