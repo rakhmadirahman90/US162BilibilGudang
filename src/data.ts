@@ -25,6 +25,7 @@ import {
   CornMoistureRule,
   ProductRecord
 } from './types';
+import { DryerRecord } from './components/DryerModule';
 
 export const initialLaborRates: LaborRateRecord[] = [
   { id: 'lr-1', activityName: 'BONGKARAN', rateType: 'PER_KG', rate: 30 },
@@ -517,5 +518,11 @@ export const initialFinanceCategories: FinanceCategoryRecord[] = [
 export const initialProducts: ProductRecord[] = [
   { id: '1', name: 'Beras Premium US Bilibili', category: 'BERAS', description: 'Beras pilihan dengan tingkat kepulenan tinggi, diproses secara modern.', characteristics: ['Pulen', 'Warna Putih Alami', 'Tanpa Pemutih' , 'Higienis'], pricePerKg: 15500, stockAvailable: 5500, imageUrl: '' },
   { id: '2', name: 'Jagung Pipil Super', category: 'JAGUNG', description: 'Jagung kualitas ekspor dengan kadar air rendah dan kebersihan terjaga.', characteristics: ['Biji Penuh', 'Kadar Air 14%', 'Bersih dari Kotoran', 'Warna Kuning Cerah'], pricePerKg: 6800, stockAvailable: 15000, imageUrl: '' },
+];
+
+export const initialDryerRecords: DryerRecord[] = [
+  { id: 'dryer-1', date: '2026-06-09', batchNo: 'DRY-001', operator: 'Wahyu', customerName: 'Pak Tani A', wetWeight: 5000, dryWeight: 4200, moistureIn: 22, moistureOut: 14, dryingCostPerKg: 250, laborCost: 150000, totalCost: 1200000, status: 'SELESAI' },
+  { id: 'dryer-2', date: '2026-06-09', batchNo: 'DRY-002', operator: 'Dedi', customerName: 'Koperasi Tani', wetWeight: 3000, dryWeight: 2600, moistureIn: 20, moistureOut: 14.5, dryingCostPerKg: 250, laborCost: 100000, totalCost: 750000, status: 'SELESAI' },
+  { id: 'dryer-3', date: '2026-06-10', batchNo: 'DRY-003', operator: 'Wahyu', customerName: 'Pak Tani B', wetWeight: 6000, dryWeight: 5100, moistureIn: 24, moistureOut: 14, dryingCostPerKg: 250, laborCost: 200000, totalCost: 1475000, status: 'PROSES' }
 ];
 

@@ -104,7 +104,7 @@ export default function InboundModule({
   const [price, setPrice] = useState(0);
   const [driverName, setDriverName] = useState("");
 
-  // Automatically update laborCost when grossWeight or selectedLaborId changes
+  // Automatically update laborCost when grossWeight, tareWeight, or selectedLaborId changes
   React.useEffect(() => {
     if (selectedLaborId) {
       const labor = laborRates.find(l => l.id === selectedLaborId);
@@ -112,12 +112,13 @@ export default function InboundModule({
         if (labor.rateType === 'FLAT') {
           setLaborCost(labor.rate);
         } else {
-          // New formula: Berat bruto (grossWeight) * upah buruh (labor.rate)
-          setLaborCost(Math.round(grossWeight * labor.rate));
+          // Formula: Bruto kargo (grossWeight - tareWeight) * upah buruh (labor.rate)
+          const cargoWeight = Math.max(0, grossWeight - tareWeight);
+          setLaborCost(Math.round(cargoWeight * labor.rate));
         }
       }
     }
-  }, [selectedLaborId, grossWeight, laborRates]);
+  }, [selectedLaborId, grossWeight, tareWeight, laborRates]);
 
   // When a weighing ticket is chosen, automatically fill details!
   const handleTicketChange = (ticketId: string) => {
@@ -501,8 +502,9 @@ export default function InboundModule({
                             if (labor.rateType === 'FLAT') {
                               setLaborCost(labor.rate);
                             } else {
-                              // Formula requested: Berat Bruto (grossWeight) * Upah Buruh Rate
-                              setLaborCost(Math.round(grossWeight * labor.rate));
+                              // Formula requested: Bruto Kargo (grossWeight - tareWeight) * Upah Buruh Rate
+                              const cargoWeight = Math.max(0, grossWeight - tareWeight);
+                              setLaborCost(Math.round(cargoWeight * labor.rate));
                             }
                           }
                         } else {

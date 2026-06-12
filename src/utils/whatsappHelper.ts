@@ -37,6 +37,41 @@ Terima kasih.`;
 
 export function buildInboundWAText(record: InboundRecord, tk: WeighbridgeTicket | undefined): string {
   const isJagung = record.commodity === 'JAGUNG';
+  const rawNet = record.grossWeight - record.tareWeight;
+  const rawNetFormatted = rawNet.toLocaleString('id-ID');
+  const netWeightFormatted = record.netWeight.toLocaleString('id-ID');
+
+  if (isJagung) {
+    const buyGross = record.netWeight * record.price;
+    const laborRateVal = record.laborCost > 0 && rawNet > 0 ? Math.round(record.laborCost / rawNet) : 30;
+    
+    return `*BUKTI MASUK BARANG*
+_Gudang Bilibili_
+
+Tanggal: ${formatReceiptDate(record.date)}
+Relasi/Suplier: ${record.supplier}
+No. Polisi: ${record.vehicleNo}
+Komoditas: ${record.commodity}
+
+*Detail Timbangan:*
+Bruto (Kotor): ${record.grossWeight.toLocaleString('id-ID')} Kg
+Tara (Kosong): ${record.tareWeight.toLocaleString('id-ID')} Kg
+Pot. Karung: ${record.bagDeductionPercent}%
+Kadar Air (KA): ${record.moistureContent}%
+Refaksi (KA): ${record.refaksiKaPercent}%
+ 
+Netto (Bersih): *${rawNetFormatted}-${record.refaksiKaPercent}% Kg* = *${netWeightFormatted}kg*
+
+Harga per Kg: ${formatCurrency(record.price)}
+${netWeightFormatted} × ${record.price.toLocaleString('id-ID')} = ${buyGross.toLocaleString('id-ID')}
+Pot buruh ${rawNetFormatted} x ${laborRateVal} = ${record.laborCost.toLocaleString('id-ID')}
+Total yg harus dibayar
+${buyGross.toLocaleString('id-ID')} - ${record.laborCost.toLocaleString('id-ID')}
+Total Rp: *${formatCurrency(record.totalPrice)}*
+
+Terima kasih.`;
+  }
+
   return `*BUKTI MASUK BARANG*
 _Gudang Bilibili_
 
@@ -49,8 +84,7 @@ Komoditas: ${record.commodity}
 Bruto (Kotor): ${record.grossWeight.toLocaleString('id-ID')} Kg
 Tara (Kosong): ${record.tareWeight.toLocaleString('id-ID')} Kg
 Pot. Karung: ${record.bagDeductionPercent}%
-${isJagung ? `Kadar Air (KA): ${record.moistureContent}%
-Refaksi (KA): ${record.refaksiKaPercent}%` : `Pot. Kotoran: ${record.refaksiKaPercent}%`}
+Pot. Kotoran: ${record.refaksiKaPercent}%
  
 Netto (Bersih): *${record.netWeight.toLocaleString('id-ID')} Kg*
 

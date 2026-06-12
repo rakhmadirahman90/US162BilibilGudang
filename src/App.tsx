@@ -50,7 +50,8 @@ import {
   initialFinanceCategories,
   initialLaborRates,
   initialCornMoistureRules,
-  initialProducts
+  initialProducts,
+  initialDryerRecords
 } from './data';
 
 // Import our modular subcomponents
@@ -393,7 +394,7 @@ export default function App() {
 
   const [dryerRecords, setDryerRecords] = useState<DryerRecord[]>(() => {
     const saved = localStorage.getItem('bilibili_dryer_records');
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : initialDryerRecords;
   });
 
   const [users, setUsers] = useState<UserAccount[]>(() => {
@@ -483,7 +484,7 @@ export default function App() {
   useSyncCollection('laborRates', laborRates, setLaborRates, initialLaborRates);
   useSyncCollection('cornMoistureRules', cornMoistureRules, setCornMoistureRules, initialCornMoistureRules);
   useSyncCollection('products', products, setProducts, initialProducts);
-  useSyncCollection('dryerRecords', dryerRecords, setDryerRecords, []);
+  useSyncCollection('dryerRecords', dryerRecords, setDryerRecords, initialDryerRecords);
 
   // --- SYNCHRONIZED MASTER SETTERS WRAPPER ---
   const createSyncedSetter = <T extends { id: string }>(

@@ -594,11 +594,11 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
     <div class="divider-line" style="margin: 2px 0 !important;"></div>
 
     <div class="flex"><span class="label">HARGA BELI</span><span class="value">: Rp ${(record.price ?? 0).toLocaleString('id-ID')}/Kg</span></div>
-    <div class="flex"><span class="label">TOTAL BRUTO</span><span class="value">: Rp ${(net * (record.price ?? 0)).toLocaleString('id-ID')}</span></div>
+    <div class="flex"><span class="label">BAYAR KOTOR</span><span class="value">: Rp ${(net * (record.price ?? 0)).toLocaleString('id-ID')}</span></div>
     <div class="flex"><span class="label">BIAYA BURUH</span><span class="value">: -Rp ${(record.laborCost ?? 0).toLocaleString('id-ID')}</span></div>
 
     <div class="divider-line" style="margin: 2px 0 !important;"></div>
-    <div class="flex" style="font-weight: 950; font-size: 9pt;"><span class="label">TOTAL BAYAR</span><span class="value" style="font-weight: 950;">: Rp ${(record.totalPrice ?? 0).toLocaleString('id-ID')}</span></div>
+    <div class="flex" style="font-weight: 950; font-size: 9pt;"><span class="label">BAYAR KE PETANI</span><span class="value" style="font-weight: 950;">: Rp ${(record.totalPrice ?? 0).toLocaleString('id-ID')}</span></div>
     <div class="divider-line" style="margin: 2px 0 !important;"></div>
 
     <div class="signatures" style="margin-top: 6px; width: 100%; display: table; table-layout: fixed;">
