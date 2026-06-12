@@ -274,6 +274,69 @@
         "capacityKg": { "type": "number" }
       },
       "required": ["id", "name", "type"]
+    },
+    "LaborRateRecord": {
+      "title": "LaborRateRecord",
+      "description": "Standard rates for various labor activities",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "activityName": { "type": "string" },
+        "rateType": { "type": "string" },
+        "rate": { "type": "number" }
+      },
+      "required": ["id", "activityName", "rateType", "rate"]
+    },
+    "CornMoistureRule": {
+      "title": "CornMoistureRule",
+      "description": "Deduction standards for moisture content in corn",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "moistureMin": { "type": "number" },
+        "moistureMax": { "type": "number" },
+        "refaksiPercent": { "type": "number" },
+        "priceDiscountPerKg": { "type": "number" },
+        "type": { "type": "string" }
+      },
+      "required": ["id", "moistureMin", "moistureMax", "refaksiPercent", "priceDiscountPerKg", "type"]
+    },
+    "DryerRecord": {
+      "title": "DryerRecord",
+      "description": "Grain drying process and billing record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "batchNo": { "type": "string" },
+        "operator": { "type": "string" },
+        "customerName": { "type": "string" },
+        "wetWeight": { "type": "number" },
+        "dryWeight": { "type": "number" },
+        "moistureIn": { "type": "number" },
+        "moistureOut": { "type": "number" },
+        "dryingCostPerKg": { "type": "number" },
+        "laborCost": { "type": "number" },
+        "totalCost": { "type": "number" },
+        "status": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "date", "batchNo", "customerName", "wetWeight", "status"]
+    },
+    "LaborKasbonRecord": {
+      "title": "LaborKasbonRecord",
+      "description": "Salary advance loans and repayments tracker for laborers",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string" },
+        "employeeId": { "type": "string" },
+        "employeeName": { "type": "string" },
+        "type": { "type": "string" },
+        "amount": { "type": "number" },
+        "description": { "type": "string" }
+      },
+      "required": ["id", "date", "employeeId", "employeeName", "type", "amount"]
     }
   },
   "firestore": {
@@ -294,6 +357,10 @@
     "banks": { "schema": "BankRecord", "description": "Bank account catalogs" },
     "brokers": { "schema": "BrokerRecord", "description": "Master registered agents" },
     "products": { "schema": "Product", "description": "Product inventory and catalog" },
-    "locations": { "schema": "LocationRecord", "description": "Storage physical zones" }
+    "locations": { "schema": "LocationRecord", "description": "Storage physical zones" },
+    "laborRates": { "schema": "LaborRateRecord", "description": "Standard rates for various labor activities" },
+    "cornMoistureRules": { "schema": "CornMoistureRule", "description": "Deduction standards for moisture content in corn" },
+    "dryerRecords": { "schema": "DryerRecord", "description": "Grain drying process and billing record" },
+    "kasbons": { "schema": "LaborKasbonRecord", "description": "Salary advance loans and repayments tracker for laborers" }
   }
 }

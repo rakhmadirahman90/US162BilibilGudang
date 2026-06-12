@@ -2346,76 +2346,145 @@ export default function DatabaseMasterModule({
 
         {/* GRID: VEHICLES */}
         {activeSubTab === 'VEHICLES' && (
-          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
-              <thead>
-                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
-                  <th className="p-3 font-semibold">No. Polisi</th>
-                  <th className="p-3 font-semibold">Nama Sopir</th>
-                  <th className="p-3 font-semibold">Tipe Truk</th>
-                  <th className="p-3 font-semibold text-right">Berat Tara Kosong (Kg)</th>
-                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-150">
-                {vehicles
-                  .filter(v => v.policeNo.toLowerCase().includes(searchQuery.toLowerCase()) || v.driverName.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map(v => (
-                    <tr key={v.id} className="hover:bg-slate-50 font-sans text-neutral-800">
-                      <td className="p-3 font-extrabold text-indigo-900 tracking-tight font-mono">{v.policeNo}</td>
-                      <td className="p-3 font-bold">{v.driverName}</td>
-                      <td className="p-3 text-neutral-600">{v.vehicleType}</td>
-                      <td className="p-3 font-mono font-bold text-right text-emerald-700">{(v.tareWeight || 0).toLocaleString('id-ID')} Kg</td>
-                      <td className="p-3 text-center flex items-center justify-center gap-1.5">
+          <div className="rounded-xl border border-neutral-200 overflow-hidden">
+            <div className="overflow-x-auto custom-scrollbar hidden md:block">
+              <table className="w-full text-left border-collapse text-xs min-w-[650px]">
+                <thead>
+                  <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                    <th className="p-3 font-semibold">No. Polisi</th>
+                    <th className="p-3 font-semibold">Nama Sopir</th>
+                    <th className="p-3 font-semibold">Tipe Truk</th>
+                    <th className="p-3 font-semibold text-right">Berat Tara Kosong (Kg)</th>
+                    <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-150">
+                  {vehicles
+                    .filter(v => v.policeNo.toLowerCase().includes(searchQuery.toLowerCase()) || v.driverName.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map(v => (
+                      <tr key={v.id} className="hover:bg-slate-50 font-sans text-neutral-800">
+                        <td className="p-3 font-extrabold text-indigo-900 tracking-tight font-mono">{v.policeNo}</td>
+                        <td className="p-3 font-bold">{v.driverName}</td>
+                        <td className="p-3 text-neutral-600">{v.vehicleType}</td>
+                        <td className="p-3 font-mono font-bold text-right text-emerald-700">{(v.tareWeight || 0).toLocaleString('id-ID')} Kg</td>
+                        <td className="p-3 text-center flex items-center justify-center gap-1.5">
+                          <button 
+                            onClick={() => handleEditVehicle(v)}
+                            className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                            title="Sunting"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteVehicle(v.id, v.policeNo)}
+                            className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
+                            title="Hapus"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="grid grid-cols-1 gap-3 md:hidden p-3 bg-slate-50/50">
+              {vehicles
+                .filter(v => v.policeNo.toLowerCase().includes(searchQuery.toLowerCase()) || v.driverName.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(v => (
+                  <div key={v.id} className="bg-white p-3 rounded-lg border border-neutral-200 shadow-sm flex flex-col gap-2">
+                    <div className="flex justify-between items-center border-b border-neutral-100 pb-2">
+                      <span className="font-mono font-extrabold text-indigo-900 text-sm">{v.policeNo}</span>
+                      <div className="flex gap-1">
                         <button 
                           onClick={() => handleEditVehicle(v)}
                           className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
-                          title="Sunting"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
                         <button 
                           onClick={() => handleDeleteVehicle(v.id, v.policeNo)}
                           className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
-                          title="Hapus"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
-                      </td>
-                    </tr>
-                ))}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-y-1 text-[11px] text-neutral-600 font-bold">
+                      <div>Sopir:</div>
+                      <div className="text-neutral-800 text-right">{v.driverName}</div>
+                      <div>Tipe Truk:</div>
+                      <div className="text-neutral-800 text-right">{v.vehicleType}</div>
+                      <div>Berat Tara:</div>
+                      <div className="text-emerald-700 font-mono text-right font-extrabold">{(v.tareWeight || 0).toLocaleString('id-ID')} Kg</div>
+                    </div>
+                  </div>
+              ))}
+              {vehicles.filter(v => v.policeNo.toLowerCase().includes(searchQuery.toLowerCase()) || v.driverName.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                <div className="p-4 text-center text-neutral-400 text-xs">Belum ada data truk cocok.</div>
+              )}
+            </div>
           </div>
         )}
 
         {/* GRID: SUPPLIERS */}
         {activeSubTab === 'SUPPLIERS' && (
-          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
-              <thead>
-                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
-                  <th className="p-3 font-semibold">Nama Supplier</th>
-                  <th className="p-3 font-semibold">No. HP</th>
-                  <th className="p-3 font-semibold">Alamat Asal</th>
-                  <th className="p-3 font-semibold">Komoditas Utama</th>
-                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-150">
-                {suppliers
-                  .filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.address.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map(s => (
-                    <tr key={s.id} className="hover:bg-slate-50 text-neutral-800">
-                      <td className="p-3 font-extrabold text-neutral-900">{s.name}</td>
-                      <td className="p-3 font-mono font-medium">{s.phone || '-'}</td>
-                      <td className="p-3 text-neutral-600">{s.address || '-'}</td>
-                      <td className="p-3">
-                        <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 font-extrabold px-2 py-0.5 rounded text-[10px]">
-                          {s.mainCommodity}
-                        </span>
-                      </td>
-                      <td className="p-3 text-center flex items-center justify-center gap-1.5">
+          <div className="rounded-xl border border-neutral-200 overflow-hidden">
+            <div className="overflow-x-auto custom-scrollbar hidden md:block">
+              <table className="w-full text-left border-collapse text-xs min-w-[650px]">
+                <thead>
+                  <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                    <th className="p-3 font-semibold">Nama Supplier</th>
+                    <th className="p-3 font-semibold">No. HP</th>
+                    <th className="p-3 font-semibold">Alamat Asal</th>
+                    <th className="p-3 font-semibold">Komoditas Utama</th>
+                    <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-150">
+                  {suppliers
+                    .filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.address.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map(s => (
+                      <tr key={s.id} className="hover:bg-slate-50 text-neutral-800">
+                        <td className="p-3 font-extrabold text-neutral-900">{s.name}</td>
+                        <td className="p-3 font-mono font-medium">{s.phone || '-'}</td>
+                        <td className="p-3 text-neutral-600">{s.address || '-'}</td>
+                        <td className="p-3">
+                          <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 font-extrabold px-2 py-0.5 rounded text-[10px]">
+                            {s.mainCommodity}
+                          </span>
+                        </td>
+                        <td className="p-3 text-center flex items-center justify-center gap-1.5">
+                          <button 
+                            onClick={() => handleEditSupplier(s)}
+                            className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteSupplier(s.id, s.name)}
+                            className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="grid grid-cols-1 gap-3 md:hidden p-3 bg-slate-50/50">
+              {suppliers
+                .filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.address.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(s => (
+                  <div key={s.id} className="bg-white p-3 rounded-lg border border-neutral-200 shadow-sm flex flex-col gap-2">
+                    <div className="flex justify-between items-center border-b border-neutral-100 pb-2">
+                      <span className="font-extrabold text-neutral-900 text-sm">{s.name}</span>
+                      <div className="flex gap-1">
                         <button 
                           onClick={() => handleEditSupplier(s)}
                           className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
@@ -2428,35 +2497,79 @@ export default function DatabaseMasterModule({
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
-                      </td>
-                    </tr>
-                ))}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-y-1 text-[11px] text-neutral-600 font-bold">
+                      <div>No. HP:</div>
+                      <div className="text-neutral-800 text-right font-mono">{s.phone || '-'}</div>
+                      <div>Alamat Asal:</div>
+                      <div className="text-neutral-800 text-right">{s.address || '-'}</div>
+                      <div>Komoditas Utama:</div>
+                      <div className="text-right">
+                        <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 font-extrabold px-2 py-0.5 rounded text-[10px] inline-block">
+                          {s.mainCommodity}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+              ))}
+              {suppliers.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.address.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                <div className="p-4 text-center text-neutral-400 text-xs">Belum ada data supplier cocok.</div>
+              )}
+            </div>
           </div>
         )}
 
         {/* GRID: BUYERS */}
         {activeSubTab === 'BUYERS' && (
-          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
-              <thead>
-                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
-                  <th className="p-3 font-semibold">Nama Perusahaan / Buyer</th>
-                  <th className="p-3 font-semibold">No. Telepon</th>
-                  <th className="p-3 font-semibold">Alamat Pengiriman Utama</th>
-                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-150">
-                {buyers
-                  .filter(b => b.name.toLowerCase().includes(searchQuery.toLowerCase()) || b.address.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map(b => (
-                    <tr key={b.id} className="hover:bg-slate-50 text-neutral-800">
-                      <td className="p-3 font-extrabold text-[#111]">{b.name}</td>
-                      <td className="p-3 font-mono">{b.phone || '-'}</td>
-                      <td className="p-3 text-neutral-600 font-bold">{b.address || '-'}</td>
-                      <td className="p-3 text-center flex items-center justify-center gap-1.5">
+          <div className="rounded-xl border border-neutral-200 overflow-hidden">
+            <div className="overflow-x-auto custom-scrollbar hidden md:block">
+              <table className="w-full text-left border-collapse text-xs min-w-[650px]">
+                <thead>
+                  <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                    <th className="p-3 font-semibold">Nama Perusahaan / Buyer</th>
+                    <th className="p-3 font-semibold">No. Telepon</th>
+                    <th className="p-3 font-semibold">Alamat Pengiriman Utama</th>
+                    <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-150">
+                  {buyers
+                    .filter(b => b.name.toLowerCase().includes(searchQuery.toLowerCase()) || b.address.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map(b => (
+                      <tr key={b.id} className="hover:bg-slate-50 text-neutral-800">
+                        <td className="p-3 font-extrabold text-[#111]">{b.name}</td>
+                        <td className="p-3 font-mono">{b.phone || '-'}</td>
+                        <td className="p-3 text-neutral-600 font-bold">{b.address || '-'}</td>
+                        <td className="p-3 text-center flex items-center justify-center gap-1.5">
+                          <button 
+                            onClick={() => handleEditBuyer(b)}
+                            className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteBuyer(b.id, b.name)}
+                            className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="grid grid-cols-1 gap-3 md:hidden p-3 bg-slate-50/50">
+              {buyers
+                .filter(b => b.name.toLowerCase().includes(searchQuery.toLowerCase()) || b.address.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(b => (
+                  <div key={b.id} className="bg-white p-3 rounded-lg border border-neutral-200 shadow-sm flex flex-col gap-2">
+                    <div className="flex justify-between items-center border-b border-neutral-100 pb-2">
+                      <span className="font-extrabold text-neutral-900 text-sm">{b.name}</span>
+                      <div className="flex gap-1">
                         <button 
                           onClick={() => handleEditBuyer(b)}
                           className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
@@ -2469,49 +2582,87 @@ export default function DatabaseMasterModule({
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
-                      </td>
-                    </tr>
-                ))}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-y-1 text-[11px] text-neutral-600 font-bold">
+                      <div>No. Telepon:</div>
+                      <div className="text-neutral-800 text-right font-mono">{b.phone || '-'}</div>
+                      <div>Alamat Kirim:</div>
+                      <div className="text-neutral-800 text-right font-bold">{b.address || '-'}</div>
+                    </div>
+                  </div>
+              ))}
+              {buyers.filter(b => b.name.toLowerCase().includes(searchQuery.toLowerCase()) || b.address.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                <div className="p-4 text-center text-neutral-400 text-xs">Belum ada data pembeli cocok.</div>
+              )}
+            </div>
           </div>
         )}
 
         {/* GRID: EMPLOYEES */}
         {activeSubTab === 'EMPLOYEES' && (
-          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
-              <thead>
-                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
-                  <th className="p-3 font-semibold">Nama Lengkap</th>
-                  <th className="p-3 font-semibold">Jabatan/Mitra Kerja</th>
-                  <th className="p-3 font-semibold">No. HP</th>
-                  <th className="p-3 font-semibold text-right">Tarif Komisi (Makelar)</th>
-                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-150">
-                {employees
-                  .filter(emp => emp.name.toLowerCase().includes(searchQuery.toLowerCase()) || emp.role.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map(emp => (
-                    <tr key={emp.id} className="hover:bg-slate-50 text-neutral-800">
-                      <td className="p-3 font-extrabold text-neutral-905">{emp.name}</td>
-                      <td className="p-3">
-                        <span className={`font-extrabold px-2 py-0.5 rounded text-[9px] ${
-                          emp.role === 'MAKELAR' 
-                            ? 'bg-rose-50 text-rose-800 border border-rose-200' 
-                            : emp.role === 'BURUH' 
-                            ? 'bg-amber-50 text-amber-800 border border-amber-200' 
-                            : 'bg-indigo-50 text-indigo-850 border border-indigo-200'
-                        }`}>
-                          {emp.role === 'MAKELAR' ? '📌 MAKELAR' : emp.role === 'BURUH' ? '📦 BURUH STRIPPER/LOADER' : '💼 KARYAWAN TETAP'}
-                        </span>
-                      </td>
-                      <td className="p-3 font-mono">{emp.phone || '-'}</td>
-                      <td className="p-3 font-mono font-bold text-right text-emerald-850">
-                        {emp.role === 'MAKELAR' ? `Rp ${(emp.ratePerKg || 0).toLocaleString('id-ID')} / Kg` : '-'}
-                      </td>
-                      <td className="p-3 text-center flex items-center justify-center gap-1.5">
+          <div className="rounded-xl border border-neutral-200 overflow-hidden">
+            <div className="overflow-x-auto custom-scrollbar hidden md:block">
+              <table className="w-full text-left border-collapse text-xs min-w-[650px]">
+                <thead>
+                  <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                    <th className="p-3 font-semibold">Nama Lengkap</th>
+                    <th className="p-3 font-semibold">Jabatan/Mitra Kerja</th>
+                    <th className="p-3 font-semibold">No. HP</th>
+                    <th className="p-3 font-semibold text-right">Tarif Komisi (Makelar)</th>
+                    <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-150">
+                  {employees
+                    .filter(emp => emp.name.toLowerCase().includes(searchQuery.toLowerCase()) || emp.role.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map(emp => (
+                      <tr key={emp.id} className="hover:bg-slate-50 text-neutral-800">
+                        <td className="p-3 font-extrabold text-neutral-905">{emp.name}</td>
+                        <td className="p-3">
+                          <span className={`font-extrabold px-2 py-0.5 rounded text-[9px] ${
+                            emp.role === 'MAKELAR' 
+                              ? 'bg-rose-50 text-rose-800 border border-rose-200' 
+                              : emp.role === 'BURUH' 
+                              ? 'bg-amber-50 text-amber-800 border border-amber-200' 
+                              : 'bg-indigo-50 text-indigo-850 border border-indigo-200'
+                          }`}>
+                            {emp.role === 'MAKELAR' ? '📌 MAKELAR' : emp.role === 'BURUH' ? '📦 BURUH STRIPPER/LOADER' : '💼 KARYAWAN TETAP'}
+                          </span>
+                        </td>
+                        <td className="p-3 font-mono">{emp.phone || '-'}</td>
+                        <td className="p-3 font-mono font-bold text-right text-emerald-850">
+                          {emp.role === 'MAKELAR' ? `Rp ${(emp.ratePerKg || 0).toLocaleString('id-ID')} / Kg` : '-'}
+                        </td>
+                        <td className="p-3 text-center flex items-center justify-center gap-1.5">
+                          <button 
+                            onClick={() => handleEditEmployee(emp)}
+                            className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteEmployee(emp.id, emp.name)}
+                            className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="grid grid-cols-1 gap-3 md:hidden p-3 bg-slate-50/50">
+              {employees
+                .filter(emp => emp.name.toLowerCase().includes(searchQuery.toLowerCase()) || emp.role.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(emp => (
+                  <div key={emp.id} className="bg-white p-3 rounded-lg border border-neutral-200 shadow-sm flex flex-col gap-2">
+                    <div className="flex justify-between items-center border-b border-neutral-100 pb-2">
+                      <span className="font-extrabold text-neutral-900 text-sm">{emp.name}</span>
+                      <div className="flex gap-1">
                         <button 
                           onClick={() => handleEditEmployee(emp)}
                           className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
@@ -2524,37 +2675,91 @@ export default function DatabaseMasterModule({
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
-                      </td>
-                    </tr>
-                ))}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-y-1 text-[11px] text-neutral-600 font-bold">
+                      <div>Jabatan/Mitra:</div>
+                      <div className="text-right">
+                        <span className={`font-extrabold px-2 py-0.5 rounded text-[9px] ${
+                          emp.role === 'MAKELAR' 
+                            ? 'bg-rose-50 text-rose-800 border border-rose-200' 
+                            : emp.role === 'BURUH' 
+                            ? 'bg-amber-50 text-amber-805 border border-amber-200' 
+                            : 'bg-indigo-50 text-indigo-850 border border-indigo-200'
+                        }`}>
+                          {emp.role === 'MAKELAR' ? 'MAKELAR' : emp.role === 'BURUH' ? 'BURUH' : 'KARYAWAN TETAP'}
+                        </span>
+                      </div>
+                      <div>No. HP:</div>
+                      <div className="text-neutral-800 text-right font-mono">{emp.phone || '-'}</div>
+                      {emp.role === 'MAKELAR' && (
+                        <>
+                          <div>Tarif Komisi:</div>
+                          <div className="text-emerald-850 text-right font-mono font-bold">Rp {(emp.ratePerKg || 0).toLocaleString('id-ID')} / Kg</div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+              ))}
+              {employees.filter(emp => emp.name.toLowerCase().includes(searchQuery.toLowerCase()) || emp.role.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                <div className="p-4 text-center text-neutral-400 text-xs">Belum ada data pegawai/mitra cocok.</div>
+              )}
+            </div>
           </div>
         )}
 
         {/* GRID: COMMODITIES */}
         {activeSubTab === 'COMMODITIES' && (
-          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
-              <thead>
-                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
-                  <th className="p-3 font-semibold">Nama Barang/Komoditas</th>
-                  <th className="p-3 font-semibold">Jenis Basis</th>
-                  <th className="p-3 font-semibold text-center">Standar Kadar Air KA (%)</th>
-                  <th className="p-3 font-semibold text-center">Deduction Karung (%)</th>
-                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-150">
-                {commodities
-                  .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map(c => (
-                    <tr key={c.id} className="hover:bg-slate-50 text-neutral-800">
-                      <td className="p-3 font-extrabold text-neutral-900 tracking-tight">{c.name}</td>
-                      <td className="p-3 font-semibold text-gray-500 font-mono text-[10px] uppercase">{c.type}</td>
-                      <td className="p-3 text-center font-mono font-bold text-amber-700">{c.moistureStandard}%</td>
-                      <td className="p-3 text-center font-mono font-bold text-indigo-700">{c.bagDeductionPercent}%</td>
-                      <td className="p-3 text-center flex items-center justify-center gap-1.5">
+          <div className="rounded-xl border border-neutral-200 overflow-hidden">
+            <div className="overflow-x-auto custom-scrollbar hidden md:block">
+              <table className="w-full text-left border-collapse text-xs min-w-[650px]">
+                <thead>
+                  <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                    <th className="p-3 font-semibold">Nama Barang/Komoditas</th>
+                    <th className="p-3 font-semibold">Jenis Basis</th>
+                    <th className="p-3 font-semibold text-center">Standar Kadar Air KA (%)</th>
+                    <th className="p-3 font-semibold text-center">Deduction Karung (%)</th>
+                    <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-150">
+                  {commodities
+                    .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map(c => (
+                      <tr key={c.id} className="hover:bg-slate-50 text-neutral-800">
+                        <td className="p-3 font-extrabold text-neutral-900 tracking-tight">{c.name}</td>
+                        <td className="p-3 font-semibold text-gray-500 font-mono text-[10px] uppercase">{c.type}</td>
+                        <td className="p-3 text-center font-mono font-bold text-amber-700">{c.moistureStandard}%</td>
+                        <td className="p-3 text-center font-mono font-bold text-indigo-700">{c.bagDeductionPercent}%</td>
+                        <td className="p-3 text-center flex items-center justify-center gap-1.5">
+                          <button 
+                            onClick={() => handleEditCommodity(c)}
+                            className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteCommodity(c.id, c.name)}
+                            className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="grid grid-cols-1 gap-3 md:hidden p-3 bg-slate-50/50">
+              {commodities
+                .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(c => (
+                  <div key={c.id} className="bg-white p-3 rounded-lg border border-neutral-200 shadow-sm flex flex-col gap-2">
+                    <div className="flex justify-between items-center border-b border-neutral-100 pb-2">
+                      <span className="font-extrabold text-neutral-900 text-sm">{c.name}</span>
+                      <div className="flex gap-1">
                         <button 
                           onClick={() => handleEditCommodity(c)}
                           className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
@@ -2567,37 +2772,77 @@ export default function DatabaseMasterModule({
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
-                      </td>
-                    </tr>
-                ))}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-y-1 text-[11px] text-neutral-600 font-bold">
+                      <div>Jenis Basis:</div>
+                      <div className="text-neutral-500 font-mono text-right uppercase">{c.type}</div>
+                      <div>KA Standar:</div>
+                      <div className="text-amber-700 font-mono text-right font-extrabold">{c.moistureStandard}%</div>
+                      <div>Potongan Karung:</div>
+                      <div className="text-indigo-700 font-mono text-right font-extrabold">{c.bagDeductionPercent}%</div>
+                    </div>
+                  </div>
+              ))}
+              {commodities.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                <div className="p-4 text-center text-neutral-400 text-xs">Belum ada data komoditas cocok.</div>
+              )}
+            </div>
           </div>
         )}
 
         {/* GRID: BANKS */}
         {activeSubTab === 'BANKS' && (
-          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
-              <thead>
-                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
-                  <th className="p-3 font-semibold">Nama Akun</th>
-                  <th className="p-3 font-semibold">Bank</th>
-                  <th className="p-3 font-semibold">No. Rekening</th>
-                  <th className="p-3 font-semibold text-right">Saldo Awal</th>
-                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-150">
-                {banks
-                  .filter(b => b.accountName.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map(b => (
-                    <tr key={b.id} className="hover:bg-slate-50 text-neutral-800">
-                      <td className="p-3 font-extrabold text-neutral-900">{b.accountName}</td>
-                      <td className="p-3 font-semibold">{b.bankName}</td>
-                      <td className="p-3 font-mono">{b.accountNo || '-'}</td>
-                      <td className="p-3 text-right font-mono font-bold text-emerald-800">Rp {b.initialBalance?.toLocaleString('id-ID')}</td>
-                      <td className="p-3 text-center flex items-center justify-center gap-1.5">
+          <div className="rounded-xl border border-neutral-200 overflow-hidden">
+            <div className="overflow-x-auto custom-scrollbar hidden md:block">
+              <table className="w-full text-left border-collapse text-xs min-w-[650px]">
+                <thead>
+                  <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                    <th className="p-3 font-semibold">Nama Akun</th>
+                    <th className="p-3 font-semibold">Bank</th>
+                    <th className="p-3 font-semibold">No. Rekening</th>
+                    <th className="p-3 font-semibold text-right">Saldo Awal</th>
+                    <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-150">
+                  {banks
+                    .filter(b => b.accountName.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map(b => (
+                      <tr key={b.id} className="hover:bg-slate-50 text-neutral-800">
+                        <td className="p-3 font-extrabold text-neutral-900">{b.accountName}</td>
+                        <td className="p-3 font-semibold">{b.bankName}</td>
+                        <td className="p-3 font-mono">{b.accountNo || '-'}</td>
+                        <td className="p-3 text-right font-mono font-bold text-emerald-800">Rp {b.initialBalance?.toLocaleString('id-ID')}</td>
+                        <td className="p-3 text-center flex items-center justify-center gap-1.5">
+                          <button 
+                            onClick={() => handleEditBank(b)}
+                            className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteBank(b.id, b.accountName)}
+                            className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="grid grid-cols-1 gap-3 md:hidden p-3 bg-slate-50/50">
+              {banks
+                .filter(b => b.accountName.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(b => (
+                  <div key={b.id} className="bg-white p-3 rounded-lg border border-neutral-200 shadow-sm flex flex-col gap-2">
+                    <div className="flex justify-between items-center border-b border-neutral-100 pb-2">
+                      <span className="font-extrabold text-neutral-900 text-sm">{b.accountName}</span>
+                      <div className="flex gap-1">
                         <button 
                           onClick={() => handleEditBank(b)}
                           className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
@@ -2610,37 +2855,77 @@ export default function DatabaseMasterModule({
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
-                      </td>
-                    </tr>
-                ))}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-y-1 text-[11px] text-neutral-600 font-bold">
+                      <div>Bank:</div>
+                      <div className="text-neutral-800 text-right font-semibold">{b.bankName}</div>
+                      <div>No. Rekening:</div>
+                      <div className="text-neutral-800 text-right font-mono">{b.accountNo || '-'}</div>
+                      <div>Saldo Awal:</div>
+                      <div className="text-emerald-800 text-right font-mono font-bold">Rp {b.initialBalance?.toLocaleString('id-ID')}</div>
+                    </div>
+                  </div>
+              ))}
+              {banks.filter(b => b.accountName.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                <div className="p-4 text-center text-neutral-400 text-xs">Belum ada data kas/bank cocok.</div>
+              )}
+            </div>
           </div>
         )}
 
         {/* GRID: BROKERS */}
         {activeSubTab === 'BROKERS' && (
-          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
-              <thead>
-                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
-                  <th className="p-3 font-semibold">Nama Makelar</th>
-                  <th className="p-3 font-semibold">No. HP</th>
-                  <th className="p-3 font-semibold">Wilayah / Domisili</th>
-                  <th className="p-3 font-semibold text-right">Tarif Komisi (Rp/Kg)</th>
-                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-150">
-                {brokers
-                  .filter(b => b.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map(b => (
-                    <tr key={b.id} className="hover:bg-slate-50 text-neutral-800">
-                      <td className="p-3 font-extrabold text-neutral-900">{b.name}</td>
-                      <td className="p-3 font-mono">{b.phone || '-'}</td>
-                      <td className="p-3 text-neutral-600">{b.address || '-'}</td>
-                      <td className="p-3 text-right font-mono font-bold text-rose-700">Rp {b.commissionRate} / Kg</td>
-                      <td className="p-3 text-center flex items-center justify-center gap-1.5">
+          <div className="rounded-xl border border-neutral-200 overflow-hidden">
+            <div className="overflow-x-auto custom-scrollbar hidden md:block">
+              <table className="w-full text-left border-collapse text-xs min-w-[650px]">
+                <thead>
+                  <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                    <th className="p-3 font-semibold">Nama Makelar</th>
+                    <th className="p-3 font-semibold">No. HP</th>
+                    <th className="p-3 font-semibold">Wilayah / Domisili</th>
+                    <th className="p-3 font-semibold text-right">Tarif Komisi (Rp/Kg)</th>
+                    <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-150">
+                  {brokers
+                    .filter(b => b.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map(b => (
+                      <tr key={b.id} className="hover:bg-slate-50 text-neutral-800">
+                        <td className="p-3 font-extrabold text-neutral-900">{b.name}</td>
+                        <td className="p-3 font-mono">{b.phone || '-'}</td>
+                        <td className="p-3 text-neutral-600">{b.address || '-'}</td>
+                        <td className="p-3 text-right font-mono font-bold text-rose-700">Rp {b.commissionRate} / Kg</td>
+                        <td className="p-3 text-center flex items-center justify-center gap-1.5">
+                          <button 
+                            onClick={() => handleEditBroker(b)}
+                            className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteBroker(b.id, b.name)}
+                            className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="grid grid-cols-1 gap-3 md:hidden p-3 bg-slate-50/50">
+              {brokers
+                .filter(b => b.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(b => (
+                  <div key={b.id} className="bg-white p-3 rounded-lg border border-neutral-200 shadow-sm flex flex-col gap-2">
+                    <div className="flex justify-between items-center border-b border-neutral-100 pb-2">
+                      <span className="font-extrabold text-neutral-900 text-sm">{b.name}</span>
+                      <div className="flex gap-1">
                         <button 
                           onClick={() => handleEditBroker(b)}
                           className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
@@ -2653,37 +2938,77 @@ export default function DatabaseMasterModule({
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
-                      </td>
-                    </tr>
-                ))}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-y-1 text-[11px] text-neutral-600 font-bold">
+                      <div>No. HP:</div>
+                      <div className="text-neutral-800 text-right font-mono">{b.phone || '-'}</div>
+                      <div>Wilayah:</div>
+                      <div className="text-neutral-800 text-right">{b.address || '-'}</div>
+                      <div>Tarif Komisi:</div>
+                      <div className="text-rose-700 text-right font-mono font-bold">Rp {b.commissionRate} / Kg</div>
+                    </div>
+                  </div>
+              ))}
+              {brokers.filter(b => b.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                <div className="p-4 text-center text-neutral-400 text-xs">Belum ada data makelar cocok.</div>
+              )}
+            </div>
           </div>
         )}
 
         {/* GRID: LOCATIONS */}
         {activeSubTab === 'LOCATIONS' && (
-          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
-              <thead>
-                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
-                  <th className="p-3 font-semibold">Lokasi / Fasilitas</th>
-                  <th className="p-3 font-semibold text-center">Tipe Unit</th>
-                  <th className="p-3 font-semibold text-right">Kapasitas (Kg)</th>
-                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-150">
-                {locations
-                  .filter(l => l.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map(l => (
-                    <tr key={l.id} className="hover:bg-slate-50 text-neutral-800">
-                      <td className="p-3 font-extrabold text-indigo-900">{l.name}</td>
-                      <td className="p-3 text-center font-bold text-[10px] text-neutral-500 uppercase">{l.type}</td>
-                      <td className="p-3 text-right font-mono font-bold text-neutral-700">
-                        {l.capacityKg ? `${l.capacityKg.toLocaleString('id-ID')} Kg` : '-'}
-                      </td>
-                      <td className="p-3 text-center flex items-center justify-center gap-1.5">
+          <div className="rounded-xl border border-neutral-200 overflow-hidden">
+            <div className="overflow-x-auto custom-scrollbar hidden md:block">
+              <table className="w-full text-left border-collapse text-xs min-w-[650px]">
+                <thead>
+                  <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                    <th className="p-3 font-semibold">Lokasi / Fasilitas</th>
+                    <th className="p-3 font-semibold text-center">Tipe Unit</th>
+                    <th className="p-3 font-semibold text-right">Kapasitas (Kg)</th>
+                    <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-150">
+                  {locations
+                    .filter(l => l.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map(l => (
+                      <tr key={l.id} className="hover:bg-slate-50 text-neutral-800">
+                        <td className="p-3 font-extrabold text-indigo-900">{l.name}</td>
+                        <td className="p-3 text-center font-bold text-[10px] text-neutral-500 uppercase">{l.type}</td>
+                        <td className="p-3 text-right font-mono font-bold text-neutral-700">
+                          {l.capacityKg ? `${l.capacityKg.toLocaleString('id-ID')} Kg` : '-'}
+                        </td>
+                        <td className="p-3 text-center flex items-center justify-center gap-1.5">
+                          <button 
+                            onClick={() => handleEditLocation(l)}
+                            className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteLocation(l.id, l.name)}
+                            className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="grid grid-cols-1 gap-3 md:hidden p-3 bg-slate-50/50">
+              {locations
+                .filter(l => l.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(l => (
+                  <div key={l.id} className="bg-white p-3 rounded-lg border border-neutral-200 shadow-sm flex flex-col gap-2">
+                    <div className="flex justify-between items-center border-b border-neutral-100 pb-2">
+                      <span className="font-extrabold text-indigo-900 text-sm">{l.name}</span>
+                      <div className="flex gap-1">
                         <button 
                           onClick={() => handleEditLocation(l)}
                           className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
@@ -2696,35 +3021,75 @@ export default function DatabaseMasterModule({
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
-                      </td>
-                    </tr>
-                ))}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-y-1 text-[11px] text-neutral-600 font-bold">
+                      <div>Tipe Unit:</div>
+                      <div className="text-neutral-500 font-bold text-[10px] text-right uppercase">{l.type}</div>
+                      <div>Kapasitas:</div>
+                      <div className="text-neutral-800 font-mono text-right font-extrabold">
+                        {l.capacityKg ? `${l.capacityKg.toLocaleString('id-ID')} Kg` : '-'}
+                      </div>
+                    </div>
+                  </div>
+              ))}
+              {locations.filter(l => l.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                <div className="p-4 text-center text-neutral-400 text-xs">Belum ada data lokasi cocok.</div>
+              )}
+            </div>
           </div>
         )}
 
         {/* GRID: CUSTOMERS */}
         {activeSubTab === 'CUSTOMERS' && (
-          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
-              <thead>
-                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
-                  <th className="p-3 font-semibold">Nama Pelanggan</th>
-                  <th className="p-3 font-semibold">HP / WA</th>
-                  <th className="p-3 font-semibold">Alamat / Wilayah</th>
-                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-150">
-                {customers
-                  .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map(c => (
-                    <tr key={c.id} className="hover:bg-slate-50 text-neutral-800">
-                      <td className="p-3 font-extrabold text-indigo-900 uppercase">{c.name}</td>
-                      <td className="p-3 font-mono text-neutral-600">{c.phone || '-'}</td>
-                      <td className="p-3 font-semibold text-neutral-700 italic">{c.address || '-'}</td>
-                      <td className="p-3 text-center flex items-center justify-center gap-1.5">
+          <div className="rounded-xl border border-neutral-200 overflow-hidden">
+            <div className="overflow-x-auto custom-scrollbar hidden md:block">
+              <table className="w-full text-left border-collapse text-xs min-w-[650px]">
+                <thead>
+                  <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                    <th className="p-3 font-semibold">Nama Pelanggan</th>
+                    <th className="p-3 font-semibold">HP / WA</th>
+                    <th className="p-3 font-semibold">Alamat / Wilayah</th>
+                    <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-150">
+                  {customers
+                    .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map(c => (
+                      <tr key={c.id} className="hover:bg-slate-50 text-neutral-800">
+                        <td className="p-3 font-extrabold text-indigo-900 uppercase">{c.name}</td>
+                        <td className="p-3 font-mono text-neutral-600">{c.phone || '-'}</td>
+                        <td className="p-3 font-semibold text-neutral-700 italic">{c.address || '-'}</td>
+                        <td className="p-3 text-center flex items-center justify-center gap-1.5">
+                          <button 
+                            onClick={() => handleEditCustomer(c)}
+                            className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteCustomer(c.id, c.name)}
+                            className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="grid grid-cols-1 gap-3 md:hidden p-3 bg-slate-50/50">
+              {customers
+                .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(c => (
+                  <div key={c.id} className="bg-white p-3 rounded-lg border border-neutral-200 shadow-sm flex flex-col gap-2">
+                    <div className="flex justify-between items-center border-b border-neutral-100 pb-2">
+                      <span className="font-extrabold text-indigo-900 text-sm uppercase">{c.name}</span>
+                      <div className="flex gap-1">
                         <button 
                           onClick={() => handleEditCustomer(c)}
                           className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
@@ -2737,98 +3102,185 @@ export default function DatabaseMasterModule({
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
-                      </td>
-                    </tr>
-                ))}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-y-1 text-[11px] text-neutral-600 font-bold">
+                      <div>No. HP / WA:</div>
+                      <div className="text-neutral-800 text-right font-mono">{c.phone || '-'}</div>
+                      <div>Alamat:</div>
+                      <div className="text-neutral-800 text-right">{c.address || '-'}</div>
+                    </div>
+                  </div>
+              ))}
+              {customers.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                <div className="p-4 text-center text-neutral-400 text-xs">Belum ada data pelanggan cocok.</div>
+              )}
+            </div>
           </div>
         )}
 
         {/* GRID: LABOR_RATES */}
         {activeSubTab === 'LABOR_RATES' && (
-          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
-              <thead>
-                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
-                  <th className="p-3 font-semibold">Nama Kegiatan Buruh</th>
-                  <th className="p-3 font-semibold">Tipe Tarif</th>
-                  <th className="p-3 font-semibold text-right">Tarif (Rp)</th>
-                  <th className="p-3 font-semibold text-center w-24">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-neutral-100">
-                {laborRates.filter(l => l.activityName.toLowerCase().includes(searchQuery.toLowerCase())).map((l) => (
-                  <tr key={l.id} className="hover:bg-neutral-50/80 transition-colors group">
-                    <td className="p-3 flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-amber-100 flex-shrink-0 flex items-center justify-center border border-amber-200 shadow-sm text-amber-700">
-                        <Users className="w-4 h-4" />
+          <div className="rounded-xl border border-neutral-200 overflow-hidden">
+            <div className="overflow-x-auto custom-scrollbar hidden md:block">
+              <table className="w-full text-left border-collapse text-xs min-w-[650px]">
+                <thead>
+                  <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                    <th className="p-3 font-semibold">Nama Kegiatan Buruh</th>
+                    <th className="p-3 font-semibold">Tipe Tarif</th>
+                    <th className="p-3 font-semibold text-right">Tarif (Rp)</th>
+                    <th className="p-3 font-semibold text-center w-24">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-neutral-100">
+                  {laborRates.filter(l => l.activityName.toLowerCase().includes(searchQuery.toLowerCase())).map((l) => (
+                    <tr key={l.id} className="hover:bg-neutral-50/80 transition-colors group">
+                      <td className="p-3 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-amber-100 flex-shrink-0 flex items-center justify-center border border-amber-200 shadow-sm text-amber-700">
+                          <Users className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-neutral-900 text-xs">{l.activityName}</p>
+                          <p className="text-[10px] font-mono font-medium text-neutral-400 mt-0.5">ID: {l.id.substring(0,8)}</p>
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider inline-flex ${l.rateType === 'FLAT' ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800'}`}>
+                          {l.rateType === 'FLAT' ? 'BORONGAN (FLAT)' : 'PER KILOGRAM'}
+                        </span>
+                      </td>
+                      <td className="p-3 text-right font-mono font-bold text-emerald-600 text-xs">
+                        {l.rateType === 'FLAT' ? `Rp ${l.rate.toLocaleString('id-ID')}` : `Rp ${l.rate}/Kg`}
+                      </td>
+                      <td className="p-3">
+                        <div className="flex gap-1.5 justify-center opacity-40 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => handleEditLaborRate(l)} className="bg-white hover:bg-blue-50 text-neutral-400 hover:text-blue-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer" title="Edit Data">
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => handleDeleteLaborRate(l.id, l.activityName)} className="bg-white hover:bg-rose-50 text-neutral-400 hover:text-rose-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer" title="Hapus Permanen">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {laborRates.filter(l => l.activityName.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="p-6 text-center text-neutral-400 bg-neutral-50/50">
+                        <Users className="w-8 h-8 mx-auto text-neutral-300 mb-2 opacity-50" />
+                        <p className="font-medium text-xs">Belum ada data buruh</p>
+                        <p className="text-[10px] mt-1">Daftarkan jenis tanggungan buruh baru untuk dikelola.</p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="grid grid-cols-1 gap-3 md:hidden p-3 bg-slate-50/50">
+              {laborRates
+                .filter(l => l.activityName.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(l => (
+                  <div key={l.id} className="bg-white p-3 rounded-lg border border-neutral-200 shadow-sm flex flex-col gap-2">
+                    <div className="flex justify-between items-center border-b border-neutral-100 pb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center border border-amber-200 text-amber-700 border-solid">
+                          <Users className="w-3 h-3" />
+                        </div>
+                        <span className="font-extrabold text-neutral-900 text-xs">{l.activityName}</span>
                       </div>
-                      <div>
-                        <p className="font-bold text-neutral-900 text-xs">{l.activityName}</p>
-                        <p className="text-[10px] font-mono font-medium text-neutral-400 mt-0.5">ID: {l.id.substring(0,8)}</p>
-                      </div>
-                    </td>
-                    <td className="p-3">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider inline-flex ${l.rateType === 'FLAT' ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800'}`}>
-                        {l.rateType === 'FLAT' ? 'BORONGAN (FLAT)' : 'PER KILOGRAM'}
-                      </span>
-                    </td>
-                    <td className="p-3 text-right font-mono font-bold text-emerald-600 text-xs">
-                      {l.rateType === 'FLAT' ? `Rp ${l.rate.toLocaleString('id-ID')}` : `Rp ${l.rate}/Kg`}
-                    </td>
-                    <td className="p-3">
-                      <div className="flex gap-1.5 justify-center opacity-40 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => handleEditLaborRate(l)} className="bg-white hover:bg-blue-50 text-neutral-400 hover:text-blue-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer" title="Edit Data">
+                      <div className="flex gap-1">
+                        <button 
+                          onClick={() => handleEditLaborRate(l)}
+                          className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                        >
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => handleDeleteLaborRate(l.id, l.activityName)} className="bg-white hover:bg-rose-50 text-neutral-400 hover:text-rose-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer" title="Hapus Permanen">
+                        <button 
+                          onClick={() => handleDeleteLaborRate(l.id, l.activityName)}
+                          className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
+                        >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-                {laborRates.filter(l => l.activityName.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="p-6 text-center text-neutral-400 bg-neutral-50/50">
-                      <Users className="w-8 h-8 mx-auto text-neutral-300 mb-2 opacity-50" />
-                      <p className="font-medium text-xs">Belum ada data buruh</p>
-                      <p className="text-[10px] mt-1">Daftarkan jenis tanggungan buruh baru untuk dikelola.</p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                    </div>
+                    <div className="grid grid-cols-2 gap-y-1 text-[11px] text-neutral-600 font-bold">
+                      <div>Tipe Tarif:</div>
+                      <div className="text-right">
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold inline-block ${l.rateType === 'FLAT' ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800'}`}>
+                          {l.rateType === 'FLAT' ? 'BORONGAN (FLAT)' : 'PER KILOGRAM'}
+                        </span>
+                      </div>
+                      <div>Besar Tarif:</div>
+                      <div className="text-emerald-600 font-mono text-right font-extrabold font-bold">
+                        {l.rateType === 'FLAT' ? `Rp ${l.rate.toLocaleString('id-ID')}` : `Rp ${l.rate}/Kg`}
+                      </div>
+                    </div>
+                  </div>
+              ))}
+              {laborRates.filter(l => l.activityName.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                <div className="p-4 text-center text-neutral-400 text-xs">Belum ada data tarif buruh cocok.</div>
+              )}
+            </div>
           </div>
         )}
 
         {/* GRID: FINANCE_CATS */}
         {activeSubTab === 'FINANCE_CATS' && (
-          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs min-w-[650px]">
-              <thead>
-                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
-                  <th className="p-3 font-semibold">Nama Kategori</th>
-                  <th className="p-3 font-semibold text-center">Tipe Mutasi</th>
-                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-150">
-                {financeCategories
-                  .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map(c => (
-                    <tr key={c.id} className="hover:bg-slate-50 text-neutral-800">
-                      <td className="p-3 font-extrabold text-indigo-900">{c.name}</td>
-                      <td className="p-3 text-center">
-                        <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black tracking-tighter ${
-                          c.type === 'DEBIT' ? 'bg-green-100 text-green-700' :
-                          c.type === 'KREDIT' ? 'bg-red-100 text-red-750' : 'bg-blue-100 text-blue-700'
-                        }`}>
-                          {c.type === 'DEBIT' ? 'MASUK' : c.type === 'KREDIT' ? 'KELUAR' : 'CAMPUR'}
-                        </span>
-                      </td>
-                      <td className="p-3 text-center flex items-center justify-center gap-1.5">
+          <div className="rounded-xl border border-neutral-200 overflow-hidden">
+            <div className="overflow-x-auto custom-scrollbar hidden md:block">
+              <table className="w-full text-left border-collapse text-xs min-w-[650px]">
+                <thead>
+                  <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                    <th className="p-3 font-semibold">Nama Kategori</th>
+                    <th className="p-3 font-semibold text-center">Tipe Mutasi</th>
+                    <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-150">
+                  {financeCategories
+                    .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map(c => (
+                      <tr key={c.id} className="hover:bg-slate-50 text-neutral-800">
+                        <td className="p-3 font-extrabold text-indigo-900">{c.name}</td>
+                        <td className="p-3 text-center">
+                          <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black tracking-tighter ${
+                            c.type === 'DEBIT' ? 'bg-green-100 text-green-700' :
+                            c.type === 'KREDIT' ? 'bg-red-100 text-red-750' : 'bg-blue-100 text-blue-700'
+                          }`}>
+                            {c.type === 'DEBIT' ? 'MASUK' : c.type === 'KREDIT' ? 'KELUAR' : 'CAMPUR'}
+                          </span>
+                        </td>
+                        <td className="p-3 text-center flex items-center justify-center gap-1.5">
+                          <button 
+                            onClick={() => handleEditFinanceCategory(c)}
+                            className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteFinanceCategory(c.id, c.name)}
+                            className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="grid grid-cols-1 gap-3 md:hidden p-3 bg-slate-50/50">
+              {financeCategories
+                .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(c => (
+                  <div key={c.id} className="bg-white p-3 rounded-lg border border-neutral-200 shadow-sm flex flex-col gap-2">
+                    <div className="flex justify-between items-center border-b border-neutral-100 pb-2">
+                      <span className="font-extrabold text-indigo-900 text-sm">{c.name}</span>
+                      <div className="flex gap-1">
                         <button 
                           onClick={() => handleEditFinanceCategory(c)}
                           className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
@@ -2841,164 +3293,312 @@ export default function DatabaseMasterModule({
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
-                      </td>
-                    </tr>
-                ))}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-y-1 text-[11px] text-neutral-600 font-bold">
+                      <div>Tipe Mutasi:</div>
+                      <div className="text-right">
+                        <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black tracking-tighter ${
+                          c.type === 'DEBIT' ? 'bg-green-100 text-green-700' :
+                          c.type === 'KREDIT' ? 'bg-red-100 text-red-750' : 'bg-blue-100 text-blue-700'
+                        }`}>
+                          {c.type === 'DEBIT' ? 'MASUK' : c.type === 'KREDIT' ? 'KELUAR' : 'CAMPUR'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+              ))}
+              {financeCategories.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                <div className="p-4 text-center text-neutral-400 text-xs">Belum ada data kategori cocok.</div>
+              )}
+            </div>
           </div>
         )}
 
         {/* GRID: PRODUCTS */}
         {activeSubTab === 'PRODUCTS' && (
-          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs min-w-[800px]">
-              <thead>
-                <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
-                  <th className="p-3 font-semibold">Produk</th>
-                  <th className="p-3 font-semibold">Kategori</th>
-                  <th className="p-3 font-semibold">Harga</th>
-                  <th className="p-3 font-semibold">Stok</th>
-                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-150">
-                {products
-                  .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map(p => (
-                    <tr key={p.id} className="hover:bg-slate-50 text-neutral-800 group">
-                      <td className="p-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center overflow-hidden shrink-0 border border-neutral-200">
-                            {p.imageUrl ? (
-                              <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <Package className="w-5 h-5 text-neutral-400" />
-                            )}
+          <div className="rounded-xl border border-neutral-200 overflow-hidden">
+            <div className="overflow-x-auto custom-scrollbar hidden md:block">
+              <table className="w-full text-left border-collapse text-xs min-w-[800px]">
+                <thead>
+                  <tr className="bg-neutral-800 text-white uppercase font-mono tracking-wider text-[10px] border-b border-neutral-700">
+                    <th className="p-3 font-semibold">Produk</th>
+                    <th className="p-3 font-semibold">Kategori</th>
+                    <th className="p-3 font-semibold">Harga</th>
+                    <th className="p-3 font-semibold">Stok</th>
+                    <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-150">
+                  {products
+                    .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map(p => (
+                      <tr key={p.id} className="hover:bg-slate-50 text-neutral-800 group">
+                        <td className="p-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center overflow-hidden shrink-0 border border-neutral-200">
+                              {p.imageUrl ? (
+                                <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <Package className="w-5 h-5 text-neutral-400" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-extrabold text-indigo-900">{p.name}</p>
+                              <p className="text-[10px] text-neutral-500 truncate max-w-[200px]">{p.description}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-extrabold text-indigo-900">{p.name}</p>
-                            <p className="text-[10px] text-neutral-500 truncate max-w-[200px]">{p.description}</p>
+                        </td>
+                        <td className="p-3">
+                          <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black tracking-tighter ${
+                            p.category === 'BERAS' ? 'bg-blue-100 text-blue-700' :
+                            p.category === 'JAGUNG' ? 'bg-amber-100 text-amber-700' : 'bg-neutral-100 text-neutral-700'
+                          }`}>
+                            {p.category}
+                          </span>
+                        </td>
+                        <td className="p-3 font-mono font-bold text-neutral-700">Rp {p.pricePerKg.toLocaleString('id-ID')}</td>
+                        <td className="p-3">
+                          <div className="flex flex-col">
+                            <span className="font-mono font-bold text-neutral-900">{p.stockAvailable.toLocaleString('id-ID')} Kg</span>
+                            <div className="w-16 h-1 bg-neutral-100 rounded-full mt-1 overflow-hidden">
+                              <div 
+                                className={`h-full ${p.stockAvailable > 5000 ? 'bg-emerald-500' : p.stockAvailable > 1000 ? 'bg-amber-500' : 'bg-rose-500'}`}
+                                style={{ width: `${Math.min(100, (p.stockAvailable / 10000) * 100)}%` }}
+                              ></div>
+                            </div>
                           </div>
-                        </div>
+                        </td>
+                        <td className="p-3">
+                          <div className="flex gap-1.5 justify-center opacity-40 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => handleEditProduct(p)} className="bg-white hover:bg-blue-50 text-neutral-400 hover:text-blue-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer" title="Edit Produk">
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button onClick={() => handleDeleteProduct(p.id, p.name)} className="bg-white hover:bg-rose-50 text-neutral-400 hover:text-rose-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer" title="Hapus Produk">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  {products.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="p-10 text-center">
+                        <Package className="w-10 h-10 text-neutral-200 mx-auto mb-2" />
+                        <p className="text-neutral-400 font-bold uppercase tracking-widest text-[10px]">Belum ada data produk</p>
                       </td>
-                      <td className="p-3">
-                        <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black tracking-tighter ${
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="grid grid-cols-1 gap-3 md:hidden p-3 bg-slate-50/50">
+              {products
+                .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(p => (
+                  <div key={p.id} className="bg-white p-3 rounded-lg border border-neutral-200 shadow-sm flex flex-col gap-2">
+                    <div className="flex justify-between items-start border-b border-neutral-100 pb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-neutral-100 rounded overflow-hidden shrink-0 border border-neutral-200 flex items-center justify-center">
+                          {p.imageUrl ? (
+                            <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <Package className="w-4 h-4 text-neutral-400" />
+                          )}
+                        </div>
+                        <div>
+                          <span className="font-extrabold text-indigo-900 text-xs block leading-tight">{p.name}</span>
+                          <span className="text-[10px] text-neutral-400 block truncate max-w-[150px]">{p.description || '-'}</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-1 shrink-0">
+                        <button 
+                          onClick={() => handleEditProduct(p)}
+                          className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteProduct(p.id, p.name)}
+                          className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-y-1 text-[11px] text-neutral-600 font-bold">
+                      <div>Kategori:</div>
+                      <div className="text-right">
+                        <span className={`px-1.5 py-0.5 rounded-[4px] text-[9px] font-black tracking-tighter ${
                           p.category === 'BERAS' ? 'bg-blue-100 text-blue-700' :
-                          p.category === 'JAGUNG' ? 'bg-amber-100 text-amber-700' : 'bg-neutral-100 text-neutral-700'
+                          p.category === 'JAGUNG' ? 'bg-amber-100 text-amber-700' : 'bg-neutral-100 text-neutral-750'
                         }`}>
                           {p.category}
                         </span>
-                      </td>
-                      <td className="p-3 font-mono font-bold text-neutral-700">Rp {p.pricePerKg.toLocaleString('id-ID')}</td>
-                      <td className="p-3">
-                        <div className="flex flex-col">
-                          <span className="font-mono font-bold text-neutral-900">{p.stockAvailable.toLocaleString('id-ID')} Kg</span>
-                          <div className="w-16 h-1 bg-neutral-100 rounded-full mt-1 overflow-hidden">
-                            <div 
-                              className={`h-full ${p.stockAvailable > 5000 ? 'bg-emerald-500' : p.stockAvailable > 1000 ? 'bg-amber-500' : 'bg-rose-500'}`}
-                              style={{ width: `${Math.min(100, (p.stockAvailable / 10000) * 100)}%` }}
-                            ></div>
-                          </div>
+                      </div>
+                      <div>Harga:</div>
+                      <div className="text-neutral-850 font-mono text-right font-bold">Rp {p.pricePerKg.toLocaleString('id-ID')}</div>
+                      <div>Stok Available:</div>
+                      <div className="text-right">
+                        <span className="font-mono font-bold text-neutral-900">{p.stockAvailable.toLocaleString('id-ID')} Kg</span>
+                        <div className="w-20 h-1 bg-neutral-100 rounded-full mt-1 overflow-hidden ml-auto">
+                          <div 
+                            className={`h-full ${p.stockAvailable > 5000 ? 'bg-emerald-500' : p.stockAvailable > 1000 ? 'bg-amber-500' : 'bg-rose-500'}`}
+                            style={{ width: `${Math.min(100, (p.stockAvailable / 10000) * 100)}%` }}
+                          ></div>
                         </div>
-                      </td>
-                      <td className="p-3">
-                        <div className="flex gap-1.5 justify-center opacity-40 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => handleEditProduct(p)} className="bg-white hover:bg-blue-50 text-neutral-400 hover:text-blue-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer" title="Edit Produk">
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </button>
-                          <button onClick={() => handleDeleteProduct(p.id, p.name)} className="bg-white hover:bg-rose-50 text-neutral-400 hover:text-rose-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer" title="Hapus Produk">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                {products.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="p-10 text-center">
-                      <Package className="w-10 h-10 text-neutral-200 mx-auto mb-2" />
-                      <p className="text-neutral-400 font-bold uppercase tracking-widest text-[10px]">Belum ada data produk</p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+                  </div>
+              ))}
+              {products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                <div className="p-4 text-center text-neutral-400 text-xs">Belum ada data varian produk cocok.</div>
+              )}
+            </div>
           </div>
         )}
 
         {/* GRID: USERS */}
         {activeSubTab === 'USERS' && (
-          <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
-            <table className="w-full text-left border-collapse text-xs min-w-[800px]">
-              <thead>
-                <tr className="bg-[#064e3b] text-white uppercase font-mono tracking-wider text-[10px] border-b border-rose-900/10">
-                  <th className="p-3 font-semibold">Identitas User</th>
-                  <th className="p-3 font-semibold">Username Login</th>
-                  <th className="p-3 font-semibold">Hak Akses / Role</th>
-                  <th className="p-3 font-semibold text-center">Status Keaktifan</th>
-                  <th className="p-3 font-semibold">Login Terakhir</th>
-                  <th className="p-3 font-semibold text-center w-28">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-150">
-                {users
-                  .filter(u => u.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || u.username.toLowerCase().includes(searchQuery.toLowerCase()))
-                  .map(u => (
-                    <tr key={u.id} className="hover:bg-slate-50 text-neutral-800 group">
-                      <td className="p-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-[10px]">
-                            <Users className="w-3.5 h-3.5" />
+          <div className="rounded-xl border border-neutral-200 overflow-hidden">
+            <div className="overflow-x-auto custom-scrollbar hidden md:block">
+              <table className="w-full text-left border-collapse text-xs min-w-[800px]">
+                <thead>
+                  <tr className="bg-[#064e3b] text-white uppercase font-mono tracking-wider text-[10px] border-b border-rose-900/10">
+                    <th className="p-3 font-semibold">Identitas User</th>
+                    <th className="p-3 font-semibold">Username Login</th>
+                    <th className="p-3 font-semibold">Hak Akses / Role</th>
+                    <th className="p-3 font-semibold text-center">Status Keaktifan</th>
+                    <th className="p-3 font-semibold">Login Terakhir</th>
+                    <th className="p-3 font-semibold text-center w-28">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-150">
+                  {users
+                    .filter(u => u.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || u.username.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map(u => (
+                      <tr key={u.id} className="hover:bg-slate-50 text-neutral-800 group">
+                        <td className="p-3">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-[10px]">
+                              <Users className="w-3.5 h-3.5" />
+                            </div>
+                            <span className="font-extrabold text-neutral-900 uppercase leading-none">{u.fullName}</span>
                           </div>
-                          <span className="font-extrabold text-neutral-900 uppercase leading-none">{u.fullName}</span>
-                        </div>
-                      </td>
-                      <td className="p-3 font-mono font-bold text-emerald-700">{u.username}</td>
-                      <td className="p-3">
-                        <div className="flex flex-col gap-1 items-start">
-                          <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black tracking-wide uppercase ${
-                            u.role === 'admin' ? 'bg-amber-100 text-amber-700' :
-                            u.role === 'pimpinan' ? 'bg-emerald-100 text-emerald-700' :
-                            u.role === 'operator' ? 'bg-indigo-100 text-indigo-700' : 'bg-neutral-100 text-neutral-700'
-                          }`}>
-                            {u.role}
+                        </td>
+                        <td className="p-3 font-mono font-bold text-emerald-700">{u.username}</td>
+                        <td className="p-3">
+                          <div className="flex flex-col gap-1 items-start">
+                            <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black tracking-wide uppercase ${
+                              u.role === 'admin' ? 'bg-amber-100 text-amber-700' :
+                              u.role === 'pimpinan' ? 'bg-emerald-100 text-emerald-700' :
+                              u.role === 'operator' ? 'bg-indigo-100 text-indigo-700' : 'bg-neutral-100 text-neutral-700'
+                            }`}>
+                              {u.role}
+                            </span>
+                            <span className="text-[9px] font-bold text-neutral-500 uppercase tracking-tighter leading-none mt-1">
+                              {u.allowedTabs && u.allowedTabs.length > 0 ? (
+                                <span className="text-emerald-700 font-extrabold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
+                                  Menu Kustom ({u.allowedTabs.length})
+                                </span>
+                              ) : (
+                                <span className="text-neutral-400">
+                                  Sesuai Akses Default
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${u.isActive ? 'bg-emerald-500 text-white' : 'bg-neutral-300 text-white'}`}>
+                            {u.isActive ? 'AKTIF' : 'NON-AKTIF'}
                           </span>
-                          <span className="text-[9px] font-bold text-neutral-500 uppercase tracking-tighter leading-none mt-1">
-                            {u.allowedTabs && u.allowedTabs.length > 0 ? (
-                              <span className="text-emerald-700 font-extrabold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
-                                Menu Kustom ({u.allowedTabs.length})
-                              </span>
-                            ) : (
-                              <span className="text-neutral-400">
-                                Sesuai Akses Default
-                              </span>
-                            )}
-                          </span>
+                        </td>
+                        <td className="p-3 font-mono text-[9px] text-neutral-500">
+                          {u.lastLogin ? new Date(u.lastLogin).toLocaleString('id-ID') : '-'}
+                        </td>
+                        <td className="p-3">
+                          <div className="flex gap-1.5 justify-center opacity-40 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => handleEditUser(u)} className="bg-white hover:bg-emerald-50 text-neutral-400 hover:text-emerald-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer" title="Edit Akun">
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button onClick={() => handleDeleteUser(u.id, u.username)} disabled={u.username === 'admin'} className="bg-white hover:bg-rose-50 text-neutral-400 hover:text-rose-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-30" title="Hapus Akun">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="grid grid-cols-1 gap-3 md:hidden p-3 bg-slate-50/50">
+              {users
+                .filter(u => u.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || u.username.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(u => (
+                  <div key={u.id} className="bg-white p-3 rounded-lg border border-neutral-200 shadow-sm flex flex-col gap-2">
+                    <div className="flex justify-between items-center border-b border-neutral-100 pb-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-[10px]">
+                          <Users className="w-3 h-3" />
                         </div>
-                      </td>
-                      <td className="p-3 text-center">
+                        <span className="font-extrabold text-neutral-900 uppercase leading-none text-xs">{u.fullName}</span>
+                      </div>
+                      <div className="flex gap-1 shrink-0">
+                        <button 
+                          onClick={() => handleEditUser(u)}
+                          className="bg-sky-50 text-sky-700 hover:bg-sky-100 p-1.5 rounded transition cursor-pointer"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteUser(u.id, u.username)} 
+                          disabled={u.username === 'admin'}
+                          className="bg-red-50 text-red-650 hover:bg-red-100 p-1.5 rounded transition cursor-pointer disabled:opacity-30"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-y-1 text-[11px] text-neutral-600 font-bold">
+                      <div>Username Login:</div>
+                      <div className="text-emerald-750 font-mono text-right font-extrabold">{u.username}</div>
+                      <div>Hak Akses:</div>
+                      <div className="text-right flex flex-col items-end gap-1">
+                        <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black uppercase inline-block ${
+                          u.role === 'admin' ? 'bg-amber-100 text-amber-705' :
+                          u.role === 'pimpinan' ? 'bg-emerald-100 text-emerald-700' :
+                          u.role === 'operator' ? 'bg-indigo-100 text-indigo-705' : 'bg-neutral-100 text-neutral-700'
+                        }`}>
+                          {u.role}
+                        </span>
+                        {u.allowedTabs && u.allowedTabs.length > 0 && (
+                          <span className="text-emerald-700 text-[9px] font-extrabold bg-emerald-50 px-1 py-0.5 rounded border border-emerald-100 inline-block">
+                            Menu Kustom ({u.allowedTabs.length})
+                          </span>
+                        )}
+                      </div>
+                      <div>Status Keaktifan:</div>
+                      <div className="text-right">
                         <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${u.isActive ? 'bg-emerald-500 text-white' : 'bg-neutral-300 text-white'}`}>
                           {u.isActive ? 'AKTIF' : 'NON-AKTIF'}
                         </span>
-                      </td>
-                      <td className="p-3 font-mono text-[9px] text-neutral-500">
+                      </div>
+                      <div>Login Terakhir:</div>
+                      <div className="text-right font-mono text-[9px] text-neutral-500">
                         {u.lastLogin ? new Date(u.lastLogin).toLocaleString('id-ID') : '-'}
-                      </td>
-                      <td className="p-3">
-                        <div className="flex gap-1.5 justify-center opacity-40 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => handleEditUser(u)} className="bg-white hover:bg-emerald-50 text-neutral-400 hover:text-emerald-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer" title="Edit Akun">
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </button>
-                          <button onClick={() => handleDeleteUser(u.id, u.username)} disabled={u.username === 'admin'} className="bg-white hover:bg-rose-50 text-neutral-400 hover:text-rose-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-30" title="Hapus Akun">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+                  </div>
+              ))}
+              {users.filter(u => u.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || u.username.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                <div className="p-4 text-center text-neutral-400 text-xs">Belum ada akun cocok.</div>
+              )}
+            </div>
           </div>
         )}
 
@@ -3010,55 +3610,93 @@ export default function DatabaseMasterModule({
                 <History className="w-3 h-3" /> Rekaman Aktivitas Pengguna (Log Sistem)
               </span>
             </div>
-            <div className="overflow-x-auto custom-scrollbar rounded-xl border border-neutral-200">
-              <table className="w-full text-left border-collapse text-xs min-w-[900px]">
-                <thead>
-                  <tr className="bg-slate-800 text-white uppercase font-mono tracking-wider text-[9px] border-b border-slate-700">
-                    <th className="p-2.5 font-semibold">Waktu / Tanggal</th>
-                    <th className="p-2.5 font-semibold">Pengguna</th>
-                    <th className="p-2.5 font-semibold">Modul</th>
-                    <th className="p-2.5 font-semibold">Tindakan</th>
-                    <th className="p-2.5 font-semibold">Detail Kejadian</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-100 bg-white">
-                  {activityLogs
-                    .filter(log => 
-                      log.details.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                      log.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      log.module.toLowerCase().includes(searchQuery.toLowerCase())
-                    )
-                    .map(log => (
-                      <tr key={log.id} className="hover:bg-slate-50 text-[11px] text-neutral-700">
-                        <td className="p-2.5 font-mono text-[9px] text-neutral-400 font-bold whitespace-nowrap">
-                          {new Date(log.timestamp).toLocaleString('id-ID')}
-                        </td>
-                        <td className="p-2.5 font-bold">
-                          <span className="block text-indigo-900">{log.username}</span>
-                          <span className="text-[8px] uppercase tracking-tighter text-neutral-400 font-black">{log.role}</span>
-                        </td>
-                        <td className="p-2.5 font-black font-mono">
-                          <span className="bg-neutral-100 px-1.5 py-0.5 rounded text-[9px] text-neutral-600">{log.module}</span>
-                        </td>
-                        <td className="p-2.5">
-                           <span className={`font-black text-[10px] px-2 py-0.5 rounded ${
-                             log.action === 'AUTH' ? 'text-blue-600' :
-                             log.action.includes('DELETE') ? 'text-rose-600' :
-                             log.action.includes('ADD') ? 'text-emerald-600' : 'text-neutral-600'
-                           }`}>
-                             {log.action}
-                           </span>
-                        </td>
-                        <td className="p-2.5 italic text-neutral-500 font-medium">
-                          {log.details}
-                        </td>
-                      </tr>
-                    ))}
-                  {activityLogs.length === 0 && (
-                    <tr><td colSpan={5} className="p-10 text-center text-neutral-400 uppercase font-bold text-[10px]">Belum ada rekaman aktivitas</td></tr>
-                  )}
-                </tbody>
-              </table>
+            <div className="rounded-xl border border-neutral-200 overflow-hidden">
+              <div className="overflow-x-auto custom-scrollbar hidden md:block">
+                <table className="w-full text-left border-collapse text-xs min-w-[900px]">
+                  <thead>
+                    <tr className="bg-slate-800 text-white uppercase font-mono tracking-wider text-[9px] border-b border-slate-700">
+                      <th className="p-2.5 font-semibold">Waktu / Tanggal</th>
+                      <th className="p-2.5 font-semibold">Pengguna</th>
+                      <th className="p-2.5 font-semibold">Modul</th>
+                      <th className="p-2.5 font-semibold">Tindakan</th>
+                      <th className="p-2.5 font-semibold">Detail Kejadian</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-100 bg-white">
+                    {activityLogs
+                      .filter(log => 
+                        log.details.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        log.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        log.module.toLowerCase().includes(searchQuery.toLowerCase())
+                      )
+                      .map(log => (
+                        <tr key={log.id} className="hover:bg-slate-50 text-[11px] text-neutral-700">
+                          <td className="p-2.5 font-mono text-[9px] text-neutral-400 font-bold whitespace-nowrap">
+                            {new Date(log.timestamp).toLocaleString('id-ID')}
+                          </td>
+                          <td className="p-2.5 font-bold">
+                            <span className="block text-indigo-900">{log.username}</span>
+                            <span className="text-[8px] uppercase tracking-tighter text-neutral-400 font-black">{log.role}</span>
+                          </td>
+                          <td className="p-2.5 font-black font-mono">
+                            <span className="bg-neutral-100 px-1.5 py-0.5 rounded text-[9px] text-neutral-600">{log.module}</span>
+                          </td>
+                          <td className="p-2.5">
+                             <span className={`font-black text-[10px] px-2 py-0.5 rounded ${
+                               log.action === 'AUTH' ? 'text-blue-600' :
+                               log.action.includes('DELETE') ? 'text-rose-600' :
+                               log.action.includes('ADD') ? 'text-emerald-600' : 'text-neutral-600'
+                             }`}>
+                               {log.action}
+                             </span>
+                          </td>
+                          <td className="p-2.5 italic text-neutral-500 font-medium">
+                            {log.details}
+                          </td>
+                        </tr>
+                      ))}
+                    {activityLogs.length === 0 && (
+                      <tr><td colSpan={5} className="p-10 text-center text-neutral-400 uppercase font-bold text-[10px]">Belum ada rekaman aktivitas</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card View for Logs */}
+              <div className="grid grid-cols-1 gap-3 md:hidden p-3 bg-slate-50/50">
+                {activityLogs
+                  .filter(log => 
+                    log.details.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                    log.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    log.module.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
+                  .map(log => (
+                    <div key={log.id} className="bg-white p-3 rounded-lg border border-neutral-200 shadow-sm flex flex-col gap-1.5 text-[11px]">
+                      <div className="flex justify-between items-center border-b border-neutral-100 pb-1.5">
+                        <span className="font-mono text-[9px] text-neutral-400 font-bold">{new Date(log.timestamp).toLocaleString('id-ID')}</span>
+                        <span className={`font-extrabold text-[9px] px-1.5 py-0.5 rounded ${
+                          log.action === 'AUTH' ? 'bg-blue-50 text-blue-700 border border-blue-100' :
+                          log.action.includes('DELETE') ? 'bg-rose-50 text-rose-700 border border-rose-100' :
+                          log.action.includes('ADD') ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-neutral-105 text-neutral-600 border border-neutral-200'
+                        }`}>
+                          {log.action}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-y-1 text-neutral-600 font-bold">
+                        <div>Pengguna:</div>
+                        <div className="text-right text-indigo-900">{log.username} <span className="text-[8px] uppercase text-neutral-400 font-black">({log.role})</span></div>
+                        <div>Modul:</div>
+                        <div className="text-right text-neutral-750 font-black">{log.module}</div>
+                      </div>
+                      <div className="text-neutral-500 italic mt-1 pt-1.5 border-t border-neutral-50 leading-relaxed font-semibold">
+                        {log.details}
+                      </div>
+                    </div>
+                ))}
+                {activityLogs.length === 0 && (
+                  <div className="p-4 text-center text-neutral-400 text-xs">Belum ada rekaman aktivitas cocok.</div>
+                )}
+              </div>
             </div>
           </div>
         )}

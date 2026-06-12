@@ -231,3 +231,14 @@ export interface ActivityLog {
   details: string;
 }
 
+export interface LaborKasbonRecord {
+  id: string;
+  date: string;
+  employeeId: string;
+  employeeName: string;
+  type: 'PINJAM' | 'BAYAR'; // PINJAM for advance loan, BAYAR for repayment
+  amount: number;
+  description: string;
+}
+
+

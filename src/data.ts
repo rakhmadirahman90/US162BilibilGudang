@@ -23,7 +23,8 @@ import {
   FinanceCategoryRecord,
   LaborRateRecord,
   CornMoistureRule,
-  ProductRecord
+  ProductRecord,
+  LaborKasbonRecord
 } from './types';
 import { DryerRecord } from './components/DryerModule';
 
@@ -562,4 +563,12 @@ export const initialDryerRecords: DryerRecord[] = [
   { id: 'dryer-2', date: '2026-06-09', batchNo: 'DRY-002', operator: 'Dedi', customerName: 'Koperasi Tani', wetWeight: 3000, dryWeight: 2600, moistureIn: 20, moistureOut: 14.5, dryingCostPerKg: 250, laborCost: 100000, totalCost: 750000, status: 'SELESAI' },
   { id: 'dryer-3', date: '2026-06-10', batchNo: 'DRY-003', operator: 'Wahyu', customerName: 'Pak Tani B', wetWeight: 6000, dryWeight: 5100, moistureIn: 24, moistureOut: 14, dryingCostPerKg: 250, laborCost: 200000, totalCost: 1475000, status: 'PROSES' }
 ];
+
+export const initialKasbonRecords: LaborKasbonRecord[] = [
+  { id: 'kb-1', date: '2026-06-08', employeeId: 'emp-5', employeeName: 'ALDI', type: 'PINJAM', amount: 500000, description: 'Sakit Keluarga' },
+  { id: 'kb-2', date: '2026-06-09', employeeId: 'emp-6', employeeName: 'AHMAD', type: 'PINJAM', amount: 300000, description: 'Biaya Sekolah Anak' },
+  { id: 'kb-3', date: '2026-06-10', employeeId: 'emp-5', employeeName: 'ALDI', type: 'BAYAR', amount: 200000, description: 'Potong Upah Panggul Harian' },
+  { id: 'kb-4', date: '2026-06-11', employeeId: 'emp-7', employeeName: 'JAYA', type: 'PINJAM', amount: 250000, description: 'Kebutuhan Dapur mendesak' },
+];
+
 

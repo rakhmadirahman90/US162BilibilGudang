@@ -80,5 +80,8 @@ service cloud.firestore {
     match /dryerRecords/{dryerId} {
       allow read, write: if isSignedIn() && isValidId(dryerId);
     }
+    match /kasbons/{kasbonId} {
+      allow read, write: if isSignedIn() && isValidId(kasbonId);
+    }
   }
 }

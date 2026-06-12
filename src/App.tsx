@@ -28,7 +28,8 @@ import {
   CornMoistureRule,
   ProductRecord,
   UserAccount,
-  ActivityLog
+  ActivityLog,
+  LaborKasbonRecord
 } from './types';
 import { 
   initialWeighbridgeTickets, 
@@ -51,7 +52,8 @@ import {
   initialLaborRates,
   initialCornMoistureRules,
   initialProducts,
-  initialDryerRecords
+  initialDryerRecords,
+  initialKasbonRecords
 } from './data';
 
 // Import our modular subcomponents
@@ -397,6 +399,17 @@ export default function App() {
     return saved ? JSON.parse(saved) : initialDryerRecords;
   });
 
+  const [kasbons, setKasbons] = useState<LaborKasbonRecord[]>(() => {
+    const saved = localStorage.getItem('bilibili_kasbons');
+    const parsed: LaborKasbonRecord[] = saved ? JSON.parse(saved) : initialKasbonRecords;
+    const seen = new Set();
+    return parsed.filter(kb => {
+      if (!kb || !kb.id || seen.has(kb.id)) return false;
+      seen.add(kb.id);
+      return true;
+    });
+  });
+
   const [users, setUsers] = useState<UserAccount[]>(() => {
     const saved = localStorage.getItem('bilibili_users');
     if (saved) return JSON.parse(saved);
@@ -485,6 +498,7 @@ export default function App() {
   useSyncCollection('cornMoistureRules', cornMoistureRules, setCornMoistureRules, initialCornMoistureRules);
   useSyncCollection('products', products, setProducts, initialProducts);
   useSyncCollection('dryerRecords', dryerRecords, setDryerRecords, initialDryerRecords);
+  useSyncCollection('kasbons', kasbons, setKasbons, initialKasbonRecords);
 
   // --- AUTOMATIC TONO SEEDING EFFECT FOR DATABASE SIMULATION ---
   React.useEffect(() => {
@@ -596,6 +610,7 @@ export default function App() {
   const syncedSetLaborRates = createSyncedSetter('laborRates', setLaborRates);
   const syncedSetCornMoistureRules = createSyncedSetter('cornMoistureRules', setCornMoistureRules);
   const syncedSetDryerRecords = createSyncedSetter('dryerRecords', setDryerRecords);
+  const syncedSetKasbons = createSyncedSetter('kasbons', setKasbons);
   const syncedSetUsers = createSyncedSetter('users', setUsers);
   const syncedSetLogs = createSyncedSetter('activityLogs', setActivityLogs);
 
@@ -959,6 +974,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('bilibili_rice_stock_v2', JSON.stringify(riceStockRecords));
   }, [riceStockRecords]);
+
+  useEffect(() => {
+    localStorage.setItem('bilibili_kasbons', JSON.stringify(kasbons));
+  }, [kasbons]);
 
   useEffect(() => {
     localStorage.setItem('bilibili_banks', JSON.stringify(banks));
@@ -2803,6 +2822,13 @@ export default function App() {
             employees={employees}
             banks={banks}
             categories={financeCategories}
+            kasbons={kasbons}
+            onAddKasbon={(r) => syncedSetKasbons(prev => [r, ...prev])}
+            onDeleteKasbon={(id) => syncedSetKasbons(prev => prev.filter(x => x.id !== id))}
+            inboundRecords={inboundRecords}
+            outboundRecords={outboundRecords}
+            serviceRecords={serviceRecords}
+            dryerRecords={dryerRecords}
             onAddDebt={handleAddDebt}
             onUpdateDebt={handleUpdateDebt}
             onDeleteDebt={handleDeleteDebt}

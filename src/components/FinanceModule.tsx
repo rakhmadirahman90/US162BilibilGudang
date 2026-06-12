@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { DebtRecord, FinancialRecord, EmployeeRecord, BankRecord, FinanceCategoryRecord } from '../types';
+import { DebtRecord, FinancialRecord, EmployeeRecord, BankRecord, FinanceCategoryRecord, LaborKasbonRecord, InboundRecord, OutboundRecord, ServiceRecord } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import { Landmark, PlusCircle, Search, Calendar, ChevronRight, Users, Scale, CreditCard, DollarSign, Download, Printer, Edit2, Trash2 } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
@@ -12,12 +12,24 @@ import { exportToCSV, printPDFReport } from '../utils/exportHelper';
 import { formatNumberInput, parseNumberInput } from '../utils/format';
 import SmartNumberInput from './SmartNumberInput';
 
+// Import our new subcomponents
+import LaborKasbonTab from './LaborKasbonTab';
+import ProfitLossTab from './ProfitLossTab';
+import { DryerRecord } from './DryerModule';
+
 interface FinanceModuleProps {
   debts: DebtRecord[];
   finances: FinancialRecord[];
   employees: EmployeeRecord[];
   banks?: BankRecord[];
   categories?: FinanceCategoryRecord[];
+  kasbons?: LaborKasbonRecord[];
+  onAddKasbon?: (record: LaborKasbonRecord) => void;
+  onDeleteKasbon?: (id: string) => void;
+  inboundRecords?: InboundRecord[];
+  outboundRecords?: OutboundRecord[];
+  serviceRecords?: ServiceRecord[];
+  dryerRecords?: DryerRecord[];
   onAddDebt: (record: DebtRecord) => void;
   onUpdateDebt: (record: DebtRecord) => void;
   onDeleteDebt: (id: string) => void;
@@ -33,6 +45,13 @@ export default function FinanceModule({
   employees,
   banks = [],
   categories = [],
+  kasbons = [],
+  onAddKasbon = () => {},
+  onDeleteKasbon = () => {},
+  inboundRecords = [],
+  outboundRecords = [],
+  serviceRecords = [],
+  dryerRecords = [],
   onAddDebt,
   onUpdateDebt,
   onDeleteDebt,
@@ -42,7 +61,7 @@ export default function FinanceModule({
   onDeleteFinance
 }: FinanceModuleProps) {
   const { t, language } = useLanguage();
-  const [activeSubTab, setActiveSubTab] = useState<'UTANG' | 'MAKELAR' | 'MUTASI'>('UTANG');
+  const [activeSubTab, setActiveSubTab] = useState<'UTANG' | 'MAKELAR' | 'MUTASI' | 'KASBON' | 'LABARUGI'>('UTANG');
   const [editingDebtId, setEditingDebtId] = useState<string | null>(null);
   const [editingFinId, setEditingFinId] = useState<string | null>(null);
 
@@ -357,36 +376,56 @@ export default function FinanceModule({
     <div className="flex flex-col gap-6">
 
       {/* FINANCIAL SUB NAVIGATION MATCHING FOLDERS */}
-      <div className="flex border-b border-neutral-200">
+      <div className="flex overflow-x-auto border-b border-neutral-200 custom-scrollbar pr-2 whitespace-nowrap">
         <button
           onClick={() => setActiveSubTab('UTANG')}
-          className={`px-4 py-2 text-xs font-bold transition-all cursor-pointer uppercase ${
+          className={`px-4 py-2.5 text-xs font-black transition-all cursor-pointer uppercase shrink-0 ${
             activeSubTab === 'UTANG' 
               ? 'border-b-2 border-emerald-600 text-emerald-800 bg-emerald-50/50' 
               : 'text-neutral-500 hover:text-neutral-800'
           }`}
         >
-          📂 {t.financeTitle.split('&')[0].trim()}
+          📂 {t.financeTitle ? t.financeTitle.split('&')[0].trim() : 'UTANG SUPPLIER'}
         </button>
         <button
           onClick={() => setActiveSubTab('MAKELAR')}
-          className={`px-4 py-2 text-xs font-bold transition-all cursor-pointer uppercase ${
+          className={`px-4 py-2.5 text-xs font-black transition-all cursor-pointer uppercase shrink-0 ${
             activeSubTab === 'MAKELAR' 
               ? 'border-b-2 border-emerald-600 text-emerald-800 bg-emerald-50/50' 
               : 'text-neutral-500 hover:text-neutral-800'
           }`}
         >
-          📂 {t.brokerEmployees || 'BURUH & MAKELAR'}
+          📂 {t.brokerEmployees || 'KOMISI MAKELAR'}
         </button>
         <button
           onClick={() => setActiveSubTab('MUTASI')}
-          className={`px-4 py-2 text-xs font-bold transition-all cursor-pointer uppercase ${
+          className={`px-4 py-2.5 text-xs font-black transition-all cursor-pointer uppercase shrink-0 ${
             activeSubTab === 'MUTASI' 
               ? 'border-b-2 border-emerald-600 text-emerald-800 bg-emerald-50/50' 
               : 'text-neutral-500 hover:text-neutral-800'
           }`}
         >
           📂 {t.cashMutation || 'MUTASI KAS'}
+        </button>
+        <button
+          onClick={() => setActiveSubTab('KASBON')}
+          className={`px-4 py-2.5 text-xs font-black transition-all cursor-pointer uppercase shrink-0 ${
+            activeSubTab === 'KASBON' 
+              ? 'border-b-2 border-emerald-600 text-emerald-800 bg-emerald-50/50' 
+              : 'text-neutral-500 hover:text-neutral-800'
+          }`}
+        >
+          📂 KASBON BURUH 💸
+        </button>
+        <button
+          onClick={() => setActiveSubTab('LABARUGI')}
+          className={`px-4 py-2.5 text-xs font-black transition-all cursor-pointer uppercase shrink-0 ${
+            activeSubTab === 'LABARUGI' 
+              ? 'border-b-2 border-emerald-600 text-emerald-800 bg-emerald-50/50' 
+              : 'text-neutral-500 hover:text-neutral-800'
+          }`}
+        >
+          📈 LABA RUGI PERUSAHAAN 📉
         </button>
       </div>
 
@@ -877,6 +916,28 @@ export default function FinanceModule({
             </div>
           </div>
         </div>
+      )}
+
+      {/* TAB 4: KASBON BURUH */}
+      {activeSubTab === 'KASBON' && (
+        <LaborKasbonTab
+          employees={employees}
+          kasbons={kasbons}
+          onAddKasbon={onAddKasbon}
+          onDeleteKasbon={onDeleteKasbon}
+        />
+      )}
+
+      {/* TAB 5: LAPORAN LABA RUGI */}
+      {activeSubTab === 'LABARUGI' && (
+        <ProfitLossTab
+          inboundRecords={inboundRecords}
+          outboundRecords={outboundRecords}
+          serviceRecords={serviceRecords}
+          dryerRecords={dryerRecords}
+          finances={finances}
+          debts={debts}
+        />
       )}
 
       {/* CONFIRM MODAL OVERLAY */}
