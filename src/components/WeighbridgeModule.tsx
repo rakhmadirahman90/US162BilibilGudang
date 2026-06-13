@@ -116,7 +116,23 @@ export default function WeighbridgeModule({
   }, [tickets, isCreatingNew]);
 
   // Handle auto-updating the calculations
-  const calculateNetWeight = (gross: number, tare: number, bagPct: number, refaksiPct: number): number => {
+  const calculateNetWeight = (w1: number, w2: number, bagPct: number, refaksiPct: number): number => {
+    // If we only have Timbang 1 done (w2 is 0)
+    if (!w2 || w2 === 0) {
+      const rawNet = w1;
+      if (rawNet <= 0) return 0;
+      
+      const bagDeduction = rawNet * (bagPct / 100);
+      const refaksiDeduction = rawNet * (refaksiPct / 100);
+      
+      const finalNet = rawNet - bagDeduction - refaksiDeduction;
+      return Math.max(0, Math.round(finalNet));
+    }
+    
+    // When both weights exist, we determine the payload cargo weight as the absolute difference.
+    // Gross is the larger weight (loaded truck), Tare is the smaller weight (empty truck).
+    const gross = Math.max(w1, w2);
+    const tare = Math.min(w1, w2);
     const rawNet = gross - tare;
     if (rawNet <= 0) return 0;
     
@@ -129,12 +145,10 @@ export default function WeighbridgeModule({
   };
 
   // Helper values
-  const currentGross = selectedTicket ? selectedTicket.timbang1Weight : 0;
-  const currentTare = selectedTicket ? selectedTicket.timbang2Weight : 0;
   const computedNet = (selectedTicket || isCreatingNew || isEditing) 
     ? calculateNetWeight(
-        currentGross || simulatorWeight, 
-        currentTare, 
+        selectedTicket ? selectedTicket.timbang1Weight : simulatorWeight, 
+        selectedTicket ? (selectedTicket.timbang2Weight > 0 ? selectedTicket.timbang2Weight : simulatorWeight) : 0, 
         bagDeductionPercent, 
         refaksiPercent
       )
@@ -209,12 +223,18 @@ export default function WeighbridgeModule({
     } else if (selectedTicket) {
       // Re-weigh 1 for existing ticket
       const executeUpdate = () => {
+        const w1 = simulatorWeight;
+        const w2 = selectedTicket.timbang2Weight;
+        const actualGross = w2 > 0 ? Math.max(w1, w2) : w1;
+        const actualTare = w2 > 0 ? Math.min(w1, w2) : 0;
+        
         const updated: WeighbridgeTicket = {
           ...selectedTicket,
           timbang1Time: nowStr,
-          timbang1Weight: simulatorWeight,
-          grossWeight: simulatorWeight,
-          netWeight: calculateNetWeight(simulatorWeight, selectedTicket.timbang2Weight, selectedTicket.bagDeductionPercent, selectedTicket.refaksiPercent)
+          timbang1Weight: w1,
+          grossWeight: actualGross,
+          tareWeight: actualTare,
+          netWeight: calculateNetWeight(w1, w2, selectedTicket.bagDeductionPercent, selectedTicket.refaksiPercent)
         };
         onUpdateTicket(updated);
         setSelectedTicket(updated);
@@ -246,15 +266,21 @@ export default function WeighbridgeModule({
 
     const nowStr = new Date().toLocaleString(language === 'id' ? 'id-ID' : 'en-US', { hour12: false }).replace(/\//g, '-');
     const executeTimbang2 = () => {
+      const w1 = selectedTicket.timbang1Weight;
+      const w2 = simulatorWeight;
+      const actualGross = Math.max(w1, w2);
+      const actualTare = Math.min(w1, w2);
+
       const updated: WeighbridgeTicket = {
         ...selectedTicket,
         timbang2Time: nowStr,
-        timbang2Weight: simulatorWeight,
-        tareWeight: simulatorWeight,
+        timbang2Weight: w2,
+        grossWeight: actualGross,
+        tareWeight: actualTare,
         status: 'COMPLETED',
         netWeight: calculateNetWeight(
-          selectedTicket.timbang1Weight,
-          simulatorWeight,
+          w1,
+          w2,
           selectedTicket.bagDeductionPercent,
           selectedTicket.refaksiPercent
         )
@@ -770,6 +796,11 @@ export default function WeighbridgeModule({
                   <button 
                     onClick={() => {
                       if (selectedTicket) {
+                        const w1 = selectedTicket.timbang1Weight;
+                        const w2 = selectedTicket.timbang2Weight;
+                        const actualGross = w2 > 0 ? Math.max(w1, w2) : w1;
+                        const actualTare = w2 > 0 ? Math.min(w1, w2) : 0;
+
                         const updated: WeighbridgeTicket = {
                           ...selectedTicket,
                           ticketNo,
@@ -779,7 +810,9 @@ export default function WeighbridgeModule({
                           bagDeductionPercent,
                           refaksiPercent,
                           notes,
-                          netWeight: calculateNetWeight(selectedTicket.timbang1Weight, selectedTicket.timbang2Weight, bagDeductionPercent, refaksiPercent)
+                          grossWeight: actualGross,
+                          tareWeight: actualTare,
+                          netWeight: calculateNetWeight(w1, w2, bagDeductionPercent, refaksiPercent)
                         };
                         onUpdateTicket(updated);
                         setSelectedTicket(updated);

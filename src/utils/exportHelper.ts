@@ -796,8 +796,8 @@ export function printServiceSlip(record: ServiceRecord, staffName: string = "Asm
 }
 
 export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Asma") {
-  const bruto = ticket.timbang1Weight ?? 0;
-  const tara = ticket.timbang2Weight ?? 0;
+  const bruto = ticket.grossWeight ?? 0;
+  const tara = ticket.tareWeight ?? 0;
   const net = ticket.netWeight ?? 0;
   const rawNet = bruto - tara;
   const potKrg = rawNet * ((ticket.bagDeductionPercent ?? 0) / 100);

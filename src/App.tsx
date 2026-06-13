@@ -115,6 +115,7 @@ import {
   X,
   ChevronLeft,
   Menu,
+  LogOut,
 } from 'lucide-react';
 
 // Define professional industrial & agricultural application themes
@@ -820,6 +821,7 @@ export default function App() {
   const [dashFeedTab, setDashFeedTab] = useState<'WEIGH' | 'INBOUND' | 'OUTBOUND' | 'SERVICES' | 'FINANCE'>('WEIGH');
 
   // --- SETTINGS STATE ---
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [printerName, setPrinterName] = useState(() => localStorage.getItem('bilibili_printer_name') || 'EPSON LX-310');
 
@@ -1738,12 +1740,73 @@ export default function App() {
                 <SettingsIcon className="w-4.5 h-4.5" />
               </button>
 
-              {navLayout === 'TOP' && sessionUser && (
-                <div className="hidden md:flex items-center gap-2 ml-2 border-l border-white/20 pl-4">
-                  <span className={`text-[9px] px-2 py-0.5 rounded font-black font-mono tracking-wide uppercase ${sessionUser.role === 'admin' ? 'bg-amber-500 text-neutral-900 shadow-sm' : 'bg-indigo-600 text-white'}`}>{sessionUser.role}</span>
-                  <button onClick={handleSessionLogout} className="text-[10px] font-black p-1.5 rounded-lg border border-red-500 bg-red-600/20 text-white hover:bg-red-600">
-                    <X className="w-3.5 h-3.5" />
+              {sessionUser && (
+                <div className="relative border-l border-white/20 pl-2 sm:pl-3.5 ml-1 sm:ml-2">
+                  <button 
+                    onClick={() => setUserMenuOpen(!userMenuOpen)} 
+                    className={`flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 rounded-xl border transition-all cursor-pointer shadow-sm text-xs font-bold active:scale-95 ${theme.statusBoxBg} ${theme.statusBoxBorder} text-white hover:brightness-110`}
+                  >
+                    <div className="w-5 h-5 rounded-full bg-yellow-450 border border-yellow-300 text-neutral-900 font-extrabold text-[10px] flex items-center justify-center uppercase shadow-inner shrink-0">
+                      {sessionUser.username[0]}
+                    </div>
+                    <span className="max-w-[70px] sm:max-w-[120px] truncate font-mono text-[10px] sm:text-[11px] font-black uppercase text-yellow-300 leading-none">
+                      {sessionUser.username}
+                    </span>
                   </button>
+
+                  <AnimatePresence>
+                    {userMenuOpen && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
+                        <motion.div
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-2xl border border-neutral-200 p-4 z-50 text-neutral-800"
+                        >
+                          <div className="flex items-center gap-2.5 border-b border-neutral-100 pb-3 mb-3">
+                            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white text-xs font-black flex items-center justify-center uppercase shrink-0">
+                              {sessionUser.username[0]}
+                            </div>
+                            <div className="overflow-hidden">
+                              <h4 className="font-extrabold text-neutral-900 text-xs uppercase truncate leading-none mb-1">{sessionUser.username}</h4>
+                              <span className={`inline-block px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
+                                sessionUser.role === 'admin' ? 'bg-amber-100 text-amber-700' :
+                                sessionUser.role === 'pimpinan' ? 'bg-emerald-100 text-emerald-700' :
+                                'bg-indigo-100 text-indigo-700'
+                              }`}>
+                                {sessionUser.role}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5 text-[9px] text-neutral-400 font-bold uppercase tracking-wide mb-3">
+                            <div className="flex justify-between items-center">
+                              <span>Aktivitas Sesi:</span>
+                              <span className="text-emerald-700 font-mono">Aktif</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span>Instansi Gudang:</span>
+                              <span className="text-neutral-700 truncate max-w-[100px]">US Bilibili 162</span>
+                            </div>
+                          </div>
+
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              setUserMenuOpen(false);
+                              handleSessionLogout();
+                            }}
+                            className="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 transition-colors cursor-pointer active:scale-95 shadow-sm"
+                          >
+                            <LogOut className="w-3 h-3 text-white" />
+                            <span>Logout Sesi</span>
+                          </button>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
             </div>

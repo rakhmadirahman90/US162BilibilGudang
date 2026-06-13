@@ -26,8 +26,8 @@ Barang: ${ticket.goodsName}
 Tujuan/Relasi: ${ticket.agency}
 
 *Detail Timbangan:*
-Bruto (Kotor): ${ticket.timbang1Weight.toLocaleString('id-ID')} Kg
-Tara (Kosong): ${ticket.timbang2Weight.toLocaleString('id-ID')} Kg
+Bruto (Kotor): ${ticket.grossWeight.toLocaleString('id-ID')} Kg
+Tara (Kosong): ${ticket.tareWeight.toLocaleString('id-ID')} Kg
 Netto (Bersih): ${ticket.netWeight.toLocaleString('id-ID')} Kg
 
 Status: ${ticket.status}
