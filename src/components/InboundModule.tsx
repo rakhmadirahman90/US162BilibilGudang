@@ -9,7 +9,7 @@ import { getRefaksiByRule, initialCornMoistureRules } from '../data';
 import { useLanguage } from '../i18n/LanguageContext';
 import ConfirmModal from './ConfirmModal';
 import WhatsAppModal from './WhatsAppModal';
-import { ArrowDownCircle, PlusCircle, Search, Calendar, Scale, Hammer, Percent, Archive, Download, Printer, Edit2, X, MessageCircle } from 'lucide-react';
+import { ArrowDownCircle, PlusCircle, Search, Calendar, Scale, Hammer, Percent, Archive, Download, Printer, Edit2, X, MessageCircle, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { exportToCSV, printPDFReport, printCombinedSlip, getHTMLForPDF } from '../utils/exportHelper';
 import { buildInboundWAText, sendWhatsAppMessage } from '../utils/whatsappHelper';
@@ -327,6 +327,79 @@ export default function InboundModule({
     printPDFReport('Laporan Penerimaan Barang Masuk', headers, rows, summaries);
   };
 
+  const handleSimulateAllFour = () => {
+    const baseDate = new Date().toISOString().split('T')[0];
+    const baseGross = 10000;
+    const baseTare = 3000;
+    const rawNet = baseGross - baseTare; // 7,000 kg
+    const priceKg = 4500;
+    
+    const simulations = [
+      {
+        suffix: "BIJI MATI",
+        vehicle: "DD 8011 BM",
+        dead: 2.5, mold: 0, small: 0, trash: 0,
+        driverName: "SOPIR BIJI MATI"
+      },
+      {
+        suffix: "JAMUR",
+        vehicle: "DD 8012 JM",
+        dead: 0, mold: 3.0, small: 0, trash: 0,
+        driverName: "SOPIR JAMUR"
+      },
+      {
+        suffix: "BIJI KECIL",
+        vehicle: "DD 8013 BK",
+        dead: 0, mold: 0, small: 1.5, trash: 0,
+        driverName: "SOPIR BIJI KECIL"
+      },
+      {
+        suffix: "SAMPAH HALUS",
+        vehicle: "DD 8014 SH",
+        dead: 0, mold: 0, small: 0, trash: 2.0,
+        driverName: "SOPIR SAMPAH HALUS"
+      }
+    ];
+
+    simulations.forEach((sim, idx) => {
+      const deadDed = rawNet * (sim.dead / 100);
+      const moldDed = rawNet * (sim.mold / 100);
+      const smallDed = rawNet * (sim.small / 100);
+      const trashDed = rawNet * (sim.trash / 100);
+      
+      const fNet = Math.round(rawNet - deadDed - moldDed - smallDed - trashDed);
+      const labor = 0; // manual
+      
+      const rec: InboundRecord = {
+        id: `inbound-sim-${Date.now()}-${idx}-${Math.floor(Math.random() * 1000)}`,
+        date: baseDate,
+        ticketNo: `SIM-${Math.floor(100 + Math.random() * 900)}`,
+        vehicleNo: sim.vehicle,
+        supplier: `SIMULASI SUPLIER ${sim.suffix}`,
+        commodity: 'JAGUNG',
+        grossWeight: baseGross,
+        tareWeight: baseTare,
+        refaksiKaPercent: 0,
+        bagDeductionPercent: 0,
+        deadKernelsPercent: sim.dead,
+        moldPercent: sim.mold,
+        smallKernelsPercent: sim.small,
+        fineTrashPercent: sim.trash,
+        netWeight: fNet,
+        moistureContent: 14.0,
+        warehouseSection: "Gudang Jagung Tengah",
+        laborCost: labor,
+        price: priceKg,
+        totalPrice: (fNet * priceKg) - labor,
+        driverName: sim.driverName
+      };
+      
+      onAddRecord(rec);
+    });
+
+    (window as any).__showToast?.("Berhasil: 4 data simulasi penerimaan jagung (Biji Mati, Jamur, Biji Kecil, Sampah) divalidasi dan disimpan!", "success");
+  };
+
   return (
     <div className="flex flex-col gap-6">
       
@@ -342,13 +415,24 @@ export default function InboundModule({
           </p>
         </div>
         
-        <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-4 py-2.5 rounded-lg flex items-center gap-1.5 shadow transition cursor-pointer"
-        >
-          <PlusCircle className="w-4 h-4" />
-          {showAddForm ? t.close : t.recordNew}
-        </button>
+        <div className="flex flex-wrap gap-2 items-center">
+          <button
+            onClick={handleSimulateAllFour}
+            type="button"
+            className="bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs px-3.5 py-2.5 rounded-lg flex items-center gap-1.5 shadow transition cursor-pointer"
+            title="Simulasikan 4 data jagung secara otomatis untuk uji coba potongan berat non-kadar air"
+          >
+            <Zap className="w-4 h-4 text-amber-200" />
+            <span>Simulasi Jagung (4 Potongan)</span>
+          </button>
+          <button
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-4 py-2.5 rounded-lg flex items-center gap-1.5 shadow transition cursor-pointer"
+          >
+            <PlusCircle className="w-4 h-4" />
+            {showAddForm ? t.close : t.recordNew}
+          </button>
+        </div>
       </div>
 
       {/* FORM BARANG MASUK */}
@@ -542,7 +626,99 @@ export default function InboundModule({
 
                 {commodity === 'JAGUNG' && (
                   <div className="bg-amber-50/40 p-3 rounded-lg border border-amber-100/60 flex flex-col gap-2 animate-fade-in text-[10px]">
-                    <span className="font-bold text-[10px] text-amber-800 uppercase tracking-wide">POTONGAN KUALITAS LAINNYA</span>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-amber-100/50 -mx-3 -mt-3 p-2 rounded-t-lg border-b border-amber-200/50 gap-1.5 mb-1.5">
+                      <span className="font-bold text-[10px] text-amber-900 uppercase tracking-wide px-1">POTONGAN KUALITAS LAINNYA</span>
+                      <div className="flex flex-wrap gap-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVehicleNo("DD 8011 BM");
+                            setSupplier("SIMULASI BIJI MATI");
+                            setCommodity("JAGUNG");
+                            setGrossWeight(10000);
+                            setTareWeight(3000);
+                            setBagDeductionPercent(0.0);
+                            setMoistureContent(14.0);
+                            setDeadKernelsPercent(2.5);
+                            setMoldPercent(0.0);
+                            setSmallKernelsPercent(0.0);
+                            setFineTrashPercent(0.0);
+                            setPrice(4500);
+                            setDriverName("SOPIR BIJI MATI");
+                            (window as any).__showToast?.("Sukses: Preset Simulasi Biji Mati (2.5%) dimuat!", "success");
+                          }}
+                          className="bg-amber-700 hover:bg-amber-800 text-white font-extrabold text-[8px] px-2 py-0.5 rounded transition cursor-pointer"
+                        >
+                          + Biji Mati (2.5%)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVehicleNo("DD 8012 JM");
+                            setSupplier("SIMULASI JAMUR");
+                            setCommodity("JAGUNG");
+                            setGrossWeight(10000);
+                            setTareWeight(3000);
+                            setBagDeductionPercent(0.0);
+                            setMoistureContent(14.0);
+                            setDeadKernelsPercent(0.0);
+                            setMoldPercent(3.0);
+                            setSmallKernelsPercent(0.0);
+                            setFineTrashPercent(0.0);
+                            setPrice(4500);
+                            setDriverName("SOPIR JAMUR");
+                            (window as any).__showToast?.("Sukses: Preset Simulasi Jamur (3.0%) dimuat!", "success");
+                          }}
+                          className="bg-amber-700 hover:bg-amber-800 text-white font-extrabold text-[8px] px-2 py-0.5 rounded transition cursor-pointer"
+                        >
+                          + Jamur (3.0%)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVehicleNo("DD 8013 BK");
+                            setSupplier("SIMULASI BIJI KECIL");
+                            setCommodity("JAGUNG");
+                            setGrossWeight(10000);
+                            setTareWeight(3000);
+                            setBagDeductionPercent(0.0);
+                            setMoistureContent(14.0);
+                            setDeadKernelsPercent(0.0);
+                            setMoldPercent(0.0);
+                            setSmallKernelsPercent(1.5);
+                            setFineTrashPercent(0.0);
+                            setPrice(4500);
+                            setDriverName("SOPIR BIJI KECIL");
+                            (window as any).__showToast?.("Sukses: Preset Simulasi Biji Kecil (1.5%) dimuat!", "success");
+                          }}
+                          className="bg-amber-700 hover:bg-amber-800 text-white font-extrabold text-[8px] px-2 py-0.5 rounded transition cursor-pointer"
+                        >
+                          + Biji Kecil (1.5%)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVehicleNo("DD 8014 SH");
+                            setSupplier("SIMULASI SAMPAH HALUS");
+                            setCommodity("JAGUNG");
+                            setGrossWeight(10000);
+                            setTareWeight(3000);
+                            setBagDeductionPercent(0.0);
+                            setMoistureContent(14.0);
+                            setDeadKernelsPercent(0.0);
+                            setMoldPercent(0.0);
+                            setSmallKernelsPercent(0.0);
+                            setFineTrashPercent(2.0);
+                            setPrice(4500);
+                            setDriverName("SOPIR SAMPAH HALUS");
+                            (window as any).__showToast?.("Sukses: Preset Simulasi Sampah Halus (2.0%) dimuat!", "success");
+                          }}
+                          className="bg-amber-700 hover:bg-amber-805 text-white font-extrabold text-[8px] px-2 py-0.5 rounded transition cursor-pointer"
+                        >
+                          + Sampah (2.0%)
+                        </button>
+                      </div>
+                    </div>
                     <div className="grid grid-cols-2 gap-2">
                       <SmartNumberInput
                         value={deadKernelsPercent}
