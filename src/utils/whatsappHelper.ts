@@ -138,7 +138,8 @@ Terima kasih.`;
 }
 
 export function buildRiceStockWAText(record: RiceStockRecord): string {
-  return `*BUKTI MUTASI STOK BERAS*
+  const isJagung = record.itemName?.toUpperCase() === 'JAGUNG';
+  return `*BUKTI MUTASI STOK ${isJagung ? 'JAGUNG' : 'BERAS'}*
 _Gudang Bilibili_
 
 Tanggal: ${formatReceiptDate(record.date)}
