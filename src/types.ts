@@ -17,6 +17,7 @@ export interface WeighbridgeTicket {
   tareWeight: number;
   bagDeductionPercent: number; // Pot. Krg %
   refaksiPercent: number;      // Refaksi % (e.g., moisture deduction)
+  cornFormulaFactor?: number;  // 1.4 or 1.3 for high moisture
   netWeight: number;           // Net weight in kg after deductions
   status: 'PENDING' | 'COMPLETED';
   notes?: string;
@@ -32,6 +33,7 @@ export interface InboundRecord {
   grossWeight: number;
   tareWeight: number;
   refaksiKaPercent: number; // Kadar Air Refaksi %
+  cornFormulaFactor?: number; // 1.4 or 1.3 for high moisture
   bagDeductionPercent: number; // Potongan Karung %
   deadKernelsPercent?: number; // Biji Mati %
   moldPercent?: number; // Jamur %

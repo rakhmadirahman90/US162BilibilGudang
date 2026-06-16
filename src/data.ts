@@ -97,7 +97,30 @@ export const initialCornMoistureRules: CornMoistureRule[] = [
 ];
 
 // Standard Corn Moisture Deduction (Refaksi KA Jagung) Table lookup helper
-export const getRefaksiByRule = (moisture: number, rules: CornMoistureRule[], type: 'LOKAL' | 'LUAR_DAERAH'): { refaksiPercent: number; description: string } => {
+export const getRefaksiByRule = (
+  moisture: number, 
+  rules: CornMoistureRule[], 
+  type: 'LOKAL' | 'LUAR_DAERAH',
+  formulaFactor: number = 1.4
+): { refaksiPercent: number; description: string } => {
+  // 1. High Moisture Outside Table (>30% LOKAL, >31% LUAR_DAERAH) Formulas
+  if (type === 'LOKAL' && moisture > 30.00) {
+    const base = Math.floor(moisture);
+    const diff = base - 14;
+    const refaksiPercent = Math.floor(diff * formulaFactor);
+    const description = `Formula ${formulaFactor} (>30%): (${base}-14) x ${formulaFactor} = ${refaksiPercent}%`;
+    return { refaksiPercent, description };
+  }
+
+  if (type === 'LUAR_DAERAH' && moisture > 31.00) {
+    const base = Math.floor(moisture);
+    const diff = base - 14;
+    const refaksiPercent = Math.floor(diff * formulaFactor);
+    const description = `Formula ${formulaFactor} (>31%): (${base}-14) x ${formulaFactor} = ${refaksiPercent}%`;
+    return { refaksiPercent, description };
+  }
+
+  // 2. Standard Table Lookup
   const filteredRules = rules.filter(r => r.type === type);
   for (const rule of filteredRules) {
     if (moisture >= rule.moistureMin && moisture <= rule.moistureMax) {
@@ -105,6 +128,21 @@ export const getRefaksiByRule = (moisture: number, rules: CornMoistureRule[], ty
       return { refaksiPercent: rule.refaksiPercent, description };
     }
   }
+
+  // fallback if somehow outside ranges but not caught by above
+  if (moisture > 30.00 && type === 'LOKAL') {
+    const base = Math.floor(moisture);
+    const diff = base - 14;
+    const refaksiPercent = Math.floor(diff * formulaFactor);
+    return { refaksiPercent, description: `Formula ${formulaFactor} (>30%): ${refaksiPercent}%` };
+  }
+  if (moisture > 31.00 && type === 'LUAR_DAERAH') {
+    const base = Math.floor(moisture);
+    const diff = base - 14;
+    const refaksiPercent = Math.floor(diff * formulaFactor);
+    return { refaksiPercent, description: `Formula ${formulaFactor} (>31%): ${refaksiPercent}%` };
+  }
+
   return { refaksiPercent: 0, description: "Tidak Ditemukan" };
 }
 

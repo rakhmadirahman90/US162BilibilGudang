@@ -102,6 +102,7 @@ export default function InboundModule({
   const [smallKernelsPercent, setSmallKernelsPercent] = useState(0.0);
   const [fineTrashPercent, setFineTrashPercent] = useState(0.0);
   const [refaksiType, setRefaksiType] = useState<'LOKAL' | 'LUAR_DAERAH'>('LOKAL');
+  const [cornFormulaFactor, setCornFormulaFactor] = useState<number>(1.4);
   const [warehouseSection, setWarehouseSection] = useState("Gudang Jagung Tengah");
   const [selectedLaborId, setSelectedLaborId] = useState("");
   const [laborCost, setLaborCost] = useState(0);
@@ -177,7 +178,7 @@ export default function InboundModule({
     // Determine refaksi KA
     const currentRules = cornMoistureRules && cornMoistureRules.length > 0 ? cornMoistureRules : initialCornMoistureRules;
     const refaksiPercentage = commodity === 'JAGUNG' 
-      ? getRefaksiByRule(moistureContent, currentRules, refaksiType).refaksiPercent
+      ? getRefaksiByRule(moistureContent, currentRules, refaksiType, cornFormulaFactor).refaksiPercent
       : 0;
 
     // Calculate netto
@@ -206,6 +207,7 @@ export default function InboundModule({
       grossWeight,
       tareWeight,
       refaksiKaPercent: refaksiPercentage,
+      cornFormulaFactor: commodity === 'JAGUNG' ? cornFormulaFactor : undefined,
       bagDeductionPercent,
       deadKernelsPercent: commodity === 'JAGUNG' ? deadKernelsPercent : 0,
       moldPercent: commodity === 'JAGUNG' ? moldPercent : 0,
@@ -258,6 +260,7 @@ export default function InboundModule({
     setSmallKernelsPercent(0.0);
     setFineTrashPercent(0.0);
     setRefaksiType('LOKAL');
+    setCornFormulaFactor(1.4);
     setWarehouseSection("Gudang Jagung Tengah");
     setSelectedLaborId("");
     setLaborCost(0);
@@ -608,7 +611,7 @@ export default function InboundModule({
                         onChange={setMoistureContent}
                         mode="percent"
                         unit="%"
-                        presets={[14, 15, 17, 20]}
+                        presets={[14, 15, 20, 31.5]}
                       />
                     </div>
                     {commodity === 'JAGUNG' && (
@@ -622,6 +625,27 @@ export default function InboundModule({
                       </select>
                     )}
                   </div>
+
+                  {commodity === 'JAGUNG' && (
+                    <div className="flex items-center justify-between gap-2 mt-1.5 bg-neutral-50 px-2.5 py-1.5 rounded-lg border border-neutral-200">
+                      <span className="text-[10px] font-bold text-neutral-600 uppercase">Faktor Rumus KA Tinggi:</span>
+                      <select
+                        value={cornFormulaFactor}
+                        onChange={(e) => setCornFormulaFactor(parseFloat(e.target.value))}
+                        className="bg-white border border-neutral-300 rounded px-1.5 py-0.5 text-[10px] font-bold text-neutral-700 focus:outline-none cursor-pointer"
+                      >
+                        <option value={1.4}>Rumus 1.4 (Sesuai Lampiran)</option>
+                        <option value={1.3}>Rumus 1.3 (Sesuai Lampiran)</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {commodity === 'JAGUNG' && ((refaksiType === 'LOKAL' && moistureContent > 30.0) || (refaksiType === 'LUAR_DAERAH' && moistureContent > 31.0)) && (
+                    <div className="mt-1.5 text-red-700 bg-red-50 border border-red-200/50 p-2 rounded-lg text-[10px] font-medium leading-relaxed">
+                      <span className="font-extrabold text-red-850 uppercase block">⚠️ KADAR AIR TINGGI (LUAR TABEL):</span> 
+                      Menggunakan Rumus {cornFormulaFactor}: ({Math.floor(moistureContent)} - 14) x {cornFormulaFactor} = <strong>{Math.floor((Math.floor(moistureContent) - 14) * cornFormulaFactor)}%</strong> potongan.
+                    </div>
+                  )}
                 </div>
 
                 {commodity === 'JAGUNG' && (
@@ -837,7 +861,7 @@ export default function InboundModule({
                 const rNet = grossWeight - tareWeight;
                 const bagDed = rNet * (bagDeductionPercent / 100);
                 const activeRefaksiRule = commodity === 'JAGUNG'
-                  ? getRefaksiByRule(moistureContent, cornMoistureRules.length > 0 ? cornMoistureRules : initialCornMoistureRules, refaksiType)
+                  ? getRefaksiByRule(moistureContent, cornMoistureRules.length > 0 ? cornMoistureRules : initialCornMoistureRules, refaksiType, cornFormulaFactor)
                   : { refaksiPercent: 0, description: 'Bukan Jagung' };
                 const refPercentage = activeRefaksiRule.refaksiPercent;
                 const refDed = rNet * (refPercentage / 100);
@@ -1408,6 +1432,19 @@ export default function InboundModule({
                     })()}
                   </tbody>
                 </table>
+              </div>
+
+              {/* High moisture formula reference info block */}
+              <div className="mt-3 p-2.5 bg-amber-50 rounded-xl border border-amber-200 font-sans text-[10px] text-amber-900 leading-normal">
+                <strong className="block text-[11px] mb-1 text-slate-800 uppercase">Kadar Air Tinggi (Luar Tabel):</strong>
+                Kadar air &gt;30.00% (LOKAL) atau &gt;31.00% (LUAR) otomatis dihitung menggunakan rumus sesuai lampiran kerja (Faktor 1.4 atau 1.3):
+                <div className="mt-1.5 bg-white/70 p-1.5 rounded font-mono text-[9px] text-neutral-800 border border-amber-100 flex flex-col gap-0.5">
+                  <div>Model LOKAL: (Math.floor(KA) - 14) × Faktor</div>
+                  <div>Model LUAR: (Math.floor(KA) - 14) × Faktor</div>
+                </div>
+                <span className="block mt-1 italic text-[9px] text-amber-800">
+                  * Hasil akhir persentase potongan dibulatkan ke bawah.
+                </span>
               </div>
 
               <div className="mt-4 pt-2.5 border-t border-gradient flex justify-end">

@@ -259,19 +259,20 @@ const COMMON_SLIP_STYLE = `
   html, body {
     width: 100% !important;
     height: 100% !important;
-    font-family: 'Courier New', 'Courier', monospace !important;
-    font-size: 8.5pt !important;
+    /* PENGGUNAAN FONT MONOSPACE TEBAL DAN SANS-SERIF CRISP SECARA HIBRID UNTUK MENCEGAH PUTUS-PUTUS */
+    font-family: 'Consolas', 'Menlo', 'Monaco', 'Courier New', Courier, Arial, Helvetica, sans-serif !important;
+    font-size: 9.2pt !important;
     color: #000000 !important;
     background-color: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
-    line-height: 1.4 !important;
+    line-height: 1.35 !important;
     text-align: left;
-    /* CRITICAL FOR DOT MATRIX: Turn off pixel smoothing entirely to keep output pure solid black/sharp pixels */
-    -webkit-font-smoothing: none !important;
-    -moz-osx-font-smoothing: none !important;
-    font-smooth: never !important;
-    text-rendering: optimizeSpeed !important;
+    /* CRITICAL FOR CRISP PRINT: Force proper vector antialiasing and high accuracy rendering */
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    font-smooth: always !important;
+    text-rendering: geometricPrecision !important;
   }
 
   img, .header-logo {
@@ -282,7 +283,7 @@ const COMMON_SLIP_STYLE = `
     width: 80mm !important;
     min-height: 135mm !important;
     margin: 0 !important;
-    padding: 2mm 3mm !important;
+    padding: 2mm 3.5mm !important;
     background: #ffffff !important;
     display: block !important;
     box-sizing: border-box !important;
@@ -311,14 +312,14 @@ const COMMON_SLIP_STYLE = `
       position: absolute !important;
       top: 0mm !important;
       left: 0mm !important;
-      font-family: 'Courier New', 'Courier', monospace !important;
-      font-size: 8.5pt !important;
-      -webkit-font-smoothing: none !important;
-      -moz-osx-font-smoothing: none !important;
-      font-smooth: never !important;
-      text-rendering: optimizeSpeed !important;
+      font-family: 'Consolas', 'Menlo', 'Monaco', 'Courier New', Courier, Arial, Helvetica, sans-serif !important;
+      font-size: 9.2pt !important;
+      -webkit-font-smoothing: antialiased !important;
+      -moz-osx-font-smoothing: grayscale !important;
+      font-smooth: always !important;
+      text-rendering: geometricPrecision !important;
       overflow: hidden !important;
-      line-height: 1.4 !important;
+      line-height: 1.35 !important;
     }
 
     img, .header-logo {
@@ -327,7 +328,7 @@ const COMMON_SLIP_STYLE = `
 
     .slip {
       margin: 0 !important;
-      padding: 2mm 3mm !important;
+      padding: 2mm 3.5mm !important;
       border: none !important;
       box-shadow: none !important;
       page-break-inside: avoid;
@@ -339,17 +340,18 @@ const COMMON_SLIP_STYLE = `
 
     * {
       color: #000000 !important;
-      font-weight: bold !important;
+      /* Force bold strokes across the document to prevent dot matrix head / ribbon fading */
+      font-weight: 700 !important;
       background: transparent !important;
       border-color: #000000 !important;
       box-shadow: none !important;
-      -webkit-font-smoothing: none !important;
-      -moz-osx-font-smoothing: none !important;
-      font-smooth: never !important;
-      text-rendering: optimizeSpeed !important;
+      -webkit-font-smoothing: antialiased !important;
+      -moz-osx-font-smoothing: grayscale !important;
+      font-smooth: always !important;
+      text-rendering: geometricPrecision !important;
     }
 
-    /* Keep headings and highlights clear but avoid super thick overstriking black smudges */
+    /* Keep headings and highlights extra thick to trigger heavier printer needle/head impacts */
     .netto-val, .value, .value-heavy, .header-title, .netto-label, .ticket-type, .signatures div, .footer-msg {
       color: #000000 !important;
       font-weight: 900 !important;
@@ -368,43 +370,43 @@ const COMMON_SLIP_STYLE = `
     text-align: left;
   }
   .header-title {
-    font-size: 10.5pt !important;
-    font-weight: bold !important;
+    font-size: 11.5pt !important;
+    font-weight: 950 !important;
     color: #000000 !important;
     text-transform: uppercase;
-    letter-spacing: 0.2px;
+    letter-spacing: 0.3px;
     line-height: 1.2;
-    margin-bottom: 1px;
+    margin-bottom: 2px;
   }
   .header-subtitle {
-    font-size: 7.5pt !important;
+    font-size: 8.2pt !important;
     color: #000000 !important;
-    line-height: 1.2;
-    font-weight: bold !important;
+    line-height: 1.25;
+    font-weight: 800 !important;
   }
 
-  /* DIVIDERS (Simple solid borders render cleanest as pixel-perfect single/double lines on LX-310) */
+  /* DIVIDERS (Extra bold solid lines for maximum visual clarity on thermal printers) */
   .divider-line {
     border: none !important;
-    border-top: 1.5px solid #000000 !important;
+    border-top: 2px solid #000000 !important;
     margin: 4px 0 !important;
     height: 0 !important;
   }
   .divider-double {
     border: none !important;
-    border-top: 3px double #000000 !important;
+    border-top: 4px double #000000 !important;
     margin: 4px 0 !important;
     height: 0 !important;
   }
 
   /* TICKET TYPE LABEL */
   .ticket-type {
-    font-size: 9pt !important;
-    font-weight: bold !important;
+    font-size: 9.5pt !important;
+    font-weight: 900 !important;
     color: #000000 !important;
     text-transform: uppercase;
-    letter-spacing: 0.2px;
-    margin: 3px 0;
+    letter-spacing: 0.5px;
+    margin: 4px 0;
     line-height: 1.1;
     text-align: center;
   }
@@ -413,46 +415,48 @@ const COMMON_SLIP_STYLE = `
   .flex {
     display: block;
     width: 100%;
-    margin: 2px 0;
+    margin: 3px 0;
   }
   .flex span {
     display: inline-block;
-    font-size: 8.5pt !important;
+    font-size: 9.2pt !important;
     color: #000000 !important;
-    line-height: 1.25 !important;
+    line-height: 1.3 !important;
+    font-weight: 700 !important;
   }
   .flex span.label {
     width: 48%;
     text-align: left;
-    font-weight: bold !important;
+    font-weight: 700 !important;
     padding-right: 2px;
   }
   .flex span.value {
     width: 52%;
     text-align: left;
-    font-weight: bold !important;
+    font-weight: 800 !important;
   }
   .flex span.label-heavy {
     width: 48%;
-    font-weight: bold !important;
-    font-size: 8.5pt !important;
+    font-weight: 800 !important;
+    font-size: 9.2pt !important;
   }
   .flex span.value-heavy {
     width: 52%;
-    font-weight: bold !important;
-    font-size: 8.5pt !important;
+    font-weight: 950 !important;
+    font-size: 9.2pt !important;
     text-align: left;
   }
 
   /* WEIGHT TIMESTAMP */
   .weight-time {
-    font-size: 7.5pt !important;
+    font-size: 8pt !important;
     color: #000000 !important;
     text-align: left;
     margin: 1px 0 3px 0;
     font-style: italic;
     line-height: 1.1;
     padding-left: 2px;
+    font-weight: bold !important;
   }
 
   /* NETTO ROW */
@@ -465,28 +469,29 @@ const COMMON_SLIP_STYLE = `
   .netto-label {
     display: table-cell;
     width: 46%;
-    font-size: 9pt !important;
-    font-weight: bold !important;
+    font-size: 9.5pt !important;
+    font-weight: 900 !important;
     vertical-align: middle;
   }
   .netto-val {
     display: table-cell;
     width: 54%;
-    font-size: 10.5pt !important;
-    font-weight: bold !important;
+    font-size: 11.5pt !important;
+    font-weight: 950 !important;
     text-align: left;
     vertical-align: middle;
+    letter-spacing: 0.1px;
   }
 
   /* NOTES */
   .notes-box {
-    font-size: 8pt !important;
-    border: 1px solid #000000 !important;
-    padding: 3px 5px;
-    margin: 3px 0;
-    line-height: 1.2;
+    font-size: 8.5pt !important;
+    border: 1.8px solid #000000 !important;
+    padding: 4px 6px;
+    margin: 4px 0;
+    line-height: 1.25;
     word-break: break-word;
-    font-weight: bold !important;
+    font-weight: 800 !important;
   }
 
   /* SIGNATURES */
@@ -494,28 +499,28 @@ const COMMON_SLIP_STYLE = `
     display: table;
     width: 100%;
     table-layout: fixed;
-    margin-top: 8px;
+    margin-top: 10px;
   }
   .signatures > div {
     display: table-cell;
     width: 50%;
     text-align: left;
-    font-size: 8pt !important;
+    font-size: 8.5pt !important;
     padding: 0 4px;
     vertical-align: top;
-    line-height: 1.2;
-    font-weight: bold !important;
+    line-height: 1.25;
+    font-weight: 800 !important;
   }
   .signature-space {
-    height: 16px;
+    height: 18px;
     display: block;
   }
   .signature-line {
-    border-top: 1px solid #000000 !important;
+    border-top: 1.5px solid #000000 !important;
     margin: 2px 0 0 0;
     width: 90%;
-    font-weight: bold !important;
-    font-size: 8pt !important;
+    font-weight: 900 !important;
+    font-size: 8.5pt !important;
     padding-top: 1px;
     text-align: left;
   }
@@ -523,12 +528,12 @@ const COMMON_SLIP_STYLE = `
   /* FOOTER */
   .footer-msg {
     text-align: center;
-    font-size: 7.5pt !important;
-    margin-top: 8px;
-    line-height: 1.2;
-    border-top: 1px dashed #000000 !important;
-    padding-top: 3px;
-    font-weight: bold !important;
+    font-size: 8pt !important;
+    margin-top: 10px;
+    line-height: 1.25;
+    border-top: 1.5px dashed #000000 !important;
+    padding-top: 4px;
+    font-weight: 800 !important;
   }
 `;
 // GANTI DENGAN JENDELA BARU AGAR PREVIEW MUNCUL & TIDAK DIBLOKIR BROWSER
@@ -594,7 +599,7 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
     <div class="flex"><span class="label">BRUTO</span><span class="value">: ${bruto.toLocaleString('id-ID')} Kg</span></div>
     <div class="flex"><span class="label">TARA</span><span class="value">: ${tara.toLocaleString('id-ID')} Kg</span></div>
     <div class="flex"><span class="label">Pot. Karung</span><span class="value">: -${potKrg.toLocaleString('id-ID')} Kg (${record.bagDeductionPercent ?? 0}%)</span></div>
-    <div class="flex"><span class="label">Refaksi KA</span><span class="value">: -${potRefaksi.toLocaleString('id-ID')} Kg (${record.refaksiKaPercent ?? 0}%)</span></div>
+    <div class="flex"><span class="label">Refaksi KA</span><span class="value">: -${potRefaksi.toLocaleString('id-ID')} Kg (${record.refaksiKaPercent ?? 0}%) ${record.commodity === 'JAGUNG' && ((record.moistureContent ?? 0) > 30.00 || (record.cornFormulaFactor && (record.moistureContent ?? 0) > 30.00)) ? `*[Rumus ${record.cornFormulaFactor || 1.4}]` : ''}</span></div>
     ${record.commodity === 'JAGUNG' ? `
     <div class="flex"><span class="label">Pot. Biji Mati</span><span class="value">: -${potBijiMati.toLocaleString('id-ID')} Kg (${record.deadKernelsPercent ?? 0}%)</span></div>
     <div class="flex"><span class="label">Pot. Jamur</span><span class="value">: -${potJamur.toLocaleString('id-ID')} Kg (${record.moldPercent ?? 0}%)</span></div>
@@ -626,6 +631,12 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
         <div style="border-top: 1.2px solid #000; width: 85%; margin: 1px auto 0 auto;"></div>
       </div>
     </div>
+
+    ${record.commodity === 'JAGUNG' && ((record.moistureContent ?? 0) > 30.00) ? `
+    <div style="font-size: 6.5pt; color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 3px; padding: 3px 6px; margin: 4px 0 6px 0; font-family: monospace; line-height: 1.25;">
+      <strong>*KA Tinggi (${record.moistureContent ?? 0}%):</strong> Potongan KA dihitung menggunakan Rumus ${record.cornFormulaFactor || 1.4} luar tabel: (Math.floor(${record.moistureContent ?? 0}) - 14) x ${record.cornFormulaFactor || 1.4} = ${record.refaksiKaPercent}% potongan.
+    </div>
+    ` : ''}
 
     <div class="footer-msg" style="margin-top: 10px; border-top: 1.2px dashed #000; padding-top: 4px; text-align: center;">
       * Terimakasih atas kerjasamanya *<br/>

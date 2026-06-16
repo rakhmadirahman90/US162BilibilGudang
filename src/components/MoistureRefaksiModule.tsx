@@ -19,13 +19,14 @@ export default function MoistureRefaksiModule({ rules }: MoistureRefaksiModulePr
   const [baseWeight, setBaseWeight] = useState<number>(10000); // 10 Tons
   const [pricePerKg, setPricePerKg] = useState<number>(4500); // Rp 4,500/kg
   const [ruleType, setRuleType] = useState<'LOKAL' | 'LUAR_DAERAH'>('LOKAL');
+  const [formulaFactor, setFormulaFactor] = useState<number>(1.4);
 
   // Smart masking and typing helper states ("bilangan cerdas")
   const [moistureInput, setMoistureInput] = useState<string>('15,5');
   const [weightInput, setWeightInput] = useState<string>('10.000');
   const [priceInput, setPriceInput] = useState<string>('4.500');
 
-  const refaksiDetails = getRefaksiByRule(moisture, rules, ruleType);
+  const refaksiDetails = getRefaksiByRule(moisture, rules, ruleType, formulaFactor);
   const refaksiPercent = refaksiDetails.refaksiPercent;
 
   // Calculations
@@ -90,7 +91,7 @@ export default function MoistureRefaksiModule({ rules }: MoistureRefaksiModulePr
 
   // Adjusters & Quick presets
   const adjustMoisture = (delta: number) => {
-    const nextVal = Math.min(25.0, Math.max(12.0, parseFloat((moisture + delta).toFixed(1))));
+    const nextVal = Math.min(40.0, Math.max(12.0, parseFloat((moisture + delta).toFixed(1))));
     setMoisture(nextVal);
     setMoistureInput(nextVal.toFixed(1).replace('.', ','));
   };
@@ -165,7 +166,7 @@ export default function MoistureRefaksiModule({ rules }: MoistureRefaksiModulePr
               <input
                 type="range"
                 min="12.0"
-                max="25.0"
+                max="40.0"
                 step="0.1"
                 value={moisture}
                 onChange={(e) => handleSliderChange(e.target.value)}
@@ -174,13 +175,13 @@ export default function MoistureRefaksiModule({ rules }: MoistureRefaksiModulePr
               <div className="flex justify-between text-[9px] text-neutral-400 font-mono">
                 <span>12.0% (Kering Silo)</span>
                 <span>14.0% (Standar Base)</span>
-                <span>25.0% (Maksimal Basah)</span>
+                <span>40.0% (Luar Tabel Rumus)</span>
               </div>
 
               {/* Quick Preset Buttons for Moisture */}
               <div className="mt-3 flex flex-wrap gap-1 items-center">
                 <span className="text-[9px] text-neutral-400 uppercase font-black mr-1">Presets:</span>
-                {[14.0, 15.5, 17.0, 18.5, 20.0].map((itemPreset) => (
+                {[14.0, 15.5, 20.0, 30.5, 31.5, 35.0].map((itemPreset) => (
                   <button
                     key={itemPreset}
                     type="button"
@@ -229,6 +230,22 @@ export default function MoistureRefaksiModule({ rules }: MoistureRefaksiModulePr
                 >
                   <option value="LOKAL">Tabel Lokal (Pinrang/Sekitarnya)</option>
                   <option value="LUAR_DAERAH">Tabel Bone / Luar Daerah</option>
+                </select>
+              </div>
+
+              {/* Formula factor selector block */}
+              <div className="flex justify-between items-center mb-1 mt-2.5">
+                <span className="font-bold text-amber-950 flex items-center gap-1">
+                  <Calculator className="w-3.5 h-3.5 text-amber-500" />
+                  Rumus KA Tinggi ({ruleType === 'LOKAL' ? '>30%' : '>31%'}):
+                </span>
+                <select
+                  value={formulaFactor}
+                  onChange={(e) => setFormulaFactor(parseFloat(e.target.value))}
+                  className="bg-white border border-neutral-250 rounded px-2 text-xs py-1 font-bold text-neutral-700 focus:outline-none focus:ring-1 focus:ring-amber-500 shadow-sm cursor-pointer"
+                >
+                  <option value={1.4}>Rumus 1.4 (Sesuai Lampiran)</option>
+                  <option value={1.3}>Rumus 1.3 (Sesuai Lampiran)</option>
                 </select>
               </div>
             </div>
@@ -387,6 +404,49 @@ export default function MoistureRefaksiModule({ rules }: MoistureRefaksiModulePr
                 <span className="font-black text-white text-xl">Rp {finalValueBytes.toLocaleString('id-ID')}</span>
               </div>
             </div>
+
+            {/* High Moisture Formula Breakdown Card */}
+            {((ruleType === 'LOKAL' && moisture > 30.00) || (ruleType === 'LUAR_DAERAH' && moisture > 31.00)) && (() => {
+              const base = Math.floor(moisture);
+              const diff = base - 14;
+              const rawResult = diff * formulaFactor;
+              const finalPercent = Math.floor(rawResult);
+              return (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex flex-col gap-2.5 animate-fade-in">
+                  <div className="flex items-center gap-2 text-xs font-black text-red-950 uppercase tracking-wider">
+                    <Droplet className="w-4 h-4 text-red-600 animate-pulse" />
+                    Penjelasan Rumus Refaksi KA Tinggi ({ruleType})
+                  </div>
+                  <p className="text-[11px] text-red-900 leading-relaxed font-sans">
+                    Kadar air <strong>{moisture}%</strong> berada di luar tabel standar. Sesuai aturan lampiran kerja <strong>{ruleType === 'LOKAL' ? 'LOKAL' : 'BONE DAN SEKITARNYA'}</strong>, pemotongan menggunakan rumus multiplier <strong>{formulaFactor}</strong>:
+                  </p>
+                  
+                  {/* Step by step formula box */}
+                  <div className="bg-white/80 border border-red-100 rounded-lg p-3 font-mono text-[11px] text-neutral-800 flex flex-col gap-1.5 shadow-sm">
+                    <div className="flex justify-between border-b border-red-50 pb-1">
+                      <span className="text-neutral-500">Kadar Air Bulat Ke Bawah:</span>
+                      <span className="font-extrabold text-neutral-900">Math.floor({moisture}%) = {base}%</span>
+                    </div>
+                    <div className="flex justify-between border-b border-red-50 pb-1">
+                      <span className="text-neutral-500">Selisih Kadar Air ({base} - 14):</span>
+                      <span className="font-extrabold text-neutral-900">{base} - 14 = {diff}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-red-50 pb-1">
+                      <span className="text-neutral-500">Multiplier Faktor Rumus ({formulaFactor}):</span>
+                      <span className="font-extrabold text-neutral-900">{diff} x {formulaFactor} = {rawResult.toFixed(2)}%</span>
+                    </div>
+                    <div className="flex justify-between pt-1 font-bold text-red-700 bg-red-50/50 -mx-3 -mb-3 px-3 py-1.5 rounded-b-lg">
+                      <span>Total Potongan Akhir (Dibulatkan):</span>
+                      <span className="font-black text-xs text-red-650">{finalPercent}%</span>
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] text-red-800 italic font-medium leading-normal">
+                    * Catatan: Nilai pecahan persen {rawResult.toFixed(2)}% dibulatkan ke bawah menjadi {finalPercent}% sesuai contoh lampiran lembar hitung.
+                  </p>
+                </div>
+              );
+            })()}
 
             {/* Interactive guidelines / recommendations */}
             <div className={`p-4.5 rounded-xl border flex gap-3 ${
