@@ -246,7 +246,7 @@ export function printPDFReport(
 
 const COMMON_SLIP_STYLE = `
   @page {
-    size: auto;
+    size: A6 portrait;
     margin: 0mm !important;
   }
 
@@ -257,35 +257,40 @@ const COMMON_SLIP_STYLE = `
   }
 
   html, body {
-    width: 100% !important;
-    height: 100% !important;
-    /* PENGGUNAAN FONT MONOSPACE TEBAL DAN SANS-SERIF CRISP SECARA HIBRID UNTUK MENCEGAH PUTUS-PUTUS */
-    font-family: 'Consolas', 'Menlo', 'Monaco', 'Courier New', Courier, Arial, Helvetica, sans-serif !important;
-    font-size: 9.2pt !important;
-    color: #000000 !important;
+    width: 105mm !important;
+    height: 148mm !important;
+    /* PENGGUNAAN FONT SANS-SERIF MODERN DAN MONOSPACE UNTUK KETERBACAAN MAKSIMAL DI UKURAN A6 */
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+    font-size: 7.5pt !important;
+    color: #111827 !important;
     background-color: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
-    line-height: 1.35 !important;
+    line-height: 1.2 !important;
     text-align: left;
-    /* CRITICAL FOR CRISP PRINT: Force proper vector antialiasing and high accuracy rendering */
     -webkit-font-smoothing: antialiased !important;
     -moz-osx-font-smoothing: grayscale !important;
     font-smooth: always !important;
     text-rendering: geometricPrecision !important;
   }
 
+  /* LOGO DIALIRKAN SECARA ELEGAN DI RECTANGLE FORMAT A6 */
   img, .header-logo {
-    display: none !important;
+    display: block !important;
+    width: 10mm !important;
+    height: 10mm !important;
+    object-fit: contain !important;
   }
 
   .slip {
-    width: 80mm !important;
-    min-height: 135mm !important;
+    width: 105mm !important;
+    height: 148mm !important;
     margin: 0 !important;
-    padding: 2mm 3.5mm !important;
+    padding: 2.5mm 4mm !important; /* Extremely neat and compact padding for A6 single-page guarantee */
     background: #ffffff !important;
-    display: block !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
     box-sizing: border-box !important;
     page-break-after: avoid;
     -webkit-print-color-adjust: exact;
@@ -297,13 +302,13 @@ const COMMON_SLIP_STYLE = `
 
   @media print {
     @page {
-      size: auto;
+      size: A6 portrait;
       margin: 0 !important;
     }
     
     html, body {
-      width: 100% !important;
-      height: 100% !important;
+      width: 105mm !important;
+      height: 148mm !important;
       background: transparent !important;
       margin: 0 !important;
       padding: 0 !important;
@@ -312,46 +317,37 @@ const COMMON_SLIP_STYLE = `
       position: absolute !important;
       top: 0mm !important;
       left: 0mm !important;
-      font-family: 'Consolas', 'Menlo', 'Monaco', 'Courier New', Courier, Arial, Helvetica, sans-serif !important;
-      font-size: 9.2pt !important;
-      -webkit-font-smoothing: antialiased !important;
-      -moz-osx-font-smoothing: grayscale !important;
-      font-smooth: always !important;
-      text-rendering: geometricPrecision !important;
       overflow: hidden !important;
-      line-height: 1.35 !important;
     }
 
     img, .header-logo {
-      display: none !important;
+      display: block !important;
+      width: 9.5mm !important;
+      height: 9.5mm !important;
     }
 
     .slip {
       margin: 0 !important;
-      padding: 2mm 3.5mm !important;
+      padding: 2.5mm 4mm !important;
       border: none !important;
       box-shadow: none !important;
       page-break-inside: avoid;
       position: absolute !important;
-      top: 2mm !important;
-      left: 5mm !important;
-      width: 76mm !important;
+      top: 0mm !important;
+      left: 0mm !important;
+      width: 105mm !important;
+      height: 148mm !important;
     }
 
     * {
       color: #000000 !important;
-      /* Force bold strokes across the document to prevent dot matrix head / ribbon fading */
+      /* Force bold strokes across the document to prevent low resolution fading */
       font-weight: 700 !important;
       background: transparent !important;
       border-color: #000000 !important;
       box-shadow: none !important;
-      -webkit-font-smoothing: antialiased !important;
-      -moz-osx-font-smoothing: grayscale !important;
-      font-smooth: always !important;
-      text-rendering: geometricPrecision !important;
     }
 
-    /* Keep headings and highlights extra thick to trigger heavier printer needle/head impacts */
     .netto-val, .value, .value-heavy, .header-title, .netto-label, .ticket-type, .signatures div, .footer-msg {
       color: #000000 !important;
       font-weight: 900 !important;
@@ -360,180 +356,188 @@ const COMMON_SLIP_STYLE = `
 
   /* HEADER */
   .header {
-    display: block;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
     width: 100%;
     margin-bottom: 2px;
-    text-align: left;
+    gap: 2.5mm !important;
   }
   .header-text {
-    display: block;
-    text-align: left;
+    display: flex !important;
+    flex-direction: column !important;
+    text-align: left !important;
+    flex: 1 !important;
   }
   .header-title {
-    font-size: 11.5pt !important;
-    font-weight: 950 !important;
-    color: #000000 !important;
+    font-size: 9.5pt !important;
+    font-weight: 900 !important;
+    color: #111827 !important;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
-    line-height: 1.2;
-    margin-bottom: 2px;
+    letter-spacing: 0.2px;
+    line-height: 1.15;
+    margin-bottom: 1px;
   }
   .header-subtitle {
-    font-size: 8.2pt !important;
-    color: #000000 !important;
-    line-height: 1.25;
-    font-weight: 800 !important;
+    font-size: 6.5pt !important;
+    color: #4b5563 !important;
+    line-height: 1.2;
+    font-weight: 600 !important;
   }
 
-  /* DIVIDERS (Extra bold solid lines for maximum visual clarity on thermal printers) */
+  /* DIVIDERS */
   .divider-line {
     border: none !important;
-    border-top: 2px solid #000000 !important;
-    margin: 4px 0 !important;
+    border-top: 1.2px solid #111827 !important;
+    margin: 2px 0 !important;
     height: 0 !important;
   }
   .divider-double {
     border: none !important;
-    border-top: 4px double #000000 !important;
-    margin: 4px 0 !important;
+    border-top: 3.0px double #111827 !important;
+    margin: 2px 0 !important;
     height: 0 !important;
   }
 
   /* TICKET TYPE LABEL */
   .ticket-type {
-    font-size: 9.5pt !important;
-    font-weight: 900 !important;
-    color: #000000 !important;
+    font-size: 8pt !important;
+    font-weight: 800 !important;
+    color: #111827 !important;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin: 4px 0;
+    letter-spacing: 0.4px;
+    margin: 2px 0;
     line-height: 1.1;
     text-align: center;
   }
 
   /* DATA ROWS */
   .flex {
-    display: block;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
     width: 100%;
-    margin: 3px 0;
+    margin: 0.5px 0;
   }
   .flex span {
     display: inline-block;
-    font-size: 9.2pt !important;
-    color: #000000 !important;
-    line-height: 1.3 !important;
-    font-weight: 700 !important;
+    font-size: 7.5pt !important;
+    color: #1f2937 !important;
+    line-height: 1.15 !important;
+    font-weight: 600 !important;
   }
   .flex span.label {
-    width: 48%;
+    width: 45%;
     text-align: left;
-    font-weight: 700 !important;
-    padding-right: 2px;
+    font-weight: 600 !important;
   }
   .flex span.value {
-    width: 52%;
-    text-align: left;
-    font-weight: 800 !important;
+    width: 55%;
+    text-align: right; /* Rata Kanan untuk kerapian A6 */
+    font-weight: 750 !important;
   }
   .flex span.label-heavy {
-    width: 48%;
-    font-weight: 800 !important;
-    font-size: 9.2pt !important;
+    width: 45%;
+    font-weight: 750 !important;
+    font-size: 7.5pt !important;
   }
   .flex span.value-heavy {
-    width: 52%;
-    font-weight: 950 !important;
-    font-size: 9.2pt !important;
-    text-align: left;
+    width: 55%;
+    font-weight: 850 !important;
+    font-size: 7.5pt !important;
+    text-align: right; /* Rata Kanan */
   }
 
   /* WEIGHT TIMESTAMP */
   .weight-time {
-    font-size: 8pt !important;
-    color: #000000 !important;
-    text-align: left;
-    margin: 1px 0 3px 0;
+    font-size: 6.5pt !important;
+    color: #6b7280 !important;
+    text-align: right; /* Menjadi rata kanan menyertai digit timbangan */
+    margin: -1px 0 1px 0;
     font-style: italic;
     line-height: 1.1;
-    padding-left: 2px;
-    font-weight: bold !important;
+    font-weight: 600 !important;
   }
 
   /* NETTO ROW */
   .netto-row {
-    display: table;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
     width: 100%;
-    table-layout: fixed;
-    padding: 3px 0;
+    padding: 2px 0;
   }
   .netto-label {
-    display: table-cell;
-    width: 46%;
-    font-size: 9.5pt !important;
-    font-weight: 900 !important;
-    vertical-align: middle;
+    width: 45%;
+    font-size: 8pt !important;
+    font-weight: 850 !important;
+    color: #111827 !important;
   }
   .netto-val {
-    display: table-cell;
-    width: 54%;
-    font-size: 11.5pt !important;
-    font-weight: 950 !important;
-    text-align: left;
-    vertical-align: middle;
+    width: 55%;
+    font-size: 10pt !important;
+    font-weight: 900 !important;
+    text-align: right; /* Rata kanan */
     letter-spacing: 0.1px;
+    color: #111827 !important;
   }
 
   /* NOTES */
   .notes-box {
-    font-size: 8.5pt !important;
-    border: 1.8px solid #000000 !important;
-    padding: 4px 6px;
-    margin: 4px 0;
-    line-height: 1.25;
+    font-size: 6.8pt !important;
+    border: 1.0px solid #374151 !important;
+    padding: 2px 4px;
+    margin: 2px 0;
+    line-height: 1.2;
     word-break: break-word;
-    font-weight: 800 !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
   }
 
   /* SIGNATURES */
   .signatures {
-    display: table;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
     width: 100%;
-    table-layout: fixed;
-    margin-top: 10px;
+    margin-top: 4px;
   }
   .signatures > div {
-    display: table-cell;
-    width: 50%;
-    text-align: left;
-    font-size: 8.5pt !important;
-    padding: 0 4px;
-    vertical-align: top;
-    line-height: 1.25;
-    font-weight: 800 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 48%;
+    text-align: center !important; /* Sentralisasi tanda tangan di A6 */
+    font-size: 7.2pt !important;
+    line-height: 1.15;
+    font-weight: 700 !important;
+    color: #1f2937 !important;
   }
   .signature-space {
-    height: 18px;
+    height: 10px;
     display: block;
   }
   .signature-line {
-    border-top: 1.5px solid #000000 !important;
-    margin: 2px 0 0 0;
-    width: 90%;
-    font-weight: 900 !important;
-    font-size: 8.5pt !important;
+    border-top: 1.0px solid #111827 !important;
+    margin: 2px auto 0 auto;
+    width: 85%;
+    font-weight: 800 !important;
+    font-size: 7.2pt !important;
     padding-top: 1px;
-    text-align: left;
+    text-align: center !important;
   }
 
   /* FOOTER */
   .footer-msg {
     text-align: center;
-    font-size: 8pt !important;
-    margin-top: 10px;
-    line-height: 1.25;
-    border-top: 1.5px dashed #000000 !important;
-    padding-top: 4px;
-    font-weight: 800 !important;
+    font-size: 6.8pt !important;
+    margin-top: 4px;
+    line-height: 1.15;
+    border-top: 1.0px dashed #9ca3af !important;
+    padding-top: 2px;
+    font-weight: 700 !important;
+    color: #4b5563 !important;
   }
 `;
 // GANTI DENGAN JENDELA BARU AGAR PREVIEW MUNCUL & TIDAK DIBLOKIR BROWSER

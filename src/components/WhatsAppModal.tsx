@@ -38,6 +38,190 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
       const parsedDoc = parser.parseFromString(pdfHtml, 'text/html');
       const slip = parsedDoc.querySelector('.slip') || parsedDoc.body;
 
+      // EXTRACT ORIGINAL LOGO SRC BEFORE RESTRUCTURING
+      const originalLogo = slip.querySelector('img');
+      const logoSrc = originalLogo ? originalLogo.getAttribute('src') : '';
+
+      // EXTRACT ORIGINAL HEADER INFO
+      const origTitleEl = slip.querySelector('.header-title') || slip.querySelector('div[class*="title"]');
+      const origSubtitleEl = slip.querySelector('.header-subtitle') || slip.querySelector('div[class*="subtitle"]');
+      const customTitle = origTitleEl ? (origTitleEl.textContent || '').toUpperCase() : 'US BILIBILI 162';
+      const customSubtitleHtml = origSubtitleEl ? (origSubtitleEl.innerHTML || '') : 'Jalan Poros Pinrang-Polman KM. 12<br/>Desa Bilibili, Suppa, Kab. Pinrang';
+      const subtitleLines = customSubtitleHtml.split(/<br\s*\/?>/i).map(line => line.trim()).filter(Boolean);
+
+      // PROSES DAN STRUKTURKAN ULANG BARIS AGAR ALIGNMENT KANAN-KIRI SEMPURNA SEPERTI GAMBAR
+      const flexRows = slip.querySelectorAll('.flex, .netto-row');
+      flexRows.forEach(row => {
+        const labelEl = row.querySelector('.label, .label-heavy, .netto-label');
+        const valueEl = row.querySelector('.value, .value-heavy, .netto-val');
+        if (labelEl && valueEl) {
+          let labelText = labelEl.textContent || '';
+          let valueText = valueEl.textContent || '';
+
+          // Bersihkan label & value dari tanda titik dua di akhir/awal jika ada
+          labelText = labelText.trim();
+          if (labelText.endsWith(':')) {
+            labelText = labelText.slice(0, -1).trim();
+          }
+
+          valueText = valueText.trim();
+          if (valueText.startsWith(':')) {
+            valueText = valueText.slice(1).trim();
+          }
+
+          // Ekstrak persentase dari value (jika ada seperti "0%") untuk dipindah ke Label
+          const percentRegex = /\(([\d.,]+%)\)/;
+          const matchPercent = valueText.match(percentRegex);
+          if (matchPercent) {
+            const percentStr = matchPercent[1];
+            valueText = valueText.replace(percentRegex, '').replace(/\s+/g, ' ').trim();
+            labelText = `${labelText} (${percentStr})`;
+          }
+
+          let lowerLabel = labelText.toLowerCase();
+
+          // Standardize/Translate labels to match the image exactly
+          if (lowerLabel.includes('tgl. cetak') || lowerLabel.includes('tanggal cetak')) {
+            labelText = 'Tanggal';
+          } else if (lowerLabel.includes('no. tiket') || lowerLabel.includes('nomor tiket')) {
+            labelText = 'No. Tiket/Ref';
+          } else if (lowerLabel.includes('no. polisi') || lowerLabel.includes('nomor polisi')) {
+            labelText = 'No. Polisi';
+          } else if (lowerLabel.includes('supplier')) {
+            labelText = 'Suplier';
+          } else if (lowerLabel.includes('komoditas')) {
+            labelText = 'Komoditas';
+          } else if (lowerLabel === 'bruto') {
+            labelText = 'BERAT BRUTO';
+          } else if (lowerLabel === 'tara') {
+            labelText = 'BERAT TARA';
+          } else if (lowerLabel.includes('pot. karung')) {
+            labelText = 'Pot. Karung';
+          } else if (lowerLabel.includes('refaksi ka')) {
+            labelText = 'Refaksi KA';
+          } else if (lowerLabel === 'netto') {
+            labelText = 'BERAT NETTO';
+          } else if (lowerLabel.includes('harga beli')) {
+            labelText = 'HARGA BELI';
+          } else if (lowerLabel.includes('bayar kotor')) {
+            labelText = 'HARGA BRUTO';
+          } else if (lowerLabel.includes('biaya buruh')) {
+            labelText = 'BIAYA BURUH PANGGUL';
+          } else if (lowerLabel.includes('bayar ke petani') || lowerLabel.includes('total harus dibayar')) {
+            labelText = 'TOTAL HARUS DIBAYAR';
+          }
+
+          // Deteksi baris tebal / netto / total bayar
+          const isHeavy = labelEl.classList.contains('label-heavy') || 
+                          labelEl.classList.contains('netto-label') || 
+                          valueEl.classList.contains('value-heavy') || 
+                          valueEl.classList.contains('netto-val') ||
+                          row.getAttribute('style')?.includes('font-weight') ||
+                          labelText === 'BERAT NETTO' ||
+                          labelText === 'TOTAL HARUS DIBAYAR';
+
+          const isTotalRow = labelText === 'TOTAL HARUS DIBAYAR';
+
+          let rowClass = 'pdf-row';
+          if (isHeavy) rowClass += ' row-heavy';
+          if (isTotalRow) rowClass += ' pdf-total-row';
+
+          row.className = rowClass;
+          row.innerHTML = `
+            <span class="pdf-label">${labelText} :</span>
+            <span class="pdf-value">${valueText}</span>
+          `;
+          row.removeAttribute('style');
+        }
+      });
+
+      // RERENDER HEADER YANG SEMPURNA SEPERTI GAMBAR
+      const headerEl = slip.querySelector('.header');
+      if (headerEl) {
+        headerEl.className = 'pdf-header';
+        headerEl.removeAttribute('style');
+        
+        let subtitleMarkups = subtitleLines.map(line => `<div class="pdf-header-subtitle">${line}</div>`).join('');
+        
+        headerEl.innerHTML = `
+          ${logoSrc ? `<img src="${logoSrc}" class="pdf-header-logo" alt="Logo" />` : ''}
+          <div class="pdf-header-text">
+            <div class="pdf-header-title">${customTitle}</div>
+            ${subtitleMarkups}
+          </div>
+        `;
+      }
+
+      // KONSISTENKAN SEMUA SEPARATOR SEJAJAR SOLID LINE
+      const dividers = slip.querySelectorAll('.divider-line, .divider-double');
+      dividers.forEach(div => {
+        div.className = 'pdf-divider-line';
+        div.removeAttribute('style');
+      });
+
+      // PROSES DAN STRUKTURKAN TANDA TANGAN SECARA INDEPENDEN DAN REKAYASA PRESISI SEPERTI GAMBAR
+      const signaturesContainer = slip.querySelector('.signatures');
+      if (signaturesContainer) {
+        const children = Array.from(signaturesContainer.children);
+        let leftTitle = "Staff 162";
+        let leftName = "Asma";
+        let rightTitle = "Sopir / Pembawa";
+
+        if (children.length >= 2) {
+          const leftText = children[0].textContent || '';
+          const rightText = children[1].textContent || '';
+
+          // Ekstrak nama staff dari format "( Asma )" atau baris bawah
+          const leftMatch = leftText.match(/\(\s*([^\s)]+)\s*\)/);
+          if (leftMatch && leftMatch[1]) {
+            leftName = leftMatch[1];
+          } else {
+            const lines = leftText.split('\n').map(l => l.trim()).filter(Boolean);
+            if (lines.length > 1) {
+              leftName = lines[lines.length - 1];
+            } else if (leftText.includes('Staff 162')) {
+              const t = leftText.replace('Staff 162', '').replace(/[()_]/g, '').trim();
+              if (t) leftName = t;
+            }
+          }
+
+          if (leftText.toLowerCase().includes('penerima')) {
+            leftTitle = "Penerima Staff 162";
+          }
+          if (rightText.toLowerCase().includes('pelanggan')) {
+            rightTitle = "Pelanggan";
+          }
+        }
+
+        signaturesContainer.className = 'pdf-signatures';
+        signaturesContainer.innerHTML = `
+          <div class="pdf-sig-col">
+            <div class="pdf-sig-title">${leftTitle}</div>
+            <div class="pdf-sig-name-container">
+              <span class="pdf-sig-name">${leftName}</span>
+              <div class="pdf-sig-line"></div>
+              <span class="pdf-sig-parens">( )</span>
+            </div>
+          </div>
+          <div class="pdf-sig-col">
+            <div class="pdf-sig-title">${rightTitle}</div>
+            <div class="pdf-sig-name-container">
+              <span class="pdf-sig-name">&nbsp;</span>
+              <div class="pdf-sig-line"></div>
+              <span class="pdf-sig-parens">( )</span>
+            </div>
+          </div>
+        `;
+        signaturesContainer.removeAttribute('style');
+      }
+
+      // CAUTION BOX UNTUK KEADAAN KHUSUS (MOISTURE JIKA ADA)
+      const infoBox = slip.querySelector('div[style*="background-color: #f8d7da"]');
+      if (infoBox) {
+        infoBox.className = 'pdf-caution-box';
+        infoBox.removeAttribute('style');
+      }
+
       const cleanHtml = `
 <!DOCTYPE html>
 <html>
@@ -45,7 +229,7 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
   <meta charset="utf-8">
   <title>${pdfFileName || 'Resi'}</title>
   <style>
-    /* RESET STYLE UNTUK DIGITAL PDF */
+    /* RESET GLOBAL STYLE UNTUK DIGITAL A6 PRINT */
     html, body {
       margin: 0 !important;
       padding: 0 !important;
@@ -57,222 +241,232 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
       text-rendering: geometricPrecision !important;
     }
 
-    /* DIGITAL SLIP CONTAINER YANG RAPI & COCOK DENGAN FORMAT KERTAS THERMAL */
+    /* DIGITAL SLIP CONTAINER YANG RAPI & TIGHT */
     .pdf-slip {
-      width: 100% !important;
+      width: 105mm !important;
+      height: 140mm !important; /* Shrunk from 148mm to exactly 140mm to guarantee it is safely shorter than A6 page height (148mm) so that no second page/blank page is ever created due to pixel/rounding issues */
+      max-height: 140mm !important;
+      overflow: hidden !important;
       margin: 0 !important;
-      padding: 2px !important; /* Margins are controlled of page-level to keep alignment symmetrical */
+      padding: 1.5mm 3.5mm !important; /* Shrunk padding marginally to guarantee everything stays on page 1 */
       background: #ffffff !important;
-      font-family: 'Consolas', 'Courier New', Courier, monospace !important;
-      font-size: 7.4pt !important;
-      color: #000000 !important;
-      line-height: 1.35 !important;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+      font-size: 6.8pt !important; /* Shrunk from 7.5pt to 6.8pt to ensure everything fits on 1 page! */
+      color: #111827 !important;
+      line-height: 1.15 !important;
       box-sizing: border-box !important;
+      display: block !important;
     }
 
-    /* PAKSA SEMUA ELEMEN BERWARNA HITAM & TEBAL / CRISP */
+    /* KUALITAS TEKS SOLID PENCEGAHAN BLUR */
     .pdf-slip * {
-      color: #000000 !important;
+      color: #111827 !important;
       background: transparent !important;
-      border-color: #000000 !important;
+      border-color: #111827 !important;
       box-shadow: none !important;
-      font-family: 'Consolas', 'Courier New', Courier, monospace !important;
-      font-weight: 700 !important;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+      font-weight: bold !important;
       box-sizing: border-box !important;
     }
 
-    /* JUDUL BRAND GUDANG */
-    .pdf-slip .header {
-      display: block !important;
+    /* DESAIN HEADER KORPORASI RAPI DAN TERSENTRALISASI */
+    .pdf-header {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      margin-bottom: 2px !important;
       width: 100% !important;
-      margin-bottom: 4px !important;
+      gap: 2mm !important;
     }
-    
-    .pdf-slip .header-title {
-      font-size: 9.5pt !important;
+    .pdf-header-logo {
+      width: 8mm !important;
+      height: 8mm !important;
+      object-fit: contain !important;
+      margin: 0 !important;
+      display: block !important;
+    }
+    .pdf-header-text {
+      flex: 1 !important;
+      text-align: left !important;
+    }
+    .pdf-header-title {
+      font-size: 8.5pt !important;
       font-weight: 950 !important;
       text-transform: uppercase !important;
-      letter-spacing: 0.3px !important;
-      display: block !important;
+      letter-spacing: 0.1px !important;
+      margin-bottom: 0.5px !important;
+      text-align: left !important;
     }
-    
-    .pdf-slip .header-subtitle {
-      font-size: 6.6pt !important;
-      font-weight: 700 !important;
-      display: block !important;
-      line-height: 1.25 !important;
+    .pdf-header-subtitle {
+      font-size: 5.8pt !important;
+      font-weight: 600 !important;
+      line-height: 1.15 !important;
+      text-align: left !important;
     }
 
-    /* SEPARATOR GARIS */
-    .pdf-slip .divider-line {
+    /* FORMAT BARIS TABEL SEMPURNA KANAN-KIRI */
+    .pdf-row {
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: space-between !important;
+      width: 100% !important;
+      margin: 0.2px 0 !important;
+      page-break-inside: avoid !important;
+    }
+    .pdf-label {
+      width: 45% !important;
+      text-align: left !important;
+      font-weight: 600 !important;
+      font-size: 6.8pt !important;
+    }
+    .pdf-value {
+      width: 55% !important;
+      text-align: right !important; /* Rata kanan */
+      font-weight: 750 !important;
+      font-size: 6.8pt !important;
+    }
+
+    /* KETEBALAN FONT BARIS UTAMA */
+    .row-heavy .pdf-label {
+      font-weight: 850 !important;
+    }
+    .row-heavy .pdf-value {
+      font-weight: 950 !important;
+    }
+
+    /* BOX SPESIAL ABU SHADED TOTAL HARUS DIBAYAR */
+    .pdf-total-row {
+      background-color: #f3f4f6 !important;
+      padding: 1px 3px !important;
+      margin: 1px 0 !important;
+      border-radius: 2px !important;
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: space-between !important;
+    }
+
+    /* SOLID DIVIDER LINE */
+    .pdf-divider-line {
       border: none !important;
-      border-top: 1.8px solid #000000 !important;
-      margin: 4px 0 !important;
+      border-top: 1.0px solid #111827 !important;
+      margin: 1.5px 0 !important;
       height: 0 !important;
       display: block !important;
     }
-    
-    .pdf-slip .divider-double {
-      border: none !important;
-      border-top: 3.5px double #000000 !important;
-      margin: 4px 0 !important;
-      height: 0 !important;
-      display: block !important;
-    }
 
-    /* LABEL KATEGORI */
+    /* SEPARASI STATUS ATAU TICKET TYPE */
     .pdf-slip .ticket-type {
-      font-size: 8.0pt !important;
-      font-weight: 950 !important;
+      font-size: 7.2pt !important;
+      font-weight: 800 !important;
       text-transform: uppercase !important;
-      letter-spacing: 0.5px !important;
-      margin: 4px 0 !important;
+      letter-spacing: 0.2px !important;
+      margin: 1.5px 0 !important;
       text-align: center !important;
       display: block !important;
-    }
-
-    /* TABLE LAYOUT UNTUK BARIS PREVENT WRAPPING BARIS YG RUSAK */
-    .pdf-slip .flex {
-      display: table !important;
-      width: 100% !important;
-      table-layout: fixed !important;
-      margin: 2px 0 !important;
-      border-collapse: collapse !important;
-      clear: both !important;
-    }
-    
-    .pdf-slip .flex span {
-      display: table-cell !important;
-      font-size: 7.2pt !important;
-      line-height: 1.25 !important;
-      vertical-align: top !important;
-    }
-    
-    .pdf-slip .flex span.label {
-      width: 45% !important;
-      text-align: left !important;
-      font-weight: 700 !important;
-    }
-    
-    .pdf-slip .flex span.value {
-      width: 55% !important;
-      text-align: left !important;
-      font-weight: 850 !important;
-    }
-    
-    .pdf-slip .flex span.label-heavy {
-      width: 45% !important;
-      font-weight: 850 !important;
-    }
-    
-    .pdf-slip .flex span.value-heavy {
-      width: 55% !important;
-      font-weight: 950 !important;
-      text-align: left !important;
     }
 
     /* JAM TIMBANGER */
     .pdf-slip .weight-time {
-      font-size: 7.0pt !important;
-      margin: 3px 0 !important;
-      line-height: 1.1 !important;
-      padding-left: 2px !important;
+      font-size: 5.8pt !important;
+      margin: -1px 0 0.5px 0 !important;
+      line-height: 1.05 !important;
+      text-align: right !important; /* Rata kanan */
       font-weight: bold !important;
       display: block !important;
-    }
-
-    /* BARIS NETTO MENGGUNAKAN SEBARAN TABLE MODEL TERSTABIL */
-    .pdf-slip .netto-row {
-      display: table !important;
-      width: 100% !important;
-      table-layout: fixed !important;
-      margin: 5px 0 !important;
-      border-collapse: collapse !important;
-    }
-    
-    .pdf-slip .netto-label {
-      display: table-cell !important;
-      width: 45% !important;
-      font-size: 8.2pt !important;
-      font-weight: 900 !important;
-      vertical-align: middle !important;
-      text-align: left !important;
-    }
-    
-    .pdf-slip .netto-val {
-      display: table-cell !important;
-      width: 55% !important;
-      font-size: 9.8pt !important;
-      font-weight: 950 !important;
-      text-align: left !important;
-      vertical-align: middle !important;
+      font-style: italic !important;
+      color: #4b5563 !important;
     }
 
     /* BOX CATATAN */
     .pdf-slip .notes-box {
-      font-size: 7.2pt !important;
-      border: 1.5px solid #000000 !important;
-      padding: 3px 5px !important;
-      margin: 4px 0 !important;
-      line-height: 1.25 !important;
+      font-size: 6pt !important;
+      border: 1.0px solid #374151 !important;
+      padding: 1px 2px !important;
+      margin: 1.5px 0 !important;
+      line-height: 1.15 !important;
       word-break: break-word !important;
-      font-weight: 800 !important;
-      display: block !important;
-    }
-
-    /* TANDA TANGAN */
-    .pdf-slip .signatures {
-      display: table !important;
-      width: 100% !important;
-      table-layout: fixed !important;
-      margin-top: 10px !important;
-      border-collapse: collapse !important;
-    }
-    
-    .pdf-slip .signatures > div {
-      display: table-cell !important;
-      width: 50% !important;
-      text-align: center !important;
-      font-size: 7.0pt !important;
-      padding: 0 4px !important;
-      vertical-align: top !important;
-      line-height: 1.3 !important;
       font-weight: bold !important;
     }
-    
-    .pdf-slip .signature-space {
-      height: 14px !important;
-      display: block !important;
+
+    /* STRUKTUR TANDA TANGAN REKAYASA PRESISI */
+    .pdf-signatures {
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: space-between !important;
+      width: 100% !important;
+      margin-top: 2.5px !important;
+      page-break-inside: avoid !important;
     }
-    
-    .pdf-slip .signature-line {
-      border-top: 1.2px solid #000000 !important;
-      margin: 2px auto 0 auto !important;
-      width: 85% !important;
-      font-weight: 900 !important;
-      font-size: 7.0pt !important;
-      padding-top: 1px !important;
+    .pdf-sig-col {
+      display: flex !important;
+      flex-direction: column !important;
+      width: 48% !important;
       text-align: center !important;
     }
-
-    /* TAMPILKAN LOGO BRANDING DI PDF SECARA SEMPURNA */
-    .pdf-slip img, .pdf-slip .header-logo {
+    .pdf-sig-title {
+      font-size: 6.5pt !important;
+      font-weight: 800 !important;
+      margin-bottom: 6px !important;
+      text-align: center !important;
+    }
+    .pdf-sig-name-container {
+      display: inline-block !important;
+      width: 85% !important;
+      margin: 0 auto !important;
+      text-align: center !important;
+    }
+    .pdf-sig-name {
+      font-size: 6.5pt !important;
+      font-weight: 900 !important;
+      text-align: center !important;
+      margin-bottom: 0.5px !important;
       display: block !important;
-      max-width: 32px !important;
-      height: auto !important;
-      margin: 0 auto 4px 0 !important;
+      height: 9px !important;
+    }
+    .pdf-sig-line {
+      border-top: 1.0px solid #111827 !important;
+      width: 100% !important;
+      margin: 0 auto !important;
+      display: block !important;
+    }
+    .pdf-sig-parens {
+      font-size: 6pt !important;
+      font-weight: bold !important;
+      text-align: center !important;
+      margin-top: 0.5px !important;
+      display: block !important;
     }
 
-    /* PESAN FOOTER */
+    /* CAUTION / INFO MOISTURE BOX */
+    .pdf-caution-box {
+      font-size: 6pt !important;
+      color: #111827 !important;
+      background-color: #f9fafb !important;
+      border: 1.0px solid #d1d5db !important;
+      border-radius: 4px !important;
+      padding: 1px 2px !important;
+      margin: 1.5px 0 !important;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+      line-height: 1.15 !important;
+    }
+
+    /* ANTIALIASING LOGO UNTUK PENCEGAHAN BLUR */
+    .pdf-slip img {
+      image-rendering: -webkit-optimize-contrast !important;
+      image-rendering: crisp-edges !important;
+    }
+
+    /* FOOTER TERSENTRALISASI */
     .pdf-slip .footer-msg {
       text-align: center !important;
-      font-size: 7.0pt !important;
-      margin-top: 10px !important;
-      line-height: 1.3 !important;
-      border-top: 1.5px dashed #000000 !important;
-      padding-top: 5px !important;
+      font-size: 6pt !important;
+      margin-top: 3px !important;
+      line-height: 1.1 !important;
+      border-top: 1.0px dashed #9ca3af !important;
+      padding-top: 1.5px !important;
       font-weight: bold !important;
-      display: block !important;
+      color: #4b5563 !important;
       clear: both !important;
     }
   </style>
@@ -285,15 +479,44 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
 </html>
       `;
 
+      // EXTRACT STYLE FOR ACCURATE MEASUREMENT AND DEFINE STYLES FOR THE GENERANT REMOVING NESTED HTML ISSUES
+      const styleMatch = cleanHtml.match(/<style>([\s\S]*?)<\/style>/);
+      const styleContent = styleMatch ? styleMatch[1] : '';
+
+      // CREATE A STABLE DOM ELEMENT THAT STAYS ATTACHED DURING HTML2PDF CAPTURE FOR PERFECT STYLE INHERITANCE
+      const containerForPdf = document.createElement('div');
+      containerForPdf.style.position = 'absolute';
+      containerForPdf.style.left = '-9999px';
+      containerForPdf.style.top = '-9999px';
+      containerForPdf.style.width = '397px'; // A6 width in pixels (approx)
+      containerForPdf.style.height = '559px'; // A6 height in pixels (approx)
+      
+      const targetEl = document.createElement('div');
+      targetEl.className = 'pdf-slip';
+      targetEl.innerHTML = slip.innerHTML;
+
+      // APPEND THE STYLE SHEET INSIDE TARGETEL SO HTML2PDF CLONES IT AND APPLIES STYLES PERFECTLY!
+      const styleEl = document.createElement('style');
+      styleEl.textContent = styleContent;
+      targetEl.appendChild(styleEl);
+
+      containerForPdf.appendChild(targetEl);
+      document.body.appendChild(containerForPdf);
+
       const opt = {
-        margin:       [4, 8, 4, 8] as [number, number, number, number], // 4mm top/bottom, 8mm left/right (menyediakan spasi 1.5 yang simetris dan aman dari terpotong)
+        margin:       [0, 0, 0, 0] as [number, number, number, number],
         filename:     pdfFileName || 'Resi.pdf',
         image:        { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas:  { scale: 2.5, useCORS: true, logging: false, letterRendering: true, windowWidth: 380 },
-        jsPDF:        { unit: 'mm', format: [82, 185] as [number, number], orientation: 'portrait' as const, compress: true }
+        html2canvas:  { scale: 2.5, useCORS: true, logging: false, letterRendering: true, windowWidth: 397 },
+        jsPDF:        { unit: 'mm', format: 'a6', orientation: 'portrait' as const, compress: true },
+        pagebreak:    { mode: 'avoid-all' }
       };
 
-      const pdfBlob = await html2pdf().set(opt).from(cleanHtml).output('blob');
+      // Generate PDF directly from the live DOM element (targetEl) so that styles inside `<style>` are fully loaded and used by html2canvas!
+      const pdfBlob = await html2pdf().set(opt).from(targetEl).output('blob');
+      
+      // Clean up the temporary container from the body
+      document.body.removeChild(containerForPdf);
       
       let uploadUrl = '';
 
