@@ -38,41 +38,259 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
       const parsedDoc = parser.parseFromString(pdfHtml, 'text/html');
       const slip = parsedDoc.querySelector('.slip') || parsedDoc.body;
 
-      let stylesText = Array.from(parsedDoc.querySelectorAll('style'))
-        .map(style => style.innerHTML)
-        .join('\n');
-
-      stylesText = stylesText.replace(/html,\s*body/gi, '.pdf-slip-wrapper');
-      stylesText = stylesText.replace(/\bbody\b/gi, '.pdf-slip-wrapper');
-
       const cleanHtml = `
-        <div class="pdf-slip-wrapper" style="width: 105mm; height: 148mm; box-sizing: border-box; background-color: #ffffff; padding: 0; margin: 0; overflow: hidden; position: relative;">
-          <style>
-            ${stylesText}
-            .pdf-slip-wrapper {
-              font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace !important;
-              color: #1e293b !important;
-              background-color: #ffffff !important;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            .slip {
-               height: auto !important;
-               min-height: auto !important;
-            }
-          </style>
-          <div class="slip" style="border: none !important; box-shadow: none !important; border-radius: 0 !important; margin: 0 !important; width: 105mm !important; box-sizing: border-box !important; padding: 5mm !important; background-color: #ffffff !important; display: flex !important; flex-direction: column !important; justify-content: flex-start !important;">
-            ${slip.innerHTML}
-          </div>
-        </div>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${pdfFileName || 'Resi'}</title>
+  <style>
+    /* RESET STYLE UNTUK DIGITAL PDF */
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      background-color: #ffffff !important;
+      -webkit-font-smoothing: antialiased !important;
+      -moz-osx-font-smoothing: grayscale !important;
+      font-smooth: always !important;
+      text-rendering: geometricPrecision !important;
+    }
+
+    /* DIGITAL SLIP CONTAINER YANG RAPI & COCOK DENGAN FORMAT KERTAS THERMAL */
+    .pdf-slip {
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 2px !important; /* Margins are controlled of page-level to keep alignment symmetrical */
+      background: #ffffff !important;
+      font-family: 'Consolas', 'Courier New', Courier, monospace !important;
+      font-size: 7.4pt !important;
+      color: #000000 !important;
+      line-height: 1.35 !important;
+      box-sizing: border-box !important;
+    }
+
+    /* PAKSA SEMUA ELEMEN BERWARNA HITAM & TEBAL / CRISP */
+    .pdf-slip * {
+      color: #000000 !important;
+      background: transparent !important;
+      border-color: #000000 !important;
+      box-shadow: none !important;
+      font-family: 'Consolas', 'Courier New', Courier, monospace !important;
+      font-weight: 700 !important;
+      box-sizing: border-box !important;
+    }
+
+    /* JUDUL BRAND GUDANG */
+    .pdf-slip .header {
+      display: block !important;
+      width: 100% !important;
+      margin-bottom: 4px !important;
+    }
+    
+    .pdf-slip .header-title {
+      font-size: 9.5pt !important;
+      font-weight: 950 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.3px !important;
+      display: block !important;
+    }
+    
+    .pdf-slip .header-subtitle {
+      font-size: 6.6pt !important;
+      font-weight: 700 !important;
+      display: block !important;
+      line-height: 1.25 !important;
+    }
+
+    /* SEPARATOR GARIS */
+    .pdf-slip .divider-line {
+      border: none !important;
+      border-top: 1.8px solid #000000 !important;
+      margin: 4px 0 !important;
+      height: 0 !important;
+      display: block !important;
+    }
+    
+    .pdf-slip .divider-double {
+      border: none !important;
+      border-top: 3.5px double #000000 !important;
+      margin: 4px 0 !important;
+      height: 0 !important;
+      display: block !important;
+    }
+
+    /* LABEL KATEGORI */
+    .pdf-slip .ticket-type {
+      font-size: 8.0pt !important;
+      font-weight: 950 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+      margin: 4px 0 !important;
+      text-align: center !important;
+      display: block !important;
+    }
+
+    /* TABLE LAYOUT UNTUK BARIS PREVENT WRAPPING BARIS YG RUSAK */
+    .pdf-slip .flex {
+      display: table !important;
+      width: 100% !important;
+      table-layout: fixed !important;
+      margin: 2px 0 !important;
+      border-collapse: collapse !important;
+      clear: both !important;
+    }
+    
+    .pdf-slip .flex span {
+      display: table-cell !important;
+      font-size: 7.2pt !important;
+      line-height: 1.25 !important;
+      vertical-align: top !important;
+    }
+    
+    .pdf-slip .flex span.label {
+      width: 45% !important;
+      text-align: left !important;
+      font-weight: 700 !important;
+    }
+    
+    .pdf-slip .flex span.value {
+      width: 55% !important;
+      text-align: left !important;
+      font-weight: 850 !important;
+    }
+    
+    .pdf-slip .flex span.label-heavy {
+      width: 45% !important;
+      font-weight: 850 !important;
+    }
+    
+    .pdf-slip .flex span.value-heavy {
+      width: 55% !important;
+      font-weight: 950 !important;
+      text-align: left !important;
+    }
+
+    /* JAM TIMBANGER */
+    .pdf-slip .weight-time {
+      font-size: 7.0pt !important;
+      margin: 3px 0 !important;
+      line-height: 1.1 !important;
+      padding-left: 2px !important;
+      font-weight: bold !important;
+      display: block !important;
+    }
+
+    /* BARIS NETTO MENGGUNAKAN SEBARAN TABLE MODEL TERSTABIL */
+    .pdf-slip .netto-row {
+      display: table !important;
+      width: 100% !important;
+      table-layout: fixed !important;
+      margin: 5px 0 !important;
+      border-collapse: collapse !important;
+    }
+    
+    .pdf-slip .netto-label {
+      display: table-cell !important;
+      width: 45% !important;
+      font-size: 8.2pt !important;
+      font-weight: 900 !important;
+      vertical-align: middle !important;
+      text-align: left !important;
+    }
+    
+    .pdf-slip .netto-val {
+      display: table-cell !important;
+      width: 55% !important;
+      font-size: 9.8pt !important;
+      font-weight: 950 !important;
+      text-align: left !important;
+      vertical-align: middle !important;
+    }
+
+    /* BOX CATATAN */
+    .pdf-slip .notes-box {
+      font-size: 7.2pt !important;
+      border: 1.5px solid #000000 !important;
+      padding: 3px 5px !important;
+      margin: 4px 0 !important;
+      line-height: 1.25 !important;
+      word-break: break-word !important;
+      font-weight: 800 !important;
+      display: block !important;
+    }
+
+    /* TANDA TANGAN */
+    .pdf-slip .signatures {
+      display: table !important;
+      width: 100% !important;
+      table-layout: fixed !important;
+      margin-top: 10px !important;
+      border-collapse: collapse !important;
+    }
+    
+    .pdf-slip .signatures > div {
+      display: table-cell !important;
+      width: 50% !important;
+      text-align: center !important;
+      font-size: 7.0pt !important;
+      padding: 0 4px !important;
+      vertical-align: top !important;
+      line-height: 1.3 !important;
+      font-weight: bold !important;
+    }
+    
+    .pdf-slip .signature-space {
+      height: 14px !important;
+      display: block !important;
+    }
+    
+    .pdf-slip .signature-line {
+      border-top: 1.2px solid #000000 !important;
+      margin: 2px auto 0 auto !important;
+      width: 85% !important;
+      font-weight: 900 !important;
+      font-size: 7.0pt !important;
+      padding-top: 1px !important;
+      text-align: center !important;
+    }
+
+    /* TAMPILKAN LOGO BRANDING DI PDF SECARA SEMPURNA */
+    .pdf-slip img, .pdf-slip .header-logo {
+      display: block !important;
+      max-width: 32px !important;
+      height: auto !important;
+      margin: 0 auto 4px 0 !important;
+    }
+
+    /* PESAN FOOTER */
+    .pdf-slip .footer-msg {
+      text-align: center !important;
+      font-size: 7.0pt !important;
+      margin-top: 10px !important;
+      line-height: 1.3 !important;
+      border-top: 1.5px dashed #000000 !important;
+      padding-top: 5px !important;
+      font-weight: bold !important;
+      display: block !important;
+      clear: both !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="pdf-slip">
+    ${slip.innerHTML}
+  </div>
+</body>
+</html>
       `;
 
       const opt = {
-        margin:       0,
+        margin:       [4, 8, 4, 8] as [number, number, number, number], // 4mm top/bottom, 8mm left/right (menyediakan spasi 1.5 yang simetris dan aman dari terpotong)
         filename:     pdfFileName || 'Resi.pdf',
-        image:        { type: 'jpeg' as const, quality: 0.8 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false, letterRendering: true, windowWidth: 400 },
-        jsPDF:        { unit: 'mm', format: 'a6', orientation: 'portrait' as const, compress: true }
+        image:        { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas:  { scale: 2.5, useCORS: true, logging: false, letterRendering: true, windowWidth: 380 },
+        jsPDF:        { unit: 'mm', format: [82, 185] as [number, number], orientation: 'portrait' as const, compress: true }
       };
 
       const pdfBlob = await html2pdf().set(opt).from(cleanHtml).output('blob');
