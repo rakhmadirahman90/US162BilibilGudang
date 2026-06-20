@@ -257,7 +257,7 @@ const COMMON_SLIP_STYLE = `
   }
 
   html, body {
-    width: 100mm !important;
+    width: 85mm !important;
     height: 140mm !important;
     /* PENGGUNAAN FONT SANS-SERIF CALIBRI DENGAN STROKES TEBAL AGAR SANGAT JELAS DI DOT MATRIX LX-310 */
     font-family: Calibri, Arial, "Segoe UI", sans-serif !important;
@@ -295,7 +295,7 @@ const COMMON_SLIP_STYLE = `
   }
 
   .slip {
-    width: 100mm !important;
+    width: 85mm !important;
     height: 140mm !important;
     margin: 0 !important;
     padding: 2.5mm 3mm 2.5mm 6ch !important; /* Beri jarak 6 spasi ke kanan */
@@ -319,7 +319,7 @@ const COMMON_SLIP_STYLE = `
     }
     
     html, body {
-      width: 100mm !important;
+      width: 85mm !important;
       height: 140mm !important;
       background: transparent !important;
       margin: 0 !important;
@@ -350,7 +350,7 @@ const COMMON_SLIP_STYLE = `
       position: absolute !important;
       top: 0mm !important;
       left: 0mm !important;
-      width: 100mm !important;
+      width: 85mm !important;
       height: 140mm !important;
     }
 

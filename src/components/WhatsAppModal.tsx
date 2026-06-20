@@ -243,7 +243,7 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
 
     /* PENGATURAN FONT "CALIBRI" UNTUK KETERBACAAN TEBAL & SOLID DI DOT MATRIX LX-310 */
     .pdf-slip {
-      width: 100mm !important;
+      width: 85mm !important;
       height: 140mm !important; /* Shrunk from 148mm to exactly 140mm to guarantee it is safely shorter than A6 page height (148mm) so that no second page/blank page is ever created due to pixel/rounding issues */
       max-height: 140mm !important;
       overflow: hidden !important;
