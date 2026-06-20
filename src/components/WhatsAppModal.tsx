@@ -229,19 +229,19 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
   <meta charset="utf-8">
   <title>${pdfFileName || 'Resi'}</title>
   <style>
-    /* RESET GLOBAL STYLE UNTUK DIGITAL A6 PRINT */
+    /* RESET GLOBAL STYLE UNTUK DIGITAL A6 PRINT - NONAKTIFKAN SMOOTHING AGAR BERSIH TANPA GREY PIXEL DI DOT MATRIX */
     html, body {
       margin: 0 !important;
       padding: 0 !important;
       width: 100% !important;
       background-color: #ffffff !important;
-      -webkit-font-smoothing: antialiased !important;
-      -moz-osx-font-smoothing: grayscale !important;
-      font-smooth: always !important;
-      text-rendering: geometricPrecision !important;
+      -webkit-font-smoothing: none !important;
+      -moz-osx-font-smoothing: unset !important;
+      font-smooth: never !important;
+      text-rendering: optimizeSpeed !important;
     }
 
-    /* DIGITAL SLIP CONTAINER YANG RAPI & TIGHT */
+    /* PENGATURAN FONT "CALIBRI" UNTUK KETERBACAAN TEBAL & SOLID DI DOT MATRIX LX-310 */
     .pdf-slip {
       width: 105mm !important;
       height: 140mm !important; /* Shrunk from 148mm to exactly 140mm to guarantee it is safely shorter than A6 page height (148mm) so that no second page/blank page is ever created due to pixel/rounding issues */
@@ -250,22 +250,25 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
       margin: 0 !important;
       padding: 1.5mm 3.5mm !important; /* Shrunk padding marginally to guarantee everything stays on page 1 */
       background: #ffffff !important;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
-      font-size: 6.8pt !important; /* Shrunk from 7.5pt to 6.8pt to ensure everything fits on 1 page! */
-      color: #111827 !important;
-      line-height: 1.15 !important;
+      font-family: Calibri, Arial, "Segoe UI", sans-serif !important;
+      font-size: 10.2pt !important; /* Ukuran ideal untuk dots matrix */
+      color: #000000 !important;
+      line-height: 1.25 !important;
       box-sizing: border-box !important;
       display: block !important;
     }
 
-    /* KUALITAS TEKS SOLID PENCEGAHAN BLUR */
+    /* KUALITAS TEKS SOLID PENCEGAHAN BLUR, PURE BLACK UNTUK DOT MATRIX - TINGKATKAN KETERBACAAN */
     .pdf-slip * {
-      color: #111827 !important;
+      color: #000000 !important;
       background: transparent !important;
-      border-color: #111827 !important;
+      border-color: #000000 !important;
       box-shadow: none !important;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
-      font-weight: bold !important;
+      font-family: Calibri, Arial, "Segoe UI", sans-serif !important;
+      font-weight: 900 !important; /* Tebalkan ganda hingga tingkat Black secara global agar jarum printer menusuk rapat */
+      -webkit-text-stroke: 0.3px #000000 !important; /* Outline stroke untuk menebalkan bentuk fisik font */
+      text-shadow: 0.25px 0px 0px #000000, -0.25px 0px 0px #000000 !important; /* Simulasi cetak ganda (double-strike) hardware */
+      letter-spacing: 0.25px !important; /* Memberikan mikro-spasi agar tinta ketukan pita tidak bloat / menyatu */
       box-sizing: border-box !important;
     }
 
@@ -291,16 +294,16 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
       text-align: left !important;
     }
     .pdf-header-title {
-      font-size: 8.5pt !important;
-      font-weight: 950 !important;
+      font-size: 11.5pt !important;
+      font-weight: bold !important; /* Tegas namun tidak dither berlubang */
       text-transform: uppercase !important;
       letter-spacing: 0.1px !important;
       margin-bottom: 0.5px !important;
       text-align: left !important;
     }
     .pdf-header-subtitle {
-      font-size: 5.8pt !important;
-      font-weight: 600 !important;
+      font-size: 8pt !important;
+      font-weight: bold !important;
       line-height: 1.15 !important;
       text-align: left !important;
     }
@@ -317,27 +320,28 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
     .pdf-label {
       width: 45% !important;
       text-align: left !important;
-      font-weight: 600 !important;
-      font-size: 6.8pt !important;
+      font-weight: bold !important;
+      font-size: 9.2pt !important;
     }
     .pdf-value {
       width: 55% !important;
       text-align: right !important; /* Rata kanan */
-      font-weight: 750 !important;
-      font-size: 6.8pt !important;
+      font-weight: bold !important;
+      font-size: 9.2pt !important;
     }
 
-    /* KETEBALAN FONT BARIS UTAMA */
+    /* KETEBALAN FONT BARIS UTAMA UNTUK BAGIAN PENTING */
     .row-heavy .pdf-label {
-      font-weight: 850 !important;
+      font-weight: bold !important;
     }
     .row-heavy .pdf-value {
-      font-weight: 950 !important;
+      font-weight: bold !important;
     }
 
     /* BOX SPESIAL ABU SHADED TOTAL HARUS DIBAYAR */
     .pdf-total-row {
-      background-color: #f3f4f6 !important;
+      background-color: #ffffff !important; /* Gunakan background putih polos di dot matrix agar tidak dithering pixel abu-abu */
+      border: 1.5px solid #000000 !important;
       padding: 1px 3px !important;
       margin: 1px 0 !important;
       border-radius: 2px !important;
@@ -349,7 +353,7 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
     /* SOLID DIVIDER LINE */
     .pdf-divider-line {
       border: none !important;
-      border-top: 1.0px solid #111827 !important;
+      border-top: 1.5px solid #000000 !important;
       margin: 1.5px 0 !important;
       height: 0 !important;
       display: block !important;
@@ -357,8 +361,8 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
 
     /* SEPARASI STATUS ATAU TICKET TYPE */
     .pdf-slip .ticket-type {
-      font-size: 7.2pt !important;
-      font-weight: 800 !important;
+      font-size: 10.5pt !important;
+      font-weight: bold !important;
       text-transform: uppercase !important;
       letter-spacing: 0.2px !important;
       margin: 1.5px 0 !important;
@@ -368,20 +372,20 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
 
     /* JAM TIMBANGER */
     .pdf-slip .weight-time {
-      font-size: 5.8pt !important;
+      font-size: 8pt !important;
       margin: -1px 0 0.5px 0 !important;
       line-height: 1.05 !important;
       text-align: right !important; /* Rata kanan */
       font-weight: bold !important;
       display: block !important;
       font-style: italic !important;
-      color: #4b5563 !important;
+      color: #000000 !important;
     }
 
     /* BOX CATATAN */
     .pdf-slip .notes-box {
-      font-size: 6pt !important;
-      border: 1.0px solid #374151 !important;
+      font-size: 8.2pt !important;
+      border: 1.5px solid #000000 !important;
       padding: 1px 2px !important;
       margin: 1.5px 0 !important;
       line-height: 1.15 !important;
@@ -405,8 +409,8 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
       text-align: center !important;
     }
     .pdf-sig-title {
-      font-size: 6.5pt !important;
-      font-weight: 800 !important;
+      font-size: 8.5pt !important;
+      font-weight: bold !important;
       margin-bottom: 6px !important;
       text-align: center !important;
     }
@@ -417,21 +421,21 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
       text-align: center !important;
     }
     .pdf-sig-name {
-      font-size: 6.5pt !important;
-      font-weight: 900 !important;
+      font-size: 8.5pt !important;
+      font-weight: bold !important;
       text-align: center !important;
       margin-bottom: 0.5px !important;
       display: block !important;
       height: 9px !important;
     }
     .pdf-sig-line {
-      border-top: 1.0px solid #111827 !important;
+      border-top: 1.5px solid #000000 !important;
       width: 100% !important;
       margin: 0 auto !important;
       display: block !important;
     }
     .pdf-sig-parens {
-      font-size: 6pt !important;
+      font-size: 7.5pt !important;
       font-weight: bold !important;
       text-align: center !important;
       margin-top: 0.5px !important;
@@ -440,14 +444,14 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
 
     /* CAUTION / INFO MOISTURE BOX */
     .pdf-caution-box {
-      font-size: 6pt !important;
-      color: #111827 !important;
-      background-color: #f9fafb !important;
-      border: 1.0px solid #d1d5db !important;
+      font-size: 8.2pt !important;
+      color: #000000 !important;
+      background-color: #ffffff !important;
+      border: 1.5px solid #000000 !important;
       border-radius: 4px !important;
       padding: 1px 2px !important;
       margin: 1.5px 0 !important;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+      font-family: Calibri, Arial, "Segoe UI", sans-serif !important;
       line-height: 1.15 !important;
     }
 
@@ -460,13 +464,13 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
     /* FOOTER TERSENTRALISASI */
     .pdf-slip .footer-msg {
       text-align: center !important;
-      font-size: 6pt !important;
+      font-size: 8pt !important;
       margin-top: 3px !important;
       line-height: 1.1 !important;
-      border-top: 1.0px dashed #9ca3af !important;
+      border-top: 1.5px dashed #000000 !important;
       padding-top: 1.5px !important;
       font-weight: bold !important;
-      color: #4b5563 !important;
+      color: #000000 !important;
       clear: both !important;
     }
   </style>

@@ -258,20 +258,32 @@ const COMMON_SLIP_STYLE = `
 
   html, body {
     width: 105mm !important;
-    height: 148mm !important;
-    /* PENGGUNAAN FONT SANS-SERIF MODERN DAN MONOSPACE UNTUK KETERBACAAN MAKSIMAL DI UKURAN A6 */
-    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
-    font-size: 7.5pt !important;
-    color: #111827 !important;
+    height: 140mm !important;
+    /* PENGGUNAAN FONT SANS-SERIF CALIBRI DENGAN STROKES TEBAL AGAR SANGAT JELAS DI DOT MATRIX LX-310 */
+    font-family: Calibri, Arial, "Segoe UI", sans-serif !important;
+    font-size: 10.2pt !important;
+    color: #000000 !important;
     background-color: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
-    line-height: 1.2 !important;
+    line-height: 1.25 !important;
     text-align: left;
-    -webkit-font-smoothing: antialiased !important;
-    -moz-osx-font-smoothing: grayscale !important;
-    font-smooth: always !important;
+    -webkit-font-smoothing: none !important; /* Nonaktifkan penghalusan pixel anti-aliasing agar printer menusuk lurus tanpa abu-abu samar */
+    -moz-osx-font-smoothing: none !important;
+    font-smooth: never !important;
     text-rendering: geometricPrecision !important;
+  }
+
+  /* PAKSA SEMUA ELEMEN DI DALAM SLIP MENJADI PURE BLACK UNTUK DOT MATRIX TANPA BAYANGAN AGAR SANGAT JELAS */
+  .slip * {
+    color: #000000 !important;
+    border-color: #000000 !important;
+    box-shadow: none !important;
+    font-family: Calibri, Arial, "Segoe UI", sans-serif !important;
+    font-weight: 900 !important; /* Paksa tebal maksimal (Extra Bold / Black) ganda-ketuk pin printer */
+    -webkit-text-stroke: 0.3px #000000 !important; /* Tingkatkan ketebalan garis fisik agar lurus tebal */
+    text-shadow: 0.25px 0px 0px #000000, -0.25px 0px 0px #000000 !important; /* Simulasi double-strike horizontal ganda */
+    letter-spacing: 0.25px !important; /* Beri jarak mikro antar huruf agar tidak berbayang atau bocor tinta menyatu */
   }
 
   /* LOGO DIALIRKAN SECARA ELEGAN DI RECTANGLE FORMAT A6 */
@@ -284,9 +296,9 @@ const COMMON_SLIP_STYLE = `
 
   .slip {
     width: 105mm !important;
-    height: 148mm !important;
+    height: 140mm !important;
     margin: 0 !important;
-    padding: 2.5mm 4mm !important; /* Extremely neat and compact padding for A6 single-page guarantee */
+    padding: 2.5mm 4mm !important; /* Penyusuran ketat & padat agar pas di 1 halaman A6 */
     background: #ffffff !important;
     display: flex !important;
     flex-direction: column !important;
@@ -308,7 +320,7 @@ const COMMON_SLIP_STYLE = `
     
     html, body {
       width: 105mm !important;
-      height: 148mm !important;
+      height: 140mm !important;
       background: transparent !important;
       margin: 0 !important;
       padding: 0 !important;
@@ -318,6 +330,9 @@ const COMMON_SLIP_STYLE = `
       top: 0mm !important;
       left: 0mm !important;
       overflow: hidden !important;
+      -webkit-font-smoothing: none !important;
+      -moz-osx-font-smoothing: unset !important;
+      text-rendering: geometricPrecision !important;
     }
 
     img, .header-logo {
@@ -336,16 +351,19 @@ const COMMON_SLIP_STYLE = `
       top: 0mm !important;
       left: 0mm !important;
       width: 105mm !important;
-      height: 148mm !important;
+      height: 140mm !important;
     }
 
     * {
       color: #000000 !important;
-      /* Force bold strokes across the document to prevent low resolution fading */
-      font-weight: 700 !important;
+      font-weight: 900 !important; /* Paksa tebal maksimal (Extra Bold / Black) secara total saat cetak fisik di LX-310 */
       background: transparent !important;
       border-color: #000000 !important;
       box-shadow: none !important;
+      font-family: Calibri, Arial, "Segoe UI", sans-serif !important;
+      -webkit-text-stroke: 0.3px #000000 !important; /* Tebalkan garis fisik karakter untuk keterbacaan tinggi di jarum pin */
+      text-shadow: 0.25px 0px 0px #000000, -0.25px 0px 0px #000000 !important; /* Simulasi ganda-hammer (double-strike) hardware */
+      letter-spacing: 0.25px !important; /* Cegah luntur antar huruf di ribbon fisik */
     }
 
     .netto-val, .value, .value-heavy, .header-title, .netto-label, .ticket-type, .signatures div, .footer-msg {
@@ -371,40 +389,40 @@ const COMMON_SLIP_STYLE = `
     flex: 1 !important;
   }
   .header-title {
-    font-size: 9.5pt !important;
-    font-weight: 900 !important;
-    color: #111827 !important;
+    font-size: 11.5pt !important;
+    font-weight: bold !important;
+    color: #000000 !important;
     text-transform: uppercase;
     letter-spacing: 0.2px;
     line-height: 1.15;
     margin-bottom: 1px;
   }
   .header-subtitle {
-    font-size: 6.5pt !important;
-    color: #4b5563 !important;
+    font-size: 8pt !important;
+    color: #000000 !important;
     line-height: 1.2;
-    font-weight: 600 !important;
+    font-weight: bold !important;
   }
 
   /* DIVIDERS */
   .divider-line {
     border: none !important;
-    border-top: 1.2px solid #111827 !important;
+    border-top: 1.5px solid #000000 !important;
     margin: 2px 0 !important;
     height: 0 !important;
   }
   .divider-double {
     border: none !important;
-    border-top: 3.0px double #111827 !important;
+    border-top: 3.5px double #000000 !important;
     margin: 2px 0 !important;
     height: 0 !important;
   }
 
   /* TICKET TYPE LABEL */
   .ticket-type {
-    font-size: 8pt !important;
-    font-weight: 800 !important;
-    color: #111827 !important;
+    font-size: 10.5pt !important;
+    font-weight: bold !important;
+    color: #000000 !important;
     text-transform: uppercase;
     letter-spacing: 0.4px;
     margin: 2px 0;
@@ -422,42 +440,42 @@ const COMMON_SLIP_STYLE = `
   }
   .flex span {
     display: inline-block;
-    font-size: 7.5pt !important;
-    color: #1f2937 !important;
+    font-size: 9.2pt !important;
+    color: #000000 !important;
     line-height: 1.15 !important;
-    font-weight: 600 !important;
+    font-weight: bold !important;
   }
   .flex span.label {
     width: 45%;
     text-align: left;
-    font-weight: 600 !important;
+    font-weight: bold !important;
   }
   .flex span.value {
     width: 55%;
     text-align: right; /* Rata Kanan untuk kerapian A6 */
-    font-weight: 750 !important;
+    font-weight: bold !important;
   }
   .flex span.label-heavy {
     width: 45%;
-    font-weight: 750 !important;
-    font-size: 7.5pt !important;
+    font-weight: bold !important;
+    font-size: 9.5pt !important;
   }
   .flex span.value-heavy {
     width: 55%;
-    font-weight: 850 !important;
-    font-size: 7.5pt !important;
+    font-weight: bold !important;
+    font-size: 9.5pt !important;
     text-align: right; /* Rata Kanan */
   }
 
   /* WEIGHT TIMESTAMP */
   .weight-time {
-    font-size: 6.5pt !important;
-    color: #6b7280 !important;
+    font-size: 8pt !important;
+    color: #000000 !important;
     text-align: right; /* Menjadi rata kanan menyertai digit timbangan */
     margin: -1px 0 1px 0;
     font-style: italic;
     line-height: 1.1;
-    font-weight: 600 !important;
+    font-weight: bold !important;
   }
 
   /* NETTO ROW */
@@ -471,29 +489,29 @@ const COMMON_SLIP_STYLE = `
   }
   .netto-label {
     width: 45%;
-    font-size: 8pt !important;
-    font-weight: 850 !important;
-    color: #111827 !important;
+    font-size: 10.2pt !important;
+    font-weight: bold !important;
+    color: #000000 !important;
   }
   .netto-val {
     width: 55%;
-    font-size: 10pt !important;
-    font-weight: 900 !important;
+    font-size: 12.5pt !important;
+    font-weight: bold !important;
     text-align: right; /* Rata kanan */
     letter-spacing: 0.1px;
-    color: #111827 !important;
+    color: #000000 !important;
   }
 
   /* NOTES */
   .notes-box {
-    font-size: 6.8pt !important;
-    border: 1.0px solid #374151 !important;
+    font-size: 8.2pt !important;
+    border: 1.5px solid #000000 !important;
     padding: 2px 4px;
     margin: 2px 0;
     line-height: 1.2;
     word-break: break-word;
-    font-weight: 700 !important;
-    color: #111827 !important;
+    font-weight: bold !important;
+    color: #000000 !important;
   }
 
   /* SIGNATURES */
@@ -509,21 +527,21 @@ const COMMON_SLIP_STYLE = `
     flex-direction: column !important;
     width: 48%;
     text-align: center !important; /* Sentralisasi tanda tangan di A6 */
-    font-size: 7.2pt !important;
+    font-size: 8.5pt !important;
     line-height: 1.15;
-    font-weight: 700 !important;
-    color: #1f2937 !important;
+    font-weight: bold !important;
+    color: #000000 !important;
   }
   .signature-space {
     height: 10px;
     display: block;
   }
   .signature-line {
-    border-top: 1.0px solid #111827 !important;
+    border-top: 1.5px solid #000000 !important;
     margin: 2px auto 0 auto;
     width: 85%;
-    font-weight: 800 !important;
-    font-size: 7.2pt !important;
+    font-weight: bold !important;
+    font-size: 8.5pt !important;
     padding-top: 1px;
     text-align: center !important;
   }
@@ -531,13 +549,13 @@ const COMMON_SLIP_STYLE = `
   /* FOOTER */
   .footer-msg {
     text-align: center;
-    font-size: 6.8pt !important;
+    font-size: 8pt !important;
     margin-top: 4px;
     line-height: 1.15;
-    border-top: 1.0px dashed #9ca3af !important;
+    border-top: 1.5px dashed #000000 !important;
     padding-top: 2px;
-    font-weight: 700 !important;
-    color: #4b5563 !important;
+    font-weight: bold !important;
+    color: #000000 !important;
   }
 `;
 // GANTI DENGAN JENDELA BARU AGAR PREVIEW MUNCUL & TIDAK DIBLOKIR BROWSER
@@ -624,20 +642,20 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
     <div class="divider-line" style="margin: 2px 0 !important;"></div>
 
     <div class="signatures" style="margin-top: 6px; width: 100%; display: table; table-layout: fixed;">
-      <div style="display: table-cell; width: 50%; text-align: center !important; vertical-align: top; padding: 0 2px; font-size: 7.5pt; font-weight: bold;">
+      <div style="display: table-cell; width: 50%; text-align: center !important; vertical-align: top; padding: 0 2px; font-size: 8.5pt; font-weight: bold;">
         Staff 162
         <div style="margin-top: 14px; font-weight: bold; text-align: center !important;">( ${staffName} )</div>
-        <div style="border-top: 1.2px solid #000; width: 85%; margin: 1px auto 0 auto;"></div>
+        <div style="border-top: 1.5px solid #000; width: 85%; margin: 1px auto 0 auto;"></div>
       </div>
-      <div style="display: table-cell; width: 50%; text-align: center !important; vertical-align: top; padding: 0 2px; font-size: 7.5pt; font-weight: bold;">
+      <div style="display: table-cell; width: 50%; text-align: center !important; vertical-align: top; padding: 0 2px; font-size: 8.5pt; font-weight: bold;">
         Sopir / Pembawa
         <div style="margin-top: 14px; font-weight: bold; text-align: center !important;">( &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; )</div>
-        <div style="border-top: 1.2px solid #000; width: 85%; margin: 1px auto 0 auto;"></div>
+        <div style="border-top: 1.5px solid #000; width: 85%; margin: 1px auto 0 auto;"></div>
       </div>
     </div>
 
     ${record.commodity === 'JAGUNG' && ((record.moistureContent ?? 0) > 30.00) ? `
-    <div style="font-size: 6.5pt; color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 3px; padding: 3px 6px; margin: 4px 0 6px 0; font-family: monospace; line-height: 1.25;">
+    <div style="font-size: 8.2pt !important; color: #000000 !important; background-color: #ffffff !important; border: 1.5px solid #000000 !important; border-radius: 3px; padding: 3px 6px; margin: 4px 0 6px 0; font-family: Calibri, Arial, 'Segoe UI', sans-serif !important; line-height: 1.25; font-weight: bold !important;">
       <strong>*KA Tinggi (${record.moistureContent ?? 0}%):</strong> Potongan KA dihitung menggunakan Rumus ${record.cornFormulaFactor || 1.4} luar tabel: (Math.floor(${record.moistureContent ?? 0}) - 14) x ${record.cornFormulaFactor || 1.4} = ${record.refaksiKaPercent}% potongan.
     </div>
     ` : ''}
