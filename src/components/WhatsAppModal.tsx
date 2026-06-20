@@ -243,12 +243,12 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
 
     /* PENGATURAN FONT "CALIBRI" UNTUK KETERBACAAN TEBAL & SOLID DI DOT MATRIX LX-310 */
     .pdf-slip {
-      width: 105mm !important;
+      width: 100mm !important;
       height: 140mm !important; /* Shrunk from 148mm to exactly 140mm to guarantee it is safely shorter than A6 page height (148mm) so that no second page/blank page is ever created due to pixel/rounding issues */
       max-height: 140mm !important;
       overflow: hidden !important;
       margin: 0 !important;
-      padding: 1.5mm 3.5mm !important; /* Shrunk padding marginally to guarantee everything stays on page 1 */
+      padding: 1.5mm 2.5mm 1.5mm 6ch !important; /* Beri jarak 6 spasi ke kanan */
       background: #ffffff !important;
       font-family: Calibri, Arial, "Segoe UI", sans-serif !important;
       font-size: 10.2pt !important; /* Ukuran ideal untuk dots matrix */
