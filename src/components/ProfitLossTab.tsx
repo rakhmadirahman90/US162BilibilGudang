@@ -70,17 +70,42 @@ export default function ProfitLossTab({
     .filter(r => isIncluded(r.date))
     .reduce((acc, r) => acc + (r.totalFee || 0), 0);
 
-  // Dryer revenue
-  const dryerRevenue = dryerRecords
-    .filter(r => r.status === 'SELESAI' && isIncluded(r.date))
-    .reduce((acc, r) => acc + (r.totalCost || 0), 0);
+  // Dryer revenue (Jasa Dryer)
+  const dryerRecordsInPeriod = dryerRecords.filter(r => r.status === 'SELESAI' && isIncluded(r.date));
+  const totalDryerTonnage = dryerRecordsInPeriod.reduce((sum, r) => sum + r.dryWeight, 0);
+  const totalDryerRevenue = dryerRecordsInPeriod.reduce((sum, r) => sum + (r.dryWeight * r.dryingCostPerKg), 0);
+  
+  // Expenses for Dryer (Custom logic to pull from FinancialRecord/etc)
+  const laborBuruhTimbang = finances.filter(f => isIncluded(f.date) && f.category === 'BURUH_TIMBANG_DRYER').reduce((sum, f) => sum + f.amount, 0);
+  const laborBuruhMuat = finances.filter(f => isIncluded(f.date) && f.category === 'BURUH_MUAT_DRYER').reduce((sum, f) => sum + f.amount, 0);
+  const biayaListrikDrying = finances.filter(f => isIncluded(f.date) && f.category === 'LISTRIK_DRYER').reduce((sum, f) => sum + f.amount, 0);
+  const gajiOperatorDrying = finances.filter(f => isIncluded(f.date) && f.category === 'GAJI_OPERATOR_DRYER').reduce((sum, f) => sum + f.amount, 0);
+  const biayaCangkang = finances.filter(f => isIncluded(f.date) && f.category === 'CANGKANG_KEMIRI').reduce((sum, f) => sum + f.amount, 0);
+  const biayaTambahanDrying = finances.filter(f => isIncluded(f.date) && f.category === 'LAINNYA_DRYER').reduce((sum, f) => sum + f.amount, 0);
+  
+  const totalDryerExpenses = laborBuruhTimbang + laborBuruhMuat + biayaListrikDrying + gajiOperatorDrying + biayaCangkang + biayaTambahanDrying;
+  const dryerProfit = totalDryerRevenue - totalDryerExpenses;
+
+  // Cumulative Dryer Data (Accumulated Balance)
+  const allCompletedDryerRecords = dryerRecords.filter(r => r.status === 'SELESAI');
+  const allDryerRevenue = allCompletedDryerRecords.reduce((sum, r) => sum + (r.dryWeight * r.dryingCostPerKg), 0);
+  
+  const allLaborBuruhTimbang = finances.filter(f => f.category === 'BURUH_TIMBANG_DRYER').reduce((sum, f) => sum + f.amount, 0);
+  const allLaborBuruhMuat = finances.filter(f => f.category === 'BURUH_MUAT_DRYER').reduce((sum, f) => sum + f.amount, 0);
+  const allBiayaListrikDrying = finances.filter(f => f.category === 'LISTRIK_DRYER').reduce((sum, f) => sum + f.amount, 0);
+  const allGajiOperatorDrying = finances.filter(f => f.category === 'GAJI_OPERATOR_DRYER').reduce((sum, f) => sum + f.amount, 0);
+  const allBiayaCangkang = finances.filter(f => f.category === 'CANGKANG_KEMIRI').reduce((sum, f) => sum + f.amount, 0);
+  const allBiayaTambahanDrying = finances.filter(f => f.category === 'LAINNYA_DRYER').reduce((sum, f) => sum + f.amount, 0);
+  
+  const allDryerExpenses = allLaborBuruhTimbang + allLaborBuruhMuat + allBiayaListrikDrying + allGajiOperatorDrying + allBiayaCangkang + allBiayaTambahanDrying;
+  const cumulativeDryerProfit = allDryerRevenue - allDryerExpenses;
 
   // Manual debit entries in Cash Ledger (excluding ones classified as REVENUE from above if they're double-tracked)
   const otherFinancialCredits = finances
-    .filter(f => f.type === 'DEBIT' && isIncluded(f.date) && f.category !== 'POLES_KIPAS' && f.category !== 'TIMBANGAN')
+    .filter(f => f.type === 'DEBIT' && isIncluded(f.date) && f.category !== 'POLES_KIPAS' && f.category !== 'TIMBANGAN' && f.category !== 'DRYER')
     .reduce((acc, f) => acc + (f.amount || 0), 0);
 
-  const totalRevenue = outboundSales + polishRevenue + dryerRevenue + otherFinancialCredits;
+  const totalRevenue = outboundSales + polishRevenue + totalDryerRevenue + otherFinancialCredits;
 
 
   // --- COST OF GOODS SOLD (HPP) ---
@@ -193,7 +218,7 @@ export default function ProfitLossTab({
             </div>
             <div class="row">
               <span class="indent">Pendapatan Jasa Pengeringan Jagung (Gas Dryer)</span>
-              <span class="right">Rp ${dryerRevenue.toLocaleString('id-ID')}</span>
+              <span class="right">Rp ${totalDryerRevenue.toLocaleString('id-ID')}</span>
             </div>
             <div class="row">
               <span class="indent">Pemasukan Kas & Jasa Timbangan Lainnya</span>
@@ -202,6 +227,47 @@ export default function ProfitLossTab({
             <div class="row subtotal">
               <span>TOTAL PENDAPATAN KAS</span>
               <span class="right">Rp ${totalRevenue.toLocaleString('id-ID')}</span>
+            </div>
+          </div>
+
+          <!-- RINCIAN LABA DRYER -->
+          <div class="section">
+            <div class="section-title">RINCIAN LABA DRYER JAGUNG</div>
+            <div class="row">
+              <span class="indent">Jasa Dryer (${totalDryerTonnage.toLocaleString('id-ID')} Kg)</span>
+              <span class="right">Rp ${totalDryerRevenue.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="row">
+              <span class="indent">Upah Buruh Timbang</span>
+              <span class="right">Rp ${laborBuruhTimbang.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="row">
+              <span class="indent">Upah Buruh Muat</span>
+              <span class="right">Rp ${laborBuruhMuat.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="row">
+              <span class="indent">Listrik Dryer</span>
+              <span class="right">Rp ${biayaListrikDrying.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="row">
+              <span class="indent">Gaji Operator Dryer</span>
+              <span class="right">Rp ${gajiOperatorDrying.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="row">
+              <span class="indent">Cangkang Kemiri</span>
+              <span class="right">Rp ${biayaCangkang.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="row">
+              <span class="indent">Pengeluaran Tambahan (Lainnya)</span>
+              <span class="right">Rp ${biayaTambahanDrying.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="row subtotal" style="background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534;">
+              <span>JASA DRYER (LABA/RUGI)</span>
+              <span class="right">Rp ${dryerProfit.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="row" style="background-color: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; margin-top: 5px;">
+              <span>SALDO AKUMULASI JASA DRYER</span>
+              <span class="right">Rp ${cumulativeDryerProfit.toLocaleString('id-ID')}</span>
             </div>
           </div>
 
@@ -530,7 +596,29 @@ export default function ProfitLossTab({
         })()}
       </div>
 
-      {/* 4. GAAP COMPREHENSIVE SPREADSHEET */}
+      {/* 5. RINCIAN LABA DRYER JAGUNG */}
+      <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm">
+        <h4 className="font-bold text-neutral-800 text-xs uppercase tracking-wider mb-4 pb-2 border-b border-neutral-100">
+           RINCIAN LABA DRYER JAGUNG
+        </h4>
+        <div className="text-[11px] font-bold">
+           <div className="flex justify-between border-b pb-1 mb-2"><span>Jasa Dryer (${totalDryerTonnage.toLocaleString('id-ID')} Kg)</span><span>Rp ${totalDryerRevenue.toLocaleString('id-ID')}</span></div>
+           <div className="flex justify-between"><span>Upah Buruh Timbang</span><span>Rp ${laborBuruhTimbang.toLocaleString('id-ID')}</span></div>
+           <div className="flex justify-between"><span>Upah Buruh Muat</span><span>Rp ${laborBuruhMuat.toLocaleString('id-ID')}</span></div>
+           <div className="flex justify-between"><span>Listrik Dryer</span><span>Rp ${biayaListrikDrying.toLocaleString('id-ID')}</span></div>
+           <div className="flex justify-between"><span>Gaji Operator Dryer</span><span>Rp ${gajiOperatorDrying.toLocaleString('id-ID')}</span></div>
+           <div className="flex justify-between"><span>Cangkang Kemiri</span><span>Rp ${biayaCangkang.toLocaleString('id-ID')}</span></div>
+           <div className="flex justify-between border-b pb-1 mb-2"><span>Pengeluaran Tambahan</span><span>Rp ${biayaTambahanDrying.toLocaleString('id-ID')}</span></div>
+           <div className="flex justify-between text-emerald-800 font-black">
+              <span>JASA DRYER (LABA/RUGI)</span>
+              <span>Rp ${dryerProfit.toLocaleString('id-ID')}</span>
+           </div>
+           <div className="flex justify-between text-blue-800 font-black mt-2 pt-2 border-t border-neutral-200">
+              <span>SALDO AKUMULASI JASA DRYER</span>
+              <span>Rp ${cumulativeDryerProfit.toLocaleString('id-ID')}</span>
+           </div>
+        </div>
+      </div>
       <div className="bg-white border border-neutral-200 rounded-xl shadow-sm overflow-hidden mb-6">
         <div className="bg-neutral-550 border-b border-neutral-200 bg-neutral-50 px-4 py-3">
           <h4 className="font-bold text-neutral-800 text-xs uppercase tracking-wide">
@@ -553,7 +641,7 @@ export default function ProfitLossTab({
             </div>
             <div className="px-6 py-2.5 flex justify-between hover:bg-neutral-50 transition border-t border-neutral-100">
               <span className="text-neutral-600 uppercase font-normal">Pendapatan Jasa Pengeringan Jagung (Gas Dryer)</span>
-              <span className="font-mono text-neutral-800">Rp {dryerRevenue.toLocaleString('id-ID')}</span>
+              <span className="font-mono text-neutral-800">Rp {totalDryerRevenue.toLocaleString('id-ID')}</span>
             </div>
             <div className="px-6 py-2.5 flex justify-between hover:bg-neutral-50 transition border-t border-neutral-100">
               <span className="text-neutral-600 uppercase font-normal">Jasa Mutasi Kas & Timbangan Lain-lain</span>
