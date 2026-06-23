@@ -250,7 +250,7 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
       margin: 0 !important;
       padding: 1.5mm 2.5mm 1.5mm 6ch !important; /* Beri jarak 6 spasi ke kanan */
       background: #ffffff !important;
-      font-family: Calibri, Arial, "Segoe UI", sans-serif !important;
+      font-family: 'Calibri Light', Calibri, Arial, "Segoe UI", sans-serif !important;
       font-size: 10.2pt !important; /* Ukuran ideal untuk dots matrix */
       color: #000000 !important;
       line-height: 1.25 !important;
@@ -264,7 +264,7 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
       background: transparent !important;
       border-color: #000000 !important;
       box-shadow: none !important;
-      font-family: Calibri, Arial, "Segoe UI", sans-serif !important;
+      font-family: 'Calibri Light', Calibri, Arial, "Segoe UI", sans-serif !important;
       font-weight: 900 !important; /* Tebalkan ganda hingga tingkat Black secara global agar jarum printer menusuk rapat */
       -webkit-text-stroke: 0.3px #000000 !important; /* Outline stroke untuk menebalkan bentuk fisik font */
       text-shadow: 0.25px 0px 0px #000000, -0.25px 0px 0px #000000 !important; /* Simulasi cetak ganda (double-strike) hardware */
@@ -451,7 +451,7 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
       border-radius: 4px !important;
       padding: 1px 2px !important;
       margin: 1.5px 0 !important;
-      font-family: Calibri, Arial, "Segoe UI", sans-serif !important;
+      font-family: 'Calibri Light', Calibri, Arial, "Segoe UI", sans-serif !important;
       line-height: 1.15 !important;
     }
 

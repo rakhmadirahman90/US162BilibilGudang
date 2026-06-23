@@ -260,7 +260,7 @@ const COMMON_SLIP_STYLE = `
     width: 85mm !important;
     height: 140mm !important;
     /* PENGGUNAAN FONT SANS-SERIF CALIBRI DENGAN STROKES TEBAL AGAR SANGAT JELAS DI DOT MATRIX LX-310 */
-    font-family: Calibri, Arial, "Segoe UI", sans-serif !important;
+    font-family: 'Calibri Light', Calibri, Arial, "Segoe UI", sans-serif !important;
     font-size: 10.2pt !important;
     color: #000000 !important;
     background-color: #ffffff !important;
@@ -279,7 +279,7 @@ const COMMON_SLIP_STYLE = `
     color: #000000 !important;
     border-color: #000000 !important;
     box-shadow: none !important;
-    font-family: Calibri, Arial, "Segoe UI", sans-serif !important;
+    font-family: 'Calibri Light', Calibri, Arial, "Segoe UI", sans-serif !important;
     font-weight: 900 !important; /* Paksa tebal maksimal (Extra Bold / Black) ganda-ketuk pin printer */
     -webkit-text-stroke: 0.3px #000000 !important; /* Tingkatkan ketebalan garis fisik agar lurus tebal */
     text-shadow: 0.25px 0px 0px #000000, -0.25px 0px 0px #000000 !important; /* Simulasi double-strike horizontal ganda */
@@ -360,7 +360,7 @@ const COMMON_SLIP_STYLE = `
       background: transparent !important;
       border-color: #000000 !important;
       box-shadow: none !important;
-      font-family: Calibri, Arial, "Segoe UI", sans-serif !important;
+      font-family: 'Calibri Light', Calibri, Arial, "Segoe UI", sans-serif !important;
       -webkit-text-stroke: 0.3px #000000 !important; /* Tebalkan garis fisik karakter untuk keterbacaan tinggi di jarum pin */
       text-shadow: 0.25px 0px 0px #000000, -0.25px 0px 0px #000000 !important; /* Simulasi ganda-hammer (double-strike) hardware */
       letter-spacing: 0.25px !important; /* Cegah luntur antar huruf di ribbon fisik */
@@ -655,7 +655,7 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
     </div>
 
     ${record.commodity === 'JAGUNG' && ((record.moistureContent ?? 0) > 30.00) ? `
-    <div style="font-size: 8.2pt !important; color: #000000 !important; background-color: #ffffff !important; border: 1.5px solid #000000 !important; border-radius: 3px; padding: 3px 6px; margin: 4px 0 6px 0; font-family: Calibri, Arial, 'Segoe UI', sans-serif !important; line-height: 1.25; font-weight: bold !important;">
+    <div style="font-size: 8.2pt !important; color: #000000 !important; background-color: #ffffff !important; border: 1.5px solid #000000 !important; border-radius: 3px; padding: 3px 6px; margin: 4px 0 6px 0; font-family: 'Calibri Light', Calibri, Arial, 'Segoe UI', sans-serif !important; line-height: 1.25; font-weight: bold !important;">
       <strong>*KA Tinggi (${record.moistureContent ?? 0}%):</strong> Potongan KA dihitung menggunakan Rumus ${record.cornFormulaFactor || 1.4} luar tabel: (Math.floor(${record.moistureContent ?? 0}) - 14) x ${record.cornFormulaFactor || 1.4} = ${record.refaksiKaPercent}% potongan.
     </div>
     ` : ''}
