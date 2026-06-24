@@ -88,6 +88,7 @@ export default function OutboundModule({
   const [vehicleNo, setVehicleNo] = useState("");
   const [buyer, setBuyer] = useState("");
   const [commodity, setCommodity] = useState<'BERAS' | 'JAGUNG' | 'GABAH' | 'LAINNYA'>('BERAS');
+  const [itemName, setItemName] = useState("");
   const [totalWeight, setTotalWeight] = useState(10000);
   const [loadingLaborCost, setLoadingLaborCost] = useState(400000);
   const [destination, setDestination] = useState("");
@@ -100,7 +101,9 @@ export default function OutboundModule({
     if (tk) {
       setVehicleNo(tk.policeNo);
       setBuyer(tk.agency); // assume buyer agency
-      setCommodity(tk.goodsName === 'JAGUNG' ? 'JAGUNG' : tk.goodsName === 'GABAH' ? 'GABAH' : 'BERAS');
+      const comm = tk.goodsName.includes('JAGUNG') ? 'JAGUNG' : tk.goodsName.includes('GABAH') ? 'GABAH' : tk.goodsName.includes('BERAS') ? 'BERAS' : 'LAINNYA';
+      setCommodity(comm as any);
+      setItemName(tk.goodsName);
       setTotalWeight(tk.netWeight);
     }
   };
@@ -121,6 +124,7 @@ export default function OutboundModule({
       vehicleNo: vehicleNo.toUpperCase(),
       buyer: buyer.toUpperCase(),
       commodity,
+      itemName,
       totalWeight,
       loadingLaborCost,
       destination,

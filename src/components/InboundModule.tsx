@@ -93,6 +93,7 @@ export default function InboundModule({
   const [vehicleNo, setVehicleNo] = useState("");
   const [supplier, setSupplier] = useState("");
   const [commodity, setCommodity] = useState<'BERAS' | 'JAGUNG' | 'GABAH' | 'LAINNYA'>('JAGUNG');
+  const [itemName, setItemName] = useState("");
   const [grossWeight, setGrossWeight] = useState(12000);
   const [tareWeight, setTareWeight] = useState(4000);
   const [bagDeductionPercent, setBagDeductionPercent] = useState(1.00);
@@ -132,38 +133,50 @@ export default function InboundModule({
     if (tk) {
       setVehicleNo(tk.policeNo);
       setSupplier(tk.agency); // assume agent represents supplier/origin
-      const comm = tk.goodsName === 'BERAS' ? 'BERAS' : tk.goodsName === 'GABAH' ? 'GABAH' : 'JAGUNG';
-      setCommodity(comm);
+      const comm = tk.goodsName.includes('BERAS') ? 'BERAS' : tk.goodsName.includes('GABAH') ? 'GABAH' : tk.goodsName.includes('JAGUNG') ? 'JAGUNG' : 'LAINNYA';
+      setCommodity(comm as any);
+      setItemName(tk.goodsName);
       setGrossWeight(tk.timbang1Weight);
       setTareWeight(tk.timbang2Weight);
-      setBagDeductionPercent(tk.bagDeductionPercent);
       
-      if (comm === 'JAGUNG') {
-        let moisture = 14.0;
-        const notesParsed = tk.notes ? tk.notes.match(/(?:KA|Kadar\s*Air)\s*([0-9.,]+)/i) : null;
-        if (notesParsed) {
-          const parsedVal = parseFloat(notesParsed[1].replace(',', '.'));
-          if (!isNaN(parsedVal)) {
-            moisture = parsedVal;
-          }
-        } else {
-          // Reverse-lookup from rules based on refaksiPercent
-          const currentRules = cornMoistureRules && cornMoistureRules.length > 0 ? cornMoistureRules : initialCornMoistureRules;
-          const matchedRule = currentRules.find(r => r.type === refaksiType && r.refaksiPercent === tk.refaksiPercent);
-          if (matchedRule) {
-            moisture = Math.round(((matchedRule.moistureMin + matchedRule.moistureMax) / 2) * 10) / 10;
-          } else if (tk.refaksiPercent > 0) {
-            // High accurate reverse fallback (e.g. 16.5% refaksi corresponds to 28.4% moisture)
-            if (tk.refaksiPercent === 16.5) {
-              moisture = 28.4;
-            } else {
-              moisture = 15.0; // default guess
+      const noDeductionItems = ["BROKEN", "RIJEK", "BENIR", "DEDAK", "KACANG IJO", "KACANG TANAH", "CANGKANG KEMIRI", "CANGKANG SAWIT", "GULA MERAH AREN", "GULA MERAH KLPA", "PASIR", "RUMPUT LAUT", "BESI TUA", "JAGUNG READY"];
+      if (noDeductionItems.includes(tk.goodsName)) {
+        setBagDeductionPercent(0);
+        setMoistureContent(0);
+        setDeadKernelsPercent(0);
+        setMoldPercent(0);
+        setSmallKernelsPercent(0);
+        setFineTrashPercent(0);
+      } else {
+        setBagDeductionPercent(tk.bagDeductionPercent);
+        
+        if (comm === 'JAGUNG') {
+          let moisture = 14.0;
+          const notesParsed = tk.notes ? tk.notes.match(/(?:KA|Kadar\s*Air)\s*([0-9.,]+)/i) : null;
+          if (notesParsed) {
+            const parsedVal = parseFloat(notesParsed[1].replace(',', '.'));
+            if (!isNaN(parsedVal)) {
+              moisture = parsedVal;
+            }
+          } else {
+            // Reverse-lookup from rules based on refaksiPercent
+            const currentRules = cornMoistureRules && cornMoistureRules.length > 0 ? cornMoistureRules : initialCornMoistureRules;
+            const matchedRule = currentRules.find(r => r.type === refaksiType && r.refaksiPercent === tk.refaksiPercent);
+            if (matchedRule) {
+              moisture = Math.round(((matchedRule.moistureMin + matchedRule.moistureMax) / 2) * 10) / 10;
+            } else if (tk.refaksiPercent > 0) {
+              // High accurate reverse fallback (e.g. 16.5% refaksi corresponds to 28.4% moisture)
+              if (tk.refaksiPercent === 16.5) {
+                moisture = 28.4;
+              } else {
+                moisture = 15.0; // default guess
+              }
             }
           }
+          setMoistureContent(moisture);
+        } else {
+          setMoistureContent(14.0);
         }
-        setMoistureContent(moisture);
-      } else {
-        setMoistureContent(14.0);
       }
     }
   };
@@ -204,6 +217,7 @@ export default function InboundModule({
       vehicleNo: vehicleNo.toUpperCase(),
       supplier: supplier.toUpperCase(),
       commodity,
+      itemName,
       grossWeight,
       tareWeight,
       refaksiKaPercent: refaksiPercentage,

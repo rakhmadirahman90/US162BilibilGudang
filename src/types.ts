@@ -46,6 +46,7 @@ export interface InboundRecord {
   price: number;
   totalPrice: number;
   driverName?: string;
+  itemName?: string; // e.g. BROKEN, RIJEK, BENIR, etc.
 }
 
 export interface OutboundRecord {
@@ -55,6 +56,7 @@ export interface OutboundRecord {
   vehicleNo: string;
   buyer: string;
   commodity: 'BERAS' | 'JAGUNG' | 'GABAH' | 'LAINNYA';
+  itemName?: string; // e.g. JAGUNG READY, BROKEN, dll
   totalWeight: number;
   loadingLaborCost: number; // Biaya buruh muat
   destination: string;
@@ -73,6 +75,31 @@ export interface ServiceRecord {
   totalFee: number;
   paymentStatus: 'UNPAID' | 'PAID';
   operatorName: string;
+}
+
+export interface KacangIjoRekapRecord {
+  id: string;
+  date: string;
+  supplier: string;
+  policeNo: string;
+  colly: number;
+  weight: number;
+  price: number;
+  bt: number; // Biaya Timbang / Buruh Turun
+  panjar: number; // Pembayaran / Panjar
+  description: string;
+}
+
+export interface KacangIjoStockRecord {
+  id: string;
+  date: string;
+  supplier: string; // Uraian
+  itemName: string; // Nama Barang (NILON, KABUR, dll)
+  colly: number;
+  inWeight: number; // Stok Masuk
+  outWeight: number; // Stok Keluar
+  description: string; // Keterangan
+  paymentDate: string; // Tgl Bayar
 }
 
 export interface DebtRecord {
@@ -155,6 +182,7 @@ export interface RiceStockRecord {
   policeNo: string;
   description: string;
   itemName: string;
+  commodity?: 'BERAS' | 'JAGUNG' | 'KACANG IJO' | 'LAINNYA';
   price: number;
   colly: number;
   inWeight: number; // Masuk

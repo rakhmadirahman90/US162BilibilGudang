@@ -615,10 +615,22 @@ export default function WeighbridgeModule({
                       className="bg-[#122345] border border-[#2d4d8c] text-yellow-300 px-2 py-0.5 rounded text-sm w-36 cursor-pointer focus:border-yellow-400"
                     >
                       <option value="BERAS">BERAS</option>
-                      <option value="JAGUNG">JAGUNG</option>
+                      <option value="BROKEN">BROKEN</option>
+                      <option value="RIJEK">RIJEK</option>
+                      <option value="BENIR">BENIR</option>
+                      <option value="DEDAK">DEDAK</option>
+                      <option value="JAGUNG READY">JAGUNG READY</option>
+                      <option value="JAGUNG ASALAN">JAGUNG ASALAN</option>
+                      <option value="KACANG IJO">KACANG IJO</option>
+                      <option value="KACANG TANAH">KACANG TANAH</option>
+                      <option value="CANGKANG KEMIRI">CANGKANG KEMIRI</option>
+                      <option value="CANGKANG SAWIT">CANGKANG SAWIT</option>
+                      <option value="GULA MERAH AREN">GULA MERAH AREN</option>
+                      <option value="GULA MERAH KLPA">GULA MERAH KLPA</option>
                       <option value="GABAH">GABAH</option>
-                      <option value="AMPAZ">AMPAZ</option>
-                      <option value="POLESAN">POLESAN</option>
+                      <option value="PASIR">PASIR</option>
+                      <option value="RUMPUT LAUT">RUMPUT LAUT</option>
+                      <option value="BESI TUA">BESI TUA</option>
                     </select>
                   ) : (
                     <span className="text-yellow-300 font-semibold">{selectedTicket ? selectedTicket.goodsName : '-'}</span>

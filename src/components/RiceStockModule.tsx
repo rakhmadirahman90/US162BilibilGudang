@@ -26,7 +26,7 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
   const [previewRecord, setPreviewRecord] = useState<RiceStockRecord | null>(null);
 
   // Sub-tabs for separating Beras (Rice) and Jagung (Corn) completely
-  const [commodityTab, setCommodityTab] = useState<'BERAS' | 'JAGUNG'>('BERAS');
+  const [commodityTab, setCommodityTab] = useState<'BERAS' | 'JAGUNG' | 'KACANG IJO'>('BERAS');
 
   // Sorting order: NEWEST first (default for feed) or OLDEST first (traditional accounting log style like Excel)
   const [sortOrder, setSortOrder] = useState<'NEWEST' | 'OLDEST'>('NEWEST');
@@ -130,6 +130,7 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
       policeNo: policeNo.toUpperCase(),
       description,
       itemName: itemName.toUpperCase(),
+      commodity: commodityTab,
       price,
       colly,
       inWeight,
@@ -162,7 +163,7 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
   // 1. CHRONOLOGICAL SORTING FOR ACCURATE CUMULATIVE RUNNING BALANCES
   // Oldest records go first on cumulative balance stack to prevent negative arithmetic errors.
   const chronologicallySorted = [...records]
-    .filter(r => r.itemName?.toUpperCase() === commodityTab)
+    .filter(r => (r.commodity === commodityTab) || (!r.commodity && r.itemName?.toUpperCase() === commodityTab))
     .sort((a, b) => {
       if (a.date !== b.date) {
         return a.date.localeCompare(b.date);
@@ -235,7 +236,7 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
       r.runningTotal.toString()
     ]);
 
-    const titlePrefix = commodityTab === 'BERAS' ? 'Buku_Stok_Beras' : 'Buku_Stok_Jagung';
+    const titlePrefix = commodityTab === 'BERAS' ? 'Buku_Stok_Beras' : commodityTab === 'JAGUNG' ? 'Buku_Stok_Jagung' : 'Buku_Stok_Kacang_Ijo';
     exportToCSV(headers, rows, `${titlePrefix}_US_Bilibili_${new Date().toISOString().split('T')[0]}`);
   };
 
@@ -246,7 +247,7 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
         <div>
           <h2 className="text-xl font-extrabold text-neutral-850 flex items-center gap-2 uppercase tracking-tight">
             <Package className="text-emerald-600 w-6 h-6 shrink-0" />
-            <span>{commodityTab === 'BERAS' ? 'BUKU LOGISTIK BERAS' : 'BUKU LOGISTIK JAGUNG'}</span>
+            <span>{commodityTab === 'BERAS' ? 'BUKU LOGISTIK BERAS' : commodityTab === 'JAGUNG' ? 'BUKU LOGISTIK JAGUNG' : 'BUKU LOGISTIK KACANG IJO'}</span>
           </h2>
           <p className="text-[11px] text-neutral-400 font-bold mt-1 uppercase tracking-wider">
             Pengelolaan & Perhitungan Saldo Stok Gudang Mandiri US Bilibili 162
@@ -272,7 +273,7 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
       </div>
 
       {/* 2. Premium Commodity Selector Tabs */}
-      <div className="flex bg-neutral-100/80 p-1 rounded-2xl border border-neutral-200 w-full sm:max-w-md self-start">
+      <div className="flex bg-neutral-100/80 p-1 rounded-2xl border border-neutral-200 w-full sm:max-w-xl self-start">
         <button
           onClick={() => setCommodityTab('BERAS')}
           className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-black text-[11px] uppercase tracking-wider transition-all cursor-pointer ${
@@ -294,6 +295,17 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
         >
           <span className="text-sm">🌽</span>
           <span>Logistik Jagung</span>
+        </button>
+        <button
+          onClick={() => setCommodityTab('KACANG IJO')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-black text-[11px] uppercase tracking-wider transition-all cursor-pointer ${
+            commodityTab === 'KACANG IJO'
+              ? 'bg-purple-600 text-white shadow-md'
+              : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-200/50'
+          }`}
+        >
+          <span className="text-sm">🫘</span>
+          <span>Kacang Ijo</span>
         </button>
       </div>
 
@@ -327,7 +339,9 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
         <div className={`border rounded-2xl p-5 shadow-sm flex items-center justify-between transition-colors ${
           commodityTab === 'BERAS' 
             ? 'bg-emerald-50/60 border-emerald-200 text-emerald-950' 
-            : 'bg-amber-50/60 border-amber-200 text-amber-950'
+            : commodityTab === 'JAGUNG'
+            ? 'bg-amber-50/60 border-amber-200 text-amber-950'
+            : 'bg-purple-50/60 border-purple-200 text-purple-950'
         }`}>
           <div className="space-y-1">
             <span className="text-[9px] opacity-75 font-black uppercase tracking-wider">Stok Logistik Saat Ini</span>
@@ -335,7 +349,7 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
             <div className="text-[11px] opacity-80 font-mono font-bold uppercase">{formatTonValue(currentStockBalance)}</div>
           </div>
           <div className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-inner ${
-            commodityTab === 'BERAS' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+            commodityTab === 'BERAS' ? 'bg-emerald-100 text-emerald-700' : commodityTab === 'JAGUNG' ? 'bg-amber-100 text-amber-700' : 'bg-purple-100 text-purple-700'
           }`}>
             <Package className="w-5.5 h-5.5" />
           </div>
@@ -345,7 +359,7 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
       {/* 4. Manual Entry Form */}
       {showAddForm && (
         <div className="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6 relative overflow-hidden">
-          <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${commodityTab === 'BERAS' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+          <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${commodityTab === 'BERAS' ? 'bg-emerald-500' : commodityTab === 'JAGUNG' ? 'bg-amber-500' : 'bg-purple-500'}`} />
           <h3 className="text-xs font-black text-neutral-800 uppercase tracking-widest mb-4 flex items-center gap-1.5">
             <FileText className="w-4 h-4 text-neutral-500" />
             {editingId ? 'Edit Catatan Logistik' : 'Formulir Catatan Logistik Baru'}
@@ -365,16 +379,26 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
             </div>
             <div>
               <label className="block mb-1 font-bold text-neutral-600 uppercase tracking-wider text-[9px]">Pilihan Komoditas / Item</label>
-              <select
-                value={itemName}
-                onChange={(e) => setItemName(e.target.value)}
-                className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-bold focus:ring-1 focus:ring-emerald-500 outline-none"
-              >
-                <option value="BERAS">🌾 BERAS (RICE)</option>
-                <option value="JAGUNG">🌽 JAGUNG (MAIZE)</option>
-                <option value="GABAH">🌾 GABAH</option>
-                <option value="LAINNYA">📦 LAINNYA</option>
-              </select>
+              {commodityTab === 'KACANG IJO' ? (
+                <input
+                  type="text"
+                  placeholder="Contoh: NILON, KABUR, dsb"
+                  value={itemName}
+                  onChange={(e) => setItemName(e.target.value)}
+                  className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-bold uppercase focus:ring-1 focus:ring-emerald-500 outline-none"
+                />
+              ) : (
+                <select
+                  value={itemName}
+                  onChange={(e) => setItemName(e.target.value)}
+                  className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-bold focus:ring-1 focus:ring-emerald-500 outline-none"
+                >
+                  <option value="BERAS">🌾 BERAS (RICE)</option>
+                  <option value="JAGUNG">🌽 JAGUNG (MAIZE)</option>
+                  <option value="GABAH">🌾 GABAH</option>
+                  <option value="LAINNYA">📦 LAINNYA</option>
+                </select>
+              )}
             </div>
             <div>
               <SmartNumberInput
@@ -521,9 +545,9 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
                     <td className="py-3 px-4 font-medium text-neutral-750">{r.description}</td>
                     <td className="py-3 px-4">
                       <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
-                        r.itemName?.toUpperCase() === 'BERAS' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+                        (r.commodity || r.itemName?.toUpperCase()) === 'BERAS' ? 'bg-emerald-50 text-emerald-700' : (r.commodity || r.itemName?.toUpperCase()) === 'JAGUNG' ? 'bg-amber-50 text-amber-700' : 'bg-purple-50 text-purple-700'
                       }`}>
-                        <span>{r.itemName?.toUpperCase() === 'BERAS' ? '🌾' : '🌽'}</span>
+                        <span>{(r.commodity || r.itemName?.toUpperCase()) === 'BERAS' ? '🌾' : (r.commodity || r.itemName?.toUpperCase()) === 'JAGUNG' ? '🌽' : '🫘'}</span>
                         <span>{r.itemName}</span>
                       </span>
                     </td>

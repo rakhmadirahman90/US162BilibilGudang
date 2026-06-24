@@ -76,7 +76,7 @@ async function testConnection() {
     await getDocFromServer(doc(db, 'test', 'connection'));
   } catch (error) {
     if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.error("Please check your Firebase configuration or internet connection.");
+      console.warn("Please check your Firebase configuration or internet connection.");
     }
   }
 }
@@ -109,8 +109,10 @@ export const ensureAuthenticated = async (): Promise<User | null> => {
               "To enable real-time synchronization without Google Sign-In, please enable Anonymous Auth in the Firebase console: " +
               "Authentication > Sign-in method > Anonymous > Enable."
             );
+          } else if (err?.code === 'auth/network-request-failed') {
+            console.warn("[Firebase] Anonymous Authentication failed (Network Request Failed). This is often caused by adblockers (e.g., Brave Shields, uBlock). The app will continue in offline mode.");
           } else {
-            console.error("[Firebase] Anonymous Authentication failed:", err);
+            console.warn("[Firebase] Anonymous Authentication failed:", err);
           }
           notifyAuthError();
           resolve(null);
@@ -140,5 +142,5 @@ ensureAuthenticated().then((user) => {
     testConnection();
   }
 }).catch(err => {
-  console.error("Boot auth error:", err);
+  console.warn("Boot auth warning:", err);
 });

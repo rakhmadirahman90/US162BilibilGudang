@@ -29,7 +29,9 @@ import {
   ProductRecord,
   UserAccount,
   ActivityLog,
-  LaborKasbonRecord
+  LaborKasbonRecord,
+  KacangIjoRekapRecord,
+  KacangIjoStockRecord
 } from './types';
 import { 
   initialWeighbridgeTickets, 
@@ -69,6 +71,7 @@ import ProductModule from './components/ProductModule';
 import DashboardProductShowcase from './components/DashboardProductShowcase';
 import DatabaseMasterModule from './components/DatabaseMasterModule';
 import RiceStockModule from './components/RiceStockModule';
+import KacangIjoModule from './components/KacangIjoModule';
 import { useLanguage } from './i18n/LanguageContext';
 
 // Custom Firebase Live Dynamic Sync Helpers
@@ -352,6 +355,16 @@ export default function App() {
   const [riceStockRecords, setRiceStockRecords] = useState<RiceStockRecord[]>(() => {
     const saved = localStorage.getItem('bilibili_rice_stock_v2');
     return saved ? JSON.parse(saved) : initialRiceStockRecords;
+  });
+
+  const [kacangIjoRekapRecords, setKacangIjoRekapRecords] = useState<KacangIjoRekapRecord[]>(() => {
+    const saved = localStorage.getItem('bilibili_kacang_ijo_rekap');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [kacangIjoStockRecords, setKacangIjoStockRecords] = useState<KacangIjoStockRecord[]>(() => {
+    const saved = localStorage.getItem('bilibili_kacang_ijo_stock');
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [banks, setBanks] = useState<BankRecord[]>(() => {
@@ -793,7 +806,7 @@ export default function App() {
   };
 
   // Active navigational tab
-  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE' | 'STOK_BERAS' | 'LAPORAN' | 'DATABASE' | 'DRYER' | 'PRODUK'>('DASHBOARD');
+  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'TIMBANG' | 'MASUK' | 'KELUAR' | 'SERVICES' | 'REFAKSI' | 'FINANCE' | 'STOK_BERAS' | 'LAPORAN' | 'DATABASE' | 'DRYER' | 'PRODUK' | 'KACANG_IJO'>('DASHBOARD');
   
   // Guard against direct tab loading by unauthorised roles
   useEffect(() => {
@@ -976,6 +989,14 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('bilibili_rice_stock_v2', JSON.stringify(riceStockRecords));
   }, [riceStockRecords]);
+
+  useEffect(() => {
+    localStorage.setItem('bilibili_kacang_ijo_rekap', JSON.stringify(kacangIjoRekapRecords));
+  }, [kacangIjoRekapRecords]);
+
+  useEffect(() => {
+    localStorage.setItem('bilibili_kacang_ijo_stock', JSON.stringify(kacangIjoStockRecords));
+  }, [kacangIjoStockRecords]);
 
   useEffect(() => {
     localStorage.setItem('bilibili_kasbons', JSON.stringify(kasbons));
@@ -1245,6 +1266,30 @@ export default function App() {
     showToast(t.deleteSuccessGeneral, 'success');
   };
 
+  const handleAddKacangIjoRekap = (rec: KacangIjoRekapRecord) => {
+    setKacangIjoRekapRecords(prev => [rec, ...prev]);
+    saveOnline('kacangIjoRekapRecords', rec);
+    showToast('Berhasil menyimpan rekap Kacang Ijo!', 'success');
+  };
+
+  const handleDeleteKacangIjoRekap = (id: string) => {
+    setKacangIjoRekapRecords(prev => prev.filter(r => r.id !== id));
+    deleteOnline('kacangIjoRekapRecords', id);
+    showToast('Rekap Kacang Ijo dihapus!', 'success');
+  };
+
+  const handleAddKacangIjoStock = (rec: KacangIjoStockRecord) => {
+    setKacangIjoStockRecords(prev => [rec, ...prev]);
+    saveOnline('kacangIjoStockRecords', rec);
+    showToast('Berhasil menyimpan stok Kacang Ijo!', 'success');
+  };
+
+  const handleDeleteKacangIjoStock = (id: string) => {
+    setKacangIjoStockRecords(prev => prev.filter(r => r.id !== id));
+    deleteOnline('kacangIjoStockRecords', id);
+    showToast('Stok Kacang Ijo dihapus!', 'success');
+  };
+
   // --- INTEGRATED METRICS CALCULATOR FOR COVER DASHBOARD ---
   // A. Stocks inside Silos & Warehouses
   const totalInboundCorn = inboundRecords.filter(r => r.commodity === 'JAGUNG').reduce((acc, r) => acc + r.netWeight, 0);
@@ -1414,6 +1459,7 @@ export default function App() {
       { id: 'REFAKSI', name: 'POTONGAN REFAKSI', icon: <Percent className="w-4 h-4 text-amber-500" />, roles: ['admin', 'operator', 'pimpinan'] },
       { id: 'DRYER', name: 'DRYER JAGUNG', icon: <Wind className="w-4 h-4 text-orange-500" />, roles: ['admin', 'operator', 'pimpinan'] },
       { id: 'STOK_BERAS', name: 'BUKU STOK LOGISTIK', icon: <Package className="w-4 h-4 text-emerald-600" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
+      { id: 'KACANG_IJO', name: 'BUKU KACANG IJO', icon: <Package className="w-4 h-4 text-purple-600" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
       { id: 'LAPORAN', name: 'ANALISA & LAPORAN', icon: <FileSpreadsheet className="w-4 h-4 text-purple-500" />, roles: ['admin', 'pimpinan'] },
       { id: 'FINANCE', name: 'MANAJEMEN KEUANGAN', icon: <DollarSign className="w-4 h-4 text-emerald-500" />, roles: ['admin', 'pimpinan'] },
       { id: 'PRODUK', name: 'KATALOG PRODUK', icon: <Package className="w-4 h-4 text-amber-600" />, roles: ['admin', 'operator', 'karyawan'] },
@@ -2965,6 +3011,18 @@ export default function App() {
 
         {/* VIEW 11: PRODUK */}
         {activeTab === 'PRODUK' && <ProductModule sessionUser={sessionUser} products={products} />}
+
+        {/* VIEW 12: KACANG IJO */}
+        {activeTab === 'KACANG_IJO' && (
+          <KacangIjoModule 
+            rekapRecords={kacangIjoRekapRecords}
+            stockRecords={kacangIjoStockRecords}
+            onAddRekap={handleAddKacangIjoRekap}
+            onDeleteRekap={handleDeleteKacangIjoRekap}
+            onAddStock={handleAddKacangIjoStock}
+            onDeleteStock={handleDeleteKacangIjoStock}
+          />
+        )}
 
           </div>
         </main>
