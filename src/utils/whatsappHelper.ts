@@ -80,6 +80,7 @@ export function buildInboundWAText(record: InboundRecord, tk: WeighbridgeTicket 
   const detailNettoText = `*BRUTO (Kotor):* ${bruto.toLocaleString('id-ID')} Kg
 *TARA (Kosong):* ${tara.toLocaleString('id-ID')} Kg
 *Pot. Karung:* -${potKrg.toLocaleString('id-ID')} Kg (${record.bagDeductionPercent ?? 0}%)
+*Kadar Air:* ${record.moistureContent ?? 0}%
 *Refaksi KA:* -${potRefaksi.toLocaleString('id-ID')} Kg (${record.refaksiKaPercent ?? 0}%)${formulaNote}${qualityDeductionsText}`;
 
   const payGross = net * (record.price ?? 0);

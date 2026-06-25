@@ -621,6 +621,7 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
     <div class="flex"><span class="label">BRUTO</span><span class="value">: ${bruto.toLocaleString('id-ID')} Kg</span></div>
     <div class="flex"><span class="label">TARA</span><span class="value">: ${tara.toLocaleString('id-ID')} Kg</span></div>
     <div class="flex"><span class="label">Pot. Karung</span><span class="value">: -${potKrg.toLocaleString('id-ID')} Kg (${record.bagDeductionPercent ?? 0}%)</span></div>
+    <div class="flex"><span class="label">Kadar Air</span><span class="value">: ${record.moistureContent ?? 0}%</span></div>
     <div class="flex"><span class="label">Refaksi KA</span><span class="value">: -${potRefaksi.toLocaleString('id-ID')} Kg (${record.refaksiKaPercent ?? 0}%) ${record.commodity === 'JAGUNG' && ((record.moistureContent ?? 0) > 30.00 || (record.cornFormulaFactor && (record.moistureContent ?? 0) > 30.00)) ? `*[Rumus ${record.cornFormulaFactor || 1.4}]` : ''}</span></div>
     ${record.commodity === 'JAGUNG' ? `
     <div class="flex"><span class="label">Pot. Biji Mati</span><span class="value">: -${potBijiMati.toLocaleString('id-ID')} Kg (${record.deadKernelsPercent ?? 0}%)</span></div>

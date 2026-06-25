@@ -301,7 +301,7 @@ export default function ReportsModule({
 
   const handlePrintInboundPDF = () => {
     const headers = [
-      'TANGGAL', 'NO. TIKET', 'NO. POLISI', 'NAMA SUPPLIER', 'KOMODITAS', 'NAMA BARANG', 'SEKTOR GUDANG', 'NETTO (KG)'
+      'TANGGAL', 'NO. TIKET', 'NO. POLISI', 'NAMA SUPPLIER', 'KOMODITAS', 'NAMA BARANG', 'KADAR AIR', 'REFAKSI KA', 'SEKTOR GUDANG', 'NETTO (KG)'
     ];
     const rows = filteredInbound.map(r => [
       r.date,
@@ -310,6 +310,8 @@ export default function ReportsModule({
       r.supplier,
       r.commodity,
       r.itemName || '-',
+      `${r.moistureContent}%`,
+      `${r.refaksiKaPercent}%`,
       r.warehouseSection,
       (r.netWeight ?? 0).toLocaleString('id-ID')
     ]);
