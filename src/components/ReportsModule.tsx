@@ -190,7 +190,14 @@ export default function ReportsModule({
   const filteredRiceStock = useMemo(() => {
     return (riceStockRecords || []).filter(r => {
       if (!isWithinDateRange(r.date)) return false;
-      if (commodityFilter !== 'ALL' && r.itemName !== commodityFilter) return false;
+      const rCommodity = (r.commodity || r.itemName)?.toUpperCase();
+      if (commodityFilter !== 'ALL') {
+        if (commodityFilter === 'LAINNYA') {
+          if (rCommodity === 'BERAS' || rCommodity === 'JAGUNG' || rCommodity === 'GABAH') return false;
+        } else {
+          if (rCommodity !== commodityFilter) return false;
+        }
+      }
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         const matchesPlate = r.policeNo.toLowerCase().includes(q);
@@ -269,7 +276,7 @@ export default function ReportsModule({
   // Export 2. Inbound Records
   const handleExportInboundExcel = () => {
     const headers = [
-      'TANGGAL', 'NO. TIKET REF', 'NO. POLISI', 'SUPPLIER', 'KOMODITAS', 
+      'TANGGAL', 'NO. TIKET REF', 'NO. POLISI', 'SUPPLIER', 'KOMODITAS', 'NAMA BARANG',
       'TONASE GROSS (KG)', 'TONASE TARE (KG)', 'KADAR AIR (%)', 'REFAKSI KA (%)', 
       'POT. KARUNG (%)', 'TONASE NETTO (KG)', 'SEKTOR GUDANG', 'UPAH BURUH (RP)'
     ];
@@ -279,6 +286,7 @@ export default function ReportsModule({
       r.vehicleNo,
       r.supplier,
       r.commodity,
+      r.itemName || '-',
       r.grossWeight.toString(),
       r.tareWeight.toString(),
       r.moistureContent.toString(),
@@ -293,7 +301,7 @@ export default function ReportsModule({
 
   const handlePrintInboundPDF = () => {
     const headers = [
-      'TANGGAL', 'NO. TIKET', 'NO. POLISI', 'NAMA SUPPLIER', 'KOMODITAS', 'SEKTOR GUDANG', 'NETTO (KG)'
+      'TANGGAL', 'NO. TIKET', 'NO. POLISI', 'NAMA SUPPLIER', 'KOMODITAS', 'NAMA BARANG', 'SEKTOR GUDANG', 'NETTO (KG)'
     ];
     const rows = filteredInbound.map(r => [
       r.date,
@@ -301,6 +309,7 @@ export default function ReportsModule({
       r.vehicleNo,
       r.supplier,
       r.commodity,
+      r.itemName || '-',
       r.warehouseSection,
       (r.netWeight ?? 0).toLocaleString('id-ID')
     ]);
@@ -317,7 +326,7 @@ export default function ReportsModule({
   // Export 3. Outbound Records
   const handleExportOutboundExcel = () => {
     const headers = [
-      'TANGGAL', 'NO. INVOICE', 'NO. POLISI', 'PEMBELI (BUYER)', 'KOMODITAS', 
+      'TANGGAL', 'NO. INVOICE', 'NO. POLISI', 'PEMBELI (BUYER)', 'KOMODITAS', 'NAMA BARANG',
       'TOTAL TONASE NETTO (KG)', 'BURUH MUAT (RP)', 'TUJUAN KOTA', 'STATUS'
     ];
     const rows = filteredOutbound.map(r => [
@@ -326,6 +335,7 @@ export default function ReportsModule({
       r.vehicleNo,
       r.buyer,
       r.commodity,
+      r.itemName || '-',
       r.totalWeight.toString(),
       r.loadingLaborCost.toString(),
       r.destination,
@@ -336,13 +346,14 @@ export default function ReportsModule({
 
   const handlePrintOutboundPDF = () => {
     const headers = [
-      'TANGGAL', 'NO. INVOICE', 'PEMBELI (BUYER)', 'KOMODITAS', 'TUJUAN KOTA', 'STATUS', 'TONASE (KG)'
+      'TANGGAL', 'NO. INVOICE', 'PEMBELI (BUYER)', 'KOMODITAS', 'NAMA BARANG', 'TUJUAN KOTA', 'STATUS', 'TONASE (KG)'
     ];
     const rows = filteredOutbound.map(r => [
       r.date,
       r.invoiceNo,
       r.buyer,
       r.commodity,
+      r.itemName || '-',
       r.destination,
       r.status,
       (r.totalWeight ?? 0).toLocaleString('id-ID')
@@ -625,8 +636,9 @@ export default function ReportsModule({
             >
               <option value="ALL">📦 SEMUA KOMODITAS</option>
               <option value="JAGUNG">🌽 JAGUNG PIPIL</option>
-              <option value="BERAS">🌾 BERAS PREMIUM</option>
+              <option value="BERAS">🌾 BERAS</option>
               <option value="GABAH">🌾 GABAH KERING</option>
+              <option value="LAINNYA">📦 LAIN-LAIN</option>
             </select>
           </div>
 
@@ -1036,7 +1048,10 @@ export default function ReportsModule({
                     <th className="p-2">No. Polisi</th>
                     <th className="p-2">Nama Supplier</th>
                     <th className="p-2">Komoditas</th>
+                    <th className="p-2">Nama Barang</th>
                     <th className="p-2 text-right">Bruto (Kg)</th>
+                    <th className="p-2 text-right">Kadar Air</th>
+                    <th className="p-2 text-right">Refaksi KA</th>
                     <th className="p-2 text-right">Netto (Kg)</th>
                     <th className="p-2">Letak Sektor</th>
                     <th className="p-2 text-right">Buruh (Rp)</th>
@@ -1050,7 +1065,10 @@ export default function ReportsModule({
                       <td className="p-2 font-semibold text-neutral-800">{r.vehicleNo}</td>
                       <td className="p-2 text-neutral-850 font-medium">{r.supplier}</td>
                       <td className="p-2 text-neutral-700 font-bold text-[10px]">{r.commodity}</td>
+                      <td className="p-2 text-neutral-700 font-bold text-[10px] uppercase">{r.itemName || '-'}</td>
                       <td className="p-2 text-right font-mono">{(r.grossWeight ?? 0).toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-right font-mono text-neutral-600">{r.moistureContent}%</td>
+                      <td className="p-2 text-right font-mono text-neutral-600">{r.refaksiKaPercent}%</td>
                       <td className="p-2 text-right font-black text-emerald-800 font-mono">{(r.netWeight ?? 0).toLocaleString('id-ID')}</td>
                       <td className="p-2 text-neutral-550 font-medium text-[10px]">{r.warehouseSection}</td>
                       <td className="p-2 text-right font-mono text-neutral-650">Rp {(r.laborCost ?? 0).toLocaleString('id-ID')}</td>
@@ -1058,7 +1076,7 @@ export default function ReportsModule({
                   ))}
                   {filteredInbound.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="p-8 text-center text-neutral-400 italic">Tidak ada log barang masuk yang ditemukan.</td>
+                      <td colSpan={12} className="p-8 text-center text-neutral-400 italic">Tidak ada log barang masuk yang ditemukan.</td>
                     </tr>
                   )}
                 </tbody>
@@ -1103,6 +1121,7 @@ export default function ReportsModule({
                     <th className="p-2">No. Polisi</th>
                     <th className="p-2">Pembeli</th>
                     <th className="p-2">Komoditas</th>
+                    <th className="p-2">Nama Barang</th>
                     <th className="p-2 text-right">Tonase Bersih (Kg)</th>
                     <th className="p-2">Tujuan Kota</th>
                     <th className="p-2 text-center">Status</th>
@@ -1116,6 +1135,7 @@ export default function ReportsModule({
                       <td className="p-2 font-semibold text-neutral-800">{r.vehicleNo}</td>
                       <td className="p-2 text-neutral-850 font-medium">{r.buyer}</td>
                       <td className="p-2 text-neutral-700 font-bold text-[10px]">{r.commodity}</td>
+                      <td className="p-2 text-neutral-700 font-bold text-[10px] uppercase">{r.itemName || '-'}</td>
                       <td className="p-2 text-right font-bold text-neutral-800 font-mono">{r.totalWeight.toLocaleString('id-ID')}</td>
                       <td className="p-2 text-neutral-600 font-medium text-[10px]">{r.destination}</td>
                       <td className="p-2 text-center">
@@ -1129,7 +1149,7 @@ export default function ReportsModule({
                   ))}
                   {filteredOutbound.length === 0 && (
                     <tr>
-                      <td colSpan={8} className="p-8 text-center text-neutral-400 italic">Tidak ada log barang keluar yang sesuai saringan filter.</td>
+                      <td colSpan={9} className="p-8 text-center text-neutral-400 italic">Tidak ada log barang keluar yang sesuai saringan filter.</td>
                     </tr>
                   )}
                 </tbody>

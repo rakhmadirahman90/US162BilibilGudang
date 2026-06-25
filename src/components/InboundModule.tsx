@@ -463,13 +463,20 @@ export default function InboundModule({
                   <select
                     value={commodity}
                     onChange={(e) => setCommodity(e.target.value as any)}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 transition cursor-pointer font-bold"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 transition cursor-pointer font-bold mb-2"
                   >
                     <option value="JAGUNG">JAGUNG PIPIL 🌽</option>
                     <option value="BERAS">BERAS MOLEK 🌾</option>
                     <option value="GABAH">GABAH KERING 🍚</option>
                     <option value="LAINNYA">LAIN-LAIN 📦</option>
                   </select>
+                  <input
+                    type="text"
+                    placeholder="NAMA BARANG (CONTOH: BROKEN, KACANG IJO)"
+                    value={itemName}
+                    onChange={(e) => setItemName(e.target.value.toUpperCase())}
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 font-bold uppercase transition"
+                  />
                 </div>
                 <div>
                   <label className="block text-neutral-600 mb-1 font-bold">NAMA SUPLIER / PEMILIK</label>
@@ -1169,6 +1176,10 @@ export default function InboundModule({
                   <div className="flex justify-between text-neutral-500">
                     <span>Pot. Karung ({previewRecord.bagDeductionPercent}%) :</span>
                     <span>-{( ( (previewRecord.grossWeight ?? 0) - (previewRecord.tareWeight ?? 0) ) * (previewRecord.bagDeductionPercent/100) ).toFixed(0)} Kg</span>
+                  </div>
+                  <div className="flex justify-between text-neutral-500">
+                    <span>Kadar Air :</span>
+                    <span>{previewRecord.moistureContent}%</span>
                   </div>
                   <div className="flex justify-between text-neutral-500">
                     <span>Refaksi KA ({previewRecord.refaksiKaPercent}%) :</span>

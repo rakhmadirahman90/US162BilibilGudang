@@ -310,13 +310,20 @@ export default function OutboundModule({
                   <select
                     value={commodity}
                     onChange={(e) => setCommodity(e.target.value as any)}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 font-bold uppercase transition cursor-pointer"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 font-bold uppercase transition cursor-pointer mb-2"
                   >
                     <option value="BERAS">BERAS MOLEK 🌾</option>
                     <option value="JAGUNG">JAGUNG PIPIL 🌽</option>
                     <option value="GABAH">GABAH SELEB 🍚</option>
                     <option value="LAINNYA">LAIN-LAIN 📦</option>
                   </select>
+                  <input
+                    type="text"
+                    placeholder="NAMA BARANG (CONTOH: BROKEN, KACANG IJO)"
+                    value={itemName}
+                    onChange={(e) => setItemName(e.target.value.toUpperCase())}
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 font-bold uppercase transition"
+                  />
                 </div>
                 <div>
                   <label className="block text-[#1e293b] font-bold mb-1 uppercase">NAMA PEMBELI (BUYER)</label>
