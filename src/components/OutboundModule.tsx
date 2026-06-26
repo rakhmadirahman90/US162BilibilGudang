@@ -87,7 +87,7 @@ export default function OutboundModule({
   const [selectedTicketId, setSelectedTicketId] = useState("");
   const [vehicleNo, setVehicleNo] = useState("");
   const [buyer, setBuyer] = useState("");
-  const [commodity, setCommodity] = useState<'BERAS' | 'JAGUNG' | 'GABAH' | 'LAINNYA'>('BERAS');
+  const [commodity, setCommodity] = useState<string>('BERAS');
   const [itemName, setItemName] = useState("");
   const [totalWeight, setTotalWeight] = useState(10000);
   const [loadingLaborCost, setLoadingLaborCost] = useState(400000);
@@ -101,9 +101,8 @@ export default function OutboundModule({
     if (tk) {
       setVehicleNo(tk.policeNo);
       setBuyer(tk.agency); // assume buyer agency
-      const comm = tk.goodsName.includes('JAGUNG') ? 'JAGUNG' : tk.goodsName.includes('GABAH') ? 'GABAH' : tk.goodsName.includes('BERAS') ? 'BERAS' : 'LAINNYA';
-      setCommodity(comm as any);
-      setItemName(tk.goodsName);
+      setCommodity(tk.goodsName);
+      setItemName('');
       setTotalWeight(tk.netWeight);
     }
   };
@@ -312,10 +311,23 @@ export default function OutboundModule({
                     onChange={(e) => setCommodity(e.target.value as any)}
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 font-bold uppercase transition cursor-pointer mb-2"
                   >
-                    <option value="BERAS">BERAS MOLEK 🌾</option>
-                    <option value="JAGUNG">JAGUNG PIPIL 🌽</option>
-                    <option value="GABAH">GABAH SELEB 🍚</option>
-                    <option value="LAINNYA">LAIN-LAIN 📦</option>
+                    <option value="BERAS">BERAS</option>
+                    <option value="BROKEN">BROKEN</option>
+                    <option value="RIJEK">RIJEK</option>
+                    <option value="BENIR">BENIR</option>
+                    <option value="DEDAK">DEDAK</option>
+                    <option value="JAGUNG READY">JAGUNG READY</option>
+                    <option value="JAGUNG ASALAN">JAGUNG ASALAN</option>
+                    <option value="KACANG IJO">KACANG IJO</option>
+                    <option value="KACANG TANAH">KACANG TANAH</option>
+                    <option value="CANGKANG KEMIRI">CANGKANG KEMIRI</option>
+                    <option value="CANGKANG SAWIT">CANGKANG SAWIT</option>
+                    <option value="GULA MERAH AREN">GULA MERAH AREN</option>
+                    <option value="GULA MERAH KLPA">GULA MERAH KLPA</option>
+                    <option value="GABAH">GABAH</option>
+                    <option value="PASIR">PASIR</option>
+                    <option value="RUMPUT LAUT">RUMPUT LAUT</option>
+                    <option value="BESI TUA">BESI TUA</option>
                   </select>
                   <input
                     type="text"
@@ -488,8 +500,8 @@ export default function OutboundModule({
                   <td className="py-2.5 px-3 uppercase font-medium text-neutral-800">{r.buyer}</td>
                   <td className="py-2.5 px-3">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                      r.commodity === 'BERAS' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' :
-                      r.commodity === 'JAGUNG' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+                      r.commodity?.includes('BERAS') ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' :
+                      r.commodity?.includes('JAGUNG') ? 'bg-amber-100 text-amber-800 border border-amber-200' :
                       'bg-blue-100 text-blue-800 font-bold'
                     }`}>
                       {r.commodity}

@@ -92,7 +92,7 @@ export default function InboundModule({
   const [selectedTicketId, setSelectedTicketId] = useState("");
   const [vehicleNo, setVehicleNo] = useState("");
   const [supplier, setSupplier] = useState("");
-  const [commodity, setCommodity] = useState<'BERAS' | 'JAGUNG' | 'GABAH' | 'LAINNYA'>('JAGUNG');
+  const [commodity, setCommodity] = useState<string>('JAGUNG READY');
   const [itemName, setItemName] = useState("");
   const [grossWeight, setGrossWeight] = useState(12000);
   const [tareWeight, setTareWeight] = useState(4000);
@@ -133,9 +133,8 @@ export default function InboundModule({
     if (tk) {
       setVehicleNo(tk.policeNo);
       setSupplier(tk.agency); // assume agent represents supplier/origin
-      const comm = tk.goodsName.includes('BERAS') ? 'BERAS' : tk.goodsName.includes('GABAH') ? 'GABAH' : tk.goodsName.includes('JAGUNG') ? 'JAGUNG' : 'LAINNYA';
-      setCommodity(comm as any);
-      setItemName(tk.goodsName);
+      setCommodity(tk.goodsName);
+      setItemName('');
       setGrossWeight(tk.timbang1Weight);
       setTareWeight(tk.timbang2Weight);
       
@@ -465,10 +464,23 @@ export default function InboundModule({
                     onChange={(e) => setCommodity(e.target.value as any)}
                     className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 transition cursor-pointer font-bold mb-2"
                   >
-                    <option value="JAGUNG">JAGUNG PIPIL 🌽</option>
-                    <option value="BERAS">BERAS MOLEK 🌾</option>
-                    <option value="GABAH">GABAH KERING 🍚</option>
-                    <option value="LAINNYA">LAIN-LAIN 📦</option>
+                    <option value="BERAS">BERAS</option>
+                    <option value="BROKEN">BROKEN</option>
+                    <option value="RIJEK">RIJEK</option>
+                    <option value="BENIR">BENIR</option>
+                    <option value="DEDAK">DEDAK</option>
+                    <option value="JAGUNG READY">JAGUNG READY</option>
+                    <option value="JAGUNG ASALAN">JAGUNG ASALAN</option>
+                    <option value="KACANG IJO">KACANG IJO</option>
+                    <option value="KACANG TANAH">KACANG TANAH</option>
+                    <option value="CANGKANG KEMIRI">CANGKANG KEMIRI</option>
+                    <option value="CANGKANG SAWIT">CANGKANG SAWIT</option>
+                    <option value="GULA MERAH AREN">GULA MERAH AREN</option>
+                    <option value="GULA MERAH KLPA">GULA MERAH KLPA</option>
+                    <option value="GABAH">GABAH</option>
+                    <option value="PASIR">PASIR</option>
+                    <option value="RUMPUT LAUT">RUMPUT LAUT</option>
+                    <option value="BESI TUA">BESI TUA</option>
                   </select>
                   <input
                     type="text"
@@ -933,7 +945,7 @@ export default function InboundModule({
             </thead>
             <tbody className="divide-y divide-neutral-100">
               {filteredRecords.map((r) => {
-                const isJagung = r.commodity === 'JAGUNG';
+                const isJagung = r.commodity?.includes('JAGUNG');
                 return (
                   <tr key={r.id} className="hover:bg-neutral-50 transition-colors">
                     <td className="py-2.5 px-3 text-neutral-500 whitespace-nowrap font-mono">
@@ -956,8 +968,8 @@ export default function InboundModule({
                     <td className="py-2.5 px-3 text-neutral-800 uppercase font-medium">{r.supplier}</td>
                     <td className="py-2.5 px-3">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
-                        r.commodity === 'JAGUNG' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
-                        r.commodity === 'BERAS' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' :
+                        r.commodity?.includes('JAGUNG') ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+                        r.commodity?.includes('BERAS') ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' :
                         'bg-blue-100 text-blue-800 border border-blue-200'
                       }`}>
                         {r.commodity}
@@ -981,7 +993,7 @@ export default function InboundModule({
                             Aman (0%)
                           </span>
                         )}
-                        {r.commodity === 'JAGUNG' && ((r.deadKernelsPercent ?? 0) > 0 || (r.moldPercent ?? 0) > 0 || (r.smallKernelsPercent ?? 0) > 0 || (r.fineTrashPercent ?? 0) > 0) && (
+                        {r.commodity?.includes('JAGUNG') && ((r.deadKernelsPercent ?? 0) > 0 || (r.moldPercent ?? 0) > 0 || (r.smallKernelsPercent ?? 0) > 0 || (r.fineTrashPercent ?? 0) > 0) && (
                           <span className="text-[8px] text-amber-700 font-bold mt-1 bg-amber-50 border border-amber-100 px-1.5 py-0.5 rounded" title={`Mati: ${r.deadKernelsPercent || 0}%, Jamur: ${r.moldPercent || 0}%, Kecil: ${r.smallKernelsPercent || 0}%, Sampah: ${r.fineTrashPercent || 0}%`}>
                             Kualitas: -{((r.deadKernelsPercent ?? 0) + (r.moldPercent ?? 0) + (r.smallKernelsPercent ?? 0) + (r.fineTrashPercent ?? 0)).toFixed(1)}%
                           </span>
@@ -1185,7 +1197,7 @@ export default function InboundModule({
                     <span>Refaksi KA ({previewRecord.refaksiKaPercent}%) :</span>
                     <span>-{( ( (previewRecord.grossWeight ?? 0) - (previewRecord.tareWeight ?? 0) ) * (previewRecord.refaksiKaPercent/100) ).toFixed(0)} Kg</span>
                   </div>
-                  {previewRecord.commodity === 'JAGUNG' && (
+                  {previewRecord.commodity?.includes('JAGUNG') && (
                     <>
                       {(previewRecord.deadKernelsPercent ?? 0) > 0 && (
                         <div className="flex justify-between text-neutral-500">

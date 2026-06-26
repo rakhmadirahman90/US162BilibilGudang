@@ -56,7 +56,7 @@ export function buildInboundWAText(record: InboundRecord, tk: WeighbridgeTicket 
   const potKrg = Math.round(rawNet * ((record.bagDeductionPercent ?? 0) / 100));
   const potRefaksi = Math.round(rawNet * ((record.refaksiKaPercent ?? 0) / 100));
   
-  const isJagung = record.commodity === 'JAGUNG';
+  const isJagung = record.commodity?.includes('JAGUNG');
   
   let qualityDeductionsText = '';
   if (isJagung) {

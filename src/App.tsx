@@ -1292,12 +1292,12 @@ export default function App() {
 
   // --- INTEGRATED METRICS CALCULATOR FOR COVER DASHBOARD ---
   // A. Stocks inside Silos & Warehouses
-  const totalInboundCorn = inboundRecords.filter(r => r.commodity === 'JAGUNG').reduce((acc, r) => acc + r.netWeight, 0);
-  const totalOutboundCorn = outboundRecords.filter(r => r.commodity === 'JAGUNG').reduce((acc, r) => acc + r.totalWeight, 0);
+  const totalInboundCorn = inboundRecords.filter(r => r.commodity?.includes('JAGUNG')).reduce((acc, r) => acc + r.netWeight, 0);
+  const totalOutboundCorn = outboundRecords.filter(r => r.commodity?.includes('JAGUNG')).reduce((acc, r) => acc + r.totalWeight, 0);
   const cornStockBalance = Math.max(0, totalInboundCorn - totalOutboundCorn);
 
-  const totalInboundRice = inboundRecords.filter(r => r.commodity === 'BERAS').reduce((acc, r) => acc + r.netWeight, 0);
-  const totalOutboundRice = outboundRecords.filter(r => r.commodity === 'BERAS').reduce((acc, r) => acc + r.totalWeight, 0);
+  const totalInboundRice = inboundRecords.filter(r => r.commodity?.includes('BERAS') || r.commodity === 'BROKEN' || r.commodity === 'BENIR' || r.commodity === 'RIJEK' || r.commodity === 'DEDAK').reduce((acc, r) => acc + r.netWeight, 0);
+  const totalOutboundRice = outboundRecords.filter(r => r.commodity?.includes('BERAS') || r.commodity === 'BROKEN' || r.commodity === 'BENIR' || r.commodity === 'RIJEK' || r.commodity === 'DEDAK').reduce((acc, r) => acc + r.totalWeight, 0);
   const riceStockBalance = Math.max(0, totalInboundRice - totalOutboundRice);
 
   // B. Services income tally

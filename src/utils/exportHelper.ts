@@ -622,8 +622,8 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
     <div class="flex"><span class="label">TARA</span><span class="value">: ${tara.toLocaleString('id-ID')} Kg</span></div>
     <div class="flex"><span class="label">Pot. Karung</span><span class="value">: -${potKrg.toLocaleString('id-ID')} Kg (${record.bagDeductionPercent ?? 0}%)</span></div>
     <div class="flex"><span class="label">Kadar Air</span><span class="value">: ${record.moistureContent ?? 0}%</span></div>
-    <div class="flex"><span class="label">Refaksi KA</span><span class="value">: -${potRefaksi.toLocaleString('id-ID')} Kg (${record.refaksiKaPercent ?? 0}%) ${record.commodity === 'JAGUNG' && ((record.moistureContent ?? 0) > 30.00 || (record.cornFormulaFactor && (record.moistureContent ?? 0) > 30.00)) ? `*[Rumus ${record.cornFormulaFactor || 1.4}]` : ''}</span></div>
-    ${record.commodity === 'JAGUNG' ? `
+    <div class="flex"><span class="label">Refaksi KA</span><span class="value">: -${potRefaksi.toLocaleString('id-ID')} Kg (${record.refaksiKaPercent ?? 0}%) ${record.commodity?.includes('JAGUNG') && ((record.moistureContent ?? 0) > 30.00 || (record.cornFormulaFactor && (record.moistureContent ?? 0) > 30.00)) ? `*[Rumus ${record.cornFormulaFactor || 1.4}]` : ''}</span></div>
+    ${record.commodity?.includes('JAGUNG') ? `
     <div class="flex"><span class="label">Pot. Biji Mati</span><span class="value">: -${potBijiMati.toLocaleString('id-ID')} Kg (${record.deadKernelsPercent ?? 0}%)</span></div>
     <div class="flex"><span class="label">Pot. Jamur</span><span class="value">: -${potJamur.toLocaleString('id-ID')} Kg (${record.moldPercent ?? 0}%)</span></div>
     <div class="flex"><span class="label">Pot. Biji Kecil</span><span class="value">: -${potBijiKecil.toLocaleString('id-ID')} Kg (${record.smallKernelsPercent ?? 0}%)</span></div>
@@ -655,7 +655,7 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
       </div>
     </div>
 
-    ${record.commodity === 'JAGUNG' && ((record.moistureContent ?? 0) > 30.00) ? `
+    ${record.commodity?.includes('JAGUNG') && ((record.moistureContent ?? 0) > 30.00) ? `
     <div style="font-size: 8.2pt !important; color: #000000 !important; background-color: #ffffff !important; border: 1.5px solid #000000 !important; border-radius: 3px; padding: 3px 6px; margin: 4px 0 6px 0; font-family: 'Calibri Light', Calibri, Arial, 'Segoe UI', sans-serif !important; line-height: 1.25; font-weight: bold !important;">
       <strong>*KA Tinggi (${record.moistureContent ?? 0}%):</strong> Potongan KA dihitung menggunakan Rumus ${record.cornFormulaFactor || 1.4} luar tabel: (Math.floor(${record.moistureContent ?? 0}) - 14) x ${record.cornFormulaFactor || 1.4} = ${record.refaksiKaPercent}% potongan.
     </div>

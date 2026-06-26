@@ -29,7 +29,7 @@ export interface InboundRecord {
   ticketNo?: string; // Reference to Weighbridge Ticket
   vehicleNo: string;
   supplier: string;
-  commodity: 'BERAS' | 'JAGUNG' | 'GABAH' | 'LAINNYA';
+  commodity: string;
   grossWeight: number;
   tareWeight: number;
   refaksiKaPercent: number; // Kadar Air Refaksi %
@@ -55,7 +55,7 @@ export interface OutboundRecord {
   ticketNo?: string; // Reference to Weighbridge Ticket
   vehicleNo: string;
   buyer: string;
-  commodity: 'BERAS' | 'JAGUNG' | 'GABAH' | 'LAINNYA';
+  commodity: string;
   itemName?: string; // e.g. JAGUNG READY, BROKEN, dll
   totalWeight: number;
   loadingLaborCost: number; // Biaya buruh muat
@@ -158,7 +158,7 @@ export interface SupplierRecord {
   name: string;
   phone: string;
   address: string;
-  mainCommodity: 'BERAS' | 'JAGUNG' | 'GABAH' | 'LAINNYA';
+  mainCommodity: string;
 }
 
 export interface BuyerRecord {
@@ -171,7 +171,7 @@ export interface BuyerRecord {
 export interface CommodityRecord {
   id: string;
   name: string;
-  type: 'BERAS' | 'JAGUNG' | 'GABAH' | 'LAINNYA';
+  type: string;
   moistureStandard: number;
   bagDeductionPercent: number;
 }
@@ -182,7 +182,7 @@ export interface RiceStockRecord {
   policeNo: string;
   description: string;
   itemName: string;
-  commodity?: 'BERAS' | 'JAGUNG' | 'KACANG IJO' | 'LAINNYA';
+  commodity?: string;
   price: number;
   colly: number;
   inWeight: number; // Masuk
@@ -231,7 +231,7 @@ export interface LaborRateRecord {
 export interface ProductRecord {
   id: string;
   name: string;
-  category: 'BERAS' | 'JAGUNG' | 'LAINNYA';
+  category: string;
   description: string;
   characteristics: string[];
   pricePerKg: number;

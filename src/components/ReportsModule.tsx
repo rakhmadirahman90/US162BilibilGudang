@@ -545,8 +545,8 @@ export default function ReportsModule({
     const totalOutboundWeight = outboundRecords.reduce((sum, r) => sum + r.totalWeight, 0);
     
     // Inbound commodity distribution
-    const inboundCorn = inboundRecords.filter(r => r.commodity === 'JAGUNG').reduce((sum, r) => sum + r.netWeight, 0);
-    const inboundRice = inboundRecords.filter(r => r.commodity === 'BERAS').reduce((sum, r) => sum + r.netWeight, 0);
+    const inboundCorn = inboundRecords.filter(r => r.commodity?.includes('JAGUNG')).reduce((sum, r) => sum + r.netWeight, 0);
+    const inboundRice = inboundRecords.filter(r => r.commodity?.includes('BERAS') || r.commodity === 'BROKEN' || r.commodity === 'BENIR' || r.commodity === 'RIJEK' || r.commodity === 'DEDAK').reduce((sum, r) => sum + r.netWeight, 0);
 
     // Services
     const totalServiceIncome = serviceRecords.filter(s => s.paymentStatus === 'PAID').reduce((sum, s) => sum + s.totalFee, 0);
@@ -637,10 +637,23 @@ export default function ReportsModule({
               className="w-full text-xs font-semibold px-3 py-2 bg-neutral-55 border border-neutral-250 rounded-lg text-neutral-700 focus:outline-none focus:border-emerald-600 focus:bg-white cursor-pointer"
             >
               <option value="ALL">📦 SEMUA KOMODITAS</option>
-              <option value="JAGUNG">🌽 JAGUNG PIPIL</option>
-              <option value="BERAS">🌾 BERAS</option>
-              <option value="GABAH">🌾 GABAH KERING</option>
-              <option value="LAINNYA">📦 LAIN-LAIN</option>
+              <option value="BERAS">BERAS</option>
+              <option value="BROKEN">BROKEN</option>
+              <option value="RIJEK">RIJEK</option>
+              <option value="BENIR">BENIR</option>
+              <option value="DEDAK">DEDAK</option>
+              <option value="JAGUNG READY">JAGUNG READY</option>
+              <option value="JAGUNG ASALAN">JAGUNG ASALAN</option>
+              <option value="KACANG IJO">KACANG IJO</option>
+              <option value="KACANG TANAH">KACANG TANAH</option>
+              <option value="CANGKANG KEMIRI">CANGKANG KEMIRI</option>
+              <option value="CANGKANG SAWIT">CANGKANG SAWIT</option>
+              <option value="GULA MERAH AREN">GULA MERAH AREN</option>
+              <option value="GULA MERAH KLPA">GULA MERAH KLPA</option>
+              <option value="GABAH">GABAH</option>
+              <option value="PASIR">PASIR</option>
+              <option value="RUMPUT LAUT">RUMPUT LAUT</option>
+              <option value="BESI TUA">BESI TUA</option>
             </select>
           </div>
 

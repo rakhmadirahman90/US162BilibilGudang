@@ -156,7 +156,7 @@ export default function DatabaseMasterModule({
   const [supplierName, setSupplierName] = useState('');
   const [supplierPhone, setSupplierPhone] = useState('');
   const [supplierAddress, setSupplierAddress] = useState('');
-  const [supplierCommodity, setSupplierCommodity] = useState<'BERAS' | 'JAGUNG' | 'GABAH' | 'LAINNYA'>('JAGUNG');
+  const [supplierCommodity, setSupplierCommodity] = useState<string>('JAGUNG READY');
 
   // Buyer
   const [buyerName, setBuyerName] = useState('');
@@ -171,7 +171,7 @@ export default function DatabaseMasterModule({
 
   // Commodity
   const [commodityName, setCommodityName] = useState('');
-  const [commodityType, setCommodityType] = useState<'BERAS' | 'JAGUNG' | 'GABAH' | 'LAINNYA'>('JAGUNG');
+  const [commodityType, setCommodityType] = useState<string>('JAGUNG READY');
   const [commodityMoisture, setCommodityMoisture] = useState<number>(14.0);
   const [commodityBagDeduction, setCommodityBagDeduction] = useState<number>(1.0);
 
@@ -208,7 +208,7 @@ export default function DatabaseMasterModule({
 
   // Products
   const [productName, setProductName] = useState('');
-  const [productCategory, setProductCategory] = useState<'BERAS' | 'JAGUNG' | 'LAINNYA'>('BERAS');
+  const [productCategory, setProductCategory] = useState<string>('BERAS');
   const [productDescription, setProductDescription] = useState('');
   const [productCharacteristics, setProductCharacteristics] = useState('');
   const [productPrice, setProductPrice] = useState<number>(0);
@@ -1543,10 +1543,23 @@ export default function DatabaseMasterModule({
                       onChange={(e) => setSupplierCommodity(e.target.value as any)}
                       className="w-full bg-white border border-neutral-300 rounded-lg px-2 py-2 text-xs font-semibold focus:border-indigo-500 outline-none text-neutral-800"
                     >
-                      <option value="JAGUNG">JAGUNG</option>
                       <option value="BERAS">BERAS</option>
+                      <option value="BROKEN">BROKEN</option>
+                      <option value="RIJEK">RIJEK</option>
+                      <option value="BENIR">BENIR</option>
+                      <option value="DEDAK">DEDAK</option>
+                      <option value="JAGUNG READY">JAGUNG READY</option>
+                      <option value="JAGUNG ASALAN">JAGUNG ASALAN</option>
+                      <option value="KACANG IJO">KACANG IJO</option>
+                      <option value="KACANG TANAH">KACANG TANAH</option>
+                      <option value="CANGKANG KEMIRI">CANGKANG KEMIRI</option>
+                      <option value="CANGKANG SAWIT">CANGKANG SAWIT</option>
+                      <option value="GULA MERAH AREN">GULA MERAH AREN</option>
+                      <option value="GULA MERAH KLPA">GULA MERAH KLPA</option>
                       <option value="GABAH">GABAH</option>
-                      <option value="LAINNYA">LAINNYA</option>
+                      <option value="PASIR">PASIR</option>
+                      <option value="RUMPUT LAUT">RUMPUT LAUT</option>
+                      <option value="BESI TUA">BESI TUA</option>
                     </select>
                     <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
                       <Check className="w-3.5 h-3.5" /> SIMPAN
@@ -1676,10 +1689,23 @@ export default function DatabaseMasterModule({
                     onChange={(e) => setCommodityType(e.target.value as any)}
                     className="w-full bg-white border border-neutral-300 rounded-lg px-2 py-2 text-xs font-semibold focus:border-indigo-500 outline-none text-neutral-800"
                   >
-                    <option value="JAGUNG">JAGUNG</option>
                     <option value="BERAS">BERAS</option>
+                    <option value="BROKEN">BROKEN</option>
+                    <option value="RIJEK">RIJEK</option>
+                    <option value="BENIR">BENIR</option>
+                    <option value="DEDAK">DEDAK</option>
+                    <option value="JAGUNG READY">JAGUNG READY</option>
+                    <option value="JAGUNG ASALAN">JAGUNG ASALAN</option>
+                    <option value="KACANG IJO">KACANG IJO</option>
+                    <option value="KACANG TANAH">KACANG TANAH</option>
+                    <option value="CANGKANG KEMIRI">CANGKANG KEMIRI</option>
+                    <option value="CANGKANG SAWIT">CANGKANG SAWIT</option>
+                    <option value="GULA MERAH AREN">GULA MERAH AREN</option>
+                    <option value="GULA MERAH KLPA">GULA MERAH KLPA</option>
                     <option value="GABAH">GABAH</option>
-                    <option value="LAINNYA">LAINNYA</option>
+                    <option value="PASIR">PASIR</option>
+                    <option value="RUMPUT LAUT">RUMPUT LAUT</option>
+                    <option value="BESI TUA">BESI TUA</option>
                   </select>
                 </div>
                 <div>
@@ -2004,8 +2030,22 @@ export default function DatabaseMasterModule({
                       className="w-full bg-white border border-neutral-300 rounded-lg px-2 py-2 text-xs font-semibold focus:border-indigo-500 outline-none text-neutral-800"
                     >
                       <option value="BERAS">BERAS</option>
-                      <option value="JAGUNG">JAGUNG</option>
-                      <option value="LAINNYA">LAINNYA</option>
+                      <option value="BROKEN">BROKEN</option>
+                      <option value="RIJEK">RIJEK</option>
+                      <option value="BENIR">BENIR</option>
+                      <option value="DEDAK">DEDAK</option>
+                      <option value="JAGUNG READY">JAGUNG READY</option>
+                      <option value="JAGUNG ASALAN">JAGUNG ASALAN</option>
+                      <option value="KACANG IJO">KACANG IJO</option>
+                      <option value="KACANG TANAH">KACANG TANAH</option>
+                      <option value="CANGKANG KEMIRI">CANGKANG KEMIRI</option>
+                      <option value="CANGKANG SAWIT">CANGKANG SAWIT</option>
+                      <option value="GULA MERAH AREN">GULA MERAH AREN</option>
+                      <option value="GULA MERAH KLPA">GULA MERAH KLPA</option>
+                      <option value="GABAH">GABAH</option>
+                      <option value="PASIR">PASIR</option>
+                      <option value="RUMPUT LAUT">RUMPUT LAUT</option>
+                      <option value="BESI TUA">BESI TUA</option>
                     </select>
                   </div>
                   <div>
