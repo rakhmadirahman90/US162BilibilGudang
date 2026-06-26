@@ -29,9 +29,7 @@ import {
   ProductRecord,
   UserAccount,
   ActivityLog,
-  LaborKasbonRecord,
-  KacangIjoRekapRecord,
-  KacangIjoStockRecord
+  LaborKasbonRecord
 } from './types';
 import { 
   initialWeighbridgeTickets, 

@@ -152,7 +152,6 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
       } else {
         onAddRecord(newRecord);
       }
-      (window as any).__showToast?.(editingId ? t.successUpdateStock : t.successSaveStock, 'success');
       setShowAddForm(false);
       resetForm();
     };

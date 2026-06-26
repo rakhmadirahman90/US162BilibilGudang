@@ -86,12 +86,21 @@ export default function DryerModule({ records, onAddRecord, onUpdateRecord, onDe
 
     if (editingId) {
       onUpdateRecord(newRecord);
+      (window as any).__showToast?.('Catatan pengeringan jagung berhasil diperbarui!', 'success');
     } else {
       onAddRecord(newRecord);
+      (window as any).__showToast?.('Catatan pengeringan jagung berhasil ditambahkan!', 'success');
     }
     
     setShowAddForm(false);
     resetForm();
+  };
+
+  const handleDelete = (id: string, batch: string) => {
+    if (window.confirm(`Hapus rekapan dryer batch ${batch}?`)) {
+      onDeleteRecord(id);
+      (window as any).__showToast?.(`Rekapan dryer batch ${batch} berhasil dihapus!`, 'success');
+    }
   };
 
   const handleEdit = (r: DryerRecord) => {
@@ -337,7 +346,7 @@ export default function DryerModule({ records, onAddRecord, onUpdateRecord, onDe
                   <td className="py-2.5 px-3 text-center">
                     <div className="flex gap-1.5 justify-center">
                       <button onClick={() => handleEdit(r)} className="text-neutral-400 hover:text-blue-600 p-1 cursor-pointer"><Edit3 className="w-4 h-4" /></button>
-                      <button onClick={() => { if(confirm('Hapus rekapan dryer ini?')) onDeleteRecord(r.id); }} className="text-neutral-400 hover:text-rose-600 p-1 cursor-pointer"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => handleDelete(r.id, r.batchNo)} className="text-neutral-400 hover:text-rose-600 p-1 cursor-pointer"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>
                 </tr>
