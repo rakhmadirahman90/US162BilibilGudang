@@ -25,8 +25,15 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [previewRecord, setPreviewRecord] = useState<RiceStockRecord | null>(null);
 
-  // Sub-tabs for separating Beras (Rice) and Jagung (Corn) completely
-  const [commodityTab, setCommodityTab] = useState<'BERAS' | 'JAGUNG' | 'KACANG IJO'>('BERAS');
+  // Sub-tabs for separating commodities completely
+  const [commodityTab, setCommodityTab] = useState<string>('BERAS');
+
+  const COMMODITIES = [
+    'BERAS', 'BROKEN', 'RIJEK', 'BENIR', 'DEDAK', 
+    'JAGUNG READY', 'JAGUNG ASALAN', 'KACANG IJO', 'KACANG TANAH', 
+    'CANGKANG KEMIRI', 'CANGKANG SAWIT', 'GULA MERAH AREN', 'GULA MERAH KLPA', 
+    'GABAH', 'PASIR', 'RUMPUT LAUT', 'BESI TUA', 'LAINNYA'
+  ];
 
   // Sorting order: NEWEST first (default for feed) or OLDEST first (traditional accounting log style like Excel)
   const [sortOrder, setSortOrder] = useState<'NEWEST' | 'OLDEST'>('NEWEST');
@@ -236,7 +243,7 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
       r.runningTotal.toString()
     ]);
 
-    const titlePrefix = commodityTab === 'BERAS' ? 'Buku_Stok_Beras' : commodityTab === 'JAGUNG' ? 'Buku_Stok_Jagung' : 'Buku_Stok_Kacang_Ijo';
+    const titlePrefix = `Buku_Stok_${commodityTab.replace(/\s+/g, '_')}`;
     exportToCSV(headers, rows, `${titlePrefix}_US_Bilibili_${new Date().toISOString().split('T')[0]}`);
   };
 
@@ -247,7 +254,7 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
         <div>
           <h2 className="text-xl font-extrabold text-neutral-850 flex items-center gap-2 uppercase tracking-tight">
             <Package className="text-emerald-600 w-6 h-6 shrink-0" />
-            <span>{commodityTab === 'BERAS' ? 'BUKU LOGISTIK BERAS' : commodityTab === 'JAGUNG' ? 'BUKU LOGISTIK JAGUNG' : 'BUKU LOGISTIK KACANG IJO'}</span>
+            <span>BUKU LOGISTIK {commodityTab}</span>
           </h2>
           <p className="text-[11px] text-neutral-400 font-bold mt-1 uppercase tracking-wider">
             Pengelolaan & Perhitungan Saldo Stok Gudang Mandiri US Bilibili 162
@@ -273,40 +280,16 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
       </div>
 
       {/* 2. Premium Commodity Selector Tabs */}
-      <div className="flex bg-neutral-100/80 p-1 rounded-2xl border border-neutral-200 w-full sm:max-w-xl self-start">
-        <button
-          onClick={() => setCommodityTab('BERAS')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-black text-[11px] uppercase tracking-wider transition-all cursor-pointer ${
-            commodityTab === 'BERAS'
-              ? 'bg-emerald-600 text-white shadow-md'
-              : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-200/50'
-          }`}
+      <div className="flex bg-neutral-100/80 p-2 rounded-2xl border border-neutral-200 w-full sm:max-w-xl self-start">
+        <select
+          value={commodityTab}
+          onChange={(e) => setCommodityTab(e.target.value)}
+          className="w-full bg-white border border-neutral-200 text-neutral-800 text-sm font-black uppercase tracking-wider py-2.5 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-sm"
         >
-          <span className="text-sm">🌾</span>
-          <span>Logistik Beras</span>
-        </button>
-        <button
-          onClick={() => setCommodityTab('JAGUNG')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-black text-[11px] uppercase tracking-wider transition-all cursor-pointer ${
-            commodityTab === 'JAGUNG'
-              ? 'bg-amber-600 text-white shadow-md'
-              : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-200/50'
-          }`}
-        >
-          <span className="text-sm">🌽</span>
-          <span>Logistik Jagung</span>
-        </button>
-        <button
-          onClick={() => setCommodityTab('KACANG IJO')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-black text-[11px] uppercase tracking-wider transition-all cursor-pointer ${
-            commodityTab === 'KACANG IJO'
-              ? 'bg-purple-600 text-white shadow-md'
-              : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-200/50'
-          }`}
-        >
-          <span className="text-sm">🫘</span>
-          <span>Kacang Ijo</span>
-        </button>
+          {COMMODITIES.map(c => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
       </div>
 
       {/* 3. Aggregate Statistical Bento Cards */}
@@ -336,21 +319,13 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
         </div>
 
         {/* Current Stock Balance */}
-        <div className={`border rounded-2xl p-5 shadow-sm flex items-center justify-between transition-colors ${
-          commodityTab === 'BERAS' 
-            ? 'bg-emerald-50/60 border-emerald-200 text-emerald-950' 
-            : commodityTab === 'JAGUNG'
-            ? 'bg-amber-50/60 border-amber-200 text-amber-950'
-            : 'bg-purple-50/60 border-purple-200 text-purple-950'
-        }`}>
+        <div className="bg-emerald-50/60 border border-emerald-200 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[9px] opacity-75 font-black uppercase tracking-wider">Stok Logistik Saat Ini</span>
-            <div className="text-lg font-black">{formatKgValue(currentStockBalance)}</div>
-            <div className="text-[11px] opacity-80 font-mono font-bold uppercase">{formatTonValue(currentStockBalance)}</div>
+            <span className="text-[9px] text-emerald-950/75 font-black uppercase tracking-wider">Stok Logistik Saat Ini</span>
+            <div className="text-lg text-emerald-950 font-black">{formatKgValue(currentStockBalance)}</div>
+            <div className="text-[11px] text-emerald-950/80 font-mono font-bold uppercase">{formatTonValue(currentStockBalance)}</div>
           </div>
-          <div className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-inner ${
-            commodityTab === 'BERAS' ? 'bg-emerald-100 text-emerald-700' : commodityTab === 'JAGUNG' ? 'bg-amber-100 text-amber-700' : 'bg-purple-100 text-purple-700'
-          }`}>
+          <div className="bg-emerald-100 text-emerald-700 w-11 h-11 rounded-xl flex items-center justify-center shadow-inner">
             <Package className="w-5.5 h-5.5" />
           </div>
         </div>
@@ -359,7 +334,7 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
       {/* 4. Manual Entry Form */}
       {showAddForm && (
         <div className="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6 relative overflow-hidden">
-          <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${commodityTab === 'BERAS' ? 'bg-emerald-500' : commodityTab === 'JAGUNG' ? 'bg-amber-500' : 'bg-purple-500'}`} />
+          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500" />
           <h3 className="text-xs font-black text-neutral-800 uppercase tracking-widest mb-4 flex items-center gap-1.5">
             <FileText className="w-4 h-4 text-neutral-500" />
             {editingId ? 'Edit Catatan Logistik' : 'Formulir Catatan Logistik Baru'}
@@ -379,26 +354,13 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
             </div>
             <div>
               <label className="block mb-1 font-bold text-neutral-600 uppercase tracking-wider text-[9px]">Pilihan Komoditas / Item</label>
-              {commodityTab === 'KACANG IJO' ? (
-                <input
-                  type="text"
-                  placeholder="Contoh: NILON, KABUR, dsb"
-                  value={itemName}
-                  onChange={(e) => setItemName(e.target.value)}
-                  className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-bold uppercase focus:ring-1 focus:ring-emerald-500 outline-none"
-                />
-              ) : (
-                <select
-                  value={itemName}
-                  onChange={(e) => setItemName(e.target.value)}
-                  className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-bold focus:ring-1 focus:ring-emerald-500 outline-none"
-                >
-                  <option value="BERAS">🌾 BERAS (RICE)</option>
-                  <option value="JAGUNG">🌽 JAGUNG (MAIZE)</option>
-                  <option value="GABAH">🌾 GABAH</option>
-                  <option value="LAINNYA">📦 LAINNYA</option>
-                </select>
-              )}
+              <input
+                type="text"
+                placeholder="Spesifikasi / Jenis Item (Opsional)"
+                value={itemName}
+                onChange={(e) => setItemName(e.target.value)}
+                className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-bold uppercase focus:ring-1 focus:ring-emerald-500 outline-none"
+              />
             </div>
             <div>
               <SmartNumberInput
