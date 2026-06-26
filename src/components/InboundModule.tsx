@@ -126,6 +126,11 @@ export default function InboundModule({
     }
   }, [selectedLaborId, grossWeight, tareWeight, laborRates]);
 
+  // Helper to check if ticket is already integrated into an inbound record
+  const isTicketUsed = (ticket: WeighbridgeTicket) => {
+    return records.some(r => r.ticketNo === ticket.ticketNo && r.id !== editingId);
+  };
+
   // When a weighing ticket is chosen, automatically fill details!
   const handleTicketChange = (ticketId: string) => {
     setSelectedTicketId(ticketId);
@@ -149,6 +154,7 @@ export default function InboundModule({
       } else {
         setBagDeductionPercent(tk.bagDeductionPercent);
         
+        const comm = tk.goodsName;
         if (comm === 'JAGUNG') {
           let moisture = 14.0;
           const notesParsed = tk.notes ? tk.notes.match(/(?:KA|Kadar\s*Air)\s*([0-9.,]+)/i) : null;
@@ -185,6 +191,17 @@ export default function InboundModule({
     if (!vehicleNo.trim() || !supplier.trim()) {
       (window as any).__showToast?.("Harap lengkapi semua isian wajib seperti nomor kendaraan dan nama suplier!", "error");
       return;
+    }
+
+    if (selectedTicketId) {
+      const tk = tickets.find(t => t.id === selectedTicketId);
+      if (tk) {
+        const isUsed = records.some(r => r.ticketNo === tk.ticketNo && r.id !== editingId);
+        if (isUsed) {
+          (window as any).__showToast?.(`Tiket timbang #${tk.ticketNo} sudah diintegrasikan ke penerimaan lain!`, "error");
+          return;
+        }
+      }
     }
 
     // Determine refaksi KA
@@ -389,11 +406,14 @@ export default function InboundModule({
                   className="w-full bg-white border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-emerald-600 transition cursor-pointer"
                 >
                   <option value="">-- INPUT MANUAL / TANPA TIKET --</option>
-                  {tickets.map(t => (
-                    <option key={t.id} value={t.id}>
-                      TIKET {t.ticketNo} ({t.policeNo}) - NET {(t.netWeight ?? 0).toLocaleString('id-ID')} KG
-                    </option>
-                  ))}
+                  {tickets.map(t => {
+                    const used = isTicketUsed(t);
+                    return (
+                      <option key={t.id} value={t.id} disabled={used}>
+                        TIKET {t.ticketNo} ({t.policeNo}) - NET {(t.netWeight ?? 0).toLocaleString('id-ID')} KG {used ? ' [SUDAH DIINTEGRASI]' : ''}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 

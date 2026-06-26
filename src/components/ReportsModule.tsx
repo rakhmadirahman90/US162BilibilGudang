@@ -186,9 +186,49 @@ export default function ReportsModule({
     });
   }, [dryerRecords, startDate, endDate, searchQuery]);
 
+  // Compiled unified stock records
+  const unifiedRiceStock = useMemo(() => {
+    const base = (riceStockRecords || []).filter(r => !r.id.startsWith('stock-'));
+    const unified: RiceStockRecord[] = [...base];
+
+    // Integrate Inbound Records
+    (inboundRecords || []).forEach(r => {
+      unified.push({
+        id: r.id,
+        date: r.date,
+        policeNo: r.vehicleNo,
+        description: `TERIMA DARI: ${r.supplier}`,
+        itemName: r.itemName || '',
+        commodity: r.commodity,
+        price: r.price || 0,
+        colly: 0,
+        inWeight: r.netWeight,
+        outWeight: 0,
+      });
+    });
+
+    // Integrate Outbound Records
+    (outboundRecords || []).forEach(r => {
+      unified.push({
+        id: r.id,
+        date: r.date,
+        policeNo: r.vehicleNo,
+        description: `KIRIM KE: ${r.buyer}`,
+        itemName: r.itemName || '',
+        commodity: r.commodity,
+        price: 0,
+        colly: 0,
+        inWeight: 0,
+        outWeight: r.totalWeight,
+      });
+    });
+
+    return unified;
+  }, [riceStockRecords, inboundRecords, outboundRecords]);
+
   // 7. Rice Stock (Stok Beras) Filter
   const filteredRiceStock = useMemo(() => {
-    return (riceStockRecords || []).filter(r => {
+    return unifiedRiceStock.filter(r => {
       if (!isWithinDateRange(r.date)) return false;
       const rCommodity = (r.commodity || r.itemName)?.toUpperCase();
       if (commodityFilter !== 'ALL') {
@@ -202,12 +242,12 @@ export default function ReportsModule({
         const q = searchQuery.toLowerCase();
         const matchesPlate = r.policeNo.toLowerCase().includes(q);
         const matchesDesc = r.description.toLowerCase().includes(q);
-        const matchesItem = r.itemName.toLowerCase().includes(q);
+        const matchesItem = (r.itemName || r.commodity || '').toLowerCase().includes(q);
         if (!matchesPlate && !matchesDesc && !matchesItem) return false;
       }
       return true;
     });
-  }, [riceStockRecords, startDate, endDate, commodityFilter, searchQuery]);
+  }, [unifiedRiceStock, startDate, endDate, commodityFilter, searchQuery]);
 
   // 8. Debts (Utang Supplier) Filter
   const filteredDebts = useMemo(() => {

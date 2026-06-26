@@ -168,7 +168,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
     });
   };
 
-  const unifiedRecords: RiceStockRecord[] = [...records];
+  const unifiedRecords: RiceStockRecord[] = records.filter(r => !r.id.startsWith('stock-'));
   
   // Integrate Inbound Records
   inboundRecords.forEach(r => {

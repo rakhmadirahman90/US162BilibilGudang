@@ -564,6 +564,193 @@ export default function App() {
     }
   }, [inboundRecords.length, tickets.length]);
 
+  // --- AUTOMATIC FIRESTORE DATABASE DEDUPLICATION & INTEGRITY CLEANER ---
+  const hasDeduplicated = React.useRef(false);
+
+  React.useEffect(() => {
+    // Only run if collections have finished initial loading
+    if (hasDeduplicated.current) return;
+    if (inboundRecords.length === 0 && outboundRecords.length === 0 && riceStockRecords.length === 0) return;
+
+    hasDeduplicated.current = true;
+
+    const performDeduplication = async () => {
+      console.log("[DataIntegrity] Initiating automatic data deduplication and sync check...");
+
+      // 1. Clean up "stock-" prefixed riceStockRecords because they are now dynamically generated in the UI
+      const legacyStockRecords = riceStockRecords.filter(r => r.id.startsWith('stock-'));
+      if (legacyStockRecords.length > 0) {
+        console.log(`[DataIntegrity] Found ${legacyStockRecords.length} legacy auto-generated stock records. Removing to prevent duplication...`);
+        for (const r of legacyStockRecords) {
+          try {
+            await deleteOnline('riceStockRecords', r.id);
+          } catch (e) {
+            console.error(`[DataIntegrity] Failed to delete legacy stock record ${r.id}:`, e);
+          }
+        }
+        setRiceStockRecords(prev => prev.filter(r => !r.id.startsWith('stock-')));
+      }
+
+      // 2. Deduplicate inboundRecords
+      const uniqueInbounds: typeof inboundRecords = [];
+      const inboundDuplicatesToRemove: string[] = [];
+
+      inboundRecords.forEach(rec => {
+        // Skip seeds/presets or incomplete
+        if (!rec.id || !rec.date || !rec.vehicleNo) return;
+
+        const isDup = uniqueInbounds.some(u => 
+          u.date === rec.date &&
+          u.vehicleNo.trim().toUpperCase() === rec.vehicleNo.trim().toUpperCase() &&
+          (u.supplier || '').trim().toUpperCase() === (rec.supplier || '').trim().toUpperCase() &&
+          u.commodity === rec.commodity &&
+          u.netWeight === rec.netWeight &&
+          u.grossWeight === rec.grossWeight
+        );
+
+        if (isDup) {
+          inboundDuplicatesToRemove.push(rec.id);
+        } else {
+          uniqueInbounds.push(rec);
+        }
+      });
+
+      if (inboundDuplicatesToRemove.length > 0) {
+        console.log(`[DataIntegrity] Found ${inboundDuplicatesToRemove.length} duplicate inbound records. Removing from Firestore...`);
+        for (const id of inboundDuplicatesToRemove) {
+          try {
+            await deleteOnline('inboundRecords', id);
+          } catch (e) {
+            console.error(`[DataIntegrity] Failed to delete duplicate inbound ${id}:`, e);
+          }
+        }
+        setInboundRecords(prev => prev.filter(r => !inboundDuplicatesToRemove.includes(r.id)));
+      }
+
+      // 3. Deduplicate outboundRecords
+      const uniqueOutbounds: typeof outboundRecords = [];
+      const outboundDuplicatesToRemove: string[] = [];
+
+      outboundRecords.forEach(rec => {
+        if (!rec.id || !rec.date || !rec.vehicleNo) return;
+
+        const isDup = uniqueOutbounds.some(u => 
+          u.date === rec.date &&
+          u.vehicleNo.trim().toUpperCase() === rec.vehicleNo.trim().toUpperCase() &&
+          (u.buyer || '').trim().toUpperCase() === (rec.buyer || '').trim().toUpperCase() &&
+          u.commodity === rec.commodity &&
+          u.totalWeight === rec.totalWeight
+        );
+
+        if (isDup) {
+          outboundDuplicatesToRemove.push(rec.id);
+        } else {
+          uniqueOutbounds.push(rec);
+        }
+      });
+
+      if (outboundDuplicatesToRemove.length > 0) {
+        console.log(`[DataIntegrity] Found ${outboundDuplicatesToRemove.length} duplicate outbound records. Removing from Firestore...`);
+        for (const id of outboundDuplicatesToRemove) {
+          try {
+            await deleteOnline('outboundRecords', id);
+          } catch (e) {
+            console.error(`[DataIntegrity] Failed to delete duplicate outbound ${id}:`, e);
+          }
+        }
+        setOutboundRecords(prev => prev.filter(r => !outboundDuplicatesToRemove.includes(r.id)));
+      }
+
+      // 4. Deduplicate manual riceStockRecords (non-legacy)
+      const uniqueStocks: typeof riceStockRecords = [];
+      const stockDuplicatesToRemove: string[] = [];
+
+      riceStockRecords.forEach(rec => {
+        if (rec.id.startsWith('stock-')) return; // already handled
+        if (!rec.id || !rec.date) return;
+
+        // Rule A: Check if it is a duplicate of another manual stock record
+        const isDupOfManual = uniqueStocks.some(u => 
+          u.date === rec.date &&
+          (u.policeNo || '').trim().toUpperCase() === (rec.policeNo || '').trim().toUpperCase() &&
+          (u.description || '').trim().toUpperCase() === (rec.description || '').trim().toUpperCase() &&
+          (u.itemName || u.commodity) === (rec.itemName || rec.commodity) &&
+          u.inWeight === rec.inWeight &&
+          u.outWeight === rec.outWeight
+        );
+
+        // Rule B: Check if it is a duplicate of an existing system Inbound record (same date, same plate, same net weight)
+        const isDupOfSystemInbound = (inboundRecords || []).some(inb => 
+          inb.date === rec.date &&
+          (inb.vehicleNo || '').trim().toUpperCase() === (rec.policeNo || '').trim().toUpperCase() &&
+          inb.netWeight === rec.inWeight &&
+          rec.inWeight > 0
+        );
+
+        // Rule C: Check if it is a duplicate of an existing system Outbound record (same date, same plate, same total weight)
+        const isDupOfSystemOutbound = (outboundRecords || []).some(outb => 
+          outb.date === rec.date &&
+          (outb.vehicleNo || '').trim().toUpperCase() === (rec.policeNo || '').trim().toUpperCase() &&
+          outb.totalWeight === rec.outWeight &&
+          rec.outWeight > 0
+        );
+
+        if (isDupOfManual || isDupOfSystemInbound || isDupOfSystemOutbound) {
+          stockDuplicatesToRemove.push(rec.id);
+        } else {
+          uniqueStocks.push(rec);
+        }
+      });
+
+      if (stockDuplicatesToRemove.length > 0) {
+        console.log(`[DataIntegrity] Found ${stockDuplicatesToRemove.length} duplicate/redundant manual stock records. Removing from Firestore...`);
+        for (const id of stockDuplicatesToRemove) {
+          try {
+            await deleteOnline('riceStockRecords', id);
+          } catch (e) {
+            console.error(`[DataIntegrity] Failed to delete duplicate stock record ${id}:`, e);
+          }
+        }
+        setRiceStockRecords(prev => prev.filter(r => !stockDuplicatesToRemove.includes(r.id)));
+      }
+
+      // 5. Deduplicate weighbridge tickets
+      const uniqueTickets: typeof tickets = [];
+      const ticketDuplicatesToRemove: string[] = [];
+
+      tickets.forEach(rec => {
+        if (!rec.id || !rec.ticketNo) return;
+
+        const isDup = uniqueTickets.some(u => 
+          u.ticketNo === rec.ticketNo &&
+          (u.policeNo || '').trim().toUpperCase() === (rec.policeNo || '').trim().toUpperCase() &&
+          u.netWeight === rec.netWeight &&
+          u.goodsName === rec.goodsName
+        );
+
+        if (isDup) {
+          ticketDuplicatesToRemove.push(rec.id);
+        } else {
+          uniqueTickets.push(rec);
+        }
+      });
+
+      if (ticketDuplicatesToRemove.length > 0) {
+        console.log(`[DataIntegrity] Found ${ticketDuplicatesToRemove.length} duplicate weighbridge tickets. Removing from Firestore...`);
+        for (const id of ticketDuplicatesToRemove) {
+          try {
+            await deleteOnline('tickets', id);
+          } catch (e) {
+            console.error(`[DataIntegrity] Failed to delete duplicate ticket ${id}:`, e);
+          }
+        }
+        setTickets(prev => prev.filter(r => !ticketDuplicatesToRemove.includes(r.id)));
+      }
+    };
+
+    performDeduplication();
+  }, [inboundRecords, outboundRecords, riceStockRecords, tickets]);
+
   // --- SYNCHRONIZED MASTER SETTERS WRAPPER ---
   const createSyncedSetter = <T extends { id: string }>(
     collectionName: string,
@@ -1044,21 +1231,6 @@ export default function App() {
     setInboundRecords(prev => [rec, ...prev]);
     saveOnline('inboundRecords', rec);
     
-    // Auto-update Rice Stock
-    const newStock: RiceStockRecord = {
-      id: `stock-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
-      date: rec.date,
-      policeNo: rec.vehicleNo,
-      description: `Penerimaan ${rec.commodity} dari ${rec.supplier}`,
-      itemName: rec.commodity,
-      price: rec.price,
-      colly: 0,
-      inWeight: rec.netWeight,
-      outWeight: 0,
-    };
-    setRiceStockRecords(prev => [newStock, ...prev]);
-    saveOnline('riceStockRecords', newStock);
-    
     showToast(`Sukses menyimpan: Penerimaan ${rec.commodity} dari ${rec.supplier} (${rec.netWeight.toLocaleString('id-ID')} Kg Netto)!`, 'success');
   };
 
@@ -1081,21 +1253,6 @@ export default function App() {
   const handleAddOutbound = (rec: OutboundRecord) => {
     setOutboundRecords(prev => [rec, ...prev]);
     saveOnline('outboundRecords', rec);
-
-    // Auto-update Rice Stock
-    const newStock: RiceStockRecord = {
-      id: `stock-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
-      date: rec.date,
-      policeNo: rec.vehicleNo,
-      description: `Pengiriman ${rec.commodity} ke ${rec.buyer}`,
-      itemName: rec.commodity,
-      price: 0, 
-      colly: 0,
-      inWeight: 0,
-      outWeight: rec.totalWeight,
-    };
-    setRiceStockRecords(prev => [newStock, ...prev]);
-    saveOnline('riceStockRecords', newStock);
 
     showToast(`Sukses menyimpan: Pengiriman ${rec.commodity} ke ${rec.buyer} (${rec.totalWeight.toLocaleString('id-ID')} Kg Netto)!`, 'success');
   };

@@ -95,6 +95,10 @@ export default function OutboundModule({
   const [invoiceNo, setInvoiceNo] = useState("");
   const [status, setStatus] = useState<'LOADING' | 'SHIPPED'>('SHIPPED');
 
+  const isTicketUsed = (ticket: WeighbridgeTicket) => {
+    return records.some(r => r.ticketNo === ticket.ticketNo && r.id !== editingId);
+  };
+
   const handleTicketChange = (ticketId: string) => {
     setSelectedTicketId(ticketId);
     const tk = tickets.find(t => t.id === ticketId);
@@ -112,6 +116,17 @@ export default function OutboundModule({
     if (!vehicleNo.trim() || !buyer.trim() || !invoiceNo.trim()) {
       (window as any).__showToast?.("Harap lengkapi No. Kendaraan, Pembeli, dan No. Invoice!", "error");
       return;
+    }
+
+    if (selectedTicketId) {
+      const tk = tickets.find(t => t.id === selectedTicketId);
+      if (tk) {
+        const isUsed = records.some(r => r.ticketNo === tk.ticketNo && r.id !== editingId);
+        if (isUsed) {
+          (window as any).__showToast?.(`Tiket timbang #${tk.ticketNo} sudah diintegrasikan ke pengiriman lain!`, "error");
+          return;
+        }
+      }
     }
 
     const existing = records.find(r => r.id === editingId);
@@ -262,11 +277,14 @@ export default function OutboundModule({
                   className="w-full bg-white border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-blue-600 font-bold uppercase cursor-pointer"
                 >
                   <option value="">-- INPUT MANUAL --</option>
-                  {tickets.map(t => (
-                    <option key={t.id} value={t.id}>
-                      TIKET {t.ticketNo} ({t.policeNo}) - NET {(t.netWeight ?? 0).toLocaleString('id-ID')} KG
-                    </option>
-                  ))}
+                  {tickets.map(t => {
+                    const used = isTicketUsed(t);
+                    return (
+                      <option key={t.id} value={t.id} disabled={used}>
+                        TIKET {t.ticketNo} ({t.policeNo}) - NET {(t.netWeight ?? 0).toLocaleString('id-ID')} KG {used ? ' [SUDAH DIINTEGRASI]' : ''}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
