@@ -189,18 +189,16 @@ export default function InboundModule({
 
     // Determine refaksi KA
     const currentRules = cornMoistureRules && cornMoistureRules.length > 0 ? cornMoistureRules : initialCornMoistureRules;
-    const refaksiPercentage = commodity === 'JAGUNG' 
-      ? getRefaksiByRule(moistureContent, currentRules, refaksiType, cornFormulaFactor).refaksiPercent
-      : 0;
+    const refaksiPercentage = getRefaksiByRule(moistureContent, currentRules, refaksiType, cornFormulaFactor).refaksiPercent;
 
     // Calculate netto
     const rawNet = grossWeight - tareWeight;
     const bagDeduction = rawNet * (bagDeductionPercent / 100);
     const refaksiDeduction = rawNet * (refaksiPercentage / 100);
-    const deadKernelsDeduction = commodity === 'JAGUNG' ? rawNet * (deadKernelsPercent / 100) : 0;
-    const moldDeduction = commodity === 'JAGUNG' ? rawNet * (moldPercent / 100) : 0;
-    const smallKernelsDeduction = commodity === 'JAGUNG' ? rawNet * (smallKernelsPercent / 100) : 0;
-    const fineTrashDeduction = commodity === 'JAGUNG' ? rawNet * (fineTrashPercent / 100) : 0;
+    const deadKernelsDeduction = rawNet * (deadKernelsPercent / 100);
+    const moldDeduction = rawNet * (moldPercent / 100);
+    const smallKernelsDeduction = rawNet * (smallKernelsPercent / 100);
+    const fineTrashDeduction = rawNet * (fineTrashPercent / 100);
 
     const fNet = Math.max(0, Math.round(
       rawNet - bagDeduction - refaksiDeduction - deadKernelsDeduction - moldDeduction - smallKernelsDeduction - fineTrashDeduction
@@ -220,12 +218,12 @@ export default function InboundModule({
       grossWeight,
       tareWeight,
       refaksiKaPercent: refaksiPercentage,
-      cornFormulaFactor: commodity === 'JAGUNG' ? cornFormulaFactor : undefined,
+      cornFormulaFactor: cornFormulaFactor,
       bagDeductionPercent,
-      deadKernelsPercent: commodity === 'JAGUNG' ? deadKernelsPercent : 0,
-      moldPercent: commodity === 'JAGUNG' ? moldPercent : 0,
-      smallKernelsPercent: commodity === 'JAGUNG' ? smallKernelsPercent : 0,
-      fineTrashPercent: commodity === 'JAGUNG' ? fineTrashPercent : 0,
+      deadKernelsPercent: deadKernelsPercent,
+      moldPercent: moldPercent,
+      smallKernelsPercent: smallKernelsPercent,
+      fineTrashPercent: fineTrashPercent,
       netWeight: fNet,
       moistureContent,
       warehouseSection,
@@ -546,16 +544,14 @@ export default function InboundModule({
                 
                 <div className="flex flex-col gap-1 w-full font-sans">
                   <div className="flex justify-between items-center mb-0.5">
-                    <span className="text-[11px] font-bold text-neutral-600 uppercase">KADAR AIR (KA) JAGUNG</span>
-                    {commodity === 'JAGUNG' && (
-                      <button
-                        type="button"
-                        onClick={() => setShowMoistureModal(true)}
-                        className="text-[10px] text-emerald-600 hover:text-emerald-800 font-bold underline cursor-pointer flex items-center gap-0.5 uppercase"
-                      >
-                        ATURAN POTONGAN KA ℹ️
-                      </button>
-                    )}
+                    <span className="text-[11px] font-bold text-neutral-600 uppercase">KADAR AIR (KA) {commodity}</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowMoistureModal(true)}
+                      className="text-[10px] text-emerald-600 hover:text-emerald-800 font-bold underline cursor-pointer flex items-center gap-0.5 uppercase"
+                    >
+                      ATURAN POTONGAN KA ℹ️
+                    </button>
                   </div>
                   <div className="flex gap-2 items-start">
                     <div className="flex-1">
@@ -567,33 +563,29 @@ export default function InboundModule({
                         presets={[14, 15, 20, 31.5]}
                       />
                     </div>
-                    {commodity === 'JAGUNG' && (
-                      <select
-                        value={refaksiType}
-                        onChange={(e) => setRefaksiType(e.target.value as 'LOKAL' | 'LUAR_DAERAH')}
-                        className="bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-neutral-700 px-2.5 rounded-xl font-bold text-xs h-[42px] outline-none transition cursor-pointer uppercase"
-                      >
-                        <option value="LOKAL">LOKAL</option>
-                        <option value="LUAR_DAERAH">LUAR</option>
-                      </select>
-                    )}
+                    <select
+                      value={refaksiType}
+                      onChange={(e) => setRefaksiType(e.target.value as 'LOKAL' | 'LUAR_DAERAH')}
+                      className="bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-neutral-700 px-2.5 rounded-xl font-bold text-xs h-[42px] outline-none transition cursor-pointer uppercase"
+                    >
+                      <option value="LOKAL">LOKAL</option>
+                      <option value="LUAR_DAERAH">LUAR</option>
+                    </select>
                   </div>
 
-                  {commodity === 'JAGUNG' && (
-                    <div className="flex items-center justify-between gap-2 mt-1.5 bg-neutral-50 px-2.5 py-1.5 rounded-lg border border-neutral-200">
-                      <span className="text-[10px] font-bold text-neutral-600 uppercase">Faktor Rumus KA Tinggi:</span>
-                      <select
-                        value={cornFormulaFactor}
-                        onChange={(e) => setCornFormulaFactor(parseFloat(e.target.value))}
-                        className="bg-white border border-neutral-300 rounded px-1.5 py-0.5 text-[10px] font-bold text-neutral-700 focus:outline-none cursor-pointer"
-                      >
-                        <option value={1.4}>Rumus 1.4 (Sesuai Lampiran)</option>
-                        <option value={1.3}>Rumus 1.3 (Sesuai Lampiran)</option>
-                      </select>
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between gap-2 mt-1.5 bg-neutral-50 px-2.5 py-1.5 rounded-lg border border-neutral-200">
+                    <span className="text-[10px] font-bold text-neutral-600 uppercase">Faktor Rumus KA Tinggi:</span>
+                    <select
+                      value={cornFormulaFactor}
+                      onChange={(e) => setCornFormulaFactor(parseFloat(e.target.value))}
+                      className="bg-white border border-neutral-300 rounded px-1.5 py-0.5 text-[10px] font-bold text-neutral-700 focus:outline-none cursor-pointer"
+                    >
+                      <option value={1.4}>Rumus 1.4 (Sesuai Lampiran)</option>
+                      <option value={1.3}>Rumus 1.3 (Sesuai Lampiran)</option>
+                    </select>
+                  </div>
 
-                  {commodity === 'JAGUNG' && ((refaksiType === 'LOKAL' && moistureContent > 30.0) || (refaksiType === 'LUAR_DAERAH' && moistureContent > 31.0)) && (
+                  {((refaksiType === 'LOKAL' && moistureContent > 30.0) || (refaksiType === 'LUAR_DAERAH' && moistureContent > 31.0)) && (
                     <div className="mt-1.5 text-red-700 bg-red-50 border border-red-200/50 p-2 rounded-lg text-[10px] font-medium leading-relaxed">
                       <span className="font-extrabold text-red-850 uppercase block">⚠️ KADAR AIR TINGGI (LUAR TABEL):</span> 
                       Menggunakan Rumus {cornFormulaFactor}: ({Math.floor(moistureContent)} - 14) x {cornFormulaFactor} = <strong>{Math.floor((Math.floor(moistureContent) - 14) * cornFormulaFactor)}%</strong> potongan.
@@ -601,9 +593,8 @@ export default function InboundModule({
                   )}
                 </div>
 
-                {commodity === 'JAGUNG' && (
-                  <div className="bg-amber-50/40 p-3 rounded-lg border border-amber-100/60 flex flex-col gap-2 animate-fade-in text-[10px]">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-amber-100/50 -mx-3 -mt-3 p-2 rounded-t-lg border-b border-amber-200/50 gap-1.5 mb-1.5">
+                <div className="bg-amber-50/40 p-3 rounded-lg border border-amber-100/60 flex flex-col gap-2 animate-fade-in text-[10px]">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-amber-100/50 -mx-3 -mt-3 p-2 rounded-t-lg border-b border-amber-200/50 gap-1.5 mb-1.5">
                       <span className="font-bold text-[10px] text-amber-900 uppercase tracking-wide px-1">POTONGAN KUALITAS LAINNYA</span>
                       <div className="flex flex-wrap gap-1">
                         <button
@@ -735,7 +726,6 @@ export default function InboundModule({
                       />
                     </div>
                   </div>
-                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-2">
                   <div className="col-span-1 sm:col-span-2 lg:col-span-1 xl:col-span-2">
@@ -813,15 +803,13 @@ export default function InboundModule({
               {(() => {
                 const rNet = grossWeight - tareWeight;
                 const bagDed = rNet * (bagDeductionPercent / 100);
-                const activeRefaksiRule = commodity === 'JAGUNG'
-                  ? getRefaksiByRule(moistureContent, cornMoistureRules.length > 0 ? cornMoistureRules : initialCornMoistureRules, refaksiType, cornFormulaFactor)
-                  : { refaksiPercent: 0, description: 'Bukan Jagung' };
+                const activeRefaksiRule = getRefaksiByRule(moistureContent, cornMoistureRules.length > 0 ? cornMoistureRules : initialCornMoistureRules, refaksiType, cornFormulaFactor);
                 const refPercentage = activeRefaksiRule.refaksiPercent;
                 const refDed = rNet * (refPercentage / 100);
-                const deadDed = commodity === 'JAGUNG' ? rNet * (deadKernelsPercent / 100) : 0;
-                const moldDed = commodity === 'JAGUNG' ? rNet * (moldPercent / 100) : 0;
-                const smallDed = commodity === 'JAGUNG' ? rNet * (smallKernelsPercent / 100) : 0;
-                const trashDed = commodity === 'JAGUNG' ? rNet * (fineTrashPercent / 100) : 0;
+                const deadDed = rNet * (deadKernelsPercent / 100);
+                const moldDed = rNet * (moldPercent / 100);
+                const smallDed = rNet * (smallKernelsPercent / 100);
+                const trashDed = rNet * (fineTrashPercent / 100);
                 const computedNet = Math.max(0, Math.round(rNet - bagDed - refDed - deadDed - moldDed - smallDed - trashDed));
                 const purchaseTotal = computedNet * price;
                 const subTotalFinal = purchaseTotal - laborCost;
@@ -841,7 +829,6 @@ export default function InboundModule({
                         <span className="font-mono text-red-400">-{Math.round(bagDed).toLocaleString('id-ID')} Kg</span>
                       </div>
 
-                      {commodity === 'JAGUNG' && (
                         <>
                           <div className="w-px h-6 bg-neutral-800 hidden lg:block" />
                           <div className="flex flex-col">
@@ -859,7 +846,6 @@ export default function InboundModule({
                             </>
                           )}
                         </>
-                      )}
 
                       <div className="w-px h-6 bg-neutral-800 hidden lg:block" />
 

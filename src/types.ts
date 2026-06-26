@@ -77,31 +77,6 @@ export interface ServiceRecord {
   operatorName: string;
 }
 
-export interface KacangIjoRekapRecord {
-  id: string;
-  date: string;
-  supplier: string;
-  policeNo: string;
-  colly: number;
-  weight: number;
-  price: number;
-  bt: number; // Biaya Timbang / Buruh Turun
-  panjar: number; // Pembayaran / Panjar
-  description: string;
-}
-
-export interface KacangIjoStockRecord {
-  id: string;
-  date: string;
-  supplier: string; // Uraian
-  itemName: string; // Nama Barang (NILON, KABUR, dll)
-  colly: number;
-  inWeight: number; // Stok Masuk
-  outWeight: number; // Stok Keluar
-  description: string; // Keterangan
-  paymentDate: string; // Tgl Bayar
-}
-
 export interface DebtRecord {
   id: string;
   date: string;
@@ -187,6 +162,7 @@ export interface RiceStockRecord {
   colly: number;
   inWeight: number; // Masuk
   outWeight: number; // Keluar
+  isSystem?: boolean; // From Inbound/Outbound integrations
 }
 
 export interface BankRecord {

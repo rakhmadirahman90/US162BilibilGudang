@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RiceStockRecord, EmployeeRecord } from '../types';
+import { RiceStockRecord, EmployeeRecord, InboundRecord, OutboundRecord } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { useLanguage } from '../i18n/LanguageContext';
 import ConfirmModal from './ConfirmModal';
@@ -12,13 +12,15 @@ import { Package, PlusCircle, Search, Calendar, Download, Printer, Edit2, Trash2
 
 interface RiceStockModuleProps {
   records: RiceStockRecord[];
+  inboundRecords: InboundRecord[];
+  outboundRecords: OutboundRecord[];
   employees?: EmployeeRecord[];
   onAddRecord: (record: RiceStockRecord) => void;
   onUpdateRecord: (record: RiceStockRecord) => void;
   onDeleteRecord: (id: string) => void;
 }
 
-export default function RiceStockModule({ records, employees = [], onAddRecord, onUpdateRecord, onDeleteRecord }: RiceStockModuleProps) {
+export default function RiceStockModule({ records, inboundRecords, outboundRecords, employees = [], onAddRecord, onUpdateRecord, onDeleteRecord }: RiceStockModuleProps) {
   const { t, language } = useLanguage();
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -167,13 +169,55 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
     });
   };
 
+  const unifiedRecords: RiceStockRecord[] = [...records];
+  
+  // Integrate Inbound Records
+  inboundRecords.forEach(r => {
+    unifiedRecords.push({
+      id: r.id,
+      date: r.date,
+      policeNo: r.vehicleNo,
+      description: `TERIMA DARI: ${r.supplier}`,
+      itemName: r.itemName || '',
+      commodity: r.commodity,
+      price: r.price || 0,
+      colly: 0,
+      inWeight: r.netWeight,
+      outWeight: 0,
+      isSystem: true
+    });
+  });
+
+  // Integrate Outbound Records
+  outboundRecords.forEach(r => {
+    unifiedRecords.push({
+      id: r.id,
+      date: r.date,
+      policeNo: r.vehicleNo,
+      description: `KIRIM KE: ${r.buyer}`,
+      itemName: r.itemName || '',
+      commodity: r.commodity,
+      price: 0,
+      colly: 0,
+      inWeight: 0,
+      outWeight: r.totalWeight,
+      isSystem: true
+    });
+  });
+
   // 1. CHRONOLOGICAL SORTING FOR ACCURATE CUMULATIVE RUNNING BALANCES
   // Oldest records go first on cumulative balance stack to prevent negative arithmetic errors.
-  const chronologicallySorted = [...records]
+  const chronologicallySorted = [...unifiedRecords]
     .filter(r => (r.commodity === commodityTab) || (!r.commodity && r.itemName?.toUpperCase() === commodityTab))
     .sort((a, b) => {
       if (a.date !== b.date) {
         return a.date.localeCompare(b.date);
+      }
+      // Parse timestamp from id, assuming format "prefix-timestamp"
+      const tsA = parseInt(a.id.split('-').pop() || '0');
+      const tsB = parseInt(b.id.split('-').pop() || '0');
+      if (!isNaN(tsA) && !isNaN(tsB) && tsA !== tsB) {
+        return tsA - tsB;
       }
       return a.id.localeCompare(b.id);
     });
@@ -543,12 +587,16 @@ export default function RiceStockModule({ records, employees = [], onAddRecord, 
                         })} className="text-neutral-400 hover:text-emerald-600 transition cursor-pointer p-1 rounded-md hover:bg-neutral-100" title="Kirim Resi via WA">
                           <MessageCircle className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => handleEdit(r)} className="text-neutral-400 hover:text-blue-600 transition p-1 rounded-md hover:bg-neutral-100" title="Edit">
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => handleDelete(r.id, r.description)} className="text-neutral-400 hover:text-red-600 transition p-1 rounded-md hover:bg-neutral-100" title="Hapus">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        {!r.isSystem && (
+                          <>
+                            <button onClick={() => handleEdit(r)} className="text-neutral-400 hover:text-blue-600 transition p-1 rounded-md hover:bg-neutral-100" title="Edit">
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button onClick={() => handleDelete(r.id, r.description)} className="text-neutral-400 hover:text-red-600 transition p-1 rounded-md hover:bg-neutral-100" title="Hapus">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
