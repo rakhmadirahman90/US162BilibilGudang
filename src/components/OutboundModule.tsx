@@ -558,7 +558,7 @@ export default function OutboundModule({
                           isOpen: true, 
                           defaultText: buildOutboundWAText(r), 
                           record: r,
-                          pdfHtml: getHTMLForPDF(printOutboundSlip, r, staffName),
+                          pdfHtml: getHTMLForPDF(printOutboundSlip, r, tickets.find(t => t.ticketNo === r.ticketNo), staffName),
                           pdfFileName: `Resi_Pengiriman_${r.invoiceNo || r.id.substring(0,8)}.pdf`
                         })}
                         className="text-neutral-400 hover:text-emerald-600 transition p-1 cursor-pointer"
@@ -687,6 +687,21 @@ export default function OutboundModule({
                     <span className="font-bold text-neutral-500 uppercase">Barang :</span>
                     <span className="font-black text-neutral-800">{previewRecord.commodity}</span>
                   </div>
+                  {(() => {
+                    const associatedTicket = tickets.find(t => t.ticketNo === previewRecord.ticketNo);
+                    return associatedTicket ? (
+                      <>
+                        <div className="flex justify-between items-center mt-1 text-[9px]">
+                          <span className="font-bold text-neutral-500 uppercase">Timbangan Kotor :</span>
+                          <span className="font-semibold text-neutral-800">{associatedTicket.timbang1Weight.toLocaleString('id-ID')} KG</span>
+                        </div>
+                        <div className="flex justify-between items-center mt-1 text-[9px]">
+                          <span className="font-bold text-neutral-500 uppercase">Timbangan Kosong :</span>
+                          <span className="font-semibold text-neutral-800">{associatedTicket.timbang2Weight > 0 ? `${associatedTicket.timbang2Weight.toLocaleString('id-ID')} KG` : '- -'}</span>
+                        </div>
+                      </>
+                    ) : null;
+                  })()}
                   <div className="flex justify-between items-center mt-1 text-[9px]">
                     <span className="font-bold text-neutral-500 uppercase">Total Berat :</span>
                     <span className="font-black text-emerald-600 text-[11px]">{(previewRecord.totalWeight ?? 0).toLocaleString('id-ID')} KG</span>
@@ -723,7 +738,7 @@ export default function OutboundModule({
               <div className="mt-3 flex gap-2">
                 <button 
                   onClick={() => {
-                    printOutboundSlip(previewRecord, staffName);
+                    printOutboundSlip(previewRecord, tickets.find(t => t.ticketNo === previewRecord.ticketNo), staffName);
                     setPreviewRecord(null);
                   }}
                   className="flex-1 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1.5 shadow"

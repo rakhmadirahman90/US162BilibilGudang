@@ -1090,17 +1090,14 @@ export default function WeighbridgeModule({
 
                 <div className="border-t border-neutral-300 my-1.5 pt-1.5 space-y-0.5">
                   <div className="flex justify-between text-[9px]">
-                    <span className="uppercase">{t.grossWeightLabel} :</span>
+                    <span className="uppercase">TIMBANGAN KOTOR :</span>
                     <span>{(printTicket.timbang1Weight).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg</span>
                   </div>
                   <div className="flex justify-between text-[9px]">
-                    <span className="uppercase">{t.tareWeightLabel} :</span>
+                    <span className="uppercase">TIMBANGAN KOSONG :</span>
                     <span>{printTicket.tareWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg</span>
                   </div>
-                  <div className="flex justify-between text-[9px] text-neutral-500 italic">
-                    <span>Pot. Karung ({printTicket.bagDeductionPercent.toFixed(2)}%):</span>
-                    <span>- {Math.round((printTicket.grossWeight - printTicket.tareWeight) * (printTicket.bagDeductionPercent/100))} kg</span>
-                  </div>
+
                   <div className="flex justify-between text-[9px] text-neutral-500 italic">
                     <span>Pot. Refaksi ({printTicket.refaksiPercent.toFixed(2)}%):</span>
                     <span>- {Math.round((printTicket.grossWeight - printTicket.tareWeight) * (printTicket.refaksiPercent/100))} kg</span>

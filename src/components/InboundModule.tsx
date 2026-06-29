@@ -1184,17 +1184,14 @@ export default function InboundModule({
 
                 <div className="border-t border-neutral-200 pt-1.5 space-y-0.5">
                   <div className="flex justify-between">
-                    <span>BERAT BRUTO :</span>
+                    <span>TIMBANGAN KOTOR :</span>
                     <span className="font-bold">{(previewRecord.grossWeight ?? 0).toLocaleString('id-ID')} Kg</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>BERAT TARA :</span>
+                    <span>TIMBANGAN KOSONG :</span>
                     <span className="font-bold">{(previewRecord.tareWeight ?? 0).toLocaleString('id-ID')} Kg</span>
                   </div>
-                  <div className="flex justify-between text-neutral-500">
-                    <span>Pot. Karung ({previewRecord.bagDeductionPercent}%) :</span>
-                    <span>-{( ( (previewRecord.grossWeight ?? 0) - (previewRecord.tareWeight ?? 0) ) * (previewRecord.bagDeductionPercent/100) ).toFixed(0)} Kg</span>
-                  </div>
+
                   <div className="flex justify-between text-neutral-500">
                     <span>Kadar Air :</span>
                     <span>{previewRecord.moistureContent}%</span>
