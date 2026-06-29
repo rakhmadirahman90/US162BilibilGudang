@@ -620,6 +620,7 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
   
       <div class="flex"><span class="label">TIMBANGAN KOTOR</span><span class="value">: ${bruto.toLocaleString('id-ID')} Kg</span></div>
       <div class="flex"><span class="label">TIMBANGAN KOSONG</span><span class="value">: ${tara.toLocaleString('id-ID')} Kg</span></div>
+      <div class="flex"><span class="label">TIMBANGAN BRUTO</span><span class="value">: ${(bruto - tara).toLocaleString('id-ID')} Kg</span></div>
       <div class="flex"><span class="label">Kadar Air</span><span class="value">: ${record.moistureContent ?? 0}%</span></div>
       <div class="flex"><span class="label">Refaksi KA</span><span class="value">: -${potRefaksi.toLocaleString('id-ID')} Kg (${record.refaksiKaPercent ?? 0}%) ${record.commodity?.includes('JAGUNG') && ((record.moistureContent ?? 0) > 30.00 || (record.cornFormulaFactor && (record.moistureContent ?? 0) > 30.00)) ? `*[Rumus ${record.cornFormulaFactor || 1.4}]` : ''}</span></div>
       ${record.commodity?.includes('JAGUNG') ? `
@@ -703,6 +704,7 @@ export function printOutboundSlip(record: OutboundRecord, ticket: WeighbridgeTic
     <div class="divider-line"></div>
     <div class="flex"><span class="label">TIMBANGAN KOTOR:</span><span class="value">${(ticket.timbang1Weight ?? 0).toLocaleString('id-ID')} Kg</span></div>
     <div class="flex"><span class="label">TIMBANGAN KOSONG:</span><span class="value">${(ticket.timbang2Weight ?? 0).toLocaleString('id-ID')} Kg</span></div>
+    <div class="flex"><span class="label">TIMBANGAN BRUTO:</span><span class="value">${((ticket.timbang1Weight ?? 0) - (ticket.timbang2Weight ?? 0)).toLocaleString('id-ID')} Kg</span></div>
     ` : ''}
 
     <div class="divider-line"></div>
@@ -877,6 +879,7 @@ export function printSlip(ticket: WeighbridgeTicket, staffName: string = "Asma")
 
     <div class="flex"><span class="label">TIMBANGAN KOTOR :</span><span class="value">${bruto.toLocaleString('id-ID')} kg</span></div>
     <div class="flex"><span class="label">TIMBANGAN KOSONG :</span><span class="value">${tara.toLocaleString('id-ID')} kg</span></div>
+    <div class="flex"><span class="label">TIMBANGAN BRUTO :</span><span class="value">${(bruto - tara).toLocaleString('id-ID')} kg</span></div>
     <div class="flex"><span class="label">Pot. Refaksi (${(ticket.refaksiPercent ?? 0).toFixed(2)}%):</span><span class="value">- ${potRefaksi.toLocaleString('id-ID')} kg</span></div>
 
     <div class="divider-line"></div>

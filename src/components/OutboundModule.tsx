@@ -699,6 +699,10 @@ export default function OutboundModule({
                           <span className="font-bold text-neutral-500 uppercase">Timbangan Kosong :</span>
                           <span className="font-semibold text-neutral-800">{associatedTicket.timbang2Weight > 0 ? `${associatedTicket.timbang2Weight.toLocaleString('id-ID')} KG` : '- -'}</span>
                         </div>
+                        <div className="flex justify-between items-center mt-1 text-[9px]">
+                          <span className="font-bold text-neutral-500 uppercase">Timbangan Bruto :</span>
+                          <span className="font-semibold text-neutral-800">{associatedTicket.timbang2Weight > 0 ? `${(associatedTicket.timbang1Weight - associatedTicket.timbang2Weight).toLocaleString('id-ID')} KG` : '- -'}</span>
+                        </div>
                       </>
                     ) : null;
                   })()}

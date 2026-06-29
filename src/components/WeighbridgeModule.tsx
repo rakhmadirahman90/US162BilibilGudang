@@ -1097,6 +1097,10 @@ export default function WeighbridgeModule({
                     <span className="uppercase">TIMBANGAN KOSONG :</span>
                     <span>{printTicket.tareWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg</span>
                   </div>
+                  <div className="flex justify-between text-[9px]">
+                    <span className="uppercase">TIMBANGAN BRUTO :</span>
+                    <span>{(printTicket.timbang1Weight - printTicket.tareWeight).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg</span>
+                  </div>
 
                   <div className="flex justify-between text-[9px] text-neutral-500 italic">
                     <span>Pot. Refaksi ({printTicket.refaksiPercent.toFixed(2)}%):</span>

@@ -1191,6 +1191,10 @@ export default function InboundModule({
                     <span>TIMBANGAN KOSONG :</span>
                     <span className="font-bold">{(previewRecord.tareWeight ?? 0).toLocaleString('id-ID')} Kg</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span>TIMBANGAN BRUTO :</span>
+                    <span className="font-bold">{((previewRecord.grossWeight ?? 0) - (previewRecord.tareWeight ?? 0)).toLocaleString('id-ID')} Kg</span>
+                  </div>
 
                   <div className="flex justify-between text-neutral-500">
                     <span>Kadar Air :</span>
