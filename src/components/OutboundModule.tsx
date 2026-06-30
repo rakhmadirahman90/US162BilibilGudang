@@ -202,16 +202,20 @@ export default function OutboundModule({
   // --- EXPORT & PRINT HANDLERS ---
   const handleExportExcel = () => {
     const headers = [
-      'No. Invoice / SJ', 'Tanggal', 'No. Polisi', 'Pembeli (Buyer)', 
-      'Komoditas', 'Total Berat (Kg)', 'Upah Buruh Muat', 'Tujuan', 'Status'
+      'No. Invoice / SJ', 'Tanggal', 'No. Polisi', 'No. Kontainer', 'No. Segel', 'Pembeli (Buyer)', 
+      'Komoditas', 'Harga (Rp/Kg)', 'Total Berat (Kg)', 'Total Nilai (Rp)', 'Upah Buruh Muat', 'Tujuan', 'Status'
     ];
     const rows = filteredRecords.map(r => [
       r.invoiceNo,
       r.date,
       r.vehicleNo,
+      r.containerNo || '-',
+      r.sealNo || '-',
       r.buyer,
       r.commodity,
+      (r.price ?? 0).toString(),
       r.totalWeight.toString(),
+      ((r.price ?? 0) * r.totalWeight).toString(),
       r.loadingLaborCost.toString(),
       r.destination || '',
       r.status
@@ -221,23 +225,29 @@ export default function OutboundModule({
 
   const handlePrintPDF = () => {
     const headers = [
-      'Tanggal', 'No. Invoice', 'No. Polisi', 'Pembeli', 'Komoditas', 'Tujuan', 'Tonase (Netto)'
+      'Tanggal', 'No. Invoice', 'No. Polisi', 'No. Kontainer', 'No. Segel', 'Pembeli', 'Komoditas', 'Harga (Rp)', 'Tonase (Netto)', 'Total Nilai (Rp)', 'Tujuan'
     ];
     const rows = filteredRecords.map(r => [
       r.date,
       r.invoiceNo,
       r.vehicleNo,
+      r.containerNo || '-',
+      r.sealNo || '-',
       r.buyer,
       r.commodity,
-      r.destination || '-',
-      `${(r.totalWeight ?? 0).toLocaleString('id-ID')} Kg`
+      r.price ? `Rp ${r.price.toLocaleString('id-ID')}` : '-',
+      `${(r.totalWeight ?? 0).toLocaleString('id-ID')} Kg`,
+      r.price ? `Rp ${(r.totalWeight * r.price).toLocaleString('id-ID')}` : '-',
+      r.destination || '-'
     ]);
     const totalWeight = filteredRecords.reduce((sum, r) => sum + r.totalWeight, 0);
     const totalLabor = filteredRecords.reduce((sum, r) => sum + r.loadingLaborCost, 0);
+    const totalValue = filteredRecords.reduce((sum, r) => sum + ((r.price ?? 0) * r.totalWeight), 0);
     const summaries = [
       { label: 'Total Pengiriman', value: `${filteredRecords.length} Transaksi` },
       { label: 'Total Tonase Terkirim', value: `${totalWeight.toLocaleString('id-ID')} Kg` },
-      { label: 'Total Ongkos Buruh Muat', value: `Rp ${totalLabor.toLocaleString('id-ID')}` }
+      { label: 'Total Ongkos Buruh Muat', value: `Rp ${totalLabor.toLocaleString('id-ID')}` },
+      { label: 'Total Nilai Penjualan', value: `Rp ${totalValue.toLocaleString('id-ID')}` }
     ];
     printPDFReport('Laporan Pengiriman Barang Keluar', headers, rows, summaries);
   };
@@ -530,9 +540,13 @@ export default function OutboundModule({
                 <th className="py-2.5 px-3">Tanggal</th>
                 <th className="py-2.5 px-3">No. Invoice / SJ</th>
                 <th className="py-2.5 px-3">Sopir / No Polisi</th>
+                <th className="py-2.5 px-3">No. Kontainer</th>
+                <th className="py-2.5 px-3">No. Segel</th>
                 <th className="py-2.5 px-3">Pembeli (Buyer)</th>
                 <th className="py-2.5 px-3">Komoditas</th>
+                <th className="text-right py-2.5 px-3">Harga (Rp/Kg)</th>
                 <th className="text-right py-2.5 px-3">Berat Bersih (Netto)</th>
+                <th className="text-right py-2.5 px-3">Total Nilai (Rp)</th>
                 <th className="py-2.5 px-3">Tujuan Pengiriman</th>
                 <th className="text-right py-2.5 px-3">Upah Buruh Muat</th>
                 <th className="text-center py-2.5 px-3">Status</th>
@@ -565,6 +579,8 @@ export default function OutboundModule({
                     )}
                   </td>
                   <td className="py-2.5 px-3 font-semibold text-neutral-800">{r.vehicleNo}</td>
+                  <td className="py-2.5 px-3 font-mono text-blue-600 font-bold whitespace-nowrap">{r.containerNo || '-'}</td>
+                  <td className="py-2.5 px-3 font-mono text-amber-600 font-bold whitespace-nowrap">{r.sealNo || '-'}</td>
                   <td className="py-2.5 px-3 uppercase font-medium text-neutral-800">{r.buyer}</td>
                   <td className="py-2.5 px-3">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
@@ -575,8 +591,14 @@ export default function OutboundModule({
                       {r.commodity}
                     </span>
                   </td>
+                  <td className="text-right py-2.5 px-3 font-semibold font-mono text-neutral-700">
+                    {r.price ? `Rp ${r.price.toLocaleString('id-ID')}` : '-'}
+                  </td>
                   <td className="text-right py-2.5 px-3 font-bold font-mono text-emerald-600">
                     {(r.totalWeight ?? 0).toLocaleString('id-ID')} kg
+                  </td>
+                  <td className="text-right py-2.5 px-3 font-bold font-mono text-emerald-700">
+                    {r.price ? `Rp ${(r.totalWeight * r.price).toLocaleString('id-ID')}` : '-'}
                   </td>
                   <td className="py-2.5 px-3 text-neutral-600 italic">
                     <div className="flex items-center gap-1">
