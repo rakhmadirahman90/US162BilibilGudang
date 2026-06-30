@@ -92,7 +92,7 @@ export default function InboundModule({
   const [selectedTicketId, setSelectedTicketId] = useState("");
   const [vehicleNo, setVehicleNo] = useState("");
   const [supplier, setSupplier] = useState("");
-  const [commodity, setCommodity] = useState<string>('JAGUNG READY');
+  const [commodity, setCommodity] = useState<string>('JAGUNG ASALAN');
   const [itemName, setItemName] = useState("");
   const [grossWeight, setGrossWeight] = useState(12000);
   const [tareWeight, setTareWeight] = useState(4000);

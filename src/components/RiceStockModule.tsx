@@ -223,7 +223,10 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
       const tab = commodityTab.toUpperCase().trim();
       
       if (tab === 'JAGUNG READY') {
-        return comm === 'JAGUNG READY' || comm === 'JAGUNG' || (!r.commodity && (item === 'JAGUNG READY' || item === 'JAGUNG'));
+        return comm === 'JAGUNG READY' || (!r.commodity && item === 'JAGUNG READY');
+      }
+      if (tab === 'JAGUNG ASALAN') {
+        return comm === 'JAGUNG ASALAN' || comm === 'JAGUNG' || (!r.commodity && (item === 'JAGUNG ASALAN' || item === 'JAGUNG'));
       }
       return comm === tab || (!r.commodity && item === tab);
     })
