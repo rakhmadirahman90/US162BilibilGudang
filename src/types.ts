@@ -62,6 +62,9 @@ export interface OutboundRecord {
   destination: string;
   invoiceNo: string;
   status: 'LOADING' | 'SHIPPED';
+  containerNo?: string;
+  sealNo?: string;
+  price?: number;
 }
 
 export interface ServiceRecord {
@@ -163,6 +166,8 @@ export interface RiceStockRecord {
   inWeight: number; // Masuk
   outWeight: number; // Keluar
   isSystem?: boolean; // From Inbound/Outbound integrations
+  containerNo?: string;
+  sealNo?: string;
 }
 
 export interface BankRecord {

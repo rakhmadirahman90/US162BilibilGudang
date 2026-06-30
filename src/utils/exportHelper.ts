@@ -699,6 +699,8 @@ export function printOutboundSlip(record: OutboundRecord, ticket: WeighbridgeTic
     <div class="flex"><span class="label">No. Polisi:</span><span class="value">${record.vehicleNo}</span></div>
     <div class="flex"><span class="label">Komoditas:</span><span class="value">${record.commodity}</span></div>
     <div class="flex"><span class="label">Tujuan:</span><span class="value">${record.destination}</span></div>
+    ${record.containerNo ? `<div class="flex"><span class="label">No. Kontainer:</span><span class="value">${record.containerNo}</span></div>` : ''}
+    ${record.sealNo ? `<div class="flex"><span class="label">No. Segel:</span><span class="value">${record.sealNo}</span></div>` : ''}
 
     ${ticket ? `
     <div class="divider-line"></div>
@@ -711,6 +713,10 @@ export function printOutboundSlip(record: OutboundRecord, ticket: WeighbridgeTic
 
     <div class="netto-row"><span class="netto-label">TOTAL BERAT :</span><span class="netto-val">${(record.totalWeight ?? 0).toLocaleString('id-ID')} kg</span></div>
     <div class="flex"><span class="label">Upah Buruh :</span><span class="value">Rp ${(record.loadingLaborCost ?? 0).toLocaleString('id-ID')}</span></div>
+    ${record.price ? `
+    <div class="flex"><span class="label">Harga Jual:</span><span class="value">Rp ${record.price.toLocaleString('id-ID')}/Kg</span></div>
+    <div class="flex"><span class="label">Total Nilai:</span><span class="value font-bold" style="font-weight: bold;">Rp ${((record.totalWeight ?? 0) * record.price).toLocaleString('id-ID')}</span></div>
+    ` : ''}
 
     <div class="divider-line"></div>
 
@@ -755,6 +761,8 @@ export function printRiceStockSlip(record: RiceStockRecord, staffName: string = 
     <div class="flex"><span class="label">Tanggal :</span><span class="value">${formatReceiptDate(record.date)}</span></div>
     <div class="flex"><span class="label">No. Polisi :</span><span class="value">${record.policeNo || '-'}</span></div>
     <div class="flex"><span class="label">Nama Barang :</span><span class="value">${record.itemName}</span></div>
+    ${record.containerNo ? `<div class="flex"><span class="label">No. Kontainer:</span><span class="value">${record.containerNo}</span></div>` : ''}
+    ${record.sealNo ? `<div class="flex"><span class="label">No. Segel:</span><span class="value">${record.sealNo}</span></div>` : ''}
 
     <div class="divider-line"></div>
 

@@ -111,7 +111,7 @@ Terima kasih atas kerjasamanya.`;
 }
 
 export function buildOutboundWAText(record: OutboundRecord): string {
-  return `*BUKTI KELUAR BARANG / SURAT JALAN*
+  let text = `*BUKTI KELUAR BARANG / SURAT JALAN*
 _Gudang US Bilibili 162_
 
 *No. Invoice:* ${record.invoiceNo}
@@ -119,15 +119,18 @@ _Gudang US Bilibili 162_
 *Pembeli/Relasi:* ${record.buyer}
 *No. Polisi:* ${record.vehicleNo}
 *Komoditas:* ${record.commodity}
-*Tujuan:* ${record.destination}
+*Tujuan:* ${record.destination}`;
 
-=============================
-*TOTAL MUATAN / NETTO:* *${(record.totalWeight ?? 0).toLocaleString('id-ID')} Kg*
-*Upah Buruh:* Rp ${(record.loadingLaborCost ?? 0).toLocaleString('id-ID')}
-=============================
+  if (record.containerNo) {
+    text += `\n*No. Kontainer:* ${record.containerNo}`;
+  }
+  if (record.sealNo) {
+    text += `\n*No. Segel:* ${record.sealNo}`;
+  }
 
-*Aplikasi Timbangan GSC GST-9700 Jembatan Timbang v2.0*
-Terima kasih atas kerjasamanya.`;
+  text += `\n\n=============================\n*TOTAL MUATAN / NETTO:* *${(record.totalWeight ?? 0).toLocaleString('id-ID')} Kg*\n*Upah Buruh:* Rp ${(record.loadingLaborCost ?? 0).toLocaleString('id-ID')}\n=============================\n\n*Aplikasi Timbangan GSC GST-9700 Jembatan Timbang v2.0*\nTerima kasih atas kerjasamanya.`;
+
+  return text;
 }
 
 export function buildServiceWAText(record: ServiceRecord): string {
@@ -150,19 +153,28 @@ Terima kasih.`;
 
 export function buildRiceStockWAText(record: RiceStockRecord): string {
   const isJagung = record.itemName?.toUpperCase() === 'JAGUNG';
-  return `*BUKTI MUTASI STOK ${isJagung ? 'JAGUNG' : 'BERAS'}*
+  let text = `*BUKTI MUTASI STOK ${isJagung ? 'JAGUNG' : 'BERAS'}*
 _Gudang Bilibili_
 
 Tanggal: ${formatReceiptDate(record.date)}
 Uraian: ${record.description}
 Barang/Merk: ${record.itemName}
-No. Polisi: ${record.policeNo || '-'}
+No. Polisi: ${record.policeNo || '-'}`;
 
-Colly: ${record.colly.toLocaleString('id-ID')}
+  if (record.containerNo) {
+    text += `\nNo. Kontainer: ${record.containerNo}`;
+  }
+  if (record.sealNo) {
+    text += `\nNo. Segel: ${record.sealNo}`;
+  }
+
+  text += `\n\nColly: ${record.colly.toLocaleString('id-ID')}
 Berat Masuk: ${record.inWeight.toLocaleString('id-ID')} Kg
 Berat Keluar: ${record.outWeight.toLocaleString('id-ID')} Kg
 
 Harga: ${formatCurrency(record.price)}
 
 Terima kasih.`;
+
+  return text;
 }

@@ -79,6 +79,8 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
   const [colly, setColly] = useState(0);
   const [inWeight, setInWeight] = useState(0);
   const [outWeight, setOutWeight] = useState(0);
+  const [containerNo, setContainerNo] = useState("");
+  const [sealNo, setSealNo] = useState("");
 
   // Auto-default form's itemName based on currently active book tab
   React.useEffect(() => {
@@ -96,6 +98,8 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
     setColly(0);
     setInWeight(0);
     setOutWeight(0);
+    setContainerNo("");
+    setSealNo("");
     setEditingId(null);
   };
 
@@ -109,6 +113,8 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
     setColly(r.colly);
     setInWeight(r.inWeight);
     setOutWeight(r.outWeight);
+    setContainerNo(r.containerNo || "");
+    setSealNo(r.sealNo || "");
     setShowAddForm(true);
   };
 
@@ -143,7 +149,9 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
       price,
       colly,
       inWeight,
-      outWeight
+      outWeight,
+      containerNo: containerNo.trim().toUpperCase(),
+      sealNo: sealNo.trim().toUpperCase()
     };
 
     const action = () => {
@@ -196,18 +204,29 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
       description: `KIRIM KE: ${r.buyer}`,
       itemName: r.itemName || '',
       commodity: r.commodity,
-      price: 0,
+      price: r.price || 0,
       colly: 0,
       inWeight: 0,
       outWeight: r.totalWeight,
-      isSystem: true
+      isSystem: true,
+      containerNo: r.containerNo,
+      sealNo: r.sealNo
     });
   });
 
   // 1. CHRONOLOGICAL SORTING FOR ACCURATE CUMULATIVE RUNNING BALANCES
   // Oldest records go first on cumulative balance stack to prevent negative arithmetic errors.
   const chronologicallySorted = [...unifiedRecords]
-    .filter(r => (r.commodity === commodityTab) || (!r.commodity && r.itemName?.toUpperCase() === commodityTab))
+    .filter(r => {
+      const comm = (r.commodity || '').toUpperCase().trim();
+      const item = (r.itemName || '').toUpperCase().trim();
+      const tab = commodityTab.toUpperCase().trim();
+      
+      if (tab === 'JAGUNG READY') {
+        return comm === 'JAGUNG READY' || comm === 'JAGUNG' || (!r.commodity && (item === 'JAGUNG READY' || item === 'JAGUNG'));
+      }
+      return comm === tab || (!r.commodity && item === tab);
+    })
     .sort((a, b) => {
       if (a.date !== b.date) {
         return a.date.localeCompare(b.date);
@@ -445,6 +464,26 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
                 presets={[1000, 5000, 10000, 15000]}
               />
             </div>
+            <div>
+              <label className="block mb-1 font-bold text-neutral-600 uppercase tracking-wider text-[9px]">No. Kontainer</label>
+              <input
+                type="text"
+                placeholder="MISAL: MSKU 123"
+                value={containerNo}
+                onChange={(e) => setContainerNo(e.target.value)}
+                className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-bold uppercase focus:ring-1 focus:ring-emerald-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 font-bold text-neutral-600 uppercase tracking-wider text-[9px]">No. Segel</label>
+              <input
+                type="text"
+                placeholder="MISAL: SGL-987"
+                value={sealNo}
+                onChange={(e) => setSealNo(e.target.value)}
+                className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-bold uppercase focus:ring-1 focus:ring-emerald-500 outline-none"
+              />
+            </div>
             <div className="col-span-1 md:col-span-3 flex justify-end gap-2.5 border-t border-neutral-100 pt-4">
               <button
                 type="button"
@@ -547,7 +586,16 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
                   <tr key={r.id} className="hover:bg-neutral-50/70 transition-colors">
                     <td className="py-3 px-4 font-mono text-[11px] whitespace-nowrap text-neutral-600">{r.date}</td>
                     <td className="py-3 px-4 font-black text-neutral-850">{r.policeNo}</td>
-                    <td className="py-3 px-4 font-medium text-neutral-750">{r.description}</td>
+                    <td className="py-3 px-4 font-medium text-neutral-750">
+                      <div>{r.description}</div>
+                      {(r.containerNo || r.sealNo) && (
+                        <div className="text-[10px] text-blue-600 font-bold mt-0.5 uppercase tracking-wide">
+                          {r.containerNo ? `KTR: ${r.containerNo}` : ''}
+                          {r.containerNo && r.sealNo ? ' | ' : ''}
+                          {r.sealNo ? `SGL: ${r.sealNo}` : ''}
+                        </div>
+                      )}
+                    </td>
                     <td className="py-3 px-4">
                       <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
                         (r.commodity || r.itemName?.toUpperCase()) === 'BERAS' ? 'bg-emerald-50 text-emerald-700' : (r.commodity || r.itemName?.toUpperCase()) === 'JAGUNG' ? 'bg-amber-50 text-amber-700' : 'bg-purple-50 text-purple-700'
@@ -649,6 +697,18 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
                     <span className="text-neutral-500">Keterangan :</span>
                     <span className="font-bold">{previewRecord.description}</span>
                   </div>
+                  {previewRecord.containerNo && (
+                    <div className="flex justify-between">
+                      <span className="text-neutral-500">No. Kontainer :</span>
+                      <span className="font-bold">{previewRecord.containerNo}</span>
+                    </div>
+                  )}
+                  {previewRecord.sealNo && (
+                    <div className="flex justify-between">
+                      <span className="text-neutral-500">No. Segel :</span>
+                      <span className="font-bold">{previewRecord.sealNo}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="border-t border-neutral-200 pt-1.5 space-y-0.5">

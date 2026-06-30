@@ -94,6 +94,9 @@ export default function OutboundModule({
   const [destination, setDestination] = useState("");
   const [invoiceNo, setInvoiceNo] = useState("");
   const [status, setStatus] = useState<'LOADING' | 'SHIPPED'>('SHIPPED');
+  const [containerNo, setContainerNo] = useState("");
+  const [sealNo, setSealNo] = useState("");
+  const [price, setPrice] = useState<number>(0);
 
   const isTicketUsed = (ticket: WeighbridgeTicket) => {
     return records.some(r => r.ticketNo === ticket.ticketNo && r.id !== editingId);
@@ -143,7 +146,10 @@ export default function OutboundModule({
       loadingLaborCost,
       destination,
       invoiceNo: invoiceNo.toUpperCase(),
-      status
+      status,
+      containerNo: containerNo.trim().toUpperCase(),
+      sealNo: sealNo.trim().toUpperCase(),
+      price: price || 0
     };
 
     const executeSave = () => {
@@ -180,6 +186,9 @@ export default function OutboundModule({
     setDestination("");
     setInvoiceNo("");
     setStatus("SHIPPED");
+    setContainerNo("");
+    setSealNo("");
+    setPrice(0);
     setEditingId(null);
   };
 
@@ -315,6 +324,29 @@ export default function OutboundModule({
                   className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 font-bold uppercase transition"
                 />
               </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-neutral-600 mb-1 font-bold uppercase text-[10px]">No. Kontainer</label>
+                  <input
+                    type="text"
+                    placeholder="CONTOH: MSKU 123"
+                    value={containerNo}
+                    onChange={(e) => setContainerNo(e.target.value.toUpperCase())}
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 font-bold uppercase transition"
+                  />
+                </div>
+                <div>
+                  <label className="block text-neutral-600 mb-1 font-bold uppercase text-[10px]">No. Segel</label>
+                  <input
+                    type="text"
+                    placeholder="CONTOH: SGL-987"
+                    value={sealNo}
+                    onChange={(e) => setSealNo(e.target.value.toUpperCase())}
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 font-bold uppercase transition"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Column 2: Commodity & Weights */}
@@ -381,6 +413,17 @@ export default function OutboundModule({
                   mode="weight"
                   unit="KG"
                   presets={[5000, 10000, 15000, 25000, 30000]}
+                />
+              </div>
+
+              <div>
+                <SmartNumberInput
+                  value={price}
+                  onChange={setPrice}
+                  label="HARGA PENJUALAN"
+                  mode="currency"
+                  unit="RP/KG"
+                  presets={[5000, 5500, 6000, 6250, 6500]}
                 />
               </div>
 
@@ -513,6 +556,13 @@ export default function OutboundModule({
                     {r.ticketNo && (
                       <div className="text-[10px] text-neutral-400">Timbangan: #{r.ticketNo}</div>
                     )}
+                    {(r.containerNo || r.sealNo) && (
+                      <div className="text-[10px] text-blue-600 font-bold whitespace-nowrap mt-0.5">
+                        {r.containerNo ? `KTR: ${r.containerNo}` : ''}
+                        {r.containerNo && r.sealNo ? ' | ' : ''}
+                        {r.sealNo ? `SGL: ${r.sealNo}` : ''}
+                      </div>
+                    )}
                   </td>
                   <td className="py-2.5 px-3 font-semibold text-neutral-800">{r.vehicleNo}</td>
                   <td className="py-2.5 px-3 uppercase font-medium text-neutral-800">{r.buyer}</td>
@@ -578,6 +628,9 @@ export default function OutboundModule({
                           setDestination(r.destination);
                           setInvoiceNo(r.invoiceNo);
                           setStatus(r.status);
+                          setContainerNo(r.containerNo || "");
+                          setSealNo(r.sealNo || "");
+                          setPrice(r.price || 0);
                           setShowAddForm(true);
                         }}
                         className="text-neutral-400 hover:text-blue-600 transition p-1 cursor-pointer"
@@ -680,6 +733,18 @@ export default function OutboundModule({
                     <span className="text-neutral-500">Tujuan :</span>
                     <span className="font-bold">{previewRecord.destination}</span>
                   </div>
+                  {previewRecord.containerNo && (
+                    <div className="flex justify-between">
+                      <span className="text-neutral-500">No. Kontainer :</span>
+                      <span className="font-bold">{previewRecord.containerNo}</span>
+                    </div>
+                  )}
+                  {previewRecord.sealNo && (
+                    <div className="flex justify-between">
+                      <span className="text-neutral-500">No. Segel :</span>
+                      <span className="font-bold">{previewRecord.sealNo}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="border-y border-neutral-200 py-2 my-1.5 bg-white/50 px-2 rounded">
@@ -710,6 +775,18 @@ export default function OutboundModule({
                     <span className="font-bold text-neutral-500 uppercase">Total Berat :</span>
                     <span className="font-black text-emerald-600 text-[11px]">{(previewRecord.totalWeight ?? 0).toLocaleString('id-ID')} KG</span>
                   </div>
+                  {previewRecord.price ? (
+                    <>
+                      <div className="flex justify-between items-center mt-1 text-[9px]">
+                        <span className="font-bold text-neutral-500 uppercase">Harga Jual :</span>
+                        <span className="font-semibold text-neutral-800">Rp {previewRecord.price.toLocaleString('id-ID')}/KG</span>
+                      </div>
+                      <div className="flex justify-between items-center mt-1 text-[9px]">
+                        <span className="font-bold text-neutral-500 uppercase">Total Nilai :</span>
+                        <span className="font-black text-emerald-700">Rp {((previewRecord.totalWeight ?? 0) * previewRecord.price).toLocaleString('id-ID')}</span>
+                      </div>
+                    </>
+                  ) : null}
                 </div>
 
                 <div className="mt-3 grid grid-cols-2 gap-4 text-center text-[9px]">
