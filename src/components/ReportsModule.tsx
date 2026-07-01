@@ -953,8 +953,8 @@ export default function ReportsModule({
                       <span>📈 Total Pemasukan (Debit Operasi)</span>
                       <span>Rp {consolidatedStats.totalDebit.toLocaleString('id-ID')}</span>
                     </div>
-                    <div className="h-3 bg-green-50 rounded overflow-hidden">
-                      <div className="h-full bg-green-600" style={{ width: `${Math.max(10, Math.min(100, (consolidatedStats.totalDebit / ((consolidatedStats.totalDebit + consolidatedStats.totalKredit) || 1)) * 100))}%` }}></div>
+                    <div className="h-3 bg-blue-50 rounded overflow-hidden">
+                      <div className="h-full bg-blue-600" style={{ width: `${Math.max(10, Math.min(100, (consolidatedStats.totalDebit / ((consolidatedStats.totalDebit + consolidatedStats.totalKredit) || 1)) * 100))}%` }}></div>
                     </div>
                   </div>
 
@@ -1049,7 +1049,7 @@ export default function ReportsModule({
                       <td className="p-2 text-right font-black text-blue-700 font-mono">{t.netWeight.toLocaleString('id-ID')} Kg</td>
                       <td className="p-2 text-center">
                         <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
-                          t.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                          t.status === 'COMPLETED' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'
                         }`}>
                           {t.status}
                         </span>
@@ -1195,7 +1195,7 @@ export default function ReportsModule({
                       <td className="p-2 text-neutral-600 font-medium text-[10px]">{r.destination}</td>
                       <td className="p-2 text-center">
                         <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
-                          r.status === 'SHIPPED' ? 'bg-green-100 text-green-700' : 'bg-sky-100 text-sky-700'
+                          r.status === 'SHIPPED' ? 'bg-blue-100 text-blue-700' : 'bg-sky-100 text-sky-700'
                         }`}>
                           {r.status}
                         </span>
@@ -1276,7 +1276,7 @@ export default function ReportsModule({
                       <td className="p-2 text-center text-neutral-800 font-mono">Rp {s.totalCost.toLocaleString('id-ID')}</td>
                       <td className="p-2 text-center">
                         <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold ${
-                          s.status === 'SELESAI' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                          s.status === 'SELESAI' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'
                         }`}>
                           {s.status}
                         </span>
@@ -1346,7 +1346,7 @@ export default function ReportsModule({
                       <td className="p-2 text-right font-bold text-sky-700 font-mono">Rp {(s.totalFee ?? 0).toLocaleString('id-ID')}</td>
                       <td className="p-2 text-center">
                         <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold ${
-                          s.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                          s.paymentStatus === 'PAID' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'
                         }`}>
                           {s.paymentStatus === 'PAID' ? 'LUNAS' : 'TUNGGAKAN'}
                         </span>
@@ -1545,7 +1545,7 @@ export default function ReportsModule({
                       <td className="p-2 text-right text-rose-600 font-mono font-bold">Rp {d.remainingBalance.toLocaleString('id-ID')}</td>
                       <td className="p-2 text-center">
                         <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold ${
-                          d.status === 'LUNAS' ? 'bg-green-100 text-green-700' : 'bg-red-105 bg-red-100 text-red-700'
+                          d.status === 'LUNAS' ? 'bg-blue-100 text-blue-700' : 'bg-red-105 bg-red-100 text-red-700'
                         }`}>
                           {d.status === 'LUNAS' ? 'LUNAS' : 'BELUM LUNAS'}
                         </span>

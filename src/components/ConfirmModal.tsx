@@ -77,11 +77,11 @@ export default function ConfirmModal({
       case 'ADD':
       default:
         return {
-          iconBg: 'bg-emerald-50 border-emerald-250 border text-emerald-600',
+          iconBg: 'bg-blue-50 border-blue-250 border text-blue-600',
           icon: <PlusCircle className="w-6 h-6" />,
-          confirmBtn: 'bg-emerald-600 hover:bg-emerald-700 text-white focus:ring-emerald-500',
+          confirmBtn: 'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500',
           defaultConfirmText: t.confirmAdd,
-          borderAccent: 'border-l-4 border-l-emerald-500'
+          borderAccent: 'border-l-4 border-l-blue-500'
         };
     }
   };

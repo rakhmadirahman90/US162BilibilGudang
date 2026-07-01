@@ -156,8 +156,8 @@ export default function SmartNumberInput({
   // Icon type based on input mode
   const renderIcon = () => {
     if (mode === 'currency') return <Coins className="w-4 h-4 text-amber-500 shrink-0" />;
-    if (mode === 'weight') return <Scale className="w-4 h-4 text-sky-500 shrink-0" />;
-    if (mode === 'percent') return <Percent className="w-4 h-4 text-teal-500 shrink-0" />;
+    if (mode === 'weight') return <Scale className="w-4 h-4 text-blue-500 shrink-0" />;
+    if (mode === 'percent') return <Percent className="w-4 h-4 text-indigo-500 shrink-0" />;
     return null;
   };
 

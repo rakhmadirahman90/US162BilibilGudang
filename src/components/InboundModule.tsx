@@ -367,7 +367,7 @@ export default function InboundModule({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <h2 className="text-xl font-extrabold text-neutral-800 flex items-center gap-2">
-            <ArrowDownCircle className="text-emerald-600 w-6 h-6" />
+            <ArrowDownCircle className="text-blue-600 w-6 h-6" />
             {t.inboundTitle}
           </h2>
           <p className="text-xs text-neutral-500 mt-1">
@@ -378,7 +378,7 @@ export default function InboundModule({
         <div className="flex flex-wrap gap-2 items-center">
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-4 py-2.5 rounded-lg flex items-center gap-1.5 shadow transition cursor-pointer"
+            className="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-4 py-2.5 rounded-lg flex items-center gap-1.5 shadow transition cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
             {showAddForm ? t.close : t.recordNew}
@@ -398,12 +398,12 @@ export default function InboundModule({
             <div className="flex flex-col gap-3">
               <span className="font-bold text-neutral-500">1. REFERENSI LOGISTIK</span>
               
-              <div className="bg-emerald-50/40 p-3 rounded-lg border border-emerald-100/60 flex flex-col gap-1.5 animate-fade-in text-[10px]">
+              <div className="bg-blue-50/40 p-3 rounded-lg border border-blue-100/60 flex flex-col gap-1.5 animate-fade-in text-[10px]">
                 <label className="block text-neutral-600 font-bold">PILIH TIKET TIMBANG (OPSIONAL)</label>
                 <select
                   value={selectedTicketId}
                   onChange={(e) => handleTicketChange(e.target.value)}
-                  className="w-full bg-white border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-emerald-600 transition cursor-pointer"
+                  className="w-full bg-white border border-neutral-200 rounded px-2 py-1.5 focus:outline-none focus:border-blue-600 transition cursor-pointer"
                 >
                   <option value="">-- INPUT MANUAL / TANPA TIKET --</option>
                   {tickets.map(t => {
@@ -436,7 +436,7 @@ export default function InboundModule({
                       }
                     }
                   }}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 uppercase transition font-bold"
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 uppercase transition font-bold"
                   list="inbound-vehicles"
                 />
                 <datalist id="inbound-vehicles">
@@ -453,7 +453,7 @@ export default function InboundModule({
                   placeholder="CONTOH: DAENG NABA"
                   value={driverName}
                   onChange={(e) => setDriverName(e.target.value.toUpperCase())}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 font-bold uppercase transition"
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 font-bold uppercase transition"
                   list="inbound-drivers"
                 />
               </div>
@@ -464,7 +464,7 @@ export default function InboundModule({
                   type="text"
                   value={warehouseSection}
                   onChange={(e) => setWarehouseSection(e.target.value.toUpperCase())}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 transition font-bold uppercase"
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 transition font-bold uppercase"
                   placeholder="MISAL: GUDANG UTARA, SILO B"
                 />
               </div>
@@ -480,7 +480,7 @@ export default function InboundModule({
                   <select
                     value={commodity}
                     onChange={(e) => setCommodity(e.target.value as any)}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 transition cursor-pointer font-bold mb-2"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 transition cursor-pointer font-bold mb-2"
                   >
                     <option value="BERAS">BERAS</option>
                     <option value="BROKEN">BROKEN</option>
@@ -505,7 +505,7 @@ export default function InboundModule({
                     placeholder="NAMA BARANG (CONTOH: BROKEN, KACANG IJO)"
                     value={itemName}
                     onChange={(e) => setItemName(e.target.value.toUpperCase())}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 font-bold uppercase transition"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 font-bold uppercase transition"
                   />
                 </div>
                 <div>
@@ -515,7 +515,7 @@ export default function InboundModule({
                     placeholder="CONTOH: H. MUSTAMIN"
                     value={supplier}
                     onChange={(e) => setSupplier(e.target.value.toUpperCase())}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 font-bold uppercase transition"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 font-bold uppercase transition"
                     list="inbound-suppliers"
                   />
                   <datalist id="inbound-suppliers">
@@ -568,7 +568,7 @@ export default function InboundModule({
                     <button
                       type="button"
                       onClick={() => setShowMoistureModal(true)}
-                      className="text-[10px] text-emerald-600 hover:text-emerald-800 font-bold underline cursor-pointer flex items-center gap-0.5 uppercase"
+                      className="text-[10px] text-blue-600 hover:text-blue-800 font-bold underline cursor-pointer flex items-center gap-0.5 uppercase"
                     >
                       ATURAN POTONGAN KA ℹ️
                     </button>
@@ -770,7 +770,7 @@ export default function InboundModule({
                           setLaborCost(0);
                         }
                       }}
-                      className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-emerald-600 transition cursor-pointer h-[38px] truncate font-bold uppercase"
+                      className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-600 transition cursor-pointer h-[38px] truncate font-bold uppercase"
                     >
                       <option value="">-- PILIH JENIS KEGIATAN BURUH --</option>
                       {laborRates.map(l => (
@@ -811,7 +811,7 @@ export default function InboundModule({
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg cursor-pointer transition uppercase"
+                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded-lg cursor-pointer transition uppercase"
                 >
                   {editingId ? 'SIMPAN PERUBAHAN' : 'SIMPAN TRANSAKSI MASUK'}
                 </button>
@@ -871,7 +871,7 @@ export default function InboundModule({
 
                       <div className="flex flex-col">
                         <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Netto Bersih Akhir</span>
-                        <span className="font-mono text-emerald-400 font-extrabold text-sm">{computedNet.toLocaleString('id-ID')} Kg</span>
+                        <span className="font-mono text-blue-400 font-extrabold text-sm">{computedNet.toLocaleString('id-ID')} Kg</span>
                       </div>
                     </div>
 
@@ -906,7 +906,7 @@ export default function InboundModule({
             <button
               onClick={handleExportExcel}
               title="Unduh seluruh daftar rekap penerimaan barang masuk ke format Microsoft Excel"
-              className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+              className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-200 transition cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" /> Export Excel
             </button>
@@ -925,7 +925,7 @@ export default function InboundModule({
                 placeholder="Cari Suplier, No. Polisi..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs bg-neutral-50 rounded-lg border border-neutral-200 focus:outline-none focus:border-emerald-600 focus:bg-white font-semibold text-neutral-700"
+                className="w-full pl-9 pr-3 py-1.5 text-xs bg-neutral-50 rounded-lg border border-neutral-200 focus:outline-none focus:border-blue-600 focus:bg-white font-semibold text-neutral-700"
               />
             </div>
           </div>
@@ -975,7 +975,7 @@ export default function InboundModule({
                     <td className="py-2.5 px-3">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
                         r.commodity?.includes('JAGUNG') ? 'bg-amber-100 text-amber-800 border border-amber-200' :
-                        r.commodity?.includes('BERAS') ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' :
+                        r.commodity?.includes('BERAS') ? 'bg-blue-100 text-blue-800 border border-blue-200' :
                         'bg-blue-100 text-blue-800 border border-blue-200'
                       }`}>
                         {r.commodity}
@@ -995,7 +995,7 @@ export default function InboundModule({
                             Pot: -{r.refaksiKaPercent.toFixed(1)}%
                           </span>
                         ) : (
-                          <span className="text-[9px] text-emerald-600 font-bold mt-1 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded">
+                          <span className="text-[9px] text-blue-600 font-bold mt-1 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded">
                             Aman (0%)
                           </span>
                         )}
@@ -1006,7 +1006,7 @@ export default function InboundModule({
                         )}
                       </div>
                     </td>
-                    <td className="text-right py-2.5 px-3 font-extrabold font-mono text-emerald-600">
+                    <td className="text-right py-2.5 px-3 font-extrabold font-mono text-blue-600">
                       {(r.netWeight ?? 0).toLocaleString('id-ID')} kg
                     </td>
                     <td className="py-2.5 px-3 text-neutral-500 text-[11px]">
@@ -1022,7 +1022,7 @@ export default function InboundModule({
                       <div className="flex gap-2 justify-center items-center">
                         <button
                           onClick={() => setPreviewRecord(r)}
-                          className="text-neutral-400 hover:text-emerald-600 transition p-1 cursor-pointer"
+                          className="text-neutral-400 hover:text-blue-600 transition p-1 cursor-pointer"
                           title="Cetak Resi Terpadu"
                         >
                           <Printer className="w-3.5 h-3.5" />
@@ -1038,7 +1038,7 @@ export default function InboundModule({
                               pdfFileName: `Resi_Penerimaan_${r.ticketNo || r.id.substring(0,8)}.pdf`
                             });
                           }}
-                          className="text-neutral-400 hover:text-emerald-600 transition p-1 cursor-pointer"
+                          className="text-neutral-400 hover:text-blue-600 transition p-1 cursor-pointer"
                           title="Kirim ke WA"
                         >
                           <MessageCircle className="w-3.5 h-3.5" />
@@ -1141,7 +1141,7 @@ export default function InboundModule({
             >
               <div className="flex justify-between items-start border-b border-neutral-100 pb-3 mb-4">
                 <span className="font-bold text-neutral-800 flex items-center gap-1.5 uppercase text-xs tracking-widest">
-                  <Printer className="text-emerald-600 w-4 h-4" />
+                  <Printer className="text-blue-600 w-4 h-4" />
                   Pratinjau Resi Penerimaan
                 </span>
                 <button 
@@ -1154,7 +1154,7 @@ export default function InboundModule({
 
               <div className="bg-neutral-50 p-3 border border-dashed border-neutral-300 rounded font-mono text-[10px] text-neutral-800 leading-tight shadow-inner">
                 <div className="text-center border-b border-neutral-300 pb-1 mb-2">
-                  <div className="font-bold text-xs tracking-widest text-emerald-950">CV. BILIBILI 162</div>
+                  <div className="font-bold text-xs tracking-widest text-blue-950">CV. BILIBILI 162</div>
                   <div className="text-[8px] opacity-70">Jalan Poros Pinrang-Polman KM. 12</div>
                   <div className="text-[8px] opacity-70">Desa Bilibili, Kec. Suppa, Kab. Pinrang</div>
                 </div>
@@ -1232,7 +1232,7 @@ export default function InboundModule({
                       )}
                     </>
                   )}
-                  <div className="flex justify-between font-black text-emerald-700 text-[11px] border-t border-neutral-200 mt-1 pt-1">
+                  <div className="flex justify-between font-black text-blue-700 text-[11px] border-t border-neutral-200 mt-1 pt-1">
                     <span>BERAT NETTO :</span>
                     <span>{(previewRecord.netWeight ?? 0).toLocaleString('id-ID')} KG</span>
                   </div>
@@ -1264,7 +1264,7 @@ export default function InboundModule({
                       list="inbound-staff-list"
                       value={staffName}
                       onChange={(e) => setStaffName(e.target.value)}
-                      className="w-full text-center bg-white border border-neutral-200 rounded py-1 px-1 font-bold focus:outline-none focus:border-emerald-500"
+                      className="w-full text-center bg-white border border-neutral-200 rounded py-1 px-1 font-bold focus:outline-none focus:border-blue-500"
                     />
                     <datalist id="inbound-staff-list">
                       {employees.filter(e => e.role === 'PETUGAS' || e.role === 'KARYAWAN').map(e => (
@@ -1291,7 +1291,7 @@ export default function InboundModule({
                     printCombinedSlip(previewRecord, tk, staffName);
                     setPreviewRecord(null);
                   }}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1.5 shadow"
+                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1.5 shadow"
                 >
                   <Printer className="w-3.5 h-3.5" /> CETAK SLIP
                 </button>
@@ -1340,7 +1340,7 @@ export default function InboundModule({
               </div>
 
               <p className="text-[11px] text-neutral-500 leading-relaxed mb-3">
-                Tabel acuan potongan untuk Jagung Pipil ({refaksiType}). Baris dengan latar belakang <span className="text-emerald-700 font-bold bg-emerald-50 px-1 rounded">hijau</span> adalah rule acuan potongan aktif berdasarkan kadar air saat ini <span className="font-bold text-slate-800 font-mono">({moistureContent}%)</span>.
+                Tabel acuan potongan untuk Jagung Pipil ({refaksiType}). Baris dengan latar belakang <span className="text-blue-700 font-bold bg-blue-50 px-1 rounded">biru</span> adalah rule acuan potongan aktif berdasarkan kadar air saat ini <span className="font-bold text-slate-800 font-mono">({moistureContent}%)</span>.
               </p>
 
               <div className="max-h-[220px] overflow-y-auto border border-neutral-200/80 rounded-lg bg-white shadow-inner">
@@ -1371,19 +1371,19 @@ export default function InboundModule({
                             key={rule.id} 
                             className={`transition-all duration-150 ${
                               isSelected 
-                                ? 'bg-emerald-50 text-emerald-900 font-black border-y border-emerald-250' 
+                                ? 'bg-blue-50 text-blue-900 font-black border-y border-blue-250' 
                                 : 'text-neutral-600 hover:bg-neutral-50'
                             }`}
                           >
                             <td className="py-2 px-3 font-mono">
                               {rule.moistureMin.toFixed(2)}% - {rule.moistureMax.toFixed(2)}%
                             </td>
-                            <td className={`py-2 px-3 text-center font-mono font-extrabold ${isSelected ? 'text-emerald-700' : 'text-slate-850'}`}>
+                            <td className={`py-2 px-3 text-center font-mono font-extrabold ${isSelected ? 'text-blue-700' : 'text-slate-850'}`}>
                               {rule.refaksiPercent.toFixed(2)}%
                             </td>
                             <td className="py-2 px-3 text-right">
                               {isSelected ? (
-                                <span className="inline-flex items-center gap-1 text-[8px] bg-emerald-600 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest animate-pulse">
+                                <span className="inline-flex items-center gap-1 text-[8px] bg-blue-600 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest animate-pulse">
                                   AKTIF
                                 </span>
                               ) : (

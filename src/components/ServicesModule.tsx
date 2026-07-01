@@ -247,7 +247,7 @@ export default function ServicesModule({
                   placeholder="Contoh: Agen UCU POLES, IDA, dll"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value.toUpperCase())}
-                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-sky-500 font-semibold"
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:outline-none focus:border-blue-500 font-semibold"
                   list="master-customers"
                 />
                 <datalist id="master-customers">
@@ -309,7 +309,7 @@ export default function ServicesModule({
                 </div>
                 <div>
                   <label className="text-[11px] font-black text-slate-500 tracking-wider uppercase select-none">Total Biaya (Terhitung)</label>
-                  <div className="p-2.5 h-[42px] flex items-center bg-sky-50 border border-sky-100/80 font-bold block rounded-xl font-mono text-sky-700 text-sm mt-0.5">
+                  <div className="p-2.5 h-[42px] flex items-center bg-blue-50 border border-blue-100/80 font-bold block rounded-xl font-mono text-blue-700 text-sm mt-0.5">
                     Rp {(weight * ratePerKg).toLocaleString('id-ID')}
                   </div>
                 </div>
@@ -436,14 +436,14 @@ export default function ServicesModule({
                   <td className="py-2.5 px-3 text-neutral-500 font-mono">{s.date}</td>
                   <td className="py-2.5 px-3 font-bold text-neutral-800">{s.customerName}</td>
                   <td className="py-2.5 px-3">
-                    <span className="bg-sky-50 text-sky-700 border border-sky-100 px-2 py-0.5 rounded text-[10px] font-bold">
+                    <span className="bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded text-[10px] font-bold">
                       {s.serviceType}
                     </span>
                   </td>
                   <td className="py-2.5 px-3 text-neutral-600 font-medium">{s.commodity}</td>
                   <td className="text-right py-2.5 px-3 font-bold font-mono">{(s.weight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} Kg</td>
                   <td className="text-right py-2.5 px-3 font-mono text-neutral-500">Rp {(s.ratePerKg ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}</td>
-                  <td className="text-right py-2.5 px-3 font-extrabold font-mono text-blue-600 bg-sky-50/20">
+                  <td className="text-right py-2.5 px-3 font-extrabold font-mono text-blue-600 bg-blue-50/20">
                     Rp {(s.totalFee ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}
                   </td>
                   <td className="py-2.5 px-3 text-neutral-500 italic text-[11px]">{s.operatorName}</td>
@@ -458,7 +458,7 @@ export default function ServicesModule({
                     <div className="flex gap-2 justify-center items-center">
                       <button
                         onClick={() => setPreviewRecord(s)}
-                        className="text-neutral-400 hover:text-sky-600 transition p-1 cursor-pointer"
+                        className="text-neutral-400 hover:text-blue-600 transition p-1 cursor-pointer"
                         title="Cetak Resi"
                       >
                         <Printer className="w-3.5 h-3.5" />
@@ -564,7 +564,7 @@ export default function ServicesModule({
 
               <div className="bg-neutral-50 p-4 border border-dashed border-neutral-300 rounded font-mono text-[10px] text-neutral-800 leading-relaxed shadow-inner">
                 <div className="text-center border-b border-neutral-300 pb-2 mb-3">
-                  <div className="font-bold text-xs tracking-widest text-emerald-950">CV. BILIBILI 162</div>
+                  <div className="font-bold text-xs tracking-widest text-blue-950">CV. BILIBILI 162</div>
                   <div className="text-[8px] opacity-70">Jalan Poros Pinrang-Polman KM. 12</div>
                   <div className="text-[8px] opacity-70">Desa Bilibili, Kec. Suppa, Kab. Pinrang</div>
                 </div>
@@ -634,7 +634,7 @@ export default function ServicesModule({
                     printServiceSlip(previewRecord, staffName);
                     setPreviewRecord(null);
                   }}
-                  className="flex-1 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1.5 shadow"
+                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1.5 shadow"
                 >
                   <Printer className="w-3.5 h-3.5" /> CETAK RESI
                 </button>

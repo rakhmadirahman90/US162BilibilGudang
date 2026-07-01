@@ -393,15 +393,15 @@ export default function WeighbridgeModule({
             <div className="absolute top-2 left-3 flex gap-2">
               <span className={`w-2 h-2 rounded-full ${simulatorWeight > 0 ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,1)]' : 'bg-red-950'}`}></span>
               <span className="text-[9px] font-mono text-neutral-500">{t.stable}</span>
-              <span className={`w-2 h-2 rounded-full ${simulatorWeight === 0 ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,1)]' : 'bg-green-950'}`}></span>
+              <span className={`w-2 h-2 rounded-full ${simulatorWeight === 0 ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,1)]' : 'bg-blue-950'}`}></span>
               <span className="text-[9px] font-mono text-neutral-500">{t.zero}</span>
             </div>
             
             {/* LARGE SEVEN SEGMENT RESEMBLANCE */}
-            <div className="text-red-500 font-mono text-4xl sm:text-5xl font-extrabold tracking-widest leading-none drop-shadow-[0_0_6px_rgba(239,68,68,0.7)]">
+            <div className="text-blue-500 font-mono text-4xl sm:text-5xl font-extrabold tracking-widest leading-none drop-shadow-[0_0_6px_rgba(59,130,246,0.7)]">
               {simulatorWeight.toLocaleString('id-ID')}
             </div>
-            <div className="text-red-400 font-mono text-xs sm:text-sm mt-1">kg</div>
+            <div className="text-blue-400 font-mono text-xs sm:text-sm mt-1">kg</div>
           </div>
 
           {/* Controls to Mock physical setup weights for the computer */}
@@ -536,10 +536,10 @@ export default function WeighbridgeModule({
             <div className="bg-neutral-950 border border-[#2d4d8c] p-3 rounded mb-4 flex justify-between items-center relative">
               <span className="text-[#a0c5fc] text-xs">{t.currentWeight}</span>
               <div className="text-right flex items-baseline gap-2">
-                <span className="text-green-400 font-mono text-4xl font-black relative z-10 font-mono">
+                <span className="text-blue-400 font-mono text-4xl font-black relative z-10 font-mono">
                   {simulatorWeight.toLocaleString('id-ID')}
                 </span>
-                <span className="text-green-400 text-sm">kg</span>
+                <span className="text-blue-400 text-sm">kg</span>
               </div>
               
               {/* Out of range simulation popup like in picture */}
@@ -667,7 +667,7 @@ export default function WeighbridgeModule({
                 <div className="border-t border-[#2d4d8c]/60 my-1 pt-1">
                   <div className="flex justify-between items-center text-xs text-[#a0c5fc]">
                     <span>{t.weigh1Label}</span>
-                    <span className="text-emerald-400">{selectedTicket ? `${(selectedTicket.timbang1Weight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg` : '0 kg'}</span>
+                    <span className="text-blue-400">{selectedTicket ? `${(selectedTicket.timbang1Weight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg` : '0 kg'}</span>
                   </div>
                   <div className="text-[10px] text-neutral-400 mt-0.5">
                     ({selectedTicket ? selectedTicket.timbang1Time : '-'})
@@ -750,8 +750,8 @@ export default function WeighbridgeModule({
                 <div className="flex items-center justify-between pt-1">
                   <span className="text-[#a0c5fc] font-bold text-sm">{t.netWeightLabel}</span>
                   <div className="text-right">
-                    <span className="text-green-400 font-extrabold text-xl font-mono">{selectedTicket ? (computedNet ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '0'}</span>
-                    <span className="text-green-400 text-xs ml-1">kg</span>
+                    <span className="text-blue-400 font-extrabold text-xl font-mono">{selectedTicket ? (computedNet ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '0'}</span>
+                    <span className="text-blue-400 text-xs ml-1">kg</span>
                   </div>
                 </div>
 

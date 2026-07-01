@@ -1386,7 +1386,7 @@ export default function DatabaseMasterModule({
           onClick={() => { setActiveSubTab('PRODUCTS'); setSearchQuery(''); handleCancel(); }}
           className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer uppercase ${
             activeSubTab === 'PRODUCTS'
-              ? 'bg-emerald-700 text-white shadow-sm'
+              ? 'bg-blue-900 text-white shadow-sm'
               : 'text-neutral-600 hover:bg-neutral-100'
           }`}
         >
@@ -1398,7 +1398,7 @@ export default function DatabaseMasterModule({
           onClick={() => { setActiveSubTab('USERS'); setSearchQuery(''); handleCancel(); }}
           className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer uppercase ${
             activeSubTab === 'USERS'
-              ? 'bg-emerald-700 text-white shadow-sm'
+              ? 'bg-blue-900 text-white shadow-sm'
               : 'text-neutral-600 hover:bg-neutral-100'
           }`}
         >
@@ -1493,7 +1493,7 @@ export default function DatabaseMasterModule({
                       className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-mono focus:border-indigo-500 outline-none text-neutral-800"
                       placeholder="Contoh: 3500"
                     />
-                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 cursor-pointer">
+                    <button type="submit" className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 cursor-pointer">
                       <Check className="w-3.5 h-3.5" /> SIMPAN
                     </button>
                   </div>
@@ -3286,7 +3286,7 @@ export default function DatabaseMasterModule({
                         <td className="p-3 font-extrabold text-indigo-900">{c.name}</td>
                         <td className="p-3 text-center">
                           <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black tracking-tighter ${
-                            c.type === 'DEBIT' ? 'bg-green-100 text-green-700' :
+                            c.type === 'DEBIT' ? 'bg-blue-100 text-blue-700' :
                             c.type === 'KREDIT' ? 'bg-red-100 text-red-750' : 'bg-blue-100 text-blue-700'
                           }`}>
                             {c.type === 'DEBIT' ? 'MASUK' : c.type === 'KREDIT' ? 'KELUAR' : 'CAMPUR'}
@@ -3339,7 +3339,7 @@ export default function DatabaseMasterModule({
                       <div>Tipe Mutasi:</div>
                       <div className="text-right">
                         <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black tracking-tighter ${
-                          c.type === 'DEBIT' ? 'bg-green-100 text-green-700' :
+                          c.type === 'DEBIT' ? 'bg-blue-100 text-blue-700' :
                           c.type === 'KREDIT' ? 'bg-red-100 text-red-750' : 'bg-blue-100 text-blue-700'
                         }`}>
                           {c.type === 'DEBIT' ? 'MASUK' : c.type === 'KREDIT' ? 'KELUAR' : 'CAMPUR'}

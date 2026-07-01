@@ -2648,7 +2648,7 @@ export default function App() {
                 {/* Calibration checklist & system control status block */}
                 <div className="bg-blue-950 text-blue-100 rounded-xl p-5 border border-blue-900 shadow">
                   <h4 className="font-black text-xs text-yellow-350 tracking-wider uppercase mb-2 font-mono">Pemeriksaan Jembatan Timbang</h4>
-                  <ul className="text-xs text-emerald-200 flex flex-col gap-2 mt-1">
+                  <ul className="text-xs text-blue-200 flex flex-col gap-2 mt-1">
                     <li className="flex items-start gap-1.5 leading-snug">
                       <span className="text-yellow-400 font-bold">✔</span>
                       <span><strong>Load Cell GST-9700</strong>: Terkoneksi (Kalibrasi sensor nol-beban aktif)</span>
