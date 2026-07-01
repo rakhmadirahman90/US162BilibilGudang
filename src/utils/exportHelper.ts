@@ -5,7 +5,7 @@
 
 import { WeighbridgeTicket, OutboundRecord, RiceStockRecord, InboundRecord, ServiceRecord } from '../types';
 import { formatReceiptDate } from './format';
-import bilibiliLogo from '../assets/images/bilibili_logo_1780925186692.png';
+import bilibiliLogo from '../assets/images/us_bilibili_logo.png';
 
 export function exportToCSV(headers: string[], rows: string[][], filename: string) {
   const csvContent = [

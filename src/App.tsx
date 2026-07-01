@@ -77,7 +77,7 @@ import { auth, signInWithGoogle } from './utils/firebase';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 
 // Brand Assets
-import bilibiliLogo from './assets/images/bilibili_logo_1780925186692.png';
+import bilibiliLogo from './assets/images/us_bilibili_logo.png';
 
 // Lucide icons
 import { 
@@ -1453,7 +1453,7 @@ export default function App() {
                 <img 
                   src={bilibiliLogo} 
                   alt="US Bilibili 162 Logo" 
-                  className="w-full h-full object-cover rounded-full"
+                  className="w-full h-full object-contain"
                   referrerPolicy="no-referrer"
                 />
               </div>
@@ -1801,7 +1801,7 @@ export default function App() {
             <div className={`p-4 border-b ${theme.headerBorder} flex items-center justify-between`}>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-yellow-400 bg-white shadow-md shrink-0 flex items-center justify-center">
-                  <img src={bilibiliLogo} alt="Logo" className="w-full h-full object-cover scale-110" referrerPolicy="no-referrer" />
+                  <img src={bilibiliLogo} alt="Logo" className="w-full h-full object-contain p-0.5" referrerPolicy="no-referrer" />
                 </div>
                 <div className="overflow-hidden">
                   <h1 className="font-black text-xs text-white truncate uppercase tracking-tight">US Bilibili 162</h1>
@@ -2941,11 +2941,11 @@ export default function App() {
             {/* Storage Calibration Banner */}
             <div className="bg-emerald-950 text-emerald-100 p-5 rounded-xl border border-emerald-900 shadow flex flex-col md:flex-row items-center gap-4 justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-yellow-400 bg-white shadow-md shrink-0 flex items-center justify-center">
+                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-yellow-400 bg-white shadow-md shrink-0 flex items-center justify-center p-1">
                   <img
                     src={bilibiliLogo}
                     alt="US Bilibili 162 Logo"
-                    className="w-full h-full object-cover scale-[1.12] block"
+                    className="w-full h-full object-contain block"
                     referrerPolicy="no-referrer"
                   />
                 </div>
