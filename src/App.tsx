@@ -77,7 +77,7 @@ import { auth, signInWithGoogle } from './utils/firebase';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 
 // Brand Assets
-import bilibiliLogo from './assets/images/us_bilibili_logo.png';
+import bilibiliLogo from './assets/images/logousbilibili162.png';
 
 // Lucide icons
 import { 
@@ -1452,7 +1452,7 @@ export default function App() {
               <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-slate-600 bg-white shadow-xl flex items-center justify-center p-0.5">
                 <img 
                   src={bilibiliLogo} 
-                  alt="US Bilibili 162 Logo" 
+                  alt="US BILIBILI 162 OFFICIAL LOGO" 
                   className="w-full h-full object-contain"
                   referrerPolicy="no-referrer"
                 />
@@ -1801,7 +1801,7 @@ export default function App() {
             <div className={`p-4 border-b ${theme.headerBorder} flex items-center justify-between`}>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-yellow-400 bg-white shadow-md shrink-0 flex items-center justify-center">
-                  <img src={bilibiliLogo} alt="Logo" className="w-full h-full object-contain p-0.5" referrerPolicy="no-referrer" />
+                  <img src={bilibiliLogo} alt="US BILIBILI 162" className="w-full h-full object-contain p-0.5" referrerPolicy="no-referrer" />
                 </div>
                 <div className="overflow-hidden">
                   <h1 className="font-black text-xs text-white truncate uppercase tracking-tight">US Bilibili 162</h1>
@@ -1859,7 +1859,7 @@ export default function App() {
               ) : (
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 border-yellow-400 bg-white shadow-md shrink-0 flex items-center justify-center">
-                    <img src={bilibiliLogo} alt="Logo" className="w-full h-full object-cover scale-[1.12]" referrerPolicy="no-referrer" />
+                    <img src={bilibiliLogo} alt="US BILIBILI 162" className="w-full h-full object-contain p-0.5" referrerPolicy="no-referrer" />
                   </div>
                   <div className="flex flex-col min-w-0">
                     <h1 className="font-black tracking-tight text-xs sm:text-base font-sans uppercase truncate leading-tight">
@@ -2063,8 +2063,8 @@ export default function App() {
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-3 border-yellow-400 bg-white shadow-xl shrink-0 flex items-center justify-center">
                   <img
                     src={bilibiliLogo}
-                    alt="Logo US Bilibili 162"
-                    className="w-full h-full object-cover scale-[1.12] block"
+                    alt="US BILIBILI 162 IDENTITY"
+                    className="w-full h-full object-contain p-1 block"
                     referrerPolicy="no-referrer"
                   />
                 </div>
@@ -2944,7 +2944,7 @@ export default function App() {
                 <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-yellow-400 bg-white shadow-md shrink-0 flex items-center justify-center p-1">
                   <img
                     src={bilibiliLogo}
-                    alt="US Bilibili 162 Logo"
+                    alt="US BILIBILI 162 BRAND"
                     className="w-full h-full object-contain block"
                     referrerPolicy="no-referrer"
                   />

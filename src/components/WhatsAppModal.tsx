@@ -284,7 +284,8 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
     }
     .pdf-header-logo {
       width: 8mm !important;
-      height: 8mm !important;
+      height: auto !important;
+      max-height: 8mm !important;
       object-fit: contain !important;
       margin: 0 !important;
       display: block !important;

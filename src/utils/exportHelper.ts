@@ -5,7 +5,7 @@
 
 import { WeighbridgeTicket, OutboundRecord, RiceStockRecord, InboundRecord, ServiceRecord } from '../types';
 import { formatReceiptDate } from './format';
-import bilibiliLogo from '../assets/images/us_bilibili_logo.png';
+import bilibiliLogo from '../assets/images/logousbilibili162.png';
 
 export function exportToCSV(headers: string[], rows: string[][], filename: string) {
   const csvContent = [
@@ -164,7 +164,7 @@ export function printPDFReport(
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px;">
           <tr>
             <td style="width: 100px; text-align: left; vertical-align: middle;">
-              <img src="${bilibiliLogo}" alt="US Bilibili 162" style="width: 80px; height: auto;" />
+              <img src="${bilibiliLogo}" alt="US BILIBILI 162 OFFICIAL" style="width: 80px; height: auto;" />
             </td>
             <td style="text-align: left; vertical-align: middle; padding-left: 15px;">
               <h2 style="margin: 0; font-size: 16px; letter-spacing: 0.5px; font-weight: 900; text-transform: uppercase;">
@@ -338,7 +338,8 @@ const COMMON_SLIP_STYLE = `
     img, .header-logo {
       display: block !important;
       width: 9.5mm !important;
-      height: 9.5mm !important;
+      height: auto !important;
+      max-height: 9.5mm !important;
     }
 
     .slip {
@@ -598,7 +599,7 @@ export function printCombinedSlip(record: InboundRecord, ticket: WeighbridgeTick
     <div class="slip">
       <div class="header" style="display: block; margin-bottom: 2px;">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <img src="${bilibiliLogo}" alt="Logo" style="width: 32px; height: auto;" />
+          <img src="${bilibiliLogo}" alt="US BILIBILI 162 BRAND" style="width: 32px; height: auto;" />
           <div style="text-align: left;">
             <div class="header-title" style="font-size: 10pt; font-weight: 950; text-transform: uppercase;">US Bilibili 162</div>
             <div class="header-subtitle" style="font-size: 7pt; font-weight: normal; line-height: 1.1;">
