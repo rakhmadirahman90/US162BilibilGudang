@@ -377,7 +377,7 @@ export default function ProfitLossTab({
       <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
         <div>
           <h3 className="font-black text-neutral-800 text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2">
-            <Filter className="text-emerald-700 w-4 h-4 sm:w-5 sm:h-5" />
+            <Filter className="text-blue-700 w-4 h-4 sm:w-5 sm:h-5" />
             Rentang Laporan Keuangan
           </h3>
           <p className="text-[10px] text-neutral-400 mt-0.5 uppercase">
@@ -393,7 +393,7 @@ export default function ProfitLossTab({
             <button
               onClick={() => setPreset('ALL')}
               className={`px-3 py-1.5 text-[10px] uppercase font-black rounded-md transition cursor-pointer ${
-                preset === 'ALL' ? 'bg-white text-emerald-800 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'
+                preset === 'ALL' ? 'bg-white text-blue-800 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'
               }`}
             >
               Semua Periode
@@ -401,7 +401,7 @@ export default function ProfitLossTab({
             <button
               onClick={() => setPreset('BULAN_INI')}
               className={`px-3 py-1.5 text-[10px] uppercase font-black rounded-md transition cursor-pointer ${
-                preset === 'BULAN_INI' ? 'bg-white text-emerald-800 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'
+                preset === 'BULAN_INI' ? 'bg-white text-blue-800 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'
               }`}
             >
               Bulan ini
@@ -409,7 +409,7 @@ export default function ProfitLossTab({
             <button
               onClick={() => setPreset('MINGGU_INI')}
               className={`px-3 py-1.5 text-[10px] uppercase font-black rounded-md transition cursor-pointer ${
-                preset === 'MINGGU_INI' ? 'bg-white text-emerald-800 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'
+                preset === 'MINGGU_INI' ? 'bg-white text-blue-800 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'
               }`}
             >
               Minggu ini
@@ -417,7 +417,7 @@ export default function ProfitLossTab({
             <button
               onClick={() => setPreset('CUSTOM')}
               className={`px-3 py-1.5 text-[10px] uppercase font-black rounded-md transition cursor-pointer ${
-                preset === 'CUSTOM' ? 'bg-white text-emerald-800 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'
+                preset === 'CUSTOM' ? 'bg-white text-blue-800 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'
               }`}
             >
               Kustom
@@ -458,12 +458,12 @@ export default function ProfitLossTab({
         
         {/* REVENUE CARD */}
         <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm flex items-center gap-4">
-          <div className="bg-emerald-50 text-emerald-600 p-3 rounded-full">
+          <div className="bg-blue-50 text-blue-600 p-3 rounded-full">
             <ArrowUpRight className="w-6 h-6" />
           </div>
           <div>
             <span className="text-[10px] text-neutral-400 font-bold uppercase block tracking-wider leading-none">TOTAL OUTBOUND REVENUE</span>
-            <span className="text-lg font-black text-emerald-700 font-mono mt-1 block">Rp {totalRevenue.toLocaleString('id-ID')}</span>
+            <span className="text-lg font-black text-blue-700 font-mono mt-1 block">Rp {totalRevenue.toLocaleString('id-ID')}</span>
             <span className="text-[9px] text-neutral-500 block uppercase mt-0.5">Penjualan bervariasi komoditi</span>
           </div>
         </div>
@@ -494,10 +494,10 @@ export default function ProfitLossTab({
 
         {/* NET PROFIT/LOSS CARD */}
         <div className={`rounded-xl p-4 shadow-sm flex items-center gap-4 border ${
-          netProfit >= 0 ? 'bg-emerald-50/50 border-emerald-250' : 'bg-red-50/50 border-red-250'
+          netProfit >= 0 ? 'bg-blue-50/50 border-blue-250' : 'bg-red-50/50 border-red-250'
         }`}>
           <div className={`p-3 rounded-full ${
-            netProfit >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+            netProfit >= 0 ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'
           }`}>
             {netProfit >= 0 ? <TrendingUp className="w-6 h-6" /> : <TrendingDown className="w-6 h-6" />}
           </div>
@@ -506,7 +506,7 @@ export default function ProfitLossTab({
               {netProfit >= 0 ? 'BERSIH / NET INCOME' : 'NET DEFICIT / RUGI'}
             </span>
             <span className={`text-lg font-black font-mono mt-1 block ${
-              netProfit >= 0 ? 'text-emerald-700' : 'text-red-700'
+              netProfit >= 0 ? 'text-blue-700' : 'text-red-700'
             }`}>
               Rp {netProfit.toLocaleString('id-ID')}
             </span>
@@ -521,7 +521,7 @@ export default function ProfitLossTab({
       {/* 3. DYNAMIC PROGRESS COMPARISON CHART */}
       <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm">
         <h4 className="font-bold text-neutral-800 text-xs uppercase tracking-wider mb-4 pb-2 border-b border-neutral-100 flex items-center gap-2">
-          <Activity className="text-emerald-600 w-4.5 h-4.5" />
+          <Activity className="text-blue-600 w-4.5 h-4.5" />
           Perbandingan Arus kas & Laba Operasional Berjalan
         </h4>
 
@@ -538,11 +538,11 @@ export default function ProfitLossTab({
               <div>
                 <div className="flex justify-between mb-1">
                   <span className="text-neutral-600 uppercase">📈 TOTAL PENDAPATAN (REVENUE) - 100%</span>
-                  <span className="text-emerald-800 font-mono">Rp {totalRevenue.toLocaleString('id-ID')}</span>
+                  <span className="text-blue-800 font-mono">Rp {totalRevenue.toLocaleString('id-ID')}</span>
                 </div>
                 <div className="w-full bg-neutral-100 h-4 rounded-lg overflow-hidden border border-neutral-200">
                   <div 
-                    className="bg-gradient-to-r from-emerald-500 to-emerald-600 h-full rounded-lg transition-all duration-700 shadow-inner"
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 h-full rounded-lg transition-all duration-700 shadow-inner"
                     style={{ width: `${revPercent}%` }}
                   ></div>
                 </div>
@@ -580,12 +580,12 @@ export default function ProfitLossTab({
               {netProfit > 0 && (
                 <div>
                   <div className="flex justify-between mb-1">
-                    <span className="text-emerald-700 uppercase">🏆 LABA BERSIH (NET INCOME SURPLUS)</span>
-                    <span className="text-emerald-700 font-mono">Rp {netProfit.toLocaleString('id-ID')} ({netMarginPercent.toFixed(1)}%)</span>
+                    <span className="text-blue-700 uppercase">🏆 LABA BERSIH (NET INCOME SURPLUS)</span>
+                    <span className="text-blue-700 font-mono">Rp {netProfit.toLocaleString('id-ID')} ({netMarginPercent.toFixed(1)}%)</span>
                   </div>
                   <div className="w-full bg-neutral-100 h-4 rounded-lg overflow-hidden border border-neutral-200">
                     <div 
-                      className="bg-gradient-to-r from-teal-400 to-teal-500 h-full rounded-lg transition-all duration-700"
+                      className="bg-gradient-to-r from-sky-400 to-sky-500 h-full rounded-lg transition-all duration-700"
                       style={{ width: `${profitPercent}%` }}
                     ></div>
                   </div>
@@ -602,20 +602,20 @@ export default function ProfitLossTab({
            RINCIAN LABA DRYER JAGUNG
         </h4>
         <div className="text-[11px] font-bold">
-           <div className="flex justify-between border-b pb-1 mb-2"><span>Jasa Dryer (${totalDryerTonnage.toLocaleString('id-ID')} Kg)</span><span>Rp ${totalDryerRevenue.toLocaleString('id-ID')}</span></div>
-           <div className="flex justify-between"><span>Upah Buruh Timbang</span><span>Rp ${laborBuruhTimbang.toLocaleString('id-ID')}</span></div>
-           <div className="flex justify-between"><span>Upah Buruh Muat</span><span>Rp ${laborBuruhMuat.toLocaleString('id-ID')}</span></div>
-           <div className="flex justify-between"><span>Listrik Dryer</span><span>Rp ${biayaListrikDrying.toLocaleString('id-ID')}</span></div>
-           <div className="flex justify-between"><span>Gaji Operator Dryer</span><span>Rp ${gajiOperatorDrying.toLocaleString('id-ID')}</span></div>
-           <div className="flex justify-between"><span>Cangkang Kemiri</span><span>Rp ${biayaCangkang.toLocaleString('id-ID')}</span></div>
-           <div className="flex justify-between border-b pb-1 mb-2"><span>Pengeluaran Tambahan</span><span>Rp ${biayaTambahanDrying.toLocaleString('id-ID')}</span></div>
-           <div className="flex justify-between text-emerald-800 font-black">
+           <div className="flex justify-between border-b pb-1 mb-2"><span>Jasa Dryer ({totalDryerTonnage.toLocaleString('id-ID')} Kg)</span><span>Rp {totalDryerRevenue.toLocaleString('id-ID')}</span></div>
+           <div className="flex justify-between"><span>Upah Buruh Timbang</span><span>Rp {laborBuruhTimbang.toLocaleString('id-ID')}</span></div>
+           <div className="flex justify-between"><span>Upah Buruh Muat</span><span>Rp {laborBuruhMuat.toLocaleString('id-ID')}</span></div>
+           <div className="flex justify-between"><span>Listrik Dryer</span><span>Rp {biayaListrikDrying.toLocaleString('id-ID')}</span></div>
+           <div className="flex justify-between"><span>Gaji Operator Dryer</span><span>Rp {gajiOperatorDrying.toLocaleString('id-ID')}</span></div>
+           <div className="flex justify-between"><span>Cangkang Kemiri</span><span>Rp {biayaCangkang.toLocaleString('id-ID')}</span></div>
+           <div className="flex justify-between border-b pb-1 mb-2"><span>Pengeluaran Tambahan</span><span>Rp {biayaTambahanDrying.toLocaleString('id-ID')}</span></div>
+           <div className="flex justify-between text-blue-800 font-black">
               <span>JASA DRYER (LABA/RUGI)</span>
-              <span>Rp ${dryerProfit.toLocaleString('id-ID')}</span>
+              <span>Rp {dryerProfit.toLocaleString('id-ID')}</span>
            </div>
            <div className="flex justify-between text-blue-800 font-black mt-2 pt-2 border-t border-neutral-200">
               <span>SALDO AKUMULASI JASA DRYER</span>
-              <span>Rp ${cumulativeDryerProfit.toLocaleString('id-ID')}</span>
+              <span>Rp {cumulativeDryerProfit.toLocaleString('id-ID')}</span>
            </div>
         </div>
       </div>
@@ -647,9 +647,9 @@ export default function ProfitLossTab({
               <span className="text-neutral-600 uppercase font-normal">Jasa Mutasi Kas & Timbangan Lain-lain</span>
               <span className="font-mono text-neutral-800">Rp {otherFinancialCredits.toLocaleString('id-ID')}</span>
             </div>
-            <div className="bg-emerald-50/20 px-6 py-2.5 flex justify-between font-black border-t border-neutral-200/85">
-              <span className="text-emerald-800 uppercase text-[11.5px]">TOTAL REVENUE</span>
-              <span className="font-mono text-emerald-800 text-[11.5px]">Rp {totalRevenue.toLocaleString('id-ID')}</span>
+            <div className="bg-blue-50/20 px-6 py-2.5 flex justify-between font-black border-t border-neutral-200/85">
+              <span className="text-blue-800 uppercase text-[11.5px]">TOTAL REVENUE</span>
+              <span className="font-mono text-blue-800 text-[11.5px]">Rp {totalRevenue.toLocaleString('id-ID')}</span>
             </div>
           </div>
 
@@ -671,9 +671,9 @@ export default function ProfitLossTab({
           </div>
 
           {/* GROSS MARGIN ROW */}
-          <div className="bg-emerald-50/60 border-b border-neutral-200/60 px-4 py-3 flex justify-between font-black">
-            <span className="text-emerald-800 uppercase text-[12px] tracking-tight">III. LABA KOTOR (GROSS profit MARGIN)</span>
-            <span className="font-mono text-emerald-900 text-[12px]">Rp {grossProfit.toLocaleString('id-ID')}</span>
+          <div className="bg-blue-50/60 border-b border-neutral-200/60 px-4 py-3 flex justify-between font-black">
+            <span className="text-blue-800 uppercase text-[12px] tracking-tight">III. LABA KOTOR (GROSS profit MARGIN)</span>
+            <span className="font-mono text-blue-900 text-[12px]">Rp {grossProfit.toLocaleString('id-ID')}</span>
           </div>
 
           {/* IV. OPERATIONAL EXPENSES */}
@@ -711,7 +711,7 @@ export default function ProfitLossTab({
 
           {/* NET SURPLUS SUMMARY */}
           <div className={`px-4 py-3.5 flex justify-between font-black border-t-2 border-neutral-450 ${
-            netProfit >= 0 ? 'bg-gradient-to-r from-emerald-600 to-emerald-700 text-white' : 'bg-gradient-to-r from-red-600 to-red-700 text-white'
+            netProfit >= 0 ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white' : 'bg-gradient-to-r from-red-600 to-red-700 text-white'
           }`}>
             <span className="uppercase text-[12px] tracking-wider">🌟 {netProfit >= 0 ? 'SURPLUS BERSIH PERIODE BERJALAN (NET PROFIT)' : 'DEFISIT BERSIH PERIODE BERJALAN (NET LOSS)'}</span>
             <span className="font-mono text-[13px]">Rp {netProfit.toLocaleString('id-ID')}</span>

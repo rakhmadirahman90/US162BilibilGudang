@@ -618,7 +618,7 @@ export default function ReportsModule({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="font-extrabold text-neutral-800 text-base sm:text-lg flex items-center gap-2">
-              <SlidersHorizontal className="text-emerald-600 w-5 h-5" />
+              <SlidersHorizontal className="text-blue-700 w-5 h-5" />
               {t.reportsTitle}
             </h2>
             <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
@@ -647,7 +647,7 @@ export default function ReportsModule({
               type="date" 
               value={startDate}
               onChange={e => setStartDate(e.target.value)}
-              className="w-full text-xs font-semibold px-3 py-2 bg-neutral-55 border border-neutral-250 rounded-lg text-neutral-700 focus:outline-none focus:border-emerald-600 focus:bg-white"
+              className="w-full text-xs font-semibold px-3 py-2 bg-neutral-55 border border-neutral-250 rounded-lg text-neutral-700 focus:outline-none focus:border-blue-600 focus:bg-white"
             />
           </div>
 
@@ -661,7 +661,7 @@ export default function ReportsModule({
               type="date" 
               value={endDate}
               onChange={e => setEndDate(e.target.value)}
-              className="w-full text-xs font-semibold px-3 py-2 bg-neutral-55 border border-neutral-250 rounded-lg text-neutral-700 focus:outline-none focus:border-emerald-600 focus:bg-white"
+              className="w-full text-xs font-semibold px-3 py-2 bg-neutral-55 border border-neutral-250 rounded-lg text-neutral-700 focus:outline-none focus:border-blue-600 focus:bg-white"
             />
           </div>
 
@@ -674,7 +674,7 @@ export default function ReportsModule({
             <select
               value={commodityFilter}
               onChange={e => setCommodityFilter(e.target.value)}
-              className="w-full text-xs font-semibold px-3 py-2 bg-neutral-55 border border-neutral-250 rounded-lg text-neutral-700 focus:outline-none focus:border-emerald-600 focus:bg-white cursor-pointer"
+              className="w-full text-xs font-semibold px-3 py-2 bg-neutral-55 border border-neutral-250 rounded-lg text-neutral-700 focus:outline-none focus:border-blue-700 focus:bg-white cursor-pointer"
             >
               <option value="ALL">📦 SEMUA KOMODITAS</option>
               <option value="BERAS">BERAS</option>
@@ -710,7 +710,7 @@ export default function ReportsModule({
                 placeholder="Cari Agen, No. Polisi, Plat, Mitra..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs font-semibold bg-neutral-55 border border-neutral-250 rounded-lg text-neutral-700 focus:outline-none focus:border-emerald-600 focus:bg-white"
+                className="w-full pl-9 pr-3 py-2 text-xs font-semibold bg-neutral-55 border border-neutral-250 rounded-lg text-neutral-700 focus:outline-none focus:border-blue-700 focus:bg-white"
               />
             </div>
           </div>
@@ -724,7 +724,7 @@ export default function ReportsModule({
           onClick={() => setActiveSubTab('RINGKASAN')}
           className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-extrabold transition cursor-pointer whitespace-nowrap ${
             activeSubTab === 'RINGKASAN'
-              ? 'bg-emerald-950 text-white'
+              ? 'bg-slate-900 text-white'
               : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-50'
           }`}
         >
@@ -748,7 +748,7 @@ export default function ReportsModule({
           onClick={() => setActiveSubTab('INBOUND')}
           className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-extrabold transition cursor-pointer whitespace-nowrap ${
             activeSubTab === 'INBOUND'
-              ? 'bg-emerald-800 text-white'
+              ? 'bg-blue-800 text-white'
               : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-50'
           }`}
         >
@@ -842,13 +842,13 @@ export default function ReportsModule({
               <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
                 <div>
                   <span className="text-[9px] font-black tracking-wider text-neutral-400 block uppercase font-mono">Total Tonase Masuk</span>
-                  <span className="text-2xl font-black text-emerald-800 font-mono mt-1 block">
+                  <span className="text-2xl font-black text-blue-900 font-mono mt-1 block">
                     {(consolidatedStats.totalTonaseMasuk / 1000).toFixed(2)} <span className="text-xs text-neutral-500">Ton</span>
                   </span>
                   <p className="text-[10px] text-neutral-500 mt-1">Total berat netto beras, jagung yang diterima gudang.</p>
                 </div>
-                <div className="h-1 bg-emerald-100 rounded-full overflow-hidden mt-4">
-                  <div className="h-full bg-emerald-600 rounded-full" style={{ width: '70%' }}></div>
+                <div className="h-1 bg-blue-100 rounded-full overflow-hidden mt-4">
+                  <div className="h-full bg-blue-700 rounded-full" style={{ width: '70%' }}></div>
                 </div>
               </div>
 
@@ -871,7 +871,7 @@ export default function ReportsModule({
                   <span className="text-xl font-bold font-mono mt-1 block text-neutral-800">
                     Rp {consolidatedStats.netKasBalance.toLocaleString('id-ID')}
                   </span>
-                  <p className="text-[10px] text-neutral-300 mt-1"><span className="text-emerald-600">Inflows: Rp {consolidatedStats.totalDebit.toLocaleString('id-ID')}</span></p>
+                  <p className="text-[10px] text-neutral-300 mt-1"><span className="text-blue-700">Inflows: Rp {consolidatedStats.totalDebit.toLocaleString('id-ID')}</span></p>
                 </div>
                 <div className="h-1 bg-stone-100 rounded-full overflow-hidden mt-4">
                   <div className="h-full bg-stone-700 rounded-full" style={{ width: '65%' }}></div>
@@ -919,8 +919,8 @@ export default function ReportsModule({
                       <span>🌾 Beras Giling GSC</span>
                       <span>{(consolidatedStats.tonaseRice / 1000).toLocaleString('id-ID')} Ton</span>
                     </div>
-                    <div className="h-4 bg-emerald-50 rounded border border-emerald-200 overflow-hidden flex">
-                      <div className="h-full bg-emerald-600" style={{ width: `${Math.max(10, Math.min(100, (consolidatedStats.tonaseRice / (consolidatedStats.totalTonaseMasuk || 1)) * 100))}%` }}></div>
+                    <div className="h-4 bg-blue-50 rounded border border-blue-200 overflow-hidden flex">
+                      <div className="h-full bg-blue-700" style={{ width: `${Math.max(10, Math.min(100, (consolidatedStats.tonaseRice / (consolidatedStats.totalTonaseMasuk || 1)) * 100))}%` }}></div>
                     </div>
                   </div>
                   
@@ -960,7 +960,7 @@ export default function ReportsModule({
 
                   <div className="text-[10px] text-neutral-500 bg-neutral-50 p-2.5 rounded-lg border border-dashed border-neutral-200 leading-relaxed mt-2 font-mono flex justify-between items-center">
                     <span>Kas Berjalan Bersih (Net Margin):</span>
-                    <strong className={`text-xs ${consolidatedStats.netKasBalance >= 0 ? "text-emerald-700" : "text-red-600"}`}>
+                    <strong className={`text-xs ${consolidatedStats.netKasBalance >= 0 ? "text-blue-700" : "text-red-600"}`}>
                       Rp {consolidatedStats.netKasBalance.toLocaleString('id-ID')}
                     </strong>
                   </div>
@@ -1006,7 +1006,7 @@ export default function ReportsModule({
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleExportTicketsExcel}
-                  className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                  className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-200 transition cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" /> Export Excel
                 </button>
@@ -1046,7 +1046,7 @@ export default function ReportsModule({
                       <td className="p-2 text-neutral-800 font-medium">{t.agency}</td>
                       <td className="p-2 text-right font-mono">{t.timbang1Weight.toLocaleString('id-ID')}</td>
                       <td className="p-2 text-right font-mono">{t.timbang2Weight > 0 ? t.timbang2Weight.toLocaleString('id-ID') : '-'}</td>
-                      <td className="p-2 text-right font-black text-emerald-600 font-mono">{t.netWeight.toLocaleString('id-ID')} Kg</td>
+                      <td className="p-2 text-right font-black text-blue-700 font-mono">{t.netWeight.toLocaleString('id-ID')} Kg</td>
                       <td className="p-2 text-center">
                         <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
                           t.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
@@ -1081,7 +1081,7 @@ export default function ReportsModule({
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleExportInboundExcel}
-                  className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                  className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-200 transition cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" /> Export Excel
                 </button>
@@ -1124,7 +1124,7 @@ export default function ReportsModule({
                       <td className="p-2 text-right font-mono">{(r.grossWeight ?? 0).toLocaleString('id-ID')}</td>
                       <td className="p-2 text-right font-mono text-neutral-600">{r.moistureContent}%</td>
                       <td className="p-2 text-right font-mono text-neutral-600">{r.refaksiKaPercent}%</td>
-                      <td className="p-2 text-right font-black text-emerald-800 font-mono">{(r.netWeight ?? 0).toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-right font-black text-blue-900 font-mono">{(r.netWeight ?? 0).toLocaleString('id-ID')}</td>
                       <td className="p-2 text-neutral-550 font-medium text-[10px]">{r.warehouseSection}</td>
                       <td className="p-2 text-right font-mono text-neutral-650">Rp {(r.laborCost ?? 0).toLocaleString('id-ID')}</td>
                     </tr>
@@ -1154,7 +1154,7 @@ export default function ReportsModule({
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleExportOutboundExcel}
-                  className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                  className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-200 transition cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" /> Export Excel
                 </button>
@@ -1229,7 +1229,7 @@ export default function ReportsModule({
                     const headers = ['Tanggal', 'No. Batch', 'Pelanggan', 'Basah (Kg)', 'Kering (Kg)', 'Susut (Kg)', 'Biaya (Rp)', 'Status'];
                     exportToCSV(headers, filteredDryer.map(r => [r.date, r.batchNo, r.customerName, r.wetWeight.toString(), r.dryWeight.toString(), (r.wetWeight - r.dryWeight).toString(), r.totalCost.toString(), r.status]), 'Laporan_Rekapan_Dryer_Bilibili');
                   }}
-                  className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                  className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-200 transition cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" /> Export Excel
                 </button>
@@ -1270,8 +1270,8 @@ export default function ReportsModule({
                     <tr key={s.id} className="hover:bg-neutral-50 transition-colors">
                       <td className="p-2 text-neutral-500"><div className="font-bold">{s.date}</div><div className="font-mono text-[9px]">{s.batchNo}</div></td>
                       <td className="p-2 font-semibold text-neutral-800">{s.customerName}</td>
-                      <td className="p-2 text-right text-emerald-700 font-mono">{(s.wetWeight).toLocaleString('id-ID')}</td>
-                      <td className="p-2 text-right text-emerald-700 font-mono">{(s.dryWeight).toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-right text-blue-800 font-mono">{(s.wetWeight).toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-right text-blue-800 font-mono">{(s.dryWeight).toLocaleString('id-ID')}</td>
                       <td className="p-2 text-right text-rose-600 font-mono font-bold">{(s.wetWeight - s.dryWeight).toLocaleString('id-ID')}</td>
                       <td className="p-2 text-center text-neutral-800 font-mono">Rp {s.totalCost.toLocaleString('id-ID')}</td>
                       <td className="p-2 text-center">
@@ -1307,7 +1307,7 @@ export default function ReportsModule({
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleExportServicesExcel}
-                  className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                  className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-200 transition cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" /> Export Excel
                 </button>
@@ -1378,7 +1378,7 @@ export default function ReportsModule({
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleExportFinancesExcel}
-                  className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                  className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-200 transition cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" /> Export Excel
                 </button>
@@ -1412,7 +1412,7 @@ export default function ReportsModule({
                       <td className="p-2 font-medium text-neutral-800">{f.description}</td>
                       <td className="p-2 text-neutral-550">{f.partyName || '-'}</td>
                       <td className="p-2 font-medium text-[10px] text-neutral-600 font-mono">{f.bankAccount}</td>
-                      <td className="p-2 text-right text-emerald-700 font-bold font-mono">
+                      <td className="p-2 text-right text-blue-800 font-bold font-mono">
                         {f.type === 'DEBIT' ? `+ Rp ${f.amount.toLocaleString('id-ID')}` : '-'}
                       </td>
                       <td className="p-2 text-right text-red-650 text-red-600 font-bold font-mono font-medium">
@@ -1445,7 +1445,7 @@ export default function ReportsModule({
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleExportRiceStockExcel}
-                  className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                  className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-200 transition cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" /> Export Excel
                 </button>
@@ -1467,7 +1467,7 @@ export default function ReportsModule({
                     <th className="p-2">Keterangan Aktivitas</th>
                     <th className="p-2">Komoditas</th>
                     <th className="p-2 text-right">Harga (Rp)</th>
-                    <th className="p-2 text-right text-emerald-700 font-bold">Masuk (Kg)</th>
+                    <th className="p-2 text-right text-blue-800 font-bold">Masuk (Kg)</th>
                     <th className="p-2 text-right text-rose-600 font-bold">Keluar (Kg)</th>
                   </tr>
                 </thead>
@@ -1479,7 +1479,7 @@ export default function ReportsModule({
                       <td className="p-2 font-medium text-neutral-700">{r.description}</td>
                       <td className="p-2"><span className="bg-neutral-100 text-neutral-800 px-1.5 py-0.5 rounded font-bold uppercase text-[10px]">{r.itemName}</span></td>
                       <td className="p-2 text-right text-neutral-600 font-mono">Rp {r.price.toLocaleString('id-ID')}</td>
-                      <td className="p-2 text-right font-black text-emerald-700 font-mono">{r.inWeight > 0 ? `${r.inWeight.toLocaleString('id-ID')} Kg` : '-'}</td>
+                      <td className="p-2 text-right font-black text-blue-800 font-mono">{r.inWeight > 0 ? `${r.inWeight.toLocaleString('id-ID')} Kg` : '-'}</td>
                       <td className="p-2 text-right font-black text-rose-600 font-mono">{r.outWeight > 0 ? `${r.outWeight.toLocaleString('id-ID')} Kg` : '-'}</td>
                     </tr>
                   ))}
@@ -1508,7 +1508,7 @@ export default function ReportsModule({
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleExportDebtsExcel}
-                  className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                  className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-200 transition cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" /> Export Excel
                 </button>
@@ -1541,7 +1541,7 @@ export default function ReportsModule({
                       <td className="p-2 font-bold text-neutral-800">{d.supplierName}</td>
                       <td className="p-2 text-neutral-600 font-medium">{d.description}</td>
                       <td className="p-2 text-right font-mono font-medium">Rp {d.totalDebt.toLocaleString('id-ID')}</td>
-                      <td className="p-2 text-right text-emerald-700 font-mono">Rp {d.paidAmount.toLocaleString('id-ID')}</td>
+                      <td className="p-2 text-right text-blue-800 font-mono">Rp {d.paidAmount.toLocaleString('id-ID')}</td>
                       <td className="p-2 text-right text-rose-600 font-mono font-bold">Rp {d.remainingBalance.toLocaleString('id-ID')}</td>
                       <td className="p-2 text-center">
                         <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold ${

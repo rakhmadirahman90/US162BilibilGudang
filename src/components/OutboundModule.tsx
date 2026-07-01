@@ -508,7 +508,7 @@ export default function OutboundModule({
             <button
               onClick={handleExportExcel}
               title="Unduh seluruh daftar rekap pengiriman barang keluar ke format Microsoft Excel"
-              className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+              className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-200 transition cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" /> Export Excel
             </button>
@@ -584,7 +584,7 @@ export default function OutboundModule({
                   <td className="py-2.5 px-3 uppercase font-medium text-neutral-800">{r.buyer}</td>
                   <td className="py-2.5 px-3">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                      r.commodity?.includes('BERAS') ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' :
+                      r.commodity?.includes('BERAS') ? 'bg-blue-100 text-blue-800 border border-blue-200' :
                       r.commodity?.includes('JAGUNG') ? 'bg-amber-100 text-amber-800 border border-amber-200' :
                       'bg-blue-100 text-blue-800 font-bold'
                     }`}>
@@ -594,10 +594,10 @@ export default function OutboundModule({
                   <td className="text-right py-2.5 px-3 font-semibold font-mono text-neutral-700">
                     {r.price ? `Rp ${r.price.toLocaleString('id-ID')}` : '-'}
                   </td>
-                  <td className="text-right py-2.5 px-3 font-bold font-mono text-emerald-600">
+                  <td className="text-right py-2.5 px-3 font-bold font-mono text-blue-700">
                     {(r.totalWeight ?? 0).toLocaleString('id-ID')} kg
                   </td>
-                  <td className="text-right py-2.5 px-3 font-bold font-mono text-emerald-700">
+                  <td className="text-right py-2.5 px-3 font-bold font-mono text-blue-900">
                     {r.price ? `Rp ${(r.totalWeight * r.price).toLocaleString('id-ID')}` : '-'}
                   </td>
                   <td className="py-2.5 px-3 text-neutral-600 italic">
@@ -611,7 +611,7 @@ export default function OutboundModule({
                   </td>
                   <td className="py-2.5 px-3 text-center">
                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                      r.status === 'SHIPPED' ? 'bg-green-100 text-green-700' : 'bg-[#e0efff] text-blue-700'
+                      r.status === 'SHIPPED' ? 'bg-blue-100 text-blue-800' : 'bg-[#e0efff] text-blue-700'
                     }`}>
                       {r.status === 'SHIPPED' ? 'SHIPPED 🚚' : 'LOADING ⏳'}
                     </span>
@@ -633,7 +633,7 @@ export default function OutboundModule({
                           pdfHtml: getHTMLForPDF(printOutboundSlip, r, tickets.find(t => t.ticketNo === r.ticketNo), staffName),
                           pdfFileName: `Resi_Pengiriman_${r.invoiceNo || r.id.substring(0,8)}.pdf`
                         })}
-                        className="text-neutral-400 hover:text-emerald-600 transition p-1 cursor-pointer"
+                        className="text-neutral-400 hover:text-blue-700 transition p-1 cursor-pointer"
                         title="Kirim ke WA"
                       >
                         <MessageCircle className="w-3.5 h-3.5" />
@@ -729,7 +729,7 @@ export default function OutboundModule({
 
               <div className="bg-neutral-50 p-3 border border-dashed border-neutral-300 rounded font-mono text-[10px] text-neutral-800 leading-tight shadow-inner">
                 <div className="text-center border-b border-neutral-300 pb-1 mb-2">
-                  <div className="font-bold text-xs tracking-widest text-emerald-950">CV. BILIBILI 162</div>
+                  <div className="font-bold text-xs tracking-widest text-blue-950">CV. BILIBILI 162</div>
                   <div className="text-[8px] opacity-70">Jalan Poros Pinrang-Polman KM. 12</div>
                   <div className="text-[8px] opacity-70">Desa Bilibili, Kec. Suppa, Kab. Pinrang</div>
                 </div>
@@ -795,7 +795,7 @@ export default function OutboundModule({
                   })()}
                   <div className="flex justify-between items-center mt-1 text-[9px]">
                     <span className="font-bold text-neutral-500 uppercase">Total Berat :</span>
-                    <span className="font-black text-emerald-600 text-[11px]">{(previewRecord.totalWeight ?? 0).toLocaleString('id-ID')} KG</span>
+                    <span className="font-black text-blue-800 text-[11px]">{(previewRecord.totalWeight ?? 0).toLocaleString('id-ID')} KG</span>
                   </div>
                   {previewRecord.price ? (
                     <>
@@ -805,7 +805,7 @@ export default function OutboundModule({
                       </div>
                       <div className="flex justify-between items-center mt-1 text-[9px]">
                         <span className="font-bold text-neutral-500 uppercase">Total Nilai :</span>
-                        <span className="font-black text-emerald-700">Rp {((previewRecord.totalWeight ?? 0) * previewRecord.price).toLocaleString('id-ID')}</span>
+                        <span className="font-black text-blue-900">Rp {((previewRecord.totalWeight ?? 0) * previewRecord.price).toLocaleString('id-ID')}</span>
                       </div>
                     </>
                   ) : null}

@@ -453,7 +453,7 @@ export default function WeighbridgeModule({
         {/* Action Controls for terminal */}
         <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm">
           <h3 className="font-bold text-sm text-neutral-800 mb-3 flex items-center gap-1.5 border-b border-neutral-100 pb-2">
-            <Scale className="text-emerald-500 w-4 h-4" />
+            <Scale className="text-blue-500 w-4 h-4" />
             {t.operationalButtons}
           </h3>
           <div className="flex flex-col gap-2">
@@ -471,7 +471,7 @@ export default function WeighbridgeModule({
                   className={`w-full py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition cursor-pointer ${
                     isCreatingNew 
                       ? 'bg-neutral-200 text-neutral-600' 
-                      : 'bg-emerald-600 text-white hover:bg-emerald-500'
+                      : 'bg-blue-600 text-white hover:bg-blue-500'
                   }`}
                 >
                   <PlusCircle className="w-4 h-4" />
@@ -792,7 +792,7 @@ export default function WeighbridgeModule({
                     type="text" 
                     value={staffName}
                     onChange={(e) => setStaffName(e.target.value)}
-                    className="bg-[#122345] border border-[#2d4d8c] text-emerald-400 font-bold px-3 py-1 text-xs rounded outline-none focus:border-emerald-500 uppercase"
+                    className="bg-[#122345] border border-[#2d4d8c] text-blue-400 font-bold px-3 py-1 text-xs rounded outline-none focus:border-blue-500 uppercase"
                     placeholder="NAMA STAFF/OPERATOR..."
                     list="master-staff"
                   />
@@ -856,7 +856,7 @@ export default function WeighbridgeModule({
         <div className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
             <h3 className="font-bold text-neutral-800 flex items-center gap-2 shrink-0">
-              <Scale className="text-emerald-500 w-5 h-5" />
+              <Scale className="text-blue-500 w-5 h-5" />
               {t.ticketArchiveTitle} ({filteredTickets.length})
             </h3>
             
@@ -864,7 +864,7 @@ export default function WeighbridgeModule({
               <button
                 onClick={handleExportExcel}
                 title="Unduh seluruh daftar rekap jembatan timbang ke format Microsoft Excel"
-                className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+                className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-200 transition cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" /> {t.exportExcel}
               </button>
@@ -883,7 +883,7 @@ export default function WeighbridgeModule({
                   placeholder={t.searchTicketPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 text-xs bg-neutral-50 rounded-lg border border-neutral-200 focus:outline-none focus:border-emerald-600 focus:bg-white font-semibold text-neutral-700"
+                  className="w-full pl-9 pr-3 py-1.5 text-xs bg-neutral-50 rounded-lg border border-neutral-200 focus:outline-none focus:border-blue-600 focus:bg-white font-semibold text-neutral-700"
                 />
               </div>
             </div>
@@ -910,10 +910,10 @@ export default function WeighbridgeModule({
                     key={ticket.id}
                     onClick={() => { setSelectedTicket(ticket); setIsCreatingNew(false); }}
                     className={`hover:bg-neutral-50 transition-colors cursor-pointer ${
-                      selectedTicket?.id === ticket.id ? 'bg-emerald-50/50 font-medium text-neutral-900 border-l-2 border-emerald-500' : ''
+                      selectedTicket?.id === ticket.id ? 'bg-blue-50/50 font-medium text-neutral-900 border-l-2 border-blue-500' : ''
                     }`}
                   >
-                    <td className="py-2.5 px-3 font-mono text-emerald-700 font-semibold">
+                    <td className="py-2.5 px-3 font-mono text-blue-700 font-semibold">
                       {ticket.ticketNo}
                     </td>
                     <td className="py-2.5 px-3 font-semibold text-neutral-800">
@@ -929,7 +929,7 @@ export default function WeighbridgeModule({
                     <td className="text-right py-2.5 px-3 font-mono text-orange-600">
                       {(ticket.timbang2Weight ?? 0) > 0 ? (ticket.timbang2Weight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '-'}
                     </td>
-                    <td className="text-right py-2.5 px-3 font-bold font-mono text-emerald-600">
+                    <td className="text-right py-2.5 px-3 font-bold font-mono text-blue-600">
                       {(ticket.timbang2Weight > 0 
                         ? calculateNetWeight(ticket.timbang1Weight, ticket.timbang2Weight, ticket.bagDeductionPercent, ticket.refaksiPercent) 
                         : ticket.timbang1Weight
@@ -937,7 +937,7 @@ export default function WeighbridgeModule({
                     </td>
                     <td className="text-center py-2.5 px-3">
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        ticket.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700 animate-pulse'
+                        ticket.status === 'COMPLETED' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700 animate-pulse'
                       }`}>
                         {ticket.status === 'COMPLETED' ? t.completedBadge : t.waitingBadge}
                       </span>
@@ -965,7 +965,7 @@ export default function WeighbridgeModule({
                         <button 
                           onClick={() => setPrintTicket(ticket)} 
                           title="Cetak Tiket"
-                          className="p-1 text-neutral-400 hover:text-emerald-600 transition"
+                          className="p-1 text-neutral-400 hover:text-blue-600 transition"
                         >
                           <Printer className="w-3.5 h-3.5" />
                         </button>
@@ -978,7 +978,7 @@ export default function WeighbridgeModule({
                             pdfFileName: `Resi_Timbang_${ticket.ticketNo}.pdf`
                           })} 
                           title="Kirim Tiket via WA"
-                          className="p-1 text-neutral-400 hover:text-emerald-600 transition"
+                          className="p-1 text-neutral-400 hover:text-blue-600 transition"
                         >
                           <MessageCircle className="w-3.5 h-3.5" />
                         </button>
@@ -1030,7 +1030,7 @@ export default function WeighbridgeModule({
             >
               <div className="flex justify-between items-start border-b border-neutral-100 pb-3 mb-4">
                 <span className="font-bold text-neutral-800 flex items-center gap-1.5 uppercase text-xs tracking-widest">
-                  <Printer className="text-emerald-600 w-4 h-4" />
+                  <Printer className="text-blue-600 w-4 h-4" />
                   {t.printSlipPreview}
                 </span>
                 <button 
@@ -1043,7 +1043,7 @@ export default function WeighbridgeModule({
 
               <div className="bg-neutral-50 p-3 border border-dashed border-neutral-300 rounded font-mono text-[10px] text-neutral-800 leading-tight shadow-inner">
                 <div className="text-center border-b border-neutral-300 pb-1 mb-2">
-                  <div className="font-bold text-xs tracking-widest text-emerald-950">{t.thermalSlipHeader}</div>
+                  <div className="font-bold text-xs tracking-widest text-blue-950">{t.thermalSlipHeader}</div>
                   <div className="text-[8px] opacity-70">{t.thermalSlipAddress}</div>
                   <div className="text-[8px] opacity-70">{t.thermalSlipCity}</div>
                   <div className="text-[8px] opacity-70 mt-0.5">{t.thermalSlipPhone}</div>
@@ -1110,7 +1110,7 @@ export default function WeighbridgeModule({
 
                 <div className="border-b-2 border-double border-neutral-400 my-1.5" />
 
-                <div className="flex justify-between font-extrabold text-[11px] text-emerald-950">
+                <div className="flex justify-between font-extrabold text-[11px] text-blue-950">
                   <span className="uppercase">{t.netWeightLabel} :</span>
                   <span>{calculateNetWeight(printTicket.timbang1Weight, printTicket.timbang2Weight, printTicket.bagDeductionPercent, printTicket.refaksiPercent).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} KG</span>
                 </div>
@@ -1145,7 +1145,7 @@ export default function WeighbridgeModule({
                     printSlip(printTicket, staffName);
                     setPrintTicket(null);
                   }}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1.5 shadow"
+                  className="flex-1 bg-blue-700 hover:bg-blue-600 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1.5 shadow"
                 >
                   <Printer className="w-4 h-4" />
                   Cetak Slip (Printer)

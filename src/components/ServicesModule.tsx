@@ -345,7 +345,7 @@ export default function ServicesModule({
                       checked={paymentStatus === 'PAID'}
                       onChange={() => setPaymentStatus('PAID')}
                     />
-                    <span className="bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded text-[10px]">LUNAS / PAID</span>
+                    <span className="bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded text-[10px]">LUNAS / PAID</span>
                   </label>
                   <label className="flex items-center gap-1.5 cursor-pointer">
                     <input 
@@ -389,7 +389,7 @@ export default function ServicesModule({
             <button
               onClick={handleExportExcel}
               title="Unduh seluruh rekap jasa poles kipas ke Microsoft Excel"
-              className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition cursor-pointer"
+              className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-200 transition cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" /> Export Excel
             </button>
@@ -449,7 +449,7 @@ export default function ServicesModule({
                   <td className="py-2.5 px-3 text-neutral-500 italic text-[11px]">{s.operatorName}</td>
                   <td className="py-2.5 px-3 text-center">
                     <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                      s.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                      s.paymentStatus === 'PAID' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'
                     }`}>
                       {s.paymentStatus === 'PAID' ? t.paidStatus : t.unpaidStatus}
                     </span>
@@ -473,7 +473,7 @@ export default function ServicesModule({
                             pdfFileName: `Resi_Jasa_${s.id.substring(0,8)}.pdf`
                           });
                         }}
-                        className="text-neutral-400 hover:text-emerald-600 transition p-1 cursor-pointer"
+                        className="text-neutral-400 hover:text-blue-600 transition p-1 cursor-pointer"
                         title="Kirim Nota via WA"
                       >
                         <MessageCircle className="w-3.5 h-3.5" />
@@ -605,7 +605,7 @@ export default function ServicesModule({
 
                 <div className="flex justify-center mt-3">
                    <span className={`px-4 py-1 rounded-full text-[9px] font-black tracking-widest ${
-                     previewRecord.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                     previewRecord.paymentStatus === 'PAID' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'
                    }`}>
                      {previewRecord.paymentStatus === 'PAID' ? 'LUNAS / PAID' : 'BELUM LUNAS'}
                    </span>

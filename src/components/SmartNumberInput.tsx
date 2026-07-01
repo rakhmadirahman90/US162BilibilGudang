@@ -172,7 +172,7 @@ export default function SmartNumberInput({
       {/* Input Form Controls */}
       <div className={`relative flex items-center w-full transition-all rounded-xl border ${
         isFocused 
-          ? 'border-emerald-500 ring-2 ring-emerald-500/10 bg-white' 
+          ? 'border-blue-700 ring-2 ring-blue-700/10 bg-white' 
           : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
       }`}>
         {/* Left Indicator Icons */}
@@ -217,7 +217,7 @@ export default function SmartNumberInput({
               type="button"
               onClick={increment}
               tabIndex={-1}
-              className="p-1 hover:bg-slate-100 rounded text-slate-500 hover:text-emerald-500 transition-colors cursor-pointer"
+              className="p-1 hover:bg-slate-100 rounded text-slate-500 hover:text-blue-700 transition-colors cursor-pointer"
               title={`Tambah ${defaultStep}`}
             >
               <Plus className="w-3 h-3" />
@@ -229,7 +229,7 @@ export default function SmartNumberInput({
       {/* Real-time Intel / Human readable feedback "Bilangan Cerdas" */}
       {value > 0 && (
         <div className="flex items-center gap-1 pl-1 text-[10px] text-slate-500 font-semibold italic">
-          <span className="text-emerald-600">✓</span>
+          <span className="text-blue-700">✓</span>
           <span>{getShorthandText(value, mode, unit)}</span>
         </div>
       )}
@@ -248,7 +248,7 @@ export default function SmartNumberInput({
               }}
               className={`text-[10px] px-2 py-0.5 rounded font-bold font-mono border transition-all cursor-pointer ${
                 value === preset
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm font-black'
+                  ? 'bg-blue-800 text-white border-blue-800 shadow-sm font-black'
                   : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
               }`}
             >

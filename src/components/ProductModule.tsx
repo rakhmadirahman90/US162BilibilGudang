@@ -60,9 +60,9 @@ export default function ProductModule({ products }: Props) {
     }
     return { 
       text: 'Stok Melimpah / Sangat Aman', 
-      bg: 'bg-emerald-50 text-emerald-700 border-emerald-200', 
-      color: 'text-emerald-600',
-      progressColor: 'bg-emerald-500', 
+      bg: 'bg-blue-50 text-blue-700 border-blue-200', 
+      color: 'text-blue-600',
+      progressColor: 'bg-blue-500', 
       percentage: Math.min(100, (stock / 25000) * 100) 
     };
   };
@@ -72,13 +72,13 @@ export default function ProductModule({ products }: Props) {
       {/* Header Section - Extremely Compact */}
       <div className="mb-2 flex flex-row items-center justify-between gap-2 border-b border-neutral-100 pb-1 px-1">
         <div className="flex flex-row items-center gap-1.5">
-          <Package className="w-4 h-4 text-emerald-600 animate-pulse" />
+          <Package className="w-4 h-4 text-blue-600 animate-pulse" />
           <h2 className="text-sm font-black text-neutral-900 tracking-tight uppercase">
             {products.length} KATALOG PRODUK AKTIF
           </h2>
         </div>
-        <div className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full text-[8px] font-black border border-emerald-100 flex items-center gap-1 uppercase">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+        <div className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-[8px] font-black border border-blue-100 flex items-center gap-1 uppercase">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping"></span>
           REAL-TIME READY
         </div>
       </div>
@@ -93,7 +93,7 @@ export default function ProductModule({ products }: Props) {
           <div 
             key={p.id} 
             onClick={() => setSelectedProduct(p)}
-            className="group bg-white rounded-lg border border-neutral-200 shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden h-fit max-w-[140px] mx-auto w-full cursor-pointer hover:border-emerald-500 hover:scale-[1.02] transformduration-300"
+            className="group bg-white rounded-lg border border-neutral-200 shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden h-fit max-w-[140px] mx-auto w-full cursor-pointer hover:border-blue-500 hover:scale-[1.02] transformduration-300"
           >
             {/* Image Preview - smaller and tighter */}
             <div className="aspect-[4/3] bg-neutral-50 flex items-center justify-center border-b border-neutral-100 overflow-hidden relative">
@@ -130,7 +130,7 @@ export default function ProductModule({ products }: Props) {
               <div className="absolute bottom-1 right-1 opacity-75 group-hover:opacity-100 duration-200">
                 <span className={`text-[6px] font-black px-1 py-0.5 rounded uppercase ${
                   p.category === 'BERAS' ? 'bg-amber-100 text-amber-800' :
-                  p.category === 'JAGUNG' ? 'bg-emerald-100 text-emerald-800' : 'bg-neutral-150 text-neutral-800'
+                  p.category === 'JAGUNG' ? 'bg-blue-100 text-blue-800' : 'bg-neutral-150 text-neutral-800'
                 }`}>
                   {p.category}
                 </span>
@@ -138,14 +138,14 @@ export default function ProductModule({ products }: Props) {
             </div>
 
             <div className="p-1.5 flex-1 flex flex-col gap-1 bg-white">
-              <h3 className="font-black text-[9px] text-neutral-900 leading-[1.1] line-clamp-2 uppercase tracking-tighter h-[20px] group-hover:text-emerald-700 transition-colors">
+              <h3 className="font-black text-[9px] text-neutral-900 leading-[1.1] line-clamp-2 uppercase tracking-tighter h-[20px] group-hover:text-blue-700 transition-colors">
                 {p.name}
               </h3>
               
               <div className="flex flex-col gap-0.5 mt-auto">
                 <div className="flex justify-between items-center border-b border-neutral-50 pb-0.5">
                   <span className="text-[5px] font-black text-neutral-400 uppercase">RP/KG</span>
-                  <span className="font-black text-emerald-700 text-[9px] tabular-nums tracking-tighter">
+                  <span className="font-black text-blue-700 text-[9px] tabular-nums tracking-tighter">
                     {(p.pricePerKg ?? 0).toLocaleString('id-ID')}
                   </span>
                 </div>
@@ -156,7 +156,7 @@ export default function ProductModule({ products }: Props) {
                   </p>
                 </div>
               </div>
-              <div className="text-[6px] font-black uppercase text-emerald-600 text-right mt-1 tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="text-[6px] font-black uppercase text-blue-600 text-right mt-1 tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
                 Lihat Detail &rarr;
               </div>
             </div>
@@ -188,7 +188,7 @@ export default function ProductModule({ products }: Props) {
               {/* Colored Category Bar */}
               <div className={`h-1.5 w-full ${
                 selectedProduct.category === 'BERAS' ? 'bg-amber-500' :
-                selectedProduct.category === 'JAGUNG' ? 'bg-emerald-600' : 'bg-neutral-500'
+                selectedProduct.category === 'JAGUNG' ? 'bg-blue-600' : 'bg-neutral-500'
               }`} />
 
               {/* Close Button Trigger */}
@@ -229,7 +229,7 @@ export default function ProductModule({ products }: Props) {
 
                     <div className={`absolute top-2 left-2 rounded-md font-bold px-2 py-0.5 text-[8px] border text-white ${
                       selectedProduct.category === 'BERAS' ? 'bg-amber-600 border-amber-500' :
-                      selectedProduct.category === 'JAGUNG' ? 'bg-emerald-700 border-emerald-600' : 'bg-neutral-700 border-neutral-600'
+                      selectedProduct.category === 'JAGUNG' ? 'bg-blue-700 border-blue-600' : 'bg-neutral-700 border-neutral-600'
                     }`}>
                       {selectedProduct.category}
                     </div>
@@ -237,8 +237,8 @@ export default function ProductModule({ products }: Props) {
 
                   {/* Core Meta Details */}
                   <div className="flex-1 space-y-2">
-                    <div className="flex items-center gap-1 text-[9px] font-black text-emerald-700 uppercase tracking-widest">
-                      <Sparkles className="w-3 h-3 text-emerald-500 animate-spin-slow" /> Kode Produk: #{selectedProduct.id}
+                    <div className="flex items-center gap-1 text-[9px] font-black text-blue-700 uppercase tracking-widest">
+                      <Sparkles className="w-3 h-3 text-blue-500 animate-spin-slow" /> Kode Produk: #{selectedProduct.id}
                     </div>
                     <h1 className="text-md md:text-xl font-black text-neutral-900 uppercase leading-tight tracking-tight">
                       {selectedProduct.name}
@@ -262,7 +262,7 @@ export default function ProductModule({ products }: Props) {
                       <span className="text-[8px] text-neutral-500 font-bold uppercase ml-1">/ KG</span>
                     </div>
                     <span className="text-[7px] text-neutral-400 font-extrabold mt-1 uppercase flex items-center gap-1">
-                      <Coins className="w-2.5 h-2.5 text-emerald-600" /> Tarif Tetap Transaksi
+                      <Coins className="w-2.5 h-2.5 text-blue-600" /> Tarif Tetap Transaksi
                     </span>
                   </div>
 
@@ -281,16 +281,16 @@ export default function ProductModule({ products }: Props) {
                   </div>
 
                   {/* Metric Card 3: Estimasi Nilai Aset */}
-                  <div className="bg-emerald-50/50 hover:bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex flex-col justify-between transition duration-200">
-                    <span className="text-[7px] font-black text-emerald-800 uppercase tracking-widest block mb-1">Total Estimasi Aset</span>
+                  <div className="bg-blue-50/50 hover:bg-blue-50 border border-blue-100 rounded-xl p-3 flex flex-col justify-between transition duration-200">
+                    <span className="text-[7px] font-black text-blue-800 uppercase tracking-widest block mb-1">Total Estimasi Aset</span>
                     <div>
-                      <span className="text-emerald-700 text-xs font-extrabold mr-0.5">Rp</span>
-                      <span className="text-md font-black text-emerald-950 tabular-nums">
+                      <span className="text-blue-700 text-xs font-extrabold mr-0.5">Rp</span>
+                      <span className="text-md font-black text-neutral-950 tabular-nums">
                         {calculateTotalValue(selectedProduct).toLocaleString('id-ID')}
                       </span>
                     </div>
-                    <span className="text-[7px] text-emerald-700 font-extrabold mt-1 uppercase flex items-center gap-1">
-                      <TrendingUp className="w-2.5 h-2.5 text-emerald-600 animate-bounce" /> Nilai Valuasi Gudang
+                    <span className="text-[7px] text-blue-700 font-extrabold mt-1 uppercase flex items-center gap-1">
+                      <TrendingUp className="w-2.5 h-2.5 text-blue-600 animate-bounce" /> Nilai Valuasi Gudang
                     </span>
                   </div>
                 </div>
@@ -322,7 +322,7 @@ export default function ProductModule({ products }: Props) {
                 {/* Product Characteristics Specifications */}
                 <div className="space-y-3 mb-4">
                   <h4 className="text-[10px] font-black text-neutral-700 uppercase tracking-widest flex items-center gap-1.5">
-                    <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3.5px]" /> Karakteristik & Kualitas Spek
+                    <Check className="w-3.5 h-3.5 text-blue-600 stroke-[3.5px]" /> Karakteristik & Kualitas Spek
                   </h4>
                   
                   {selectedProduct.characteristics && selectedProduct.characteristics.length > 0 ? (
@@ -330,9 +330,9 @@ export default function ProductModule({ products }: Props) {
                       {selectedProduct.characteristics.map((char, index) => (
                         <span 
                           key={index} 
-                          className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-950 text-[10px] sm:text-xs font-semibold px-3 py-1 rounded-lg flex items-center gap-1.5 transition-colors uppercase"
+                          className="bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-950 text-[10px] sm:text-xs font-semibold px-3 py-1 rounded-lg flex items-center gap-1.5 transition-colors uppercase"
                         >
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
                           {char}
                         </span>
                       ))}

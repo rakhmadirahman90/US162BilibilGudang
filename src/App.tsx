@@ -148,29 +148,55 @@ export interface AppTheme {
 
 export const APP_THEMES: AppTheme[] = [
   {
+    id: 'NAVY',
+    name: 'Navy Bilibili',
+    emoji: '🏆',
+    headerBg: 'bg-slate-950',
+    headerBorder: 'border-slate-800',
+    headerBadgeBg: 'bg-blue-900',
+    headerBadgeText: 'text-yellow-400',
+    headerBadgeBorder: 'border-blue-800',
+    statusBoxBg: 'bg-slate-900/60',
+    statusBoxBorder: 'border-slate-800',
+    tabActiveBorder: 'border-yellow-500',
+    tabActiveText: 'text-blue-950',
+    tabActiveBg: 'bg-slate-100',
+    heroGradient: 'from-slate-900 via-slate-950 to-black',
+    heroTextGradient: 'from-yellow-400 via-yellow-200 to-white',
+    heroBtnBg: 'bg-yellow-500 hover:bg-yellow-400',
+    heroBtnHover: 'hover:bg-yellow-400',
+    heroBtnText: 'text-slate-950',
+    pageBg: 'bg-slate-50',
+    accentText: 'text-blue-900',
+    btnPrimaryBg: 'bg-blue-900',
+    btnPrimaryHover: 'hover:bg-blue-800',
+    footerBg: 'bg-slate-950',
+    footerBorder: 'border-slate-800',
+  },
+  {
     id: 'EMERALD',
-    name: 'Emerald Harvest',
+    name: 'Navy Harvest',
     emoji: '🌾',
-    headerBg: 'bg-emerald-950',
-    headerBorder: 'border-emerald-900',
-    headerBadgeBg: 'bg-emerald-800',
+    headerBg: 'bg-blue-950',
+    headerBorder: 'border-blue-900',
+    headerBadgeBg: 'bg-blue-800',
     headerBadgeText: 'text-yellow-300',
-    headerBadgeBorder: 'border-emerald-700',
-    statusBoxBg: 'bg-emerald-900/60',
-    statusBoxBorder: 'border-emerald-800',
-    tabActiveBorder: 'border-emerald-600',
-    tabActiveText: 'text-emerald-800',
-    tabActiveBg: 'bg-emerald-50/20',
-    heroGradient: 'from-emerald-900 via-emerald-950 to-neutral-900',
+    headerBadgeBorder: 'border-blue-700',
+    statusBoxBg: 'bg-blue-900/60',
+    statusBoxBorder: 'border-blue-800',
+    tabActiveBorder: 'border-blue-600',
+    tabActiveText: 'text-blue-800',
+    tabActiveBg: 'bg-blue-50/20',
+    heroGradient: 'from-blue-900 via-blue-950 to-neutral-900',
     heroTextGradient: 'from-yellow-300 via-yellow-105 to-white',
     heroBtnBg: 'bg-yellow-405 hover:bg-yellow-350',
     heroBtnHover: 'hover:bg-yellow-350',
-    heroBtnText: 'text-emerald-950',
+    heroBtnText: 'text-blue-950',
     pageBg: 'bg-slate-50',
-    accentText: 'text-emerald-800',
-    btnPrimaryBg: 'bg-emerald-600',
-    btnPrimaryHover: 'hover:bg-emerald-500',
-    footerBg: 'bg-emerald-950',
+    accentText: 'text-blue-800',
+    btnPrimaryBg: 'bg-blue-700',
+    btnPrimaryHover: 'hover:bg-blue-600',
+    footerBg: 'bg-blue-950',
     footerBorder: 'border-neutral-700',
   },
   {
@@ -1044,7 +1070,7 @@ export default function App() {
 
   // Premium customizable active theme state with LocalStorage persistence
   const [activeThemeId, setActiveThemeId] = useState<string>(() => {
-    return localStorage.getItem('bilibili_theme') || 'EMERALD';
+    return localStorage.getItem('bilibili_theme') || 'NAVY';
   });
 
   const [navLayout, setNavLayout] = useState<'TOP' | 'SIDEBAR'>(() => {
@@ -1431,7 +1457,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden" id="login-screen-portal">
         {/* Modern high-quality background design elements */}
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-[120px] -ml-40 -mt-40 pointer-events-none"></div>
+        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] -ml-40 -mt-40 pointer-events-none"></div>
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-sky-600/10 rounded-full blur-[120px] -mr-40 -mb-40 pointer-events-none"></div>
         
         {/* Abstract subtle grid overlay for professional industrial/tech aesthetic */}
@@ -1447,7 +1473,7 @@ export default function App() {
           <div className="flex flex-col items-center text-center mb-8">
             <div className="relative group mb-4">
               {/* Outer soft breathing glow matching the log */}
-              <div className="absolute -inset-1.5 bg-gradient-to-r from-emerald-500 to-yellow-500 rounded-full blur opacity-40 group-hover:opacity-75 transition duration-500 animate-pulse"></div>
+              <div className="absolute -inset-1.5 bg-gradient-to-r from-blue-600 to-yellow-500 rounded-full blur opacity-40 group-hover:opacity-75 transition duration-500 animate-pulse"></div>
               
               <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-slate-600 bg-white shadow-xl flex items-center justify-center p-0.5">
                 <img 
@@ -1467,7 +1493,7 @@ export default function App() {
             </p>
 
             {/* Encrypted network badge */}
-            <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 bg-slate-700/55 border border-slate-600/60 rounded-full text-[10px] text-emerald-400 font-bold font-mono uppercase tracking-wider">
+            <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 bg-slate-700/55 border border-slate-600/60 rounded-full text-[10px] text-yellow-400 font-bold font-mono uppercase tracking-wider">
               <Shield className="w-3.5 h-3.5" />
               <span>{language === 'id' ? 'Sesi Terbuka & Terenkripsi' : 'Active Secured Session'}</span>
             </div>
@@ -1486,9 +1512,9 @@ export default function App() {
                   value={loginUsername}
                   onChange={(e) => setLoginUsername(e.target.value)}
                   placeholder={language === 'id' ? 'Masukkan username...' : 'Enter username...'}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/80 focus:border-transparent transition-all pl-11 font-medium shadow-inner"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/80 focus:border-transparent transition-all pl-11 font-medium shadow-inner"
                 />
-                <div className="absolute left-3.5 top-3.5 text-slate-500 group-focus-within/input:text-emerald-400 transition-colors">
+                <div className="absolute left-3.5 top-3.5 text-slate-500 group-focus-within/input:text-yellow-400 transition-colors">
                   <Users className="w-4 h-4" />
                 </div>
               </div>
@@ -1505,9 +1531,9 @@ export default function App() {
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   placeholder={language === 'id' ? 'Masukkan password...' : 'Enter password...'}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/80 focus:border-transparent transition-all pl-11 font-medium shadow-inner"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/80 focus:border-transparent transition-all pl-11 font-medium shadow-inner"
                 />
-                <div className="absolute left-3.5 top-3.5 text-slate-500 group-focus-within/input:text-emerald-400 transition-colors">
+                <div className="absolute left-3.5 top-3.5 text-slate-500 group-focus-within/input:text-yellow-400 transition-colors">
                   <Lock className="w-4 h-4" />
                 </div>
               </div>
@@ -1526,7 +1552,7 @@ export default function App() {
 
             <button
               type="submit"
-              className="w-full mt-2 relative overflow-hidden group/btn bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-lg transition-all duration-200 cursor-pointer text-sm flex items-center justify-center gap-2 tracking-wide"
+              className="w-full mt-2 relative overflow-hidden group/btn bg-blue-700 hover:bg-blue-600 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-lg transition-all duration-200 cursor-pointer text-sm flex items-center justify-center gap-2 tracking-wide"
             >
               <Key className="w-4 h-4 transition-transform group-hover/btn:rotate-12 duration-200" />
               <span>{language === 'id' ? 'Masuk ke Sistem' : 'Authenticate Security'}</span>
@@ -1540,7 +1566,7 @@ export default function App() {
               <button 
                 type="button"
                 onClick={() => setLanguage('id')} 
-                className={`transition-colors py-1 px-1.5 rounded hover:text-white ${language === 'id' ? 'text-emerald-400 font-bold bg-slate-700/40' : ''}`}
+                className={`transition-colors py-1 px-1.5 rounded hover:text-white ${language === 'id' ? 'text-yellow-400 font-bold bg-slate-700/40' : ''}`}
               >
                 🇮🇩 Indonesia
               </button>
@@ -1548,7 +1574,7 @@ export default function App() {
               <button 
                 type="button" 
                 onClick={() => setLanguage('en')}
-                className={`transition-colors py-1 px-1.5 rounded hover:text-white ${language === 'en' ? 'text-emerald-400 font-bold bg-slate-700/40' : ''}`}
+                className={`transition-colors py-1 px-1.5 rounded hover:text-white ${language === 'en' ? 'text-yellow-400 font-bold bg-slate-700/40' : ''}`}
               >
                 🇺🇸 English
               </button>
@@ -1569,14 +1595,14 @@ export default function App() {
     const tabs = [
       { id: 'DASHBOARD', name: 'RINGKASAN DASHBOARD', icon: <LayoutDashboard className="w-4 h-4" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
       { id: 'TIMBANG', name: 'JEMBATAN TIMBANGAN', icon: <Scale className="w-4 h-4 text-blue-500" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
-      { id: 'MASUK', name: 'PENERIMAAN BARANG MASUK', icon: <ArrowDownCircle className="w-4 h-4 text-emerald-600" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
+      { id: 'MASUK', name: 'PENERIMAAN BARANG MASUK', icon: <ArrowDownCircle className="w-4 h-4 text-blue-700" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
       { id: 'KELUAR', name: 'PENGIRIMAN BARANG KELUAR', icon: <ArrowUpCircle className="w-4 h-4 text-blue-600" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
       { id: 'SERVICES', name: 'JASA POLES & KIPAS', icon: <Wind className="w-4 h-4 text-sky-500" />, roles: ['admin', 'operator', 'pimpinan'] },
       { id: 'REFAKSI', name: 'POTONGAN REFAKSI', icon: <Percent className="w-4 h-4 text-amber-500" />, roles: ['admin', 'operator', 'pimpinan'] },
       { id: 'DRYER', name: 'DRYER JAGUNG', icon: <Wind className="w-4 h-4 text-orange-500" />, roles: ['admin', 'operator', 'pimpinan'] },
-      { id: 'STOK_BERAS', name: 'BUKU STOK LOGISTIK', icon: <Package className="w-4 h-4 text-emerald-600" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
+      { id: 'STOK_BERAS', name: 'BUKU STOK LOGISTIK', icon: <Package className="w-4 h-4 text-blue-700" />, roles: ['admin', 'operator', 'karyawan', 'pimpinan'] },
       { id: 'LAPORAN', name: 'ANALISA & LAPORAN', icon: <FileSpreadsheet className="w-4 h-4 text-purple-500" />, roles: ['admin', 'pimpinan'] },
-      { id: 'FINANCE', name: 'MANAJEMEN KEUANGAN', icon: <DollarSign className="w-4 h-4 text-emerald-500" />, roles: ['admin', 'pimpinan'] },
+      { id: 'FINANCE', name: 'MANAJEMEN KEUANGAN', icon: <DollarSign className="w-4 h-4 text-blue-600" />, roles: ['admin', 'pimpinan'] },
       { id: 'PRODUK', name: 'KATALOG PRODUK', icon: <Package className="w-4 h-4 text-amber-600" />, roles: ['admin', 'operator', 'karyawan'] },
       { id: 'DATABASE', name: 'DATABASE MASTER', icon: <Database className="w-4 h-4 text-neutral-500" />, roles: ['admin'] },
     ];
@@ -1639,13 +1665,13 @@ export default function App() {
                 {/* Printer Section */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 mb-1">
-                    <Printer className="w-4 h-4 text-emerald-600" />
+                    <Printer className="w-4 h-4 text-blue-800" />
                     <label className="text-[11px] font-black text-neutral-500 uppercase tracking-widest leading-none">Konfigurasi Printer Tiket</label>
                   </div>
                   <input 
                     value={printerName} 
                     onChange={(e) => setPrinterName(e.target.value)}
-                    className="w-full border-2 border-neutral-100 p-3 rounded-xl text-sm font-bold focus:border-emerald-500 outline-none transition-all shadow-inner"
+                    className="w-full border-2 border-neutral-100 p-3 rounded-xl text-sm font-bold focus:border-yellow-500 outline-none transition-all shadow-inner"
                     placeholder="e.g., EPSON LX-310"
                   />
                 </div>
@@ -1653,30 +1679,30 @@ export default function App() {
                 {/* Layout Section */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 mb-1">
-                    <Layout className="w-4 h-4 text-emerald-600" />
+                    <Layout className="w-4 h-4 text-blue-800" />
                     <label className="text-[11px] font-black text-neutral-500 uppercase tracking-widest leading-none">Model Navigasi (Layout System)</label>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <button 
                       onClick={() => setNavLayout('TOP')}
-                      className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all group cursor-pointer ${navLayout === 'TOP' ? 'border-emerald-500 bg-emerald-50' : 'border-neutral-100 hover:border-neutral-300'}`}
+                      className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all group cursor-pointer ${navLayout === 'TOP' ? 'border-yellow-500 bg-blue-50' : 'border-neutral-100 hover:border-neutral-300'}`}
                     >
                       <div className="w-full h-8 bg-neutral-100 rounded-md border border-neutral-200 overflow-hidden relative">
-                        <div className="absolute top-0 left-0 right-0 h-2 bg-emerald-600"></div>
+                        <div className="absolute top-0 left-0 right-0 h-2 bg-blue-800"></div>
                         <div className="absolute top-2.5 left-1 right-1 h-1.5 bg-neutral-300 rounded-full"></div>
                       </div>
-                      <span className={`text-[10px] font-black uppercase ${navLayout === 'TOP' ? 'text-emerald-800' : 'text-neutral-500'}`}>Top Navigation</span>
+                      <span className={`text-[10px] font-black uppercase ${navLayout === 'TOP' ? 'text-blue-900' : 'text-neutral-500'}`}>Top Navigation</span>
                     </button>
                     <button 
                       onClick={() => setNavLayout('SIDEBAR')}
-                      className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all group cursor-pointer ${navLayout === 'SIDEBAR' ? 'border-emerald-500 bg-emerald-50' : 'border-neutral-100 hover:border-neutral-300'}`}
+                      className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all group cursor-pointer ${navLayout === 'SIDEBAR' ? 'border-yellow-500 bg-blue-50' : 'border-neutral-100 hover:border-neutral-300'}`}
                     >
                       <div className="w-full h-8 bg-neutral-100 rounded-md border border-neutral-200 overflow-hidden relative">
-                        <div className="absolute top-0 bottom-0 left-0 w-2.5 bg-emerald-600"></div>
+                        <div className="absolute top-0 bottom-0 left-0 w-2.5 bg-blue-800"></div>
                         <div className="absolute top-1 left-3.5 right-1 h-1.5 bg-neutral-300 rounded-full"></div>
                         <div className="absolute top-3.5 left-3.5 right-2 h-1.5 bg-neutral-300 rounded-full"></div>
                       </div>
-                      <span className={`text-[10px] font-black uppercase ${navLayout === 'SIDEBAR' ? 'text-emerald-800' : 'text-neutral-500'}`}>Sidebar Layout</span>
+                      <span className={`text-[10px] font-black uppercase ${navLayout === 'SIDEBAR' ? 'text-blue-900' : 'text-neutral-500'}`}>Sidebar Layout</span>
                     </button>
                   </div>
                 </div>
@@ -1684,7 +1710,7 @@ export default function App() {
                 {/* Theme Section */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 mb-1">
-                    <Palette className="w-4 h-4 text-emerald-600" />
+                    <Palette className="w-4 h-4 text-blue-800" />
                     <label className="text-[11px] font-black text-neutral-500 uppercase tracking-widest leading-none">Pilihan Tema Visual</label>
                   </div>
                   <div className="grid grid-cols-2 gap-2 max-h-[160px] overflow-y-auto pr-1 custom-scrollbar">
@@ -1692,10 +1718,10 @@ export default function App() {
                       <button 
                         key={th.id}
                         onClick={() => handleThemeChange(th.id)}
-                        className={`flex items-center gap-2 p-2.5 rounded-xl border transition-all text-left cursor-pointer ${activeThemeId === th.id ? 'border-emerald-500 bg-emerald-50 shadow-sm' : 'border-neutral-100 hover:bg-neutral-50'}`}
+                        className={`flex items-center gap-2 p-2.5 rounded-xl border transition-all text-left cursor-pointer ${activeThemeId === th.id ? 'border-yellow-500 bg-blue-50 shadow-sm' : 'border-neutral-100 hover:bg-neutral-50'}`}
                       >
                         <span className="text-base">{th.emoji}</span>
-                        <span className={`text-[10px] font-black uppercase truncate ${activeThemeId === th.id ? 'text-emerald-800' : 'text-neutral-600'}`}>{th.name}</span>
+                        <span className={`text-[10px] font-black uppercase truncate ${activeThemeId === th.id ? 'text-blue-900' : 'text-neutral-600'}`}>{th.name}</span>
                       </button>
                     ))}
                   </div>
@@ -1704,7 +1730,7 @@ export default function App() {
                 {/* Stock Warning Threshold Section */}
                 <div className="space-y-4 pt-3 border-t border-neutral-150">
                   <div className="flex items-center gap-2 mb-1">
-                    <AlertCircle className="w-4 h-4 text-emerald-600 animate-pulse" />
+                    <AlertCircle className="w-4 h-4 text-blue-800 animate-pulse" />
                     <label className="text-[11px] font-black text-neutral-500 uppercase tracking-widest leading-none">Ambang Batas Minimum Stok (Visual Alert)</label>
                   </div>
                   <div className="space-y-3 bg-neutral-50 p-3 rounded-xl border border-neutral-100">
@@ -1720,13 +1746,13 @@ export default function App() {
                         step="1000"
                         value={cornThresholdLimit}
                         onChange={(e) => setCornThresholdLimit(parseInt(e.target.value, 10))}
-                        className="w-full accent-emerald-600 cursor-pointer"
+                        className="w-full accent-blue-700 cursor-pointer"
                       />
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1">
                         <span className="text-[10px] font-bold text-neutral-700">🌾 Batas Minim Beras:</span>
-                        <span className="text-[11px] font-black text-emerald-700 font-mono">{(riceThresholdLimit ?? 0).toLocaleString('id-ID')} Kg</span>
+                        <span className="text-[11px] font-black text-blue-800 font-mono">{(riceThresholdLimit ?? 0).toLocaleString('id-ID')} Kg</span>
                       </div>
                       <input 
                         type="range"
@@ -1735,7 +1761,7 @@ export default function App() {
                         step="1000"
                         value={riceThresholdLimit}
                         onChange={(e) => setRiceThresholdLimit(parseInt(e.target.value, 10))}
-                        className="w-full accent-emerald-600 cursor-pointer"
+                        className="w-full accent-blue-600 cursor-pointer"
                       />
                     </div>
                     <div>
@@ -1750,7 +1776,7 @@ export default function App() {
                         step="500"
                         value={productThresholdLimit}
                         onChange={(e) => setProductThresholdLimit(parseInt(e.target.value, 10))}
-                        className="w-full accent-emerald-600 cursor-pointer"
+                        className="w-full accent-blue-600 cursor-pointer"
                       />
                     </div>
                   </div>
@@ -1761,7 +1787,7 @@ export default function App() {
               <div className="p-4 bg-neutral-50 border-t flex justify-end">
                 <button 
                   onClick={() => setShowSettingsModal(false)}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg transition-all active:scale-95 cursor-pointer"
+                  className="bg-blue-700 hover:bg-blue-600 text-white px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg transition-all active:scale-95 cursor-pointer"
                 >
                   Terapkan & Simpan
                 </button>
@@ -1819,7 +1845,7 @@ export default function App() {
               {sessionUser && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 bg-white/5 p-2 rounded-xl border border-white/10">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-black text-xs">
+                    <div className="w-8 h-8 rounded-lg bg-blue-700 flex items-center justify-center text-white font-black text-xs">
                       {sessionUser.username[0].toUpperCase()}
                     </div>
                     <div className="overflow-hidden">
@@ -1927,14 +1953,14 @@ export default function App() {
                           className="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-2xl border border-neutral-200 p-4 z-50 text-neutral-800"
                         >
                           <div className="flex items-center gap-2.5 border-b border-neutral-100 pb-3 mb-3">
-                            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white text-xs font-black flex items-center justify-center uppercase shrink-0">
+                            <div className="w-9 h-9 rounded-xl bg-blue-800 text-white text-xs font-black flex items-center justify-center uppercase shrink-0">
                               {sessionUser.username[0]}
                             </div>
                             <div className="overflow-hidden">
                               <h4 className="font-extrabold text-neutral-900 text-xs uppercase truncate leading-none mb-1">{sessionUser.username}</h4>
                               <span className={`inline-block px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
                                 sessionUser.role === 'admin' ? 'bg-amber-100 text-amber-700' :
-                                sessionUser.role === 'pimpinan' ? 'bg-emerald-100 text-emerald-700' :
+                                sessionUser.role === 'pimpinan' ? 'bg-blue-100 text-blue-800' :
                                 'bg-indigo-100 text-indigo-700'
                               }`}>
                                 {sessionUser.role}
@@ -1945,7 +1971,7 @@ export default function App() {
                           <div className="space-y-1.5 text-[9px] text-neutral-400 font-bold uppercase tracking-wide mb-3">
                             <div className="flex justify-between items-center">
                               <span>Aktivitas Sesi:</span>
-                              <span className="text-emerald-700 font-mono">Aktif</span>
+                              <span className="text-blue-700 font-mono">Aktif</span>
                             </div>
                             <div className="flex justify-between items-center">
                               <span>Instansi Gudang:</span>
@@ -1998,7 +2024,7 @@ export default function App() {
               ? 'bg-amber-50 border-amber-200 text-amber-900 shadow-amber-100/30' 
               : syncStatus === 'error' 
               ? 'bg-red-50 border-red-200 text-red-900 shadow-red-100/30' 
-              : 'bg-emerald-50/50 border-emerald-100/80 text-emerald-950 shadow-emerald-100/10'
+              : 'bg-blue-50/50 border-blue-100/80 text-blue-950 shadow-blue-100/10'
           }`}
         >
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
@@ -2012,7 +2038,7 @@ export default function App() {
                   <CloudOff className="w-4 h-4 text-white animate-bounce" />
                 </div>
               ) : (
-                <div className="w-7 h-7 bg-emerald-600 text-white rounded-lg flex items-center justify-center shadow-xs">
+                <div className="w-7 h-7 bg-blue-800 text-white rounded-lg flex items-center justify-center shadow-xs">
                   <Cloud className="w-4 h-4 text-white" />
                 </div>
               )}
@@ -2028,7 +2054,7 @@ export default function App() {
                     ? 'bg-amber-400 text-neutral-900 font-bold animate-pulse' 
                     : syncStatus === 'error' 
                     ? 'bg-red-500 text-white' 
-                    : 'bg-emerald-600 text-white'
+                    : 'bg-blue-800 text-white'
                 }`}>
                   {syncStatus === 'saving' ? '🟢 MENYIMPAN...' : syncStatus === 'error' ? '🔺 GAGAL SINKRON' : '⚡ TERSINKRONISASI'}
                 </span>
@@ -2045,7 +2071,7 @@ export default function App() {
           
           <div className="flex items-center gap-2.5 font-mono text-[10px] text-neutral-500/80 border-t md:border-t-0 border-neutral-100 pt-2 md:pt-0 w-full md:w-auto justify-center md:justify-end">
             <span className="flex items-center gap-1">
-              <span className={`w-1.5 h-1.5 rounded-full ${syncStatus === 'error' ? 'bg-red-500' : 'bg-green-500'}`}></span>
+              <span className={`w-1.5 h-1.5 rounded-full ${syncStatus === 'error' ? 'bg-red-500' : 'bg-blue-600'}`}></span>
               Active Firestore Instance
             </span>
             <span>•</span>
@@ -2083,7 +2109,7 @@ export default function App() {
                     </p>
                   </div>
                   <p className="text-xs text-white/70 font-mono mt-1.5 flex items-center justify-center md:justify-start gap-1.5">
-                    <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+                    <span className="inline-block w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse"></span>
                     {t.pinrangLocation || 'Kabupaten Pinrang, Sulawesi Selatan'}
                   </p>
                 </div>
@@ -2092,7 +2118,7 @@ export default function App() {
                 <button
                   id="btn-shortcut-timbang"
                   onClick={() => setActiveTab('TIMBANG')}
-                  className="bg-emerald-600 text-white font-bold text-xs px-4 py-2.5 rounded-lg active:scale-95 transition-all shadow hover:bg-emerald-500 cursor-pointer flex-1 sm:flex-initial text-center justify-center flex items-center gap-1"
+                  className="bg-blue-800 text-white font-bold text-xs px-4 py-2.5 rounded-lg active:scale-95 transition-all shadow hover:bg-blue-700 cursor-pointer flex-1 sm:flex-initial text-center justify-center flex items-center gap-1"
                 >
                   <Scale className="w-3.5 h-3.5" />
                   {t.newWeighing || 'Timbang Baru'}
@@ -2100,7 +2126,7 @@ export default function App() {
                 <button
                   id="btn-shortcut-inbound"
                   onClick={() => setActiveTab('MASUK')}
-                  className="bg-yellow-450 hover:bg-yellow-400 text-emerald-950 font-bold text-xs px-4 py-2.5 rounded-lg active:scale-95 transition-all cursor-pointer flex-1 sm:flex-initial text-center justify-center flex items-center gap-1 uppercase"
+                  className="bg-yellow-450 hover:bg-yellow-400 text-blue-950 font-bold text-xs px-4 py-2.5 rounded-lg active:scale-95 transition-all cursor-pointer flex-1 sm:flex-initial text-center justify-center flex items-center gap-1 uppercase"
                 >
                   <ArrowDownCircle className="w-3.5 h-3.5" />
                   {t.recordInbound || 'BARANG MASUK'}
@@ -2122,14 +2148,14 @@ export default function App() {
                   className={`rounded-2xl border p-5 ${
                     hasAlerts 
                       ? 'bg-gradient-to-br from-amber-50 to-red-50/20 border-amber-300 shadow-md' 
-                      : 'bg-gradient-to-br from-emerald-50/30 to-teal-50/10 border-emerald-250 shadow-sm'
+                      : 'bg-gradient-to-br from-blue-50/30 to-sky-50/10 border-blue-200 shadow-sm'
                   } transition-all duration-300`}
                   id="dash-visual-alerts-panel"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                     <div className="flex items-center gap-2.5">
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-xs ${hasAlerts ? 'bg-amber-100 border border-amber-200 animate-pulse' : 'bg-emerald-100 border border-emerald-200'}`}>
-                        <AlertCircle className={`w-4 h-4 ${hasAlerts ? 'text-amber-800 animate-bounce' : 'text-emerald-700'}`} />
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-xs ${hasAlerts ? 'bg-amber-100 border border-amber-200 animate-pulse' : 'bg-blue-100 border border-blue-200'}`}>
+                        <AlertCircle className={`w-4 h-4 ${hasAlerts ? 'text-amber-800 animate-bounce' : 'text-blue-800'}`} />
                       </div>
                       <div>
                         <h4 className="text-xs font-black uppercase tracking-wider text-neutral-800 font-sans flex items-center gap-1.5">
@@ -2148,7 +2174,7 @@ export default function App() {
                       <span className={`text-[10px] font-black font-mono px-2.5 py-1 rounded-full uppercase tracking-wider shadow-inner ${
                         hasAlerts 
                           ? 'bg-amber-150 text-amber-800 border border-amber-250 animate-pulse' 
-                          : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                          : 'bg-blue-100 text-blue-900 border border-blue-200'
                       }`}>
                         {hasAlerts ? '🚨 PERLU TINDAKAN' : '✅ AMAN (SAFE)'}
                       </span>
@@ -2173,13 +2199,13 @@ export default function App() {
                                   <span className="text-xs font-bold text-neutral-800">🌽 Jagung Pipilan Kasar</span>
                                   <p className="text-[9px] text-neutral-500">Ambang Batas Minim: {cornThresholdLimit.toLocaleString('id-ID')} Kg</p>
                                 </div>
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${isCornAlert ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-emerald-100 text-emerald-700'}`}>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${isCornAlert ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-blue-100 text-blue-800'}`}>
                                   {isCornAlert ? '🚨 RE-ORDER' : 'OK'}
                                 </span>
                               </div>
                               <div className="w-full bg-neutral-200 h-1.5 rounded-full overflow-hidden">
                                 <div 
-                                  className={`h-full rounded-full ${isCornAlert ? 'bg-red-500' : 'bg-emerald-550'}`}
+                                  className={`h-full rounded-full ${isCornAlert ? 'bg-red-500' : 'bg-blue-600'}`}
                                   style={{ width: `${Math.min(100, Math.max(5, (cornStockBalance / (cornThresholdLimit || 1)) * 100))}%` }}
                                 ></div>
                               </div>
@@ -2205,13 +2231,13 @@ export default function App() {
                                   <span className="text-xs font-bold text-neutral-800">🌾 Beras Giling Premium</span>
                                   <p className="text-[9px] text-neutral-500">Ambang Batas Minim: {riceThresholdLimit.toLocaleString('id-ID')} Kg</p>
                                 </div>
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${isRiceAlert ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-emerald-100 text-emerald-700'}`}>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${isRiceAlert ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-blue-100 text-blue-800'}`}>
                                   {isRiceAlert ? '🚨 RE-ORDER' : 'OK'}
                                 </span>
                               </div>
                               <div className="w-full bg-neutral-200 h-1.5 rounded-full overflow-hidden">
                                 <div 
-                                  className={`h-full rounded-full ${isRiceAlert ? 'bg-red-500' : 'bg-emerald-550'}`}
+                                  className={`h-full rounded-full ${isRiceAlert ? 'bg-red-500' : 'bg-blue-600'}`}
                                   style={{ width: `${Math.min(100, Math.max(5, (riceStockBalance / (riceThresholdLimit || 1)) * 100))}%` }}
                                 ></div>
                               </div>
@@ -2255,7 +2281,7 @@ export default function App() {
                                 ))}
                               </div>
                             ) : (
-                              <div className="p-6 bg-emerald-50/30 border border-emerald-100 text-center rounded-xl my-auto">
+                              <div className="p-6 bg-blue-50/30 border border-blue-100 text-center rounded-xl my-auto">
                                 <p className="text-neutral-600 text-xs font-medium font-sans">Seluruh produk siap jual di dalam katalog terisi dengan volume tinggi dan aman.</p>
                               </div>
                             )}
@@ -2271,9 +2297,9 @@ export default function App() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-3 bg-white/75 p-3 rounded-xl border border-emerald-100">
-                      <CheckCircle className="w-4 h-4 text-emerald-600 animate-bounce" />
-                      <p className="text-[11px] text-emerald-800 font-sans font-semibold">
+                    <div className="flex items-center gap-3 bg-white/75 p-3 rounded-xl border border-blue-100">
+                      <CheckCircle className="w-4 h-4 text-blue-600 animate-bounce" />
+                      <p className="text-[11px] text-blue-900 font-sans font-semibold">
                         Gudang US Bilibili 162 mendeteksi seluruh bahan baku utama dan produk jadi berada di atas zonasi alarm. Operasional rantai pasok berjalan normal dan optimal.
                       </p>
                     </div>
@@ -2325,17 +2351,17 @@ export default function App() {
                   <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.riceStockLabel || 'STOK BERAS GUDANG'}</span>
                   {riceStockBalance <= riceThresholdLimit && <AlertCircle className="w-3 h-3 text-red-500 animate-pulse" />}
                 </div>
-                <span className={`text-xl sm:text-2xl font-black ${riceStockBalance <= riceThresholdLimit ? 'text-red-650' : 'text-emerald-800'} font-mono tracking-tight`}>
+                <span className={`text-xl sm:text-2xl font-black ${riceStockBalance <= riceThresholdLimit ? 'text-red-650' : 'text-blue-800'} font-mono tracking-tight`}>
                   {(riceStockBalance ?? 0).toLocaleString('id-ID')} <span className="text-xs text-neutral-400 font-normal">{t.kgNetto || 'Kg'}</span>
                 </span>
                 <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1 uppercase font-black">
-                  <span className="text-[#10b981] font-semibold font-mono">MSK: {(totalInboundRice + manualRiceIn).toLocaleString('id-ID')}</span>
+                  <span className="text-blue-600 font-semibold font-mono">MSK: {(totalInboundRice + manualRiceIn).toLocaleString('id-ID')}</span>
                   <span className="text-neutral-300">|</span>
                   <span className="text-red-500 font-semibold font-mono">KLR: {(totalOutboundRice + manualRiceOut).toLocaleString('id-ID')}</span>
                 </div>
                 </div>
-                <div className={`w-10 h-10 ${riceStockBalance <= riceThresholdLimit ? 'bg-red-50' : 'bg-emerald-50'} rounded-lg flex items-center justify-center border ${riceStockBalance <= riceThresholdLimit ? 'border-red-100' : 'border-emerald-100'} group-hover:scale-110 transition duration-300 shrink-0`}>
-                  <Package className={`${riceStockBalance <= riceThresholdLimit ? 'text-red-500' : 'text-emerald-650'} w-5 h-5`} />
+                <div className={`w-10 h-10 ${riceStockBalance <= riceThresholdLimit ? 'bg-red-50' : 'bg-blue-50'} rounded-lg flex items-center justify-center border ${riceStockBalance <= riceThresholdLimit ? 'border-red-100' : 'border-blue-100'} group-hover:scale-110 transition duration-300 shrink-0`}>
+                  <Package className={`${riceStockBalance <= riceThresholdLimit ? 'text-red-500' : 'text-blue-700'} w-5 h-5`} />
                 </div>
               </motion.div>
 
@@ -2354,7 +2380,7 @@ export default function App() {
                     {tickets.filter(t => t.status === 'PENDING').length} <span className="text-[9px] text-[#2563eb] font-bold bg-blue-50 px-1.5 py-0.5 rounded leading-none">Truk</span>
                   </span>
                   <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1">
-                    <span className="text-emerald-600 font-bold uppercase">SELESAI: {tickets.filter(t => t.status === 'COMPLETED').length}</span>
+                    <span className="text-blue-600 font-bold uppercase">SELESAI: {tickets.filter(t => t.status === 'COMPLETED').length}</span>
                     <span className="text-neutral-300">•</span>
                     <span className="text-blue-600 font-black uppercase">BUKA UNIT TIMBANG</span>
                   </div>
@@ -2376,7 +2402,7 @@ export default function App() {
                   <span className="text-[10px] font-bold text-neutral-400 tracking-wider font-mono uppercase">{t.cashBalance || 'Kas & Keuangan Tunai'}</span>
                   {['admin', 'pimpinan'].includes(sessionUser?.role || '') ? (
                     <>
-                      <span className={`text-base sm:text-[17px] font-black font-mono tracking-tight ${netKasBalance >= 0 ? 'text-emerald-700' : 'text-red-500'}`}>
+                      <span className={`text-base sm:text-[17px] font-black font-mono tracking-tight ${netKasBalance >= 0 ? 'text-blue-800' : 'text-red-500'}`}>
                         Rp {(netKasBalance ?? 0).toLocaleString('id-ID')}
                       </span>
                       <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 mt-1">
@@ -2394,8 +2420,8 @@ export default function App() {
                     </>
                   )}
                 </div>
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center border group-hover:scale-110 transition duration-300 shrink-0 ${['admin', 'pimpinan'].includes(sessionUser?.role || '') && netKasBalance < 0 ? 'bg-red-50 border-red-100' : 'bg-emerald-50 border-emerald-100'}`}>
-                  <DollarSign className={`w-5 h-5 ${['admin', 'pimpinan'].includes(sessionUser?.role || '') && netKasBalance < 0 ? 'text-red-500' : 'text-emerald-600'}`} />
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center border group-hover:scale-110 transition duration-300 shrink-0 ${['admin', 'pimpinan'].includes(sessionUser?.role || '') && netKasBalance < 0 ? 'bg-red-50 border-red-100' : 'bg-blue-50 border-blue-100'}`}>
+                  <DollarSign className={`w-5 h-5 ${['admin', 'pimpinan'].includes(sessionUser?.role || '') && netKasBalance < 0 ? 'text-red-500' : 'text-blue-700'}`} />
                 </div>
               </motion.div>
 
@@ -2437,7 +2463,7 @@ export default function App() {
                       </div>
                       <div className="w-full bg-neutral-100 h-3 rounded-full overflow-hidden border border-neutral-200">
                         <div 
-                          className="bg-gradient-to-r from-emerald-400 to-emerald-600 h-full rounded-full transition-all duration-700"
+                          className="bg-gradient-to-r from-blue-400 to-blue-600 h-full rounded-full transition-all duration-700"
                           style={{ width: `${Math.min(100, Math.round((riceStockBalance / 110000) * 100))}%` }}
                         ></div>
                       </div>
@@ -2473,12 +2499,12 @@ export default function App() {
                 <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm" id="cargo-volume-trends">
                   <div className="flex items-center justify-between mb-4 border-b border-neutral-100 pb-2">
                     <h3 className="font-bold text-neutral-800 text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 font-sans">
-                      <Activity className="text-emerald-600 w-4 h-4 sm:w-5 sm:h-5" />
+                      <Activity className="text-blue-700 w-4 h-4 sm:w-5 sm:h-5" />
                       Arus Aktivitas Muatan Barang (5 Hari Terakhir)
                     </h3>
                     <div className="flex gap-3 text-[10px] font-mono">
                       <span className="flex items-center gap-1 font-medium">
-                        <span className="inline-block w-2.5 h-2.5 bg-emerald-500 rounded"></span> Inbound
+                        <span className="inline-block w-2.5 h-2.5 bg-blue-600 rounded"></span> Inbound
                       </span>
                       <span className="flex items-center gap-1 font-medium">
                         <span className="inline-block w-2.5 h-2.5 bg-sky-500 rounded"></span> Outbound
@@ -2527,7 +2553,7 @@ export default function App() {
                                       {(d.inbound ?? 0).toLocaleString('id-ID')} Kg
                                     </div>
                                     <div 
-                                      className="bg-gradient-to-t from-emerald-600 to-emerald-400 hover:opacity-90 w-full rounded-t transition-all shadow-sm duration-500"
+                                      className="bg-gradient-to-t from-blue-700 to-blue-500 hover:opacity-90 w-full rounded-t transition-all shadow-sm duration-500"
                                       style={{ height: `${Math.max(3, inPct)}%` }}
                                     ></div>
                                   </div>
@@ -2620,7 +2646,7 @@ export default function App() {
                 </div>
 
                 {/* Calibration checklist & system control status block */}
-                <div className="bg-emerald-950 text-emerald-100 rounded-xl p-5 border border-emerald-900 shadow">
+                <div className="bg-blue-950 text-blue-100 rounded-xl p-5 border border-blue-900 shadow">
                   <h4 className="font-black text-xs text-yellow-350 tracking-wider uppercase mb-2 font-mono">Pemeriksaan Jembatan Timbang</h4>
                   <ul className="text-xs text-emerald-200 flex flex-col gap-2 mt-1">
                     <li className="flex items-start gap-1.5 leading-snug">
@@ -2638,7 +2664,7 @@ export default function App() {
                   </ul>
                   <button 
                     onClick={() => setActiveTab('REFAKSI')}
-                    className="mt-4 w-full bg-[#bfef30] text-emerald-950 font-black text-xs hover:bg-[#dfe40c] px-4 py-2 rounded-lg transition"
+                    className="mt-4 w-full bg-yellow-450 text-blue-950 font-black text-xs hover:bg-yellow-400 px-4 py-2 rounded-lg transition"
                   >
                     Buka Panduan Potongan Refaksi KA
                   </button>
@@ -2652,7 +2678,7 @@ export default function App() {
             <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm" id="integrated-records-pushed">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-100 pb-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <Activity className="text-emerald-700 w-5 h-5 shrink-0 animate-pulse" />
+                  <Activity className="text-blue-800 w-5 h-5 shrink-0 animate-pulse" />
                   <div>
                     <h3 className="font-black text-neutral-800 text-sm sm:text-base leading-tight">Portal Aktivitas Gudang & Timbangan Terpadu</h3>
                     <p className="text-[10px] text-neutral-500 font-mono">Arsip data diperbarui otomatis seiring perubahan transaksi di lapangan</p>
@@ -2737,12 +2763,12 @@ export default function App() {
                             <td className="text-right py-2.5 px-3 font-mono text-orange-600 font-semibold">
                               {(tk.timbang2Weight ?? 0) > 0 ? `${(tk.timbang2Weight ?? 0).toLocaleString('id-ID')} Kg` : '- -'}
                             </td>
-                            <td className="text-right py-2.5 px-3 font-black text-emerald-600 font-mono">
+                            <td className="text-right py-2.5 px-3 font-black text-blue-700 font-mono">
                               {(tk.netWeight ?? 0).toLocaleString('id-ID')} Kg
                             </td>
                             <td className="py-2.5 px-3 text-center">
                               <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                tk.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-yellow-50 text-yellow-750 animate-pulse border border-yellow-250'
+                                tk.status === 'COMPLETED' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-50 text-yellow-750 animate-pulse border border-yellow-250'
                               }`}>
                                 {tk.status === 'COMPLETED' ? 'COMPLETED' : 'PENDING'}
                               </span>
@@ -2779,9 +2805,9 @@ export default function App() {
                             <td className="py-2.5 px-3 font-mono font-semibold text-neutral-700">{r.ticketNo || '-'}</td>
                             <td className="py-2.5 px-3 font-bold text-neutral-800">{r.vehicleNo}</td>
                             <td className="py-2.5 px-3 text-neutral-800 font-semibold">{r.supplier}</td>
-                            <td className="p-2 text-right font-black text-emerald-700 font-mono">{(r.netWeight ?? 0).toLocaleString('id-ID')} Kg</td>
+                            <td className="p-2 text-right font-black text-blue-800 font-mono">{(r.netWeight ?? 0).toLocaleString('id-ID')} Kg</td>
                             <td className="py-2.5 px-3 text-center">
-                              <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${r.moistureContent > 16.0 ? 'bg-red-100 text-red-650 font-bold' : 'bg-green-50 text-green-700 font-bold border border-green-200 px-1 py-0.5'}`}>
+                              <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${r.moistureContent > 16.0 ? 'bg-red-100 text-red-650 font-bold' : 'bg-blue-50 text-blue-800 font-bold border border-blue-200 px-1 py-0.5'}`}>
                                 {r.moistureContent}%
                               </span>
                             </td>
@@ -2865,7 +2891,7 @@ export default function App() {
                             <td className="text-right py-2.5 px-3 font-mono">Rp {s.ratePerKg}</td>
                             <td className="text-right py-2.5 px-3 font-black text-sky-800 font-mono">Rp {(s.totalFee ?? 0).toLocaleString('id-ID')}</td>
                             <td className="py-2.5 px-3 text-center">
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${s.paymentStatus === 'PAID' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-650'}`}>
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${s.paymentStatus === 'PAID' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-650'}`}>
                                 {s.paymentStatus}
                               </span>
                             </td>
@@ -2899,7 +2925,7 @@ export default function App() {
                             <td className="py-2.5 px-3 font-mono">{f.date}</td>
                             <td className="py-2.5 px-3">
                               <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
-                                f.type === 'DEBIT' ? 'bg-green-100 text-green-700' : 'bg-rose-100 text-rose-700'
+                                f.type === 'DEBIT' ? 'bg-blue-100 text-blue-800' : 'bg-rose-100 text-rose-700'
                               }`}>
                                 {f.type === 'DEBIT' ? '📥 DEBIT' : '📤 KREDIT'}
                               </span>
@@ -2907,7 +2933,7 @@ export default function App() {
                             <td className="py-2.5 px-3 font-bold text-neutral-700 text-[10px]">{f.category}</td>
                             <td className="py-2.5 px-3 text-neutral-800 font-medium">{f.description}</td>
                             <td className="py-2.5 px-3 text-neutral-600 font-semibold">{f.partyName || '-'}</td>
-                            <td className={`text-right py-2.5 px-3 font-black font-mono ${f.type === 'DEBIT' ? 'text-emerald-700' : 'text-rose-700'}`}>
+                            <td className={`text-right py-2.5 px-3 font-black font-mono ${f.type === 'DEBIT' ? 'text-blue-800' : 'text-rose-700'}`}>
                               Rp {(f.amount ?? 0).toLocaleString('id-ID')}
                             </td>
                             <td className="py-2.5 px-3 font-mono text-neutral-500">{f.bankAccount}</td>
@@ -2939,7 +2965,7 @@ export default function App() {
             </div>
 
             {/* Storage Calibration Banner */}
-            <div className="bg-emerald-950 text-emerald-100 p-5 rounded-xl border border-emerald-900 shadow flex flex-col md:flex-row items-center gap-4 justify-between">
+            <div className="bg-slate-900 text-blue-100 p-5 rounded-xl border border-slate-800 shadow flex flex-col md:flex-row items-center gap-4 justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-yellow-400 bg-white shadow-md shrink-0 flex items-center justify-center p-1">
                   <img
@@ -2951,14 +2977,14 @@ export default function App() {
                 </div>
                 <div>
                   <h4 className="font-bold text-sm text-yellow-350">Informasi Alur Jembatan Timbang & Refaksi US Bilibili 162</h4>
-                  <p className="text-xs text-emerald-200 mt-0.5 max-w-2xl leading-relaxed">
+                  <p className="text-xs text-blue-200 mt-0.5 max-w-2xl leading-relaxed">
                     Sistem dikonfigurasi penuh dengan emulator digital sensor beban GST-9700. Gunakan simulator berat fisik di dalam Tab Timbangan untuk mencocokkan Truk Tronton pengantar. Susut berat akibat jamur / air diolah otomatis berdasar tabel potongan kadar air.
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setActiveTab('REFAKSI')}
-                className="bg-yellow-450 text-emerald-950 font-bold text-xs hover:bg-[#dfe40c] bg-[#cfef33] font-bold px-4 py-2 rounded-lg whitespace-nowrap transition cursor-pointer"
+                className="bg-yellow-450 text-blue-950 font-bold text-xs hover:bg-yellow-400 bg-yellow-450 font-bold px-4 py-2 rounded-lg whitespace-nowrap transition cursor-pointer"
               >
                 Lihat Panduan Refaksi KA
               </button>
@@ -3146,8 +3172,8 @@ export default function App() {
         <AnimatePresence>
           {toasts.map((toast) => {
             let bgStyle = "bg-white border-neutral-200 shadow-xl text-neutral-800";
-            let iconColor = "text-emerald-500 bg-emerald-50";
-            let progressColor = "bg-emerald-500";
+            let iconColor = "text-blue-600 bg-blue-50";
+            let progressColor = "bg-blue-600";
             let IconComponent = CheckCircle;
 
             if (toast.type === 'error') {

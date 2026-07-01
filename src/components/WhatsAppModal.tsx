@@ -610,7 +610,7 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
         </button>
 
         <div className="flex items-center gap-3 mb-6 border-b border-neutral-100 pb-4">
-          <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 shrink-0">
             <MessageCircle className="w-5 h-5" />
           </div>
           <div>
@@ -621,14 +621,14 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
 
         <div className="space-y-4">
           <div>
-            <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5 focus-within:text-emerald-600 transition-colors">
+            <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5 focus-within:text-blue-700 transition-colors">
               No. WhatsApp Penerima
             </label>
             <input
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2.5 text-sm font-bold focus:border-emerald-500 focus:bg-white outline-none transition-all text-neutral-800 shadow-sm"
+              className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2.5 text-sm font-bold focus:border-blue-600 focus:bg-white outline-none transition-all text-neutral-800 shadow-sm"
               placeholder="Contoh: 08123456789"
               autoFocus
             />
@@ -655,7 +655,7 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
               id="withPdf" 
               checked={withPdf} 
               onChange={(e) => setWithPdf(e.target.checked)}
-              className="mt-1 w-4 h-4 text-emerald-600 rounded bg-neutral-100 border-neutral-300 focus:ring-emerald-500"
+              className="mt-1 w-4 h-4 text-blue-700 rounded bg-neutral-100 border-neutral-300 focus:ring-blue-600"
             />
             <label htmlFor="withPdf" className="text-xs font-bold text-neutral-600 cursor-pointer w-full leading-tight">
               Sertakan Link Unduh PDF Resi <br/>
@@ -663,7 +663,7 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
                 Aplikasi akan otomatis mengunggah PDF ke server sementara (berlaku 60 menit) dan menyertakan link unduhnya pada pesan WA.
               </span>
             </label>
-            <FileText className={`w-6 h-6 shrink-0 ${withPdf ? 'text-emerald-500' : 'text-neutral-300'}`} />
+            <FileText className={`w-6 h-6 shrink-0 ${withPdf ? 'text-blue-600' : 'text-neutral-300'}`} />
           </div>
         )}
 
@@ -677,7 +677,7 @@ export default function WhatsAppModal({ isOpen, onClose, onSend, defaultText, pd
           <button 
             onClick={handleSend}
             disabled={!phone.trim() || (isGenerating && withPdf)}
-            className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-400 disabled:cursor-wait text-white text-xs font-bold rounded-lg flex items-center gap-2 shadow-md transition-all active:scale-95"
+            className="px-5 py-2 bg-blue-700 hover:bg-blue-600 disabled:bg-blue-400 disabled:cursor-wait text-white text-xs font-bold rounded-lg flex items-center gap-2 shadow-md transition-all active:scale-95"
           >
             {withPdf && isGenerating ? (
               <span className="flex items-center gap-2"><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Menyiapkan...</span>

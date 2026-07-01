@@ -38,7 +38,7 @@ input, select, textarea {
 
 /* Beautiful custom subtle glow and subtle text styling for premium look */
 .text-glow-premium {
-  text-shadow: 0 0 30px rgba(16, 185, 129, 0.12);
+  text-shadow: 0 0 30px rgba(30, 58, 138, 0.12);
 }
 
 /* Ensure secondary sub-labels on light elements stay readable */

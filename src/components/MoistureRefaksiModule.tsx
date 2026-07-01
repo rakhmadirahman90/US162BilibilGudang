@@ -134,7 +134,7 @@ export default function MoistureRefaksiModule({ rules }: MoistureRefaksiModulePr
               <Calculator className="text-amber-500 w-5 h-5" />
               {t.moistureTitle || 'Kalkulator Refaksi Kadar Air Jagung'}
             </span>
-            <span className="text-[10px] uppercase font-black tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-250 animate-pulse">
+            <span className="text-[10px] uppercase font-black tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 animate-pulse">
               Smart Input Aktif
             </span>
           </h3>
@@ -257,7 +257,7 @@ export default function MoistureRefaksiModule({ rules }: MoistureRefaksiModulePr
                 <div className="flex justify-between items-center">
                   <label className="block text-neutral-600 font-bold text-[11px]">Berat Bruto Jagung (Kg)</label>
                   {baseWeight > 0 && (
-                    <span className="text-[10px] bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded font-mono font-black border border-emerald-150">
+                    <span className="text-[10px] bg-blue-50 text-blue-800 px-1.5 py-0.5 rounded font-mono font-black border border-blue-200">
                       {(baseWeight / 1000).toFixed(2).replace('.', ',')} Ton
                     </span>
                   )}
@@ -389,7 +389,7 @@ export default function MoistureRefaksiModule({ rules }: MoistureRefaksiModulePr
               </div>
               <div className="flex justify-between py-2 border-b border-neutral-200 text-sm bg-neutral-50 px-3 py-2.5 rounded-lg border border-neutral-200/70">
                 <span className="font-black text-neutral-700 text-xs self-center">BERAT BERSIH (NETTO):</span>
-                <span className="font-black text-emerald-700 text-base">{netWeightCalculated.toLocaleString('id-ID')} kg</span>
+                <span className="font-black text-blue-800 text-base">{netWeightCalculated.toLocaleString('id-ID')} kg</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-neutral-100 text-[11px]">
                 <span className="text-neutral-500">Nilai Awal Bruto:</span>
@@ -399,7 +399,7 @@ export default function MoistureRefaksiModule({ rules }: MoistureRefaksiModulePr
                 <span className="text-neutral-500">Potongan Harga KA:</span>
                 <span className="font-semibold text-red-500">-Rp {lostValueBytes.toLocaleString('id-ID')}</span>
               </div>
-              <div className="flex justify-between py-3 text-base bg-emerald-600 text-white px-3.5 rounded-xl shadow-lg border border-emerald-500">
+              <div className="flex justify-between py-3 text-base bg-blue-700 text-white px-3.5 rounded-xl shadow-lg border border-blue-600">
                 <span className="font-extrabold text-white text-xs tracking-wider uppercase self-center">NILAI BAYAR NETTO:</span>
                 <span className="font-black text-white text-xl">Rp {finalValueBytes.toLocaleString('id-ID')}</span>
               </div>
@@ -450,7 +450,7 @@ export default function MoistureRefaksiModule({ rules }: MoistureRefaksiModulePr
 
             {/* Interactive guidelines / recommendations */}
             <div className={`p-4.5 rounded-xl border flex gap-3 ${
-              moisture <= 14.0 ? 'bg-emerald-50 border-emerald-200/60 text-emerald-900' :
+              moisture <= 14.0 ? 'bg-blue-50 border-blue-200/60 text-blue-900' :
               moisture <= 17.0 ? 'bg-amber-50/70 border-amber-200/60 text-amber-900' :
               'bg-rose-50 border-rose-200/60 text-rose-950'
             }`}>
@@ -503,7 +503,7 @@ export default function MoistureRefaksiModule({ rules }: MoistureRefaksiModulePr
                         isActive 
                           ? "bg-amber-100/80 text-amber-950 font-black border-y-2 border-amber-300"
                           : r.refaksiPercent === 0 
-                            ? "bg-green-50/70 text-green-950 font-semibold" 
+                            ? "bg-blue-100 text-blue-900 font-semibold" 
                             : r.refaksiPercent > 10 
                               ? "bg-red-50/30" 
                               : (i % 2 === 0 ? "bg-neutral-50" : "bg-white")

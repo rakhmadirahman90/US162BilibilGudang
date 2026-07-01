@@ -318,7 +318,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 border border-neutral-200 shadow-sm rounded-2xl">
         <div>
           <h2 className="text-xl font-extrabold text-neutral-850 flex items-center gap-2 uppercase tracking-tight">
-            <Package className="text-emerald-600 w-6 h-6 shrink-0" />
+            <Package className="text-blue-600 w-6 h-6 shrink-0" />
             <span>BUKU LOGISTIK {commodityTab}</span>
           </h2>
           <p className="text-[11px] text-neutral-400 font-bold mt-1 uppercase tracking-wider">
@@ -336,7 +336,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
           </button>
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-[10px] px-4 py-2.5 rounded-xl flex items-center gap-1.5 shadow-sm transition active:scale-95 uppercase tracking-wide cursor-pointer"
+            className="bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-[10px] px-4 py-2.5 rounded-xl flex items-center gap-1.5 shadow-sm transition active:scale-95 uppercase tracking-wide cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
             <span>{showAddForm ? 'Tutup Formulir' : 'Catat Logistik Baru'}</span>
@@ -349,7 +349,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
         <select
           value={commodityTab}
           onChange={(e) => setCommodityTab(e.target.value)}
-          className="w-full bg-white border border-neutral-200 text-neutral-800 text-sm font-black uppercase tracking-wider py-2.5 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-sm"
+          className="w-full bg-white border border-neutral-200 text-neutral-800 text-sm font-black uppercase tracking-wider py-2.5 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm"
         >
           {COMMODITIES.map(c => (
             <option key={c} value={c}>{c}</option>
@@ -363,10 +363,10 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
         <div className="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-[9px] text-neutral-400 font-black uppercase tracking-wider">Total Barang Masuk</span>
-            <div className="text-lg font-black text-emerald-600">{formatKgValue(totalInWeight)}</div>
+            <div className="text-lg font-black text-blue-600">{formatKgValue(totalInWeight)}</div>
             <div className="text-[11px] text-neutral-500 font-mono font-bold uppercase">{formatTonValue(totalInWeight)}</div>
           </div>
-          <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner">
+          <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner">
             <ArrowUpCircle className="w-5.5 h-5.5" />
           </div>
         </div>
@@ -384,13 +384,13 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
         </div>
 
         {/* Current Stock Balance */}
-        <div className="bg-emerald-50/60 border border-emerald-200 rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div className="bg-blue-50/60 border border-blue-200 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[9px] text-emerald-950/75 font-black uppercase tracking-wider">Stok Logistik Saat Ini</span>
-            <div className="text-lg text-emerald-950 font-black">{formatKgValue(currentStockBalance)}</div>
-            <div className="text-[11px] text-emerald-950/80 font-mono font-bold uppercase">{formatTonValue(currentStockBalance)}</div>
+            <span className="text-[9px] text-blue-950/75 font-black uppercase tracking-wider">Stok Logistik Saat Ini</span>
+            <div className="text-lg text-blue-950 font-black">{formatKgValue(currentStockBalance)}</div>
+            <div className="text-[11px] text-blue-950/80 font-mono font-bold uppercase">{formatTonValue(currentStockBalance)}</div>
           </div>
-          <div className="bg-emerald-100 text-emerald-700 w-11 h-11 rounded-xl flex items-center justify-center shadow-inner">
+          <div className="bg-blue-100 text-blue-700 w-11 h-11 rounded-xl flex items-center justify-center shadow-inner">
             <Package className="w-5.5 h-5.5" />
           </div>
         </div>
@@ -399,7 +399,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
       {/* 4. Manual Entry Form */}
       {showAddForm && (
         <div className="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6 relative overflow-hidden">
-          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500" />
+          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-600" />
           <h3 className="text-xs font-black text-neutral-800 uppercase tracking-widest mb-4 flex items-center gap-1.5">
             <FileText className="w-4 h-4 text-neutral-500" />
             {editingId ? 'Edit Catatan Logistik' : 'Formulir Catatan Logistik Baru'}
@@ -407,15 +407,15 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
           <form onSubmit={handleSaveRecord} className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
             <div>
               <label className="block mb-1 font-bold text-neutral-600 uppercase tracking-wider text-[9px]">{t.dateLabel}</label>
-              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-medium focus:ring-1 focus:ring-emerald-500 outline-none" />
+              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-medium focus:ring-1 focus:ring-blue-500 outline-none" />
             </div>
             <div>
               <label className="block mb-1 font-bold text-neutral-600 uppercase tracking-wider text-[9px]">{t.policeNo}</label>
-              <input type="text" placeholder="DP 8600 AL" value={policeNo} onChange={(e) => setPoliceNo(e.target.value)} className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-bold uppercase focus:ring-1 focus:ring-emerald-500 outline-none" />
+              <input type="text" placeholder="DP 8600 AL" value={policeNo} onChange={(e) => setPoliceNo(e.target.value)} className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-bold uppercase focus:ring-1 focus:ring-blue-500 outline-none" />
             </div>
             <div>
               <label className="block mb-1 font-bold text-neutral-600 uppercase tracking-wider text-[9px]">{t.descriptionLabel}</label>
-              <input type="text" placeholder="Penerimaan dari Supplier / Pengiriman" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-medium focus:ring-1 focus:ring-emerald-500 outline-none" />
+              <input type="text" placeholder="Penerimaan dari Supplier / Pengiriman" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-medium focus:ring-1 focus:ring-blue-500 outline-none" />
             </div>
             <div>
               <label className="block mb-1 font-bold text-neutral-600 uppercase tracking-wider text-[9px]">Pilihan Komoditas / Item</label>
@@ -424,7 +424,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
                 placeholder="Spesifikasi / Jenis Item (Opsional)"
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
-                className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-bold uppercase focus:ring-1 focus:ring-emerald-500 outline-none"
+                className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-bold uppercase focus:ring-1 focus:ring-blue-500 outline-none"
               />
             </div>
             <div>
@@ -474,7 +474,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
                 placeholder="MISAL: MSKU 123"
                 value={containerNo}
                 onChange={(e) => setContainerNo(e.target.value)}
-                className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-bold uppercase focus:ring-1 focus:ring-emerald-500 outline-none"
+                className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-bold uppercase focus:ring-1 focus:ring-blue-500 outline-none"
               />
             </div>
             <div>
@@ -484,7 +484,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
                 placeholder="MISAL: SGL-987"
                 value={sealNo}
                 onChange={(e) => setSealNo(e.target.value)}
-                className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-bold uppercase focus:ring-1 focus:ring-emerald-500 outline-none"
+                className="w-full border border-neutral-200 p-2.5 rounded-xl bg-white text-neutral-800 font-bold uppercase focus:ring-1 focus:ring-blue-500 outline-none"
               />
             </div>
             <div className="col-span-1 md:col-span-3 flex justify-end gap-2.5 border-t border-neutral-100 pt-4">
@@ -500,7 +500,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
               </button>
               <button
                 type="submit"
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-[10px] px-6 py-2.5 rounded-xl shadow transition cursor-pointer uppercase tracking-wider active:scale-95"
+                className="bg-blue-700 hover:bg-blue-600 text-white font-extrabold text-[10px] px-6 py-2.5 rounded-xl shadow transition cursor-pointer uppercase tracking-wider active:scale-95"
               >
                 {t.saveStock}
               </button>
@@ -529,7 +529,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
             placeholder="Cari No. Polisi / Uraian..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border border-neutral-200 rounded-xl text-xs bg-white focus:ring-1 focus:ring-emerald-500 outline-none text-neutral-700 font-medium"
+            className="w-full pl-9 pr-4 py-2 border border-neutral-200 rounded-xl text-xs bg-white focus:ring-1 focus:ring-blue-500 outline-none text-neutral-700 font-medium"
           />
         </div>
         
@@ -539,7 +539,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
             onClick={() => setSortOrder('NEWEST')}
             className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border transition duration-150 cursor-pointer ${
               sortOrder === 'NEWEST'
-                ? 'bg-emerald-600 text-white border-emerald-650 shadow-sm'
+                ? 'bg-blue-700 text-white border-blue-750 shadow-sm'
                 : 'bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-55'
             }`}
           >
@@ -549,7 +549,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
             onClick={() => setSortOrder('OLDEST')}
             className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border transition duration-150 cursor-pointer ${
               sortOrder === 'OLDEST'
-                ? 'bg-emerald-600 text-white border-emerald-650 shadow-sm'
+                ? 'bg-blue-700 text-white border-blue-750 shadow-sm'
                 : 'bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-55'
             }`}
           >
@@ -601,7 +601,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
                     </td>
                     <td className="py-3 px-4">
                       <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
-                        (r.commodity || r.itemName?.toUpperCase()) === 'BERAS' ? 'bg-emerald-50 text-emerald-700' : (r.commodity || r.itemName?.toUpperCase()) === 'JAGUNG' ? 'bg-amber-50 text-amber-700' : 'bg-purple-50 text-purple-700'
+                        (r.commodity || r.itemName?.toUpperCase()) === 'BERAS' ? 'bg-blue-50 text-blue-700' : (r.commodity || r.itemName?.toUpperCase()) === 'JAGUNG' ? 'bg-amber-50 text-amber-700' : 'bg-purple-50 text-purple-700'
                       }`}>
                         <span>{(r.commodity || r.itemName?.toUpperCase()) === 'BERAS' ? '🌾' : (r.commodity || r.itemName?.toUpperCase()) === 'JAGUNG' ? '🌽' : '🫘'}</span>
                         <span>{r.itemName}</span>
@@ -609,7 +609,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
                     </td>
                     <td className="py-3 px-4 font-mono text-right text-neutral-600">Rp {(r.price ?? 0).toLocaleString('id-ID')}</td>
                     <td className="py-3 px-4 text-right font-semibold text-neutral-800">{(r.colly ?? 0).toLocaleString('id-ID')}</td>
-                    <td className="py-3 px-4 font-black text-emerald-600 text-right">
+                    <td className="py-3 px-4 font-black text-blue-600 text-right">
                       {r.inWeight > 0 ? `+${(r.inWeight ?? 0).toLocaleString('id-ID')}` : '-'}
                     </td>
                     <td className="py-3 px-4 font-black text-rose-600 text-right">
@@ -634,7 +634,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
                           record: r,
                           pdfHtml: getHTMLForPDF(printRiceStockSlip, r, staffName),
                           pdfFileName: `Resi_Stok_${r.itemName?.replaceAll(" ", "_")}_${r.date}.pdf`
-                        })} className="text-neutral-400 hover:text-emerald-600 transition cursor-pointer p-1 rounded-md hover:bg-neutral-100" title="Kirim Resi via WA">
+                        })} className="text-neutral-400 hover:text-blue-600 transition cursor-pointer p-1 rounded-md hover:bg-neutral-100" title="Kirim Resi via WA">
                           <MessageCircle className="w-3.5 h-3.5" />
                         </button>
                         {!r.isSystem && (
@@ -669,7 +669,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
             >
               <div className="flex justify-between items-start border-b border-neutral-100 pb-3 mb-4">
                 <span className="font-bold text-neutral-800 flex items-center gap-1.5 uppercase text-[11px] tracking-widest text-neutral-700">
-                  <Printer className="text-emerald-600 w-4 h-4" />
+                  <Printer className="text-blue-600 w-4 h-4" />
                   Pratinjau Bukti Stok
                 </span>
                 <button 
@@ -682,7 +682,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
 
               <div className="bg-neutral-50 p-3.5 border border-dashed border-neutral-300 rounded-xl font-mono text-[10px] text-neutral-800 leading-tight shadow-inner">
                 <div className="text-center border-b border-neutral-300 pb-1 mb-2">
-                  <div className="font-bold text-xs tracking-widest text-emerald-950">US Bilibili 162</div>
+                  <div className="font-bold text-xs tracking-widest text-blue-950">US Bilibili 162</div>
                   <div className="text-[8px] opacity-70">Jalan Poros Pinrang-Polman KM. 12</div>
                   <div className="text-[8px] opacity-70">Desa Bilibili, Kec. Suppa, Kab. Pinrang</div>
                 </div>
@@ -717,11 +717,11 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
                 <div className="border-t border-neutral-200 pt-1.5 space-y-0.5">
                   <div className="flex justify-between text-[9px]">
                     <span className="uppercase">Nama Item :</span>
-                    <span className="font-black text-emerald-800">{previewRecord.itemName}</span>
+                    <span className="font-black text-blue-800">{previewRecord.itemName}</span>
                   </div>
                   <div className="flex justify-between text-[9px]">
                     <span className="uppercase">Masuk :</span>
-                    <span className="font-bold text-emerald-600">{(previewRecord.inWeight ?? 0).toLocaleString('id-ID')} Kg</span>
+                    <span className="font-bold text-blue-600">{(previewRecord.inWeight ?? 0).toLocaleString('id-ID')} Kg</span>
                   </div>
                   <div className="flex justify-between text-[9px]">
                     <span className="uppercase">Keluar :</span>
@@ -740,7 +740,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
                       list="ricestock-staff-list"
                       value={staffName}
                       onChange={(e) => setStaffName(e.target.value)}
-                      className="w-full text-center bg-white border border-neutral-200 rounded py-1 px-1 font-bold focus:outline-none focus:border-emerald-500"
+                      className="w-full text-center bg-white border border-neutral-200 rounded py-1 px-1 font-bold focus:outline-none focus:border-blue-500"
                     />
                     <datalist id="ricestock-staff-list">
                       {employees.filter(e => e.role === 'PETUGAS' || e.role === 'KARYAWAN').map(e => (
@@ -766,7 +766,7 @@ export default function RiceStockModule({ records, inboundRecords, outboundRecor
                     printRiceStockSlip(previewRecord, staffName);
                     setPreviewRecord(null);
                   }}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-sm transition active:scale-95"
+                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-sm transition active:scale-95"
                 >
                   <Printer className="w-3.5 h-3.5" /> <span>CETAK SLIP</span>
                 </button>

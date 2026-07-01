@@ -298,15 +298,15 @@ export default function LaborKasbonTab({
         </div>
 
         {/* KPI 3 : TOTAL PEMBAYARAN REPAYMENT */}
-        <div className="bg-white border border-emerald-200 shadow-sm rounded-xl p-4 flex gap-4 items-center">
-          <div className="bg-emerald-50 text-emerald-600 p-3 rounded-full">
+        <div className="bg-white border border-blue-200 shadow-sm rounded-xl p-4 flex gap-4 items-center">
+          <div className="bg-blue-50 text-blue-700 p-3 rounded-full">
             <ArrowDownLeft className="w-6 h-6" />
           </div>
           <div>
             <span className="text-[10px] text-neutral-400 font-bold uppercase block tracking-wider leading-none">
               TOTAL PENGEMBALIAN (REPAID)
             </span>
-            <span className="text-xl font-black text-emerald-700 font-mono mt-1 block">
+            <span className="text-xl font-black text-blue-800 font-mono mt-1 block">
               Rp {totalRepaid.toLocaleString('id-ID')}
             </span>
             <span className="text-[9px] text-neutral-500 mt-0.5 block uppercase font-mono">
@@ -325,10 +325,10 @@ export default function LaborKasbonTab({
           <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-5">
             <div className="flex items-center justify-between mb-4 pb-2 border-b border-neutral-150">
               <h3 className="font-black text-neutral-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                <PlusCircle className="text-emerald-700 w-4 h-4" />
+                <PlusCircle className="text-blue-800 w-4 h-4" />
                 Registrasi Kasbon Buruh
               </h3>
-              <span className="bg-emerald-50 text-emerald-800 text-[9px] uppercase font-bold px-2 py-0.5 rounded border border-emerald-100">
+              <span className="bg-blue-50 text-blue-900 text-[9px] uppercase font-bold px-2 py-0.5 rounded border border-blue-100">
                 Pencatatan Baru
               </span>
             </div>
@@ -350,7 +350,7 @@ export default function LaborKasbonTab({
                   <select
                     value={employeeId}
                     onChange={(e) => setEmployeeId(e.target.value)}
-                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:ring-1 focus:ring-emerald-500 font-bold text-neutral-800 uppercase outline-none"
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded p-2 focus:bg-white focus:ring-1 focus:ring-blue-500 font-bold text-neutral-800 uppercase outline-none"
                   >
                     {eligibleEmployees.map(emp => {
                       const activeLoan = kasbons
@@ -385,7 +385,7 @@ export default function LaborKasbonTab({
                       onClick={() => setType('BAYAR')}
                       className={`py-2 text-[10px] font-black rounded-lg transition-all border outline-none tracking-wider ${
                         type === 'BAYAR'
-                          ? 'bg-emerald-50 border-emerald-300 text-emerald-800 font-black'
+                          ? 'bg-blue-50 border-blue-300 text-blue-900 font-black'
                           : 'bg-white border-neutral-200 text-neutral-400 hover:text-neutral-700'
                       }`}
                     >
@@ -422,7 +422,7 @@ export default function LaborKasbonTab({
                 <button
                   type="submit"
                   className={`w-full py-2.5 rounded-lg text-white font-black text-xs uppercase tracking-widest cursor-pointer shadow transition-all hover:opacity-90 active:scale-95 ${
-                    type === 'PINJAM' ? 'bg-red-700 hover:bg-red-600' : 'bg-emerald-700 hover:bg-emerald-600'
+                    type === 'PINJAM' ? 'bg-red-700 hover:bg-red-600' : 'bg-blue-800 hover:bg-blue-700'
                   }`}
                 >
                   {type === 'PINJAM' ? 'SIMPAN PINJAMAN KASBON' : 'SIMPAN PEMBAYARAN KASBON'}
@@ -467,7 +467,7 @@ export default function LaborKasbonTab({
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 pb-3 border-b border-neutral-150">
               <div>
                 <h3 className="font-black text-neutral-800 text-xs uppercase tracking-tight flex items-center gap-1.5">
-                  <ChevronRight className="w-4 h-4 text-emerald-600" />
+                  <ChevronRight className="w-4 h-4 text-blue-600" />
                   Buku Kas Besar Pinjaman & Pelunasan Kasbon
                 </h3>
                 <p className="text-[9px] text-neutral-400 uppercase mt-0.5 font-sans">
@@ -479,7 +479,7 @@ export default function LaborKasbonTab({
                 <button
                   type="button"
                   onClick={handleExportExcel}
-                  className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[9px] px-2.5 py-1.5 rounded-lg border border-emerald-250 transition cursor-pointer"
+                  className="flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-800 text-[9px] px-2.5 py-1.5 rounded-lg border border-blue-250 transition cursor-pointer"
                 >
                   <Download className="w-3 h-3" /> CSV
                 </button>
@@ -546,13 +546,13 @@ export default function LaborKasbonTab({
                             <span className={`text-[9px] px-2 py-0.5 rounded-full font-black border tracking-tighter ${
                               isPinjam 
                                 ? 'bg-red-50 text-red-700 border-red-200' 
-                                : 'bg-emerald-50 text-emerald-700 border-emerald-205'
+                                : 'bg-blue-50 text-blue-800 border-blue-200'
                             }`}>
                               {isPinjam ? 'PINJAM' : 'BAYAR'}
                             </span>
                           </td>
                           <td className={`text-right py-2.5 px-3 font-mono font-black ${
-                            isPinjam ? 'text-red-700' : 'text-emerald-700'
+                            isPinjam ? 'text-red-700' : 'text-blue-800'
                           }`}>
                             {isPinjam ? '-' : '+'} {k.amount.toLocaleString('id-ID')}
                           </td>

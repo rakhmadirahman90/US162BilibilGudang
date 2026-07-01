@@ -1561,7 +1561,7 @@ export default function DatabaseMasterModule({
                       <option value="RUMPUT LAUT">RUMPUT LAUT</option>
                       <option value="BESI TUA">BESI TUA</option>
                     </select>
-                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
+                    <button type="submit" className="bg-blue-700 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
                       <Check className="w-3.5 h-3.5" /> SIMPAN
                     </button>
                   </div>
@@ -1603,7 +1603,7 @@ export default function DatabaseMasterModule({
                       className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs focus:border-indigo-500 outline-none text-neutral-800"
                       placeholder="Makassar / Pelabuhan / KIMA"
                     />
-                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
+                    <button type="submit" className="bg-blue-700 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
                       <Check className="w-3.5 h-3.5" /> SIMPAN
                     </button>
                   </div>
@@ -1660,7 +1660,7 @@ export default function DatabaseMasterModule({
                       className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-mono disabled:opacity-50 text-neutral-850 outline-none focus:border-indigo-500"
                       placeholder="Contoh: 50"
                     />
-                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
+                    <button type="submit" className="bg-blue-700 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
                       <Check className="w-3.5 h-3.5" /> SIMPAN
                     </button>
                   </div>
@@ -1730,7 +1730,7 @@ export default function DatabaseMasterModule({
                       className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-mono focus:border-indigo-500 outline-none text-neutral-800"
                       placeholder="Contoh: 1.00"
                     />
-                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
+                    <button type="submit" className="bg-blue-700 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
                       <Check className="w-3.5 h-3.5" /> SIMPAN
                     </button>
                   </div>
@@ -1783,7 +1783,7 @@ export default function DatabaseMasterModule({
                       className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-mono focus:border-indigo-500 outline-none text-neutral-800"
                       placeholder="Contoh: 1000000"
                     />
-                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
+                    <button type="submit" className="bg-blue-700 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
                       <Check className="w-3.5 h-3.5" /> SIMPAN
                     </button>
                   </div>
@@ -1835,7 +1835,7 @@ export default function DatabaseMasterModule({
                       className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs focus:border-indigo-500 outline-none text-neutral-800"
                       placeholder="Contoh: Pinrang"
                     />
-                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
+                    <button type="submit" className="bg-blue-700 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
                       <Check className="w-3.5 h-3.5" /> SIMPAN
                     </button>
                   </div>
@@ -1880,7 +1880,7 @@ export default function DatabaseMasterModule({
                       className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-mono focus:border-indigo-500 outline-none text-neutral-800"
                       placeholder="Contoh: 500000"
                     />
-                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
+                    <button type="submit" className="bg-blue-700 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
                       <Check className="w-3.5 h-3.5" /> SIMPAN
                     </button>
                   </div>
@@ -1922,7 +1922,7 @@ export default function DatabaseMasterModule({
                       className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs focus:border-indigo-500 outline-none text-neutral-800"
                       placeholder="Pinrang / Sidrap"
                     />
-                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
+                    <button type="submit" className="bg-blue-700 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
                       <Check className="w-3.5 h-3.5" /> SIMPAN
                     </button>
                   </div>
@@ -1966,7 +1966,7 @@ export default function DatabaseMasterModule({
                       className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs focus:border-indigo-500 outline-none text-neutral-800 font-mono"
                       placeholder="Contoh: 30"
                     />
-                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
+                    <button type="submit" className="bg-blue-700 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
                       <Check className="w-3.5 h-3.5" /> SIMPAN
                     </button>
                   </div>
@@ -1999,7 +1999,7 @@ export default function DatabaseMasterModule({
                       <option value="KREDIT">PENGELUARAN (KREDIT)</option>
                       <option value="BOTH">DUA-DUANYA (BOTH)</option>
                     </select>
-                    <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
+                    <button type="submit" className="bg-blue-700 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shrink-0 cursor-pointer">
                       <Check className="w-3.5 h-3.5" /> SIMPAN
                     </button>
                   </div>
@@ -2137,7 +2137,7 @@ export default function DatabaseMasterModule({
                         </div>
                       </div>
                     </div>
-                    <button type="submit" disabled={isCompressing} className="bg-emerald-600 hover:bg-emerald-500 disabled:bg-neutral-400 text-white font-bold px-8 py-2 rounded-lg text-xs flex items-center justify-center gap-1.5 shrink-0 cursor-pointer h-[38px] transition-all active:scale-95 shadow-md mt-auto">
+                    <button type="submit" disabled={isCompressing} className="bg-blue-700 hover:bg-blue-600 disabled:bg-neutral-400 text-white font-bold px-8 py-2 rounded-lg text-xs flex items-center justify-center gap-1.5 shrink-0 cursor-pointer h-[38px] transition-all active:scale-95 shadow-md mt-auto">
                       <Check className="w-4 h-4" /> SIMPAN PRODUK
                     </button>
                   </div>
@@ -2150,24 +2150,24 @@ export default function DatabaseMasterModule({
               <form onSubmit={handleSaveUser} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end font-sans">
                   <div>
-                    <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5 text-emerald-700">Username Login</label>
+                    <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5 text-blue-800">Username Login</label>
                     <input
                       type="text"
                       required
                       value={userUsername}
                       onChange={(e) => setUserUsername(e.target.value.toLowerCase())}
-                      className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-bold focus:border-emerald-500 outline-none text-neutral-800"
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-bold focus:border-blue-600 outline-none text-neutral-800"
                       placeholder="e.g., operator_malam"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5 text-emerald-700">Password</label>
+                    <label className="block text-[10px] font-extrabold text-neutral-500 uppercase tracking-widest mb-1.5 text-blue-800">Password</label>
                     <div className="relative">
                       <input
                         type="password"
                         value={userPassword}
                         onChange={(e) => setUserPassword(e.target.value)}
-                        className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs focus:border-emerald-500 outline-none text-neutral-800"
+                        className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs focus:border-blue-600 outline-none text-neutral-800"
                         placeholder={editingId ? 'Kosongkan jika tak diubah' : 'Min. 5 karakter'}
                       />
                       <Key className="w-3 h-3 absolute right-3 top-2.5 text-neutral-400" />
@@ -2180,7 +2180,7 @@ export default function DatabaseMasterModule({
                       required
                       value={userFullName}
                       onChange={(e) => setUserFullName(e.target.value)}
-                      className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-bold focus:border-emerald-500 outline-none text-neutral-800 uppercase"
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs font-bold focus:border-blue-600 outline-none text-neutral-800 uppercase"
                       placeholder="Nama Lengkap Karyawan"
                     />
                   </div>
@@ -2189,7 +2189,7 @@ export default function DatabaseMasterModule({
                     <select
                       value={userRole}
                       onChange={(e) => setUserRole(e.target.value as any)}
-                      className="w-full bg-white border border-neutral-300 rounded-lg px-2 py-2 text-xs font-bold focus:border-emerald-500 outline-none text-neutral-800"
+                      className="w-full bg-white border border-neutral-300 rounded-lg px-2 py-2 text-xs font-bold focus:border-blue-600 outline-none text-neutral-800"
                     >
                       <option value="operator">OPERATOR (Timbangan/Logistik)</option>
                       <option value="karyawan">KARYAWAN (Stok/Administrasi)</option>
@@ -2203,7 +2203,7 @@ export default function DatabaseMasterModule({
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 border-b border-neutral-200 pb-2.5 gap-2">
                       <div>
                         <h5 className="text-[11px] font-black text-neutral-700 uppercase tracking-wider flex items-center gap-1.5">
-                          <Settings className="w-3.5 h-3.5 text-emerald-600 animate-spin-slow" /> Otorisasi Akses Menu Navigasi (Navbar)
+                          <Settings className="w-3.5 h-3.5 text-blue-700 animate-spin-slow" /> Otorisasi Akses Menu Navigasi (Navbar)
                         </h5>
                         <p className="text-[9px] text-neutral-500 font-bold mt-0.5 uppercase tracking-wide">
                           Pilih menu yang diizinkan untuk diakses user ini. Jika kosong, sistem otomatis menggunakan default level Role.
@@ -2222,7 +2222,7 @@ export default function DatabaseMasterModule({
                             setUserAllowedTabs(defaultRoles[userRole] || []);
                             triggerToast('Berhasil mengatur menu default sesuai level Role!', 'success');
                           }}
-                          className="bg-white hover:bg-neutral-100 border border-neutral-300 text-[10px] font-black text-emerald-700 px-2.5 py-1 rounded-[4px] transition-all hover:border-emerald-300 cursor-pointer uppercase flex items-center gap-1 active:scale-95"
+                          className="bg-white hover:bg-neutral-100 border border-neutral-300 text-[10px] font-black text-blue-800 px-2.5 py-1 rounded-[4px] transition-all hover:border-blue-300 cursor-pointer uppercase flex items-center gap-1 active:scale-95"
                         >
                           Atur Default Role
                         </button>
@@ -2243,7 +2243,7 @@ export default function DatabaseMasterModule({
                       {[
                         { id: 'DASHBOARD', num: '01', name: 'Ringkasan Dashboard', rules: 'Semua Role', color: 'border-l-blue-500' },
                         { id: 'TIMBANG', num: '02', name: 'Jembatan Timbangan', rules: 'Semua Role', color: 'border-l-indigo-500' },
-                        { id: 'MASUK', num: '03', name: 'Barang Masuk', rules: 'Semua Role', color: 'border-l-emerald-500' },
+                        { id: 'MASUK', num: '03', name: 'Barang Masuk', rules: 'Semua Role', color: 'border-l-blue-500' },
                         { id: 'KELUAR', num: '04', name: 'Barang Keluar', rules: 'Semua Role', color: 'border-l-cyan-500' },
                         { id: 'SERVICES', num: '05', name: 'Jasa Poles & Kipas', rules: 'Admin/Op/Pimpinan', color: 'border-l-sky-500' },
                         { id: 'REFAKSI', num: '06', name: 'Potongan Refaksi', rules: 'Admin/Op/Pimpinan', color: 'border-l-amber-500' },
@@ -2260,7 +2260,7 @@ export default function DatabaseMasterModule({
                             key={tab.id}
                             className={`flex items-start gap-2 p-2 rounded-lg border cursor-pointer select-none transition-all ${
                               isChecked 
-                                ? 'bg-emerald-50 border-emerald-400 text-emerald-950 font-bold shadow-sm' 
+                                ? 'bg-blue-50 border-blue-400 text-blue-950 font-bold shadow-sm' 
                                 : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-100'
                             } border-l-4 ${tab.color}`}
                           >
@@ -2274,7 +2274,7 @@ export default function DatabaseMasterModule({
                                   setUserAllowedTabs(prev => prev.filter(t => t !== tab.id));
                                 }
                               }}
-                              className="w-3.5 h-3.5 accent-emerald-600 mt-1 rounded cursor-pointer"
+                              className="w-3.5 h-3.5 accent-blue-600 mt-1 rounded cursor-pointer"
                             />
                             <div className="leading-tight">
                               <span className="text-[8px] font-black tracking-widest text-neutral-400 block uppercase leading-none mb-0.5">{tab.num}</span>
@@ -2287,20 +2287,20 @@ export default function DatabaseMasterModule({
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center justify-between bg-emerald-50/50 p-3 rounded-lg border border-emerald-100">
+                <div className="flex items-center justify-between bg-blue-50/50 p-3 rounded-lg border border-blue-100">
                   <div className="flex items-center gap-2">
                     <input 
                       type="checkbox" 
                       id="user-active" 
                       checked={userIsActive}
                       onChange={(e) => setUserIsActive(e.target.checked)}
-                      className="w-4 h-4 accent-emerald-600"
+                      className="w-4 h-4 accent-blue-600"
                     />
-                    <label htmlFor="user-active" className="text-xs font-bold text-emerald-800 select-none cursor-pointer">
+                    <label htmlFor="user-active" className="text-xs font-bold text-blue-900 select-none cursor-pointer">
                       Akun Aktif (Bisa Login)
                     </label>
                   </div>
-                  <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-2 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95">
+                  <button type="submit" className="bg-blue-700 hover:bg-blue-600 text-white font-bold px-8 py-2 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95">
                     <Check className="w-4 h-4" /> SIMPAN PENGGUNA
                   </button>
                 </div>
@@ -2406,7 +2406,7 @@ export default function DatabaseMasterModule({
                         <td className="p-3 font-extrabold text-indigo-900 tracking-tight font-mono">{v.policeNo}</td>
                         <td className="p-3 font-bold">{v.driverName}</td>
                         <td className="p-3 text-neutral-600">{v.vehicleType}</td>
-                        <td className="p-3 font-mono font-bold text-right text-emerald-700">{(v.tareWeight || 0).toLocaleString('id-ID')} Kg</td>
+                        <td className="p-3 font-mono font-bold text-right text-blue-700">{(v.tareWeight || 0).toLocaleString('id-ID')} Kg</td>
                         <td className="p-3 text-center flex items-center justify-center gap-1.5">
                           <button 
                             onClick={() => handleEditVehicle(v)}
@@ -2458,7 +2458,7 @@ export default function DatabaseMasterModule({
                       <div>Tipe Truk:</div>
                       <div className="text-neutral-800 text-right">{v.vehicleType}</div>
                       <div>Berat Tara:</div>
-                      <div className="text-emerald-700 font-mono text-right font-extrabold">{(v.tareWeight || 0).toLocaleString('id-ID')} Kg</div>
+                      <div className="text-blue-700 font-mono text-right font-extrabold">{(v.tareWeight || 0).toLocaleString('id-ID')} Kg</div>
                     </div>
                   </div>
               ))}
@@ -2492,7 +2492,7 @@ export default function DatabaseMasterModule({
                         <td className="p-3 font-mono font-medium">{s.phone || '-'}</td>
                         <td className="p-3 text-neutral-600">{s.address || '-'}</td>
                         <td className="p-3">
-                          <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 font-extrabold px-2 py-0.5 rounded text-[10px]">
+                          <span className="bg-blue-50 text-blue-800 border border-blue-200 font-extrabold px-2 py-0.5 rounded text-[10px]">
                             {s.mainCommodity}
                           </span>
                         </td>
@@ -2546,7 +2546,7 @@ export default function DatabaseMasterModule({
                       <div className="text-neutral-800 text-right">{s.address || '-'}</div>
                       <div>Komoditas Utama:</div>
                       <div className="text-right">
-                        <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 font-extrabold px-2 py-0.5 rounded text-[10px] inline-block">
+                        <span className="bg-blue-50 text-blue-800 border border-blue-200 font-extrabold px-2 py-0.5 rounded text-[10px] inline-block">
                           {s.mainCommodity}
                         </span>
                       </div>
@@ -2671,7 +2671,7 @@ export default function DatabaseMasterModule({
                           </span>
                         </td>
                         <td className="p-3 font-mono">{emp.phone || '-'}</td>
-                        <td className="p-3 font-mono font-bold text-right text-emerald-850">
+                        <td className="p-3 font-mono font-bold text-right text-blue-900">
                           {emp.role === 'MAKELAR' ? `Rp ${(emp.ratePerKg || 0).toLocaleString('id-ID')} / Kg` : '-'}
                         </td>
                         <td className="p-3 text-center flex items-center justify-center gap-1.5">
@@ -2735,7 +2735,7 @@ export default function DatabaseMasterModule({
                       {emp.role === 'MAKELAR' && (
                         <>
                           <div>Tarif Komisi:</div>
-                          <div className="text-emerald-850 text-right font-mono font-bold">Rp {(emp.ratePerKg || 0).toLocaleString('id-ID')} / Kg</div>
+                          <div className="text-blue-900 text-right font-mono font-bold">Rp {(emp.ratePerKg || 0).toLocaleString('id-ID')} / Kg</div>
                         </>
                       )}
                     </div>
@@ -2853,7 +2853,7 @@ export default function DatabaseMasterModule({
                         <td className="p-3 font-extrabold text-neutral-900">{b.accountName}</td>
                         <td className="p-3 font-semibold">{b.bankName}</td>
                         <td className="p-3 font-mono">{b.accountNo || '-'}</td>
-                        <td className="p-3 text-right font-mono font-bold text-emerald-800">Rp {b.initialBalance?.toLocaleString('id-ID')}</td>
+                        <td className="p-3 text-right font-mono font-bold text-blue-800">Rp {b.initialBalance?.toLocaleString('id-ID')}</td>
                         <td className="p-3 text-center flex items-center justify-center gap-1.5">
                           <button 
                             onClick={() => handleEditBank(b)}
@@ -2903,7 +2903,7 @@ export default function DatabaseMasterModule({
                       <div>No. Rekening:</div>
                       <div className="text-neutral-800 text-right font-mono">{b.accountNo || '-'}</div>
                       <div>Saldo Awal:</div>
-                      <div className="text-emerald-800 text-right font-mono font-bold">Rp {b.initialBalance?.toLocaleString('id-ID')}</div>
+                      <div className="text-blue-800 text-right font-mono font-bold">Rp {b.initialBalance?.toLocaleString('id-ID')}</div>
                     </div>
                   </div>
               ))}
@@ -3189,7 +3189,7 @@ export default function DatabaseMasterModule({
                           {l.rateType === 'FLAT' ? 'BORONGAN (FLAT)' : 'PER KILOGRAM'}
                         </span>
                       </td>
-                      <td className="p-3 text-right font-mono font-bold text-emerald-600 text-xs">
+                      <td className="p-3 text-right font-mono font-bold text-blue-600 text-xs">
                         {l.rateType === 'FLAT' ? `Rp ${l.rate.toLocaleString('id-ID')}` : `Rp ${l.rate}/Kg`}
                       </td>
                       <td className="p-3">
@@ -3253,7 +3253,7 @@ export default function DatabaseMasterModule({
                         </span>
                       </div>
                       <div>Besar Tarif:</div>
-                      <div className="text-emerald-600 font-mono text-right font-extrabold font-bold">
+                      <div className="text-blue-600 font-mono text-right font-extrabold font-bold">
                         {l.rateType === 'FLAT' ? `Rp ${l.rate.toLocaleString('id-ID')}` : `Rp ${l.rate}/Kg`}
                       </div>
                     </div>
@@ -3403,7 +3403,7 @@ export default function DatabaseMasterModule({
                             <span className="font-mono font-bold text-neutral-900">{p.stockAvailable.toLocaleString('id-ID')} Kg</span>
                             <div className="w-16 h-1 bg-neutral-100 rounded-full mt-1 overflow-hidden">
                               <div 
-                                className={`h-full ${p.stockAvailable > 5000 ? 'bg-emerald-500' : p.stockAvailable > 1000 ? 'bg-amber-500' : 'bg-rose-500'}`}
+                                className={`h-full ${p.stockAvailable > 5000 ? 'bg-blue-600' : p.stockAvailable > 1000 ? 'bg-amber-500' : 'bg-rose-500'}`}
                                 style={{ width: `${Math.min(100, (p.stockAvailable / 10000) * 100)}%` }}
                               ></div>
                             </div>
@@ -3485,7 +3485,7 @@ export default function DatabaseMasterModule({
                         <span className="font-mono font-bold text-neutral-900">{p.stockAvailable.toLocaleString('id-ID')} Kg</span>
                         <div className="w-20 h-1 bg-neutral-100 rounded-full mt-1 overflow-hidden ml-auto">
                           <div 
-                            className={`h-full ${p.stockAvailable > 5000 ? 'bg-emerald-500' : p.stockAvailable > 1000 ? 'bg-amber-500' : 'bg-rose-500'}`}
+                            className={`h-full ${p.stockAvailable > 5000 ? 'bg-blue-600' : p.stockAvailable > 1000 ? 'bg-amber-500' : 'bg-rose-500'}`}
                             style={{ width: `${Math.min(100, (p.stockAvailable / 10000) * 100)}%` }}
                           ></div>
                         </div>
@@ -3522,25 +3522,25 @@ export default function DatabaseMasterModule({
                       <tr key={u.id} className="hover:bg-slate-50 text-neutral-800 group">
                         <td className="p-3">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-[10px]">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-800 font-bold text-[10px]">
                               <Users className="w-3.5 h-3.5" />
                             </div>
                             <span className="font-extrabold text-neutral-900 uppercase leading-none">{u.fullName}</span>
                           </div>
                         </td>
-                        <td className="p-3 font-mono font-bold text-emerald-700">{u.username}</td>
+                        <td className="p-3 font-mono font-bold text-blue-800">{u.username}</td>
                         <td className="p-3">
                           <div className="flex flex-col gap-1 items-start">
                             <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black tracking-wide uppercase ${
                               u.role === 'admin' ? 'bg-amber-100 text-amber-700' :
-                              u.role === 'pimpinan' ? 'bg-emerald-100 text-emerald-700' :
+                              u.role === 'pimpinan' ? 'bg-blue-100 text-blue-800' :
                               u.role === 'operator' ? 'bg-indigo-100 text-indigo-700' : 'bg-neutral-100 text-neutral-700'
                             }`}>
                               {u.role}
                             </span>
                             <span className="text-[9px] font-bold text-neutral-500 uppercase tracking-tighter leading-none mt-1">
                               {u.allowedTabs && u.allowedTabs.length > 0 ? (
-                                <span className="text-emerald-700 font-extrabold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
+                                <span className="text-blue-800 font-extrabold bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">
                                   Menu Kustom ({u.allowedTabs.length})
                                 </span>
                               ) : (
@@ -3552,7 +3552,7 @@ export default function DatabaseMasterModule({
                           </div>
                         </td>
                         <td className="p-3 text-center">
-                          <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${u.isActive ? 'bg-emerald-500 text-white' : 'bg-neutral-300 text-white'}`}>
+                          <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${u.isActive ? 'bg-blue-600 text-white' : 'bg-neutral-300 text-white'}`}>
                             {u.isActive ? 'AKTIF' : 'NON-AKTIF'}
                           </span>
                         </td>
@@ -3561,7 +3561,7 @@ export default function DatabaseMasterModule({
                         </td>
                         <td className="p-3">
                           <div className="flex gap-1.5 justify-center opacity-40 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => handleEditUser(u)} className="bg-white hover:bg-emerald-50 text-neutral-400 hover:text-emerald-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer" title="Edit Akun">
+                            <button onClick={() => handleEditUser(u)} className="bg-white hover:bg-blue-50 text-neutral-400 hover:text-blue-800 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer" title="Edit Akun">
                               <Edit3 className="w-3.5 h-3.5" />
                             </button>
                             <button onClick={() => handleDeleteUser(u.id, u.username)} disabled={u.username === 'admin'} className="bg-white hover:bg-rose-50 text-neutral-400 hover:text-rose-600 border border-neutral-200 p-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-30" title="Hapus Akun">
@@ -3583,7 +3583,7 @@ export default function DatabaseMasterModule({
                   <div key={u.id} className="bg-white p-3 rounded-lg border border-neutral-200 shadow-sm flex flex-col gap-2">
                     <div className="flex justify-between items-center border-b border-neutral-100 pb-2">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-[10px]">
+                        <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-800 font-bold text-[10px]">
                           <Users className="w-3 h-3" />
                         </div>
                         <span className="font-extrabold text-neutral-900 uppercase leading-none text-xs">{u.fullName}</span>
@@ -3606,25 +3606,25 @@ export default function DatabaseMasterModule({
                     </div>
                     <div className="grid grid-cols-2 gap-y-1 text-[11px] text-neutral-600 font-bold">
                       <div>Username Login:</div>
-                      <div className="text-emerald-750 font-mono text-right font-extrabold">{u.username}</div>
+                      <div className="text-blue-800 font-mono text-right font-extrabold">{u.username}</div>
                       <div>Hak Akses:</div>
                       <div className="text-right flex flex-col items-end gap-1">
                         <span className={`px-2 py-0.5 rounded-[4px] text-[9px] font-black uppercase inline-block ${
                           u.role === 'admin' ? 'bg-amber-100 text-amber-705' :
-                          u.role === 'pimpinan' ? 'bg-emerald-100 text-emerald-700' :
+                          u.role === 'pimpinan' ? 'bg-blue-100 text-blue-800' :
                           u.role === 'operator' ? 'bg-indigo-100 text-indigo-705' : 'bg-neutral-100 text-neutral-700'
                         }`}>
                           {u.role}
                         </span>
                         {u.allowedTabs && u.allowedTabs.length > 0 && (
-                          <span className="text-emerald-700 text-[9px] font-extrabold bg-emerald-50 px-1 py-0.5 rounded border border-emerald-100 inline-block">
+                          <span className="text-blue-800 text-[9px] font-extrabold bg-blue-50 px-1 py-0.5 rounded border border-blue-100 inline-block">
                             Menu Kustom ({u.allowedTabs.length})
                           </span>
                         )}
                       </div>
                       <div>Status Keaktifan:</div>
                       <div className="text-right">
-                        <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${u.isActive ? 'bg-emerald-500 text-white' : 'bg-neutral-300 text-white'}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${u.isActive ? 'bg-blue-600 text-white' : 'bg-neutral-300 text-white'}`}>
                           {u.isActive ? 'AKTIF' : 'NON-AKTIF'}
                         </span>
                       </div>
@@ -3685,7 +3685,7 @@ export default function DatabaseMasterModule({
                              <span className={`font-black text-[10px] px-2 py-0.5 rounded ${
                                log.action === 'AUTH' ? 'text-blue-600' :
                                log.action.includes('DELETE') ? 'text-rose-600' :
-                               log.action.includes('ADD') ? 'text-emerald-600' : 'text-neutral-600'
+                               log.action.includes('ADD') ? 'text-blue-700' : 'text-neutral-600'
                              }`}>
                                {log.action}
                              </span>
@@ -3717,7 +3717,7 @@ export default function DatabaseMasterModule({
                         <span className={`font-extrabold text-[9px] px-1.5 py-0.5 rounded ${
                           log.action === 'AUTH' ? 'bg-blue-50 text-blue-700 border border-blue-100' :
                           log.action.includes('DELETE') ? 'bg-rose-50 text-rose-700 border border-rose-100' :
-                          log.action.includes('ADD') ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-neutral-105 text-neutral-600 border border-neutral-200'
+                          log.action.includes('ADD') ? 'bg-blue-50 text-blue-800 border border-blue-100' : 'bg-neutral-105 text-neutral-600 border border-neutral-200'
                         }`}>
                           {log.action}
                         </span>
@@ -3744,11 +3744,11 @@ export default function DatabaseMasterModule({
       </div>
       
       {/* Alert Note */}
-      <div className="mx-6 mb-6 p-4 bg-emerald-50 rounded-xl border border-emerald-200/60 leading-normal flex items-start gap-2.5">
-        <Scale className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+      <div className="mx-6 mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200/60 leading-normal flex items-start gap-2.5">
+        <Scale className="w-5 h-5 text-blue-800 shrink-0 mt-0.5" />
         <div>
-          <h4 className="text-xs font-extrabold text-emerald-950 uppercase font-mono tracking-wide">Fungsi Persistensi database Aktif</h4>
-          <p className="text-[11px] text-emerald-800 font-bold mt-1 leading-relaxed">
+          <h4 className="text-xs font-extrabold text-blue-950 uppercase font-mono tracking-wide">Fungsi Persistensi database Aktif</h4>
+          <p className="text-[11px] text-blue-900 font-bold mt-1 leading-relaxed">
             Semua perubahan yang Anda lakukan di halaman ini akan secara otomatis tersimpan ke dalam database browser lokal dan disinkronkan ke seluruh modul pengisian lain secara real-time. Anda tidak perlu lagi melakukan penulisan manual atau berulang-ulang ketika mendaftarkan truk, suplier, buyer, atau makelar di form timbangan dan mutasi kas!
           </p>
         </div>
