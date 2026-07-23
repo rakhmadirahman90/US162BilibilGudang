@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { WeighbridgeTicket, VehicleRecord, BuyerRecord, SupplierRecord, EmployeeRecord } from '../types';
 import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2, Edit3, Download, Clock, ChevronRight, Truck, Save, XCircle, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -41,6 +41,120 @@ export default function WeighbridgeModule({
   // Simulator State
   const [simulatorWeight, setSimulatorWeight] = useState<number>(3560);
   const [customSimulatorInput, setCustomSimulatorInput] = useState<string>("3560");
+  
+  // Web Serial API states for Physical Scale GSC GST-9700
+  const [isSerialSupported, setIsSerialSupported] = useState<boolean>(false);
+  const [isSerialConnected, setIsSerialConnected] = useState<boolean>(false);
+  const [serialBaudRate, setSerialBaudRate] = useState<number>(9600);
+  const [serialError, setSerialError] = useState<string | null>(null);
+
+  const serialPortRef = useRef<any>(null);
+  const serialReaderRef = useRef<any>(null);
+  const keepReadingRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    setIsSerialSupported('serial' in navigator);
+    return () => {
+      // Cleanup on unmount
+      keepReadingRef.current = false;
+      if (serialReaderRef.current) {
+        try {
+          serialReaderRef.current.cancel().catch(() => {});
+        } catch (e) {}
+      }
+    };
+  }, []);
+
+  const connectSerial = async () => {
+    setSerialError(null);
+    try {
+      if (!('serial' in navigator)) {
+        throw new Error("Web Serial tidak didukung di browser ini. Gunakan Chrome atau Edge.");
+      }
+
+      const port = await (navigator as any).serial.requestPort();
+      await port.open({ baudRate: serialBaudRate });
+      
+      serialPortRef.current = port;
+      setIsSerialConnected(true);
+      keepReadingRef.current = true;
+      
+      (window as any).__showToast?.("Berhasil terhubung ke indikator timbangan GST-9700!", "success");
+
+      // Start reading stream asynchronously
+      readSerialData(port);
+    } catch (err: any) {
+      console.error(err);
+      setSerialError(err.message || "Gagal membuka port serial");
+      (window as any).__showToast?.(err.message || "Koneksi timbangan fisik gagal", "error");
+      setIsSerialConnected(false);
+    }
+  };
+
+  const readSerialData = async (port: any) => {
+    try {
+      const textDecoder = new TextDecoderStream();
+      // Pipe standard readable directly through TextDecoder Stream
+      const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+      const reader = textDecoder.readable.getReader();
+      serialReaderRef.current = reader;
+
+      let buffer = "";
+      while (keepReadingRef.current) {
+        const { value, done } = await reader.read();
+        if (done) {
+          break;
+        }
+        if (value) {
+          buffer += value;
+          const lines = buffer.split(/[\r\n]+/);
+          buffer = lines.pop() || ""; // Keep partial line
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+
+            // Extract the longest or first match of valid weight digits
+            // GST-9700 continuous data could look like "ST,GS,  3560kg\r\n" or similar
+            const numMatch = trimmed.match(/[-+]?\d+/g);
+            if (numMatch && numMatch.length > 0) {
+              for (const part of numMatch) {
+                const parsed = parseInt(part, 10);
+                if (!isNaN(parsed) && parsed >= 0) {
+                  // Standard weight indicators send actual scale reading
+                  setSimulatorWeight(parsed);
+                  setCustomSimulatorInput(String(parsed));
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error reading serial stream:", err);
+    } finally {
+      setIsSerialConnected(false);
+    }
+  };
+
+  const disconnectSerial = async () => {
+    keepReadingRef.current = false;
+    if (serialReaderRef.current) {
+      try {
+        await serialReaderRef.current.cancel();
+      } catch (e) {}
+      serialReaderRef.current = null;
+    }
+    if (serialPortRef.current) {
+      try {
+        await serialPortRef.current.close();
+      } catch (e) {}
+      serialPortRef.current = null;
+    }
+    setIsSerialConnected(false);
+    (window as any).__showToast?.("Koneksi timbangan fisik diputuskan.", "info");
+  };
   
   // Active Weighing Draft on Terminal
   const [selectedTicket, setSelectedTicket] = useState<WeighbridgeTicket | null>(tickets[0] || null);
@@ -402,6 +516,79 @@ export default function WeighbridgeModule({
               {simulatorWeight.toLocaleString('id-ID')}
             </div>
             <div className="text-blue-400 font-mono text-xs sm:text-sm mt-1">kg</div>
+          </div>
+
+          {/* KONEKSI TIMBANGAN FISIK REALTIME (WEB SERIAL) */}
+          <div className="bg-neutral-900 border border-neutral-750 rounded-lg p-3 my-3">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-[11px] font-black tracking-wider uppercase text-neutral-300 flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full ${isSerialConnected ? 'bg-green-500 animate-pulse shadow-[0_0_6px_rgba(34,197,94,1)]' : 'bg-neutral-600'}`} />
+                Koneksi Timbangan Fisik GST-9700
+              </span>
+              {!isSerialSupported && (
+                <span className="text-[8px] bg-red-950 text-red-400 font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                  Tidak Didukung
+                </span>
+              )}
+            </div>
+
+            {isSerialSupported ? (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1">
+                    <label className="block text-[8px] text-neutral-400 font-black uppercase font-mono">Baud Rate</label>
+                    <select
+                      value={serialBaudRate}
+                      onChange={(e) => setSerialBaudRate(Number(e.target.value))}
+                      disabled={isSerialConnected}
+                      className="w-full bg-neutral-950 border border-neutral-700 text-neutral-200 text-xs rounded px-1.5 py-1 font-mono outline-none cursor-pointer"
+                    >
+                      <option value="1200">1200 bps</option>
+                      <option value="2400">2400 bps</option>
+                      <option value="4800">4800 bps</option>
+                      <option value="9600">9600 bps (Standard GST-9700)</option>
+                      <option value="19200">19200 bps</option>
+                      <option value="38400">38400 bps</option>
+                      <option value="115200">115200 bps</option>
+                    </select>
+                  </div>
+                  <div className="pt-3 shrink-0">
+                    {isSerialConnected ? (
+                      <button
+                        onClick={disconnectSerial}
+                        className="bg-red-700 hover:bg-red-600 text-white font-mono font-bold text-xs px-3 py-1.5 rounded transition cursor-pointer"
+                      >
+                        PUTUSKAN
+                      </button>
+                    ) : (
+                      <button
+                        onClick={connectSerial}
+                        className="bg-blue-600 hover:bg-blue-500 text-white font-mono font-bold text-xs px-3 py-1.5 rounded transition cursor-pointer"
+                      >
+                        HUBUNGKAN
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {serialError && (
+                  <p className="text-[9px] text-red-400 font-mono italic mt-0.5 max-w-full truncate">{serialError}</p>
+                )}
+                <div className="text-[9px] text-neutral-400 font-mono italic mt-0.5 leading-normal bg-neutral-950/50 p-1.5 rounded border border-neutral-800">
+                  {isSerialConnected ? (
+                    <span className="text-green-400 font-bold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping" />
+                      Aktif: Menerima data timbangan langsung dari mesin...
+                    </span>
+                  ) : (
+                    "Sambungkan kabel RS-232 indikator GST-9700 ke USB komputer, lalu klik Hubungkan."
+                  )}
+                </div>
+              </div>
+            ) : (
+              <p className="text-[10px] text-red-400 font-mono italic leading-relaxed">
+                Browser Anda tidak mendukung Web Serial API. Pastikan menggunakan browser berbasis Chromium desktop terbaru seperti Google Chrome atau Microsoft Edge.
+              </p>
+            )}
           </div>
 
           {/* Controls to Mock physical setup weights for the computer */}
