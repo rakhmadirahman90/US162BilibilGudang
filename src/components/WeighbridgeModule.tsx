@@ -85,8 +85,19 @@ export default function WeighbridgeModule({
       readSerialData(port);
     } catch (err: any) {
       console.error(err);
-      setSerialError(err.message || "Gagal membuka port serial");
-      (window as any).__showToast?.(err.message || "Koneksi timbangan fisik gagal", "error");
+      let errorMsg = err.message || "Gagal membuka port serial";
+      if (err.name === 'SecurityError' || errorMsg.includes('Permissions policy') || errorMsg.includes('policy') || errorMsg.includes('disallowed')) {
+        errorMsg = "Akses Serial/Timbangan diblokir karena aplikasi berada di dalam frame Google AI Studio. Silakan klik tombol 'Buka di Tab Baru' (ikon panah keluar di pojok kanan atas preview) agar aplikasi berjalan di luar frame dan timbangan fisik GST-9700 dapat langsung terhubung secara realtime.";
+        setSerialError(errorMsg);
+        (window as any).__showToast?.(errorMsg, "error");
+      } else if (err.name === 'NotFoundError' || errorMsg.includes('No port selected') || errorMsg.includes('no port selected') || errorMsg.includes('canceled') || errorMsg.includes('cancelled')) {
+        errorMsg = "Pemilihan port dibatalkan oleh pengguna.";
+        setSerialError(null);
+        (window as any).__showToast?.(errorMsg, "info");
+      } else {
+        setSerialError(errorMsg);
+        (window as any).__showToast?.(errorMsg, "error");
+      }
       setIsSerialConnected(false);
     }
   };

@@ -1,6 +1,6 @@
 {
   "name": "Warehouse & Jembatan Timbang US Bilibili 162",
   "description": "Aplikasi sistem pergudangan lengkap US Bilibili 162 yang dilengkapi dengan modul jembatan timbang GSC GST-9700, pencatatan barang masuk-keluar, pengelolaan jasa poles & kipas, kalkulator refaksi KA jagung, serta manajemen utang dan operasional.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": ["serial"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
