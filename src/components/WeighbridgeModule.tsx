@@ -69,7 +69,7 @@ export default function WeighbridgeModule({
     setSerialError(null);
     try {
       if (!('serial' in navigator)) {
-        throw new Error("Web Serial tidak didukung di browser ini. Gunakan Chrome atau Edge.");
+        throw new Error("Web Serial API tidak didukung di browser ini. Gunakan Chrome, Edge, atau Opera versi desktop terbaru.");
       }
 
       const port = await (navigator as any).serial.requestPort();
@@ -79,7 +79,7 @@ export default function WeighbridgeModule({
       setIsSerialConnected(true);
       keepReadingRef.current = true;
       
-      (window as any).__showToast?.("Berhasil terhubung ke indikator timbangan GST-9700!", "success");
+      (window as any).__showToast?.("🔌 KONEKSI BERHASIL: Indikator Timbangan GST-9700 terhubung secara realtime! Nilai berat aktual sekarang akan otomatis tersinkronisasi ke dalam aplikasi tanpa perlu diinput manual.", "success");
 
       // Start reading stream asynchronously
       readSerialData(port);
@@ -87,14 +87,15 @@ export default function WeighbridgeModule({
       console.error(err);
       let errorMsg = err.message || "Gagal membuka port serial";
       if (err.name === 'SecurityError' || errorMsg.includes('Permissions policy') || errorMsg.includes('policy') || errorMsg.includes('disallowed')) {
-        errorMsg = "Akses Serial/Timbangan diblokir karena aplikasi berada di dalam frame Google AI Studio. Silakan klik tombol 'Buka di Tab Baru' (ikon panah keluar di pojok kanan atas preview) agar aplikasi berjalan di luar frame dan timbangan fisik GST-9700 dapat langsung terhubung secara realtime.";
+        errorMsg = "⚠️ AKSES DIBLOKIR: Akses perangkat keras serial ditolak oleh kebijakan keamanan frame Google AI Studio. Silakan klik tombol 'Buka di Tab Baru' ↗️ di pojok kanan atas preview agar aplikasi dapat berkomunikasi langsung dengan timbangan fisik GST-9700 Anda.";
         setSerialError(errorMsg);
         (window as any).__showToast?.(errorMsg, "error");
       } else if (err.name === 'NotFoundError' || errorMsg.includes('No port selected') || errorMsg.includes('no port selected') || errorMsg.includes('canceled') || errorMsg.includes('cancelled')) {
-        errorMsg = "Pemilihan port dibatalkan oleh pengguna.";
+        errorMsg = "ℹ️ PEMBERITAHUAN: Pemilihan port serial dibatalkan oleh pengguna.";
         setSerialError(null);
         (window as any).__showToast?.(errorMsg, "info");
       } else {
+        errorMsg = `❌ KESALAHAN KONEKSI: Gagal membuka koneksi serial (${errorMsg}). Pastikan kabel RS-232 indikator GST-9700 tersambung dengan benar ke USB PC/Laptop Anda, port COM tidak sedang digunakan aplikasi lain, dan indikator dalam kondisi menyala.`;
         setSerialError(errorMsg);
         (window as any).__showToast?.(errorMsg, "error");
       }
@@ -164,7 +165,7 @@ export default function WeighbridgeModule({
       serialPortRef.current = null;
     }
     setIsSerialConnected(false);
-    (window as any).__showToast?.("Koneksi timbangan fisik diputuskan.", "info");
+    (window as any).__showToast?.("🔌 KONEKSI DIPUTUSKAN: Hubungan dengan timbangan fisik GST-9700 telah dinonaktifkan secara aman.", "info");
   };
   
   // Active Weighing Draft on Terminal
