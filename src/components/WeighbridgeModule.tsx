@@ -47,6 +47,7 @@ export default function WeighbridgeModule({
   const [isSerialConnected, setIsSerialConnected] = useState<boolean>(false);
   const [serialBaudRate, setSerialBaudRate] = useState<number>(9600);
   const [serialError, setSerialError] = useState<string | null>(null);
+  const [lastRawSerialData, setLastRawSerialData] = useState<string>("");
 
   const serialPortRef = useRef<any>(null);
   const serialReaderRef = useRef<any>(null);
@@ -64,6 +65,100 @@ export default function WeighbridgeModule({
       }
     };
   }, []);
+
+  /**
+   * Helper function to robustly parse weight packets from physical GST-9700/GSC weighing indicators
+   */
+  const parseSerialIndicatorBuffer = (rawBuffer: string): { weight: number | null; rawFrame: string; remainingBuffer: string } => {
+    if (!rawBuffer) return { weight: null, rawFrame: "", remainingBuffer: "" };
+
+    let buffer = rawBuffer;
+    if (buffer.length > 2000) {
+      buffer = buffer.slice(-1000);
+    }
+
+    // Split by standard line and ASCII control boundaries (CR \r, LF \n, STX \x02, ETX \x03, EOT \x04, ESC \x1b)
+    const frames = buffer.split(/[\r\n\x02\x03\x04\x1b]+/);
+    const remainingBuffer = frames.pop() || "";
+
+    let detectedWeight: number | null = null;
+    let lastRawFrame = "";
+
+    for (let i = frames.length - 1; i >= 0; i--) {
+      const raw = frames[i];
+      const clean = raw.replace(/[^\x20-\x7E]/g, '').trim();
+      if (!clean) continue;
+
+      // Pattern 1: GST-9700 / GSC / Toledo standard indicator frame: "ST,GS,+011530kg", "ST,GS,  11530kg", "US,GS,+011530"
+      const gscMatch = clean.match(/(?:ST|US|WN|WW|GS|NT)[,\s:=]*([+-]?\s*\d+(?:\.\d+)?)\s*(?:kg|t|g)?/i);
+      if (gscMatch && gscMatch[1]) {
+        const numStr = gscMatch[1].replace(/\s+/g, '');
+        const val = parseFloat(numStr);
+        if (!isNaN(val) && val >= 0) {
+          detectedWeight = formatParsedWeightVal(val, clean);
+          lastRawFrame = clean;
+          break;
+        }
+      }
+
+      // Pattern 2: Signed numbers e.g. "+011530", "=011530", "-000000"
+      const signedMatch = clean.match(/[\+\=\-]\s*(\d+(?:\.\d+)?)/);
+      if (signedMatch && signedMatch[1]) {
+        const val = parseFloat(signedMatch[1]);
+        if (!isNaN(val) && val >= 0) {
+          detectedWeight = formatParsedWeightVal(val, clean);
+          lastRawFrame = clean;
+          break;
+        }
+      }
+
+      // Pattern 3: Isolated digits or decimal values e.g. "011530", "11530", "11.530"
+      const digitMatch = clean.match(/\b\d{3,7}(?:\.\d+)?\b/);
+      if (digitMatch) {
+        const val = parseFloat(digitMatch[0]);
+        if (!isNaN(val) && val >= 0) {
+          detectedWeight = formatParsedWeightVal(val, clean);
+          lastRawFrame = clean;
+          break;
+        }
+      }
+
+      // Pattern 4: Fallback any digits in string
+      const anyNumMatch = clean.match(/\d+(?:\.\d+)?/);
+      if (anyNumMatch) {
+        const val = parseFloat(anyNumMatch[0]);
+        if (!isNaN(val) && val >= 0) {
+          detectedWeight = formatParsedWeightVal(val, clean);
+          lastRawFrame = clean;
+          break;
+        }
+      }
+    }
+
+    // Fallback if buffer has no delimiters yet, but contains a valid weight pattern
+    if (detectedWeight === null && buffer.length >= 4) {
+      const clean = buffer.replace(/[^\x20-\x7E]/g, '').trim();
+      const gscMatch = clean.match(/(?:ST|US|WN|WW|GS|NT)[,\s:=]*([+-]?\s*\d+(?:\.\d+)?)\s*(?:kg|t|g)?/i) ||
+                       clean.match(/[\+\=\-]\s*(\d+(?:\.\d+)?)/) ||
+                       clean.match(/\d{3,7}(?:\.\d+)?/);
+      if (gscMatch) {
+        const val = parseFloat(gscMatch[1] || gscMatch[0]);
+        if (!isNaN(val) && val >= 0) {
+          detectedWeight = formatParsedWeightVal(val, clean);
+          lastRawFrame = clean;
+        }
+      }
+    }
+
+    return { weight: detectedWeight, rawFrame: lastRawFrame, remainingBuffer };
+  };
+
+  const formatParsedWeightVal = (val: number, cleanFrame: string): number => {
+    if (/t\b/i.test(cleanFrame) || (val > 0 && val < 200 && cleanFrame.includes('.'))) {
+      return Math.round(val * 1000);
+    }
+    return Math.round(val);
+  };
 
   const connectSerial = async () => {
     setSerialError(null);
@@ -105,11 +200,9 @@ export default function WeighbridgeModule({
 
   const readSerialData = async (port: any) => {
     try {
-      const textDecoder = new TextDecoderStream();
-      // Pipe standard readable directly through TextDecoder Stream
-      const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
-      const reader = textDecoder.readable.getReader();
+      const reader = port.readable.getReader();
       serialReaderRef.current = reader;
+      const decoder = new TextDecoder("utf-8");
 
       let buffer = "";
       while (keepReadingRef.current) {
@@ -118,28 +211,19 @@ export default function WeighbridgeModule({
           break;
         }
         if (value) {
-          buffer += value;
-          const lines = buffer.split(/[\r\n]+/);
-          buffer = lines.pop() || ""; // Keep partial line
+          const chunkStr = decoder.decode(value, { stream: true });
+          buffer += chunkStr;
 
-          for (const line of lines) {
-            const trimmed = line.trim();
-            if (!trimmed) continue;
+          const { weight, rawFrame, remainingBuffer } = parseSerialIndicatorBuffer(buffer);
+          buffer = remainingBuffer;
 
-            // Extract the longest or first match of valid weight digits
-            // GST-9700 continuous data could look like "ST,GS,  3560kg\r\n" or similar
-            const numMatch = trimmed.match(/[-+]?\d+/g);
-            if (numMatch && numMatch.length > 0) {
-              for (const part of numMatch) {
-                const parsed = parseInt(part, 10);
-                if (!isNaN(parsed) && parsed >= 0) {
-                  // Standard weight indicators send actual scale reading
-                  setSimulatorWeight(parsed);
-                  setCustomSimulatorInput(String(parsed));
-                  break;
-                }
-              }
-            }
+          if (rawFrame) {
+            setLastRawSerialData(rawFrame);
+          }
+
+          if (weight !== null) {
+            setSimulatorWeight(weight);
+            setCustomSimulatorInput(String(weight));
           }
         }
       }
@@ -585,12 +669,19 @@ export default function WeighbridgeModule({
                 {serialError && (
                   <p className="text-[9px] text-red-400 font-mono italic mt-0.5 max-w-full truncate">{serialError}</p>
                 )}
-                <div className="text-[9px] text-neutral-400 font-mono italic mt-0.5 leading-normal bg-neutral-950/50 p-1.5 rounded border border-neutral-800">
+                <div className="text-[9px] text-neutral-400 font-mono italic mt-0.5 leading-normal bg-neutral-950/50 p-2 rounded border border-neutral-800 flex flex-col gap-1">
                   {isSerialConnected ? (
-                    <span className="text-green-400 font-bold flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping" />
-                      Aktif: Menerima data timbangan langsung dari mesin...
-                    </span>
+                    <>
+                      <span className="text-green-400 font-bold flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping" />
+                        Aktif: Tersambung Indikator GST-9700 ({simulatorWeight.toLocaleString('id-ID')} Kg)
+                      </span>
+                      {lastRawSerialData && (
+                        <span className="text-neutral-300 font-mono text-[9px] truncate">
+                          Data Terbaca: <code className="text-yellow-300 font-bold">{lastRawSerialData}</code>
+                        </span>
+                      )}
+                    </>
                   ) : (
                     "Sambungkan kabel RS-232 indikator GST-9700 ke USB komputer, lalu klik Hubungkan."
                   )}
@@ -624,6 +715,9 @@ export default function WeighbridgeModule({
 
           {/* Preset Buttons */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mt-3">
+            <button onClick={() => applySimulatorPreset(11530)} className="bg-blue-900/80 hover:bg-blue-800 text-blue-200 font-bold font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate border border-blue-700">
+              11,530 KG (GST-9700)
+            </button>
             <button onClick={() => applySimulatorPreset(3560)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate">
               3,560 KG (BERAS)
             </button>
@@ -635,9 +729,6 @@ export default function WeighbridgeModule({
             </button>
             <button onClick={() => applySimulatorPreset(12450)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate">
               12,450 KG (GROSS)
-            </button>
-            <button onClick={() => applySimulatorPreset(3900)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate">
-              3,900 KG (KOSONG/TARA)
             </button>
             <button onClick={resetZero} className="bg-neutral-950 hover:bg-neutral-900 text-red-500 font-bold border border-red-950 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate leading-none">
               {t.zeroScale}
