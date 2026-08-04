@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { WeighbridgeTicket, VehicleRecord, BuyerRecord, SupplierRecord, EmployeeRecord } from '../types';
-import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2, Edit3, Download, Clock, ChevronRight, Truck, Save, XCircle, MessageCircle } from 'lucide-react';
+import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2, Edit3, Download, Clock, ChevronRight, Truck, Save, XCircle, MessageCircle, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { exportToCSV, printPDFReport, printSlip, getHTMLForPDF } from '../utils/exportHelper';
@@ -722,19 +722,20 @@ export default function WeighbridgeModule({
 
           {/* Preset Buttons */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mt-3">
-            <button onClick={() => applySimulatorPreset(11530)} className="bg-blue-900/80 hover:bg-blue-800 text-blue-200 font-bold font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate border border-blue-700">
-              11,530 KG (GST-9700)
+            <button onClick={() => applySimulatorPreset(11330)} className="bg-red-900/90 hover:bg-red-800 text-yellow-300 font-bold font-mono py-2 rounded text-[11px] sm:text-xs px-1.5 text-center truncate border border-red-700 shadow flex items-center justify-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse inline-block shrink-0"></span>
+              11,330 KG (GST-9700)
             </button>
-            <button onClick={() => applySimulatorPreset(3560)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate">
+            <button onClick={() => applySimulatorPreset(3560)} className="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate border border-neutral-700">
               3,560 KG (BERAS)
             </button>
-            <button onClick={() => applySimulatorPreset(14650)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate">
+            <button onClick={() => applySimulatorPreset(14650)} className="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate border border-neutral-700">
               14,650 KG (TRUK BRUTO)
             </button>
-            <button onClick={() => applySimulatorPreset(4250)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate">
+            <button onClick={() => applySimulatorPreset(4250)} className="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate border border-neutral-700">
               4,250 KG (KOSONG/TARA)
             </button>
-            <button onClick={() => applySimulatorPreset(12450)} className="bg-neutral-700 hover:bg-neutral-600 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate">
+            <button onClick={() => applySimulatorPreset(12450)} className="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate border border-neutral-700">
               12,450 KG (GROSS)
             </button>
             <button onClick={resetZero} className="bg-neutral-950 hover:bg-neutral-900 text-red-500 font-bold border border-red-950 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate leading-none">
@@ -830,21 +831,21 @@ export default function WeighbridgeModule({
             </div>
 
             {/* Display Indicator in the terminal */}
-            <div className="bg-neutral-950 border border-[#2d4d8c] p-3 rounded mb-4 flex justify-between items-center relative shadow-inner">
+            <div className="bg-neutral-950 border border-[#2d4d8c] p-3 rounded mb-3 flex justify-between items-center relative shadow-inner">
               <div className="flex items-center gap-2">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
                 </span>
                 <div className="flex flex-col">
                   <span className="text-[#a0c5fc] text-xs font-bold tracking-wide">{t.currentWeight}</span>
                   <span className="text-[10px] text-emerald-400 font-mono font-semibold">
-                    {isSerialConnected ? 'REAL-TIME SERIAL (GST-9700)' : 'REAL-TIME LIVE SYNC'}
+                    {isSerialConnected ? 'REAL-TIME SERIAL (GST-9700)' : 'REAL-TIME LIVE SYNC ACTIVE'}
                   </span>
                 </div>
               </div>
               <div className="text-right flex items-baseline gap-2">
-                <span className="text-blue-400 font-mono text-4xl sm:text-5xl font-black relative z-10 font-mono drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]">
+                <span className="text-blue-400 font-mono text-4xl sm:text-5xl font-black relative z-10 drop-shadow-[0_0_10px_rgba(59,130,246,0.8)] tracking-tight">
                   {simulatorWeight.toLocaleString('id-ID')}
                 </span>
                 <span className="text-blue-400 font-mono text-sm font-bold">kg</span>
@@ -858,6 +859,27 @@ export default function WeighbridgeModule({
                   </span>
                 </div>
               )}
+            </div>
+
+            {/* Quick Live Scale Sync Bar */}
+            <div className="bg-[#122345] border border-[#2d4d8c]/80 rounded p-2 mb-4 flex flex-wrap justify-between items-center gap-2 text-xs">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="text-[#a0c5fc] font-semibold">Berat Timbangan Fisik GST-9700:</span>
+                <span className="text-yellow-300 font-mono font-bold text-sm bg-neutral-950/80 px-2 py-0.5 rounded border border-yellow-500/30">
+                  {simulatorWeight.toLocaleString('id-ID')} kg
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => applySimulatorPreset(11330)}
+                  className="bg-red-700 hover:bg-red-600 text-white font-mono text-[10px] px-2.5 py-1 rounded font-bold transition flex items-center gap-1 border border-red-500 shadow"
+                >
+                  <RefreshCw className="w-3 h-3 animate-spin" />
+                  SET 11.330 KG (SESUAI FOTO FISIK)
+                </button>
+              </div>
             </div>
 
             {/* Ticket Information form panel */}
