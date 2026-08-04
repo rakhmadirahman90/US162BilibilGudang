@@ -39,8 +39,8 @@ export default function WeighbridgeModule({
   const { t, language } = useLanguage();
   
   // Simulator State
-  const [simulatorWeight, setSimulatorWeight] = useState<number>(3560);
-  const [customSimulatorInput, setCustomSimulatorInput] = useState<string>("3560");
+  const [simulatorWeight, setSimulatorWeight] = useState<number>(0);
+  const [customSimulatorInput, setCustomSimulatorInput] = useState<string>("0");
   
   // Web Serial API states for Physical Scale GSC GST-9700
   const [isSerialSupported, setIsSerialSupported] = useState<boolean>(false);
@@ -701,7 +701,14 @@ export default function WeighbridgeModule({
               <input 
                 type="text"
                 value={formatNumberInput(customSimulatorInput)}
-                onChange={(e) => setCustomSimulatorInput(e.target.value)}
+                onChange={(e) => {
+                  const rawVal = e.target.value;
+                  setCustomSimulatorInput(rawVal);
+                  const parsed = parseNumberInput(rawVal);
+                  if (!isNaN(parsed) && parsed >= 0) {
+                    setSimulatorWeight(parsed);
+                  }
+                }}
                 className="bg-neutral-900 border border-neutral-600 text-red-400 font-mono text-center text-sm sm:text-lg rounded px-2 py-1 flex-1 focus:outline-none focus:border-red-500"
               />
               <button 
@@ -823,13 +830,24 @@ export default function WeighbridgeModule({
             </div>
 
             {/* Display Indicator in the terminal */}
-            <div className="bg-neutral-950 border border-[#2d4d8c] p-3 rounded mb-4 flex justify-between items-center relative">
-              <span className="text-[#a0c5fc] text-xs">{t.currentWeight}</span>
+            <div className="bg-neutral-950 border border-[#2d4d8c] p-3 rounded mb-4 flex justify-between items-center relative shadow-inner">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                <div className="flex flex-col">
+                  <span className="text-[#a0c5fc] text-xs font-bold tracking-wide">{t.currentWeight}</span>
+                  <span className="text-[10px] text-emerald-400 font-mono font-semibold">
+                    {isSerialConnected ? 'REAL-TIME SERIAL (GST-9700)' : 'REAL-TIME LIVE SYNC'}
+                  </span>
+                </div>
+              </div>
               <div className="text-right flex items-baseline gap-2">
-                <span className="text-blue-400 font-mono text-4xl font-black relative z-10 font-mono">
+                <span className="text-blue-400 font-mono text-4xl sm:text-5xl font-black relative z-10 font-mono drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]">
                   {simulatorWeight.toLocaleString('id-ID')}
                 </span>
-                <span className="text-blue-400 text-sm">kg</span>
+                <span className="text-blue-400 font-mono text-sm font-bold">kg</span>
               </div>
               
               {/* Out of range simulation popup like in picture */}
