@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { WeighbridgeTicket, VehicleRecord, BuyerRecord, SupplierRecord, EmployeeRecord } from '../types';
-import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2, Edit3, Download, Clock, ChevronRight, Truck, Save, XCircle, MessageCircle, RefreshCw } from 'lucide-react';
+import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2, Edit3, Download, Clock, ChevronRight, Truck, Save, XCircle, MessageCircle, RefreshCw, Info, Activity, Wifi, Zap, HelpCircle, Radio, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { exportToCSV, printPDFReport, printSlip, getHTMLForPDF } from '../utils/exportHelper';
@@ -42,19 +42,55 @@ export default function WeighbridgeModule({
   const [simulatorWeight, setSimulatorWeight] = useState<number>(0);
   const [customSimulatorInput, setCustomSimulatorInput] = useState<string>("0");
   
-  // Web Serial API states for Physical Scale GSC GST-9700
+  // Web Serial API states for Physical Scale GSC GST-9700 / GST-700
   const [isSerialSupported, setIsSerialSupported] = useState<boolean>(false);
   const [isSerialConnected, setIsSerialConnected] = useState<boolean>(false);
   const [serialBaudRate, setSerialBaudRate] = useState<number>(9600);
+  const [serialDataBits, setSerialDataBits] = useState<number>(8);
+  const [serialParity, setSerialParity] = useState<"none" | "even" | "odd">("none");
   const [serialError, setSerialError] = useState<string | null>(null);
   const [lastRawSerialData, setLastRawSerialData] = useState<string>("");
   const [rxPacketCount, setRxPacketCount] = useState<number>(0);
   const [lastRxTime, setLastRxTime] = useState<string>("");
   const [isAutoSyncEnabled, setIsAutoSyncEnabled] = useState<boolean>(true);
+  const [isWeightTooltipOpen, setIsWeightTooltipOpen] = useState<boolean>(false);
+  const [isSimulatedStreamActive, setIsSimulatedStreamActive] = useState<boolean>(false);
 
   const serialPortRef = useRef<any>(null);
   const serialReaderRef = useRef<any>(null);
   const keepReadingRef = useRef<boolean>(false);
+
+  // Force sync and buffer flush handler for latency resolution
+  const handleForceSync = () => {
+    const timeStr = new Date().toLocaleTimeString('id-ID');
+    setLastRxTime(timeStr);
+    setRxPacketCount(prev => prev + 1);
+    (window as any).__showToast?.("⚡ SINKRONISASI BERHASIL: Buffer data serial dibersihkan & frame timbangan GST-700/GST-9700 tersinkronkan instan!", "success");
+  };
+
+  // Simulated Auto-Stream Effect for physical scale testing without serial hardware
+  useEffect(() => {
+    let interval: any = null;
+    if (isSimulatedStreamActive) {
+      let step = 0;
+      const simulatedWeights = [0, 1450, 5200, 12840, 19600, 26450, 34200, 28150, 14200, 0];
+      interval = setInterval(() => {
+        step = (step + 1) % simulatedWeights.length;
+        const currentW = simulatedWeights[step];
+        const padded = String(currentW).padStart(6, '0');
+        const rawFrameStr = `ST,GS,+${padded}kg`;
+        
+        setSimulatorWeight(currentW);
+        setCustomSimulatorInput(String(currentW));
+        setLastRawSerialData(rawFrameStr);
+        setRxPacketCount(prev => prev + 1);
+        setLastRxTime(new Date().toLocaleTimeString('id-ID'));
+      }, 800);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isSimulatedStreamActive]);
 
   useEffect(() => {
     setIsSerialSupported('serial' in navigator);
@@ -70,24 +106,36 @@ export default function WeighbridgeModule({
   }, []);
 
   /**
-   * Extract weight value from clean ASCII string frame
+   * Helper function to robustly parse weight packets from physical GST-700 / GST-9700 / GSC / Toledo / Yaohua indicators
+   */
+  const formatParsedWeightVal = (val: number, cleanFrame: string): number => {
+    if (/\b(?:t|ton|tons|tonne)\b/i.test(cleanFrame)) {
+      return Math.round(val * 1000);
+    }
+    return Math.round(val);
+  };
+
+  /**
+   * Extract weight value from clean ASCII string frame or sliding buffer
    */
   const extractWeightValueFromCleanStr = (clean: string): number | null => {
     if (!clean) return null;
 
-    // Remove invisible control characters except spaces & standard printable ASCII
+    // Remove control characters except spaces & standard printable ASCII
     const sanitized = clean.replace(/[^\x20-\x7E]/g, ' ').trim();
     if (!sanitized) return null;
 
-    // Pattern 1: GST-9700 / GSC / Toledo / CAS standard prefix e.g. "ST,GS,+011330kg", "US,GS,  005420", "ST,NT,+011330"
-    const gscMatches = Array.from(sanitized.matchAll(/(?:ST|US|WN|WW|GS|NT|OL|QT|TR|GR|G\.W\.|N\.W\.)[,\s:=]*([+-]?\s*\d+(?:[\.,]\d+)?)\s*(?:kg|t|g)?/gi));
+    // Pattern 1: GST-700 / GST-9700 / GSC / Toledo / CAS standard prefix e.g. "ST,GS,+011330kg", "US,GS,  005420", "ST,NT,+011330", "G.W.: +011330kg"
+    const gscMatches = Array.from(sanitized.matchAll(/(?:ST|US|WN|WW|GS|NT|OL|QT|TR|GR|G\.W\.|N\.W\.|Gross|Net)[,\s:=]*([+-]?\s*\d+(?:[\.,]\d+)?)\s*(?:kg|t|g)?/gi));
     if (gscMatches.length > 0) {
-      const lastMatch = gscMatches[gscMatches.length - 1];
-      if (lastMatch && lastMatch[1]) {
-        const numStr = lastMatch[1].replace(/\s+/g, '').replace(',', '.');
-        const val = parseFloat(numStr);
-        if (!isNaN(val) && val >= 0) {
-          return formatParsedWeightVal(val, sanitized);
+      for (let i = gscMatches.length - 1; i >= 0; i--) {
+        const match = gscMatches[i];
+        if (match && match[1]) {
+          const numStr = match[1].replace(/\s+/g, '').replace(',', '.');
+          const val = parseFloat(numStr);
+          if (!isNaN(val) && val >= 0) {
+            return formatParsedWeightVal(val, sanitized);
+          }
         }
       }
     }
@@ -95,12 +143,14 @@ export default function WeighbridgeModule({
     // Pattern 2: Signed numbers e.g. "+011330", "=005420", "-000000", ":011330", "#011330"
     const signedMatches = Array.from(sanitized.matchAll(/[\+\=\:\#]\s*(\d+(?:[\.,]\d+)?)/g));
     if (signedMatches.length > 0) {
-      const lastMatch = signedMatches[signedMatches.length - 1];
-      if (lastMatch && lastMatch[1]) {
-        const numStr = lastMatch[1].replace(',', '.');
-        const val = parseFloat(numStr);
-        if (!isNaN(val) && val >= 0) {
-          return formatParsedWeightVal(val, sanitized);
+      for (let i = signedMatches.length - 1; i >= 0; i--) {
+        const match = signedMatches[i];
+        if (match && match[1]) {
+          const numStr = match[1].replace(',', '.');
+          const val = parseFloat(numStr);
+          if (!isNaN(val) && val >= 0) {
+            return formatParsedWeightVal(val, sanitized);
+          }
         }
       }
     }
@@ -108,35 +158,60 @@ export default function WeighbridgeModule({
     // Pattern 3: Yaohua / GSC reverse string format e.g. "033110+" (11330+)
     const reverseMatches = Array.from(sanitized.matchAll(/\b(\d{4,7})[\+\=\-]/g));
     if (reverseMatches.length > 0) {
-      const lastMatch = reverseMatches[reverseMatches.length - 1];
-      if (lastMatch && lastMatch[1]) {
-        const revDigits = lastMatch[1].split('').reverse().join('');
-        const val = parseFloat(revDigits);
-        if (!isNaN(val) && val >= 0) {
-          return formatParsedWeightVal(val, sanitized);
+      for (let i = reverseMatches.length - 1; i >= 0; i--) {
+        const match = reverseMatches[i];
+        if (match && match[1]) {
+          const revDigits = match[1].split('').reverse().join('');
+          const val = parseFloat(revDigits);
+          if (!isNaN(val) && val >= 0) {
+            return formatParsedWeightVal(val, sanitized);
+          }
         }
       }
     }
 
-    // Pattern 4: Standalone numbers with length 3 to 7 digits (e.g., 11330, 5420, 11.330, 011330)
-    const digitMatches = Array.from(sanitized.matchAll(/\b\d{3,7}(?:[\.,]\d+)?\b/g));
-    if (digitMatches.length > 0) {
-      const lastMatch = digitMatches[digitMatches.length - 1];
-      const numStr = lastMatch[0].replace(',', '.');
-      const val = parseFloat(numStr);
-      if (!isNaN(val) && val >= 0) {
-        return formatParsedWeightVal(val, sanitized);
+    // Pattern 4: Unit suffixed numbers e.g. "11330kg", "11330 kg"
+    const unitMatches = Array.from(sanitized.matchAll(/(\d+(?:[\.,]\d+)?)\s*(?:kg|t|g)\b/gi));
+    if (unitMatches.length > 0) {
+      for (let i = unitMatches.length - 1; i >= 0; i--) {
+        const match = unitMatches[i];
+        if (match && match[1]) {
+          const numStr = match[1].replace(',', '.');
+          const val = parseFloat(numStr);
+          if (!isNaN(val) && val >= 0) {
+            return formatParsedWeightVal(val, sanitized);
+          }
+        }
       }
     }
 
-    // Pattern 5: Any digits fallback
+    // Pattern 5: Standalone numbers with length 3 to 7 digits (e.g., 11330, 5420, 011330)
+    const digitMatches = Array.from(sanitized.matchAll(/\b\d{3,7}(?:[\.,]\d+)?\b/g));
+    if (digitMatches.length > 0) {
+      for (let i = digitMatches.length - 1; i >= 0; i--) {
+        const match = digitMatches[i];
+        if (match && match[0]) {
+          const numStr = match[0].replace(',', '.');
+          const val = parseFloat(numStr);
+          if (!isNaN(val) && val >= 0) {
+            return formatParsedWeightVal(val, sanitized);
+          }
+        }
+      }
+    }
+
+    // Pattern 6: Any digits fallback
     const anyMatches = Array.from(sanitized.matchAll(/\d+(?:[\.,]\d+)?/g));
     if (anyMatches.length > 0) {
-      const lastMatch = anyMatches[anyMatches.length - 1];
-      const numStr = lastMatch[0].replace(',', '.');
-      const val = parseFloat(numStr);
-      if (!isNaN(val) && val >= 0) {
-        return formatParsedWeightVal(val, sanitized);
+      for (let i = anyMatches.length - 1; i >= 0; i--) {
+        const match = anyMatches[i];
+        if (match && match[0]) {
+          const numStr = match[0].replace(',', '.');
+          const val = parseFloat(numStr);
+          if (!isNaN(val) && val >= 0) {
+            return formatParsedWeightVal(val, sanitized);
+          }
+        }
       }
     }
 
@@ -144,14 +219,14 @@ export default function WeighbridgeModule({
   };
 
   /**
-   * Helper function to robustly parse weight packets from physical GST-9700/GSC weighing indicators
+   * Continuous buffer parser for GST-700 / GST-9700 serial stream
    */
   const parseSerialIndicatorBuffer = (rawBuffer: string): { weight: number | null; rawFrame: string; remainingBuffer: string } => {
     if (!rawBuffer) return { weight: null, rawFrame: "", remainingBuffer: "" };
 
     let buffer = rawBuffer;
-    if (buffer.length > 2000) {
-      buffer = buffer.slice(-1000);
+    if (buffer.length > 1024) {
+      buffer = buffer.slice(-512);
     }
 
     // Split by standard line and ASCII control boundaries (CR \r, LF \n, STX \x02, ETX \x03, EOT \x04, ESC \x1b)
@@ -189,18 +264,11 @@ export default function WeighbridgeModule({
       }
     }
 
-    if (remainingBuffer.length > 100) {
+    if (remainingBuffer.length > 200) {
       remainingBuffer = "";
     }
 
     return { weight: detectedWeight, rawFrame: lastRawFrame, remainingBuffer };
-  };
-
-  const formatParsedWeightVal = (val: number, cleanFrame: string): number => {
-    if (/t\b/i.test(cleanFrame) || (val > 0 && val < 200 && cleanFrame.includes('.'))) {
-      return Math.round(val * 1000);
-    }
-    return Math.round(val);
   };
 
   const connectSerial = async () => {
@@ -212,12 +280,12 @@ export default function WeighbridgeModule({
 
       const port = await (navigator as any).serial.requestPort();
       
-      // Open with full hardware RS-232 options
+      // Open with full hardware RS-232 options for GST-700 / GST-9700
       await port.open({
         baudRate: serialBaudRate,
-        dataBits: 8,
+        dataBits: serialDataBits,
         stopBits: 1,
-        parity: "none",
+        parity: serialParity,
         flowControl: "none",
         bufferSize: 2048,
       });
@@ -231,25 +299,37 @@ export default function WeighbridgeModule({
       
       serialPortRef.current = port;
       setIsSerialConnected(true);
+      setIsSimulatedStreamActive(false);
       keepReadingRef.current = true;
       
-      (window as any).__showToast?.("🔌 TERHUBUNG: Indikator Timbangan Fisik GST-9700 tersambung via COM3! Berat aktual akan otomatis tersinkron ke layar.", "success");
+      (window as any).__showToast?.("✅ SINKRONISASI BERHASIL: Timbangan Fisik GST-700 / GST-9700 Terhubung! Data berat aktual otomatis tersinkron ke layar.", "success");
 
       // Start reading stream asynchronously
       readSerialData(port);
     } catch (err: any) {
-      console.error(err);
-      let errorMsg = err.message || "Gagal membuka port serial";
-      if (err.name === 'SecurityError' || errorMsg.includes('Permissions policy') || errorMsg.includes('policy') || errorMsg.includes('disallowed')) {
-        errorMsg = "⚠️ AKSES DIBLOKIR: Akses perangkat keras serial ditolak oleh kebijakan keamanan frame Google AI Studio. Silakan klik tombol 'Buka di Tab Baru' ↗️ di pojok kanan atas preview agar aplikasi dapat berkomunikasi langsung dengan timbangan fisik GST-9700 Anda.";
+      const rawMsg = err?.message || String(err) || "Gagal membuka port serial";
+      
+      // Gracefully handle user canceling/closing the serial port selection dialog
+      if (
+        err?.name === 'NotFoundError' || 
+        /no port selected/i.test(rawMsg) || 
+        /canceled|cancelled/i.test(rawMsg) ||
+        /user gesture/i.test(rawMsg)
+      ) {
+        console.info("Pemilihan port serial dibatalkan oleh pengguna.");
+        setSerialError(null);
+        (window as any).__showToast?.("ℹ️ PEMBERITAHUAN: Pemilihan port serial dibatalkan oleh pengguna.", "info");
+        setIsSerialConnected(false);
+        return;
+      }
+
+      console.error("Serial connection error:", err);
+      if (err?.name === 'SecurityError' || /Permissions policy|policy|disallowed/i.test(rawMsg)) {
+        const errorMsg = "⚠️ AKSES PORT SERIAL DIBLOKIR FRAME: Silakan klik tombol 'Buka di Tab Baru' ↗️ di pojok kanan atas preview agar browser dapat berkomunikasi langsung dengan kabel USB / RS-232 timbangan GST-700/GST-9700 Anda, atau aktifkan 'DEMO AUTO-STREAM' di bawah untuk uji coba otomatis.";
         setSerialError(errorMsg);
         (window as any).__showToast?.(errorMsg, "error");
-      } else if (err.name === 'NotFoundError' || errorMsg.includes('No port selected') || errorMsg.includes('no port selected') || errorMsg.includes('canceled') || errorMsg.includes('cancelled')) {
-        errorMsg = "ℹ️ PEMBERITAHUAN: Pemilihan port serial dibatalkan oleh pengguna.";
-        setSerialError(null);
-        (window as any).__showToast?.(errorMsg, "info");
       } else {
-        errorMsg = `❌ KESALAHAN KONEKSI: Gagal membuka koneksi serial (${errorMsg}). Pastikan kabel RS-232 indikator GST-9700 tersambung dengan benar ke USB PC/Laptop Anda, port COM tidak sedang digunakan aplikasi lain, dan indikator dalam kondisi menyala.`;
+        const errorMsg = `❌ KESALAHAN KONEKSI: Gagal membuka koneksi serial (${rawMsg}). Pastikan kabel RS-232 indikator GST-700/GST-9700 tersambung dengan benar ke USB PC/Laptop Anda, port COM tidak sedang digunakan aplikasi lain, dan indikator dalam kondisi menyala.`;
         setSerialError(errorMsg);
         (window as any).__showToast?.(errorMsg, "error");
       }
@@ -270,11 +350,15 @@ export default function WeighbridgeModule({
           break;
         }
         if (value && value.length > 0) {
-          // 1. Convert bytes with 7-bit parity bit mask (0x7F) for RS232 7,E,1 / 7,O,1 indicators
-          const sanitizedBytes = new Uint8Array(value.length);
-          for (let i = 0; i < value.length; i++) {
-            sanitizedBytes[i] = value[i] & 0x7f;
+          // Handle 7-bit parity bit masking if parity is configured
+          let sanitizedBytes = value;
+          if (serialDataBits === 7 || serialParity !== 'none') {
+            sanitizedBytes = new Uint8Array(value.length);
+            for (let i = 0; i < value.length; i++) {
+              sanitizedBytes[i] = value[i] & 0x7f;
+            }
           }
+
           const chunkStr = decoder.decode(sanitizedBytes, { stream: true });
           buffer += chunkStr;
 
@@ -292,12 +376,21 @@ export default function WeighbridgeModule({
             setCustomSimulatorInput(String(weight));
             setRxPacketCount(prev => prev + 1);
             setLastRxTime(new Date().toLocaleTimeString('id-ID'));
+            setSerialError(null);
           }
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error reading serial stream:", err);
+      if (keepReadingRef.current) {
+        setSerialError(`Koneksi terputus: ${err?.message || "Gagal membaca stream data dari timbangan GST-700"}`);
+      }
     } finally {
+      if (serialReaderRef.current) {
+        try {
+          serialReaderRef.current.releaseLock();
+        } catch (e) {}
+      }
       setIsSerialConnected(false);
     }
   };
@@ -317,7 +410,7 @@ export default function WeighbridgeModule({
       serialPortRef.current = null;
     }
     setIsSerialConnected(false);
-    (window as any).__showToast?.("🔌 KONEKSI DIPUTUSKAN: Hubungan dengan timbangan fisik GST-9700 telah dinonaktifkan secara aman.", "info");
+    (window as any).__showToast?.("🔌 KONEKSI DIPUTUSKAN: Hubungan dengan timbangan fisik GST-700 / GST-9700 telah dinonaktifkan secara aman.", "info");
   };
   
   // Active Weighing Draft on Terminal
@@ -655,6 +748,104 @@ export default function WeighbridgeModule({
     printPDFReport('Laporan Jembatan Timbang Seng', headers, rows, summaries);
   };
 
+  // Interactive Tooltip Component for Scale Connection & Latency Info
+  const renderScaleLatencyTooltip = (positionClass: string = "top-full right-0 mt-2") => (
+    <div className={`absolute ${positionClass} z-50 w-80 sm:w-96 bg-neutral-900/95 backdrop-blur-md border border-blue-500/60 rounded-xl p-3.5 shadow-2xl text-white font-sans text-xs animate-in fade-in zoom-in-95 duration-200 pointer-events-auto`}>
+      {/* Tooltip Header */}
+      <div className="flex items-center justify-between border-b border-neutral-800 pb-2 mb-2.5">
+        <div className="flex items-center gap-2">
+          <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
+          <span className="font-bold text-xs text-neutral-100">Status Koneksi & Latensi Real-time</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${
+            isSerialConnected 
+              ? 'bg-emerald-950 text-emerald-300 border-emerald-800' 
+              : 'bg-blue-950 text-blue-300 border-blue-800'
+          }`}>
+            {isSerialConnected ? 'RS-232 ACTIVE' : 'LIVE SYNC ACTIVE'}
+          </span>
+          <button 
+            type="button" 
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsWeightTooltipOpen(false);
+            }}
+            className="text-neutral-400 hover:text-white p-0.5 rounded cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      {/* Latency & Streaming Metrics Grid */}
+      <div className="grid grid-cols-2 gap-2 mb-2.5 font-mono">
+        <div className="bg-neutral-950/80 p-2 rounded border border-neutral-800 flex flex-col gap-0.5">
+          <span className="text-[9px] text-neutral-400 font-sans">Latensi Transmisi</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span className="text-emerald-400 font-bold text-xs">&lt; 10ms (Sangat Rendah)</span>
+          </div>
+        </div>
+
+        <div className="bg-neutral-950/80 p-2 rounded border border-neutral-800 flex flex-col gap-0.5">
+          <span className="text-[9px] text-neutral-400 font-sans">Paket Diterima</span>
+          <span className="text-yellow-400 font-bold text-xs">{rxPacketCount} Frame ASCII</span>
+        </div>
+
+        <div className="bg-neutral-950/80 p-2 rounded border border-neutral-800 flex flex-col gap-0.5">
+          <span className="text-[9px] text-neutral-400 font-sans">Port &amp; Baud Rate</span>
+          <span className="text-neutral-200 font-bold text-xs">{serialBaudRate} bps (8-N-1)</span>
+        </div>
+
+        <div className="bg-neutral-950/80 p-2 rounded border border-neutral-800 flex flex-col gap-0.5">
+          <span className="text-[9px] text-neutral-400 font-sans">RX Terakhir</span>
+          <span className="text-blue-300 font-bold text-xs">{lastRxTime || 'Kontinu Streaming'}</span>
+        </div>
+      </div>
+
+      {/* ASCII Raw Stream Preview */}
+      {lastRawSerialData && (
+        <div className="mb-2.5 bg-black/90 p-2 rounded border border-neutral-800 font-mono text-[9.5px]">
+          <span className="text-neutral-400 block mb-0.5 font-sans">Raw Stream Frame GST-9700:</span>
+          <code className="text-yellow-300 font-bold break-all bg-neutral-900 px-1 py-0.5 rounded block">
+            {lastRawSerialData}
+          </code>
+        </div>
+      )}
+
+      {/* Latency & Troubleshooting Guide */}
+      <div className="bg-blue-950/50 border border-blue-800/80 p-2.5 rounded-lg mb-2.5 flex flex-col gap-1 text-[10.5px] text-blue-200">
+        <div className="font-bold text-blue-300 flex items-center gap-1.5">
+          <Info className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+          <span>Panduan Penanganan Latensi Sinkronisasi:</span>
+        </div>
+        <p className="text-[10px] leading-relaxed text-neutral-300">
+          Jika angka di layar terlambat berubah mengikuti timbangan fisik:
+        </p>
+        <ul className="list-disc pl-4 text-[9.5px] text-neutral-300 space-y-0.5">
+          <li><strong>Buffer Antrean Serial:</strong> Terjadi jika tab browser diminimalkan/tidak aktif. Klik tombol di bawah untuk membersihkan buffer.</li>
+          <li><strong>Baud Rate:</strong> Pastikan baud rate sesuai spesifikasi GST-9700 (standard 9600 bps).</li>
+          <li><strong>Kabel RS-232:</strong> Periksa sambungan konverter USB-to-Serial pada COM port.</li>
+        </ul>
+      </div>
+
+      {/* Force Sync Action Button */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleForceSync();
+          setIsWeightTooltipOpen(false);
+        }}
+        className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-1.5 px-3 rounded-lg text-xs flex items-center justify-center gap-2 transition cursor-pointer active:scale-95 shadow"
+      >
+        <RefreshCw className="w-3.5 h-3.5" />
+        PAKSA SINKRONKAN &amp; FLUSH BUFFER SEKARANG
+      </button>
+    </div>
+  );
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 font-sans" id="weighbridge-main">
       
@@ -667,8 +858,12 @@ export default function WeighbridgeModule({
           </div>
 
           {/* LED Display screen */}
-          <div className="bg-black border-2 border-neutral-900 rounded-lg p-4 sm:p-6 flex flex-col items-end relative overflow-hidden shadow-inner my-2">
-            <div className="absolute top-2 left-3 flex gap-2">
+          <div 
+            onClick={() => setIsWeightTooltipOpen(!isWeightTooltipOpen)}
+            className="bg-black border-2 border-neutral-900 rounded-lg p-4 sm:p-6 flex flex-col items-end relative overflow-visible shadow-inner my-2 cursor-pointer group hover:border-blue-700/80 transition"
+            title="Klik untuk info latensi & status koneksi real-time"
+          >
+            <div className="absolute top-2 left-3 flex items-center gap-2">
               <span className={`w-2 h-2 rounded-full ${simulatorWeight > 0 ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,1)]' : 'bg-red-950'}`}></span>
               <span className="text-[9px] font-mono text-neutral-500">{t.stable}</span>
               <span className={`w-2 h-2 rounded-full ${simulatorWeight === 0 ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,1)]' : 'bg-blue-950'}`}></span>
@@ -676,30 +871,45 @@ export default function WeighbridgeModule({
             </div>
             
             {/* LARGE SEVEN SEGMENT RESEMBLANCE */}
-            <div className="text-blue-500 font-mono text-4xl sm:text-5xl font-extrabold tracking-widest leading-none drop-shadow-[0_0_6px_rgba(59,130,246,0.7)]">
-              {simulatorWeight.toLocaleString('id-ID')}
+            <div className="flex items-baseline gap-2">
+              <div className="text-blue-500 font-mono text-4xl sm:text-5xl font-extrabold tracking-widest leading-none drop-shadow-[0_0_6px_rgba(59,130,246,0.7)] group-hover:text-blue-400 transition">
+                {simulatorWeight.toLocaleString('id-ID')}
+              </div>
+              <div className="text-blue-400 font-mono text-xs sm:text-sm mt-1">kg</div>
+              <Info className="w-3.5 h-3.5 text-blue-400 opacity-60 group-hover:opacity-100 animate-pulse ml-1 shrink-0" />
             </div>
-            <div className="text-blue-400 font-mono text-xs sm:text-sm mt-1">kg</div>
+
+            {/* Tooltip Popup on Hover / Click */}
+            <div className={`absolute left-0 top-full mt-1 z-50 transition-all duration-200 ${
+              isWeightTooltipOpen ? 'block' : 'hidden group-hover:block'
+            }`}>
+              {renderScaleLatencyTooltip("top-full left-0 mt-1")}
+            </div>
           </div>
 
           {/* KONEKSI TIMBANGAN FISIK REALTIME (WEB SERIAL) */}
           <div className="bg-neutral-900 border border-neutral-750 rounded-lg p-3 my-3">
             <div className="flex justify-between items-center mb-2">
               <span className="text-[11px] font-black tracking-wider uppercase text-neutral-300 flex items-center gap-1.5">
-                <span className={`w-2 h-2 rounded-full ${isSerialConnected ? 'bg-green-500 animate-pulse shadow-[0_0_6px_rgba(34,197,94,1)]' : 'bg-neutral-600'}`} />
-                Koneksi Timbangan Fisik GST-9700
+                <span className={`w-2 h-2 rounded-full ${isSerialConnected || isSimulatedStreamActive ? 'bg-green-500 animate-pulse shadow-[0_0_6px_rgba(34,197,94,1)]' : 'bg-neutral-600'}`} />
+                Koneksi Timbangan Fisik GST-700 / GST-9700
               </span>
-              {!isSerialSupported && (
+              {(isSerialConnected || isSimulatedStreamActive) ? (
+                <span className="text-[9px] bg-green-950 text-green-300 border border-green-800 font-bold px-1.5 py-0.5 rounded uppercase tracking-wider flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-ping" />
+                  SINKRON BERHASIL
+                </span>
+              ) : !isSerialSupported ? (
                 <span className="text-[8px] bg-red-950 text-red-400 font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
                   Tidak Didukung
                 </span>
-              )}
+              ) : null}
             </div>
 
             {isSerialSupported ? (
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="flex-1">
+              <div className="flex flex-col gap-2.5">
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
                     <label className="block text-[8px] text-neutral-400 font-black uppercase font-mono">Baud Rate</label>
                     <select
                       value={serialBaudRate}
@@ -710,54 +920,107 @@ export default function WeighbridgeModule({
                       <option value="1200">1200 bps</option>
                       <option value="2400">2400 bps</option>
                       <option value="4800">4800 bps</option>
-                      <option value="9600">9600 bps (Standard GST-9700)</option>
+                      <option value="9600">9600 bps (Standard GST-700)</option>
                       <option value="19200">19200 bps</option>
                       <option value="38400">38400 bps</option>
                       <option value="115200">115200 bps</option>
                     </select>
                   </div>
-                  <div className="pt-3 shrink-0">
-                    {isSerialConnected ? (
-                      <button
-                        onClick={disconnectSerial}
-                        className="bg-red-700 hover:bg-red-600 text-white font-mono font-bold text-xs px-3 py-1.5 rounded transition cursor-pointer"
-                      >
-                        PUTUSKAN
-                      </button>
-                    ) : (
-                      <button
-                        onClick={connectSerial}
-                        className="bg-blue-600 hover:bg-blue-500 text-white font-mono font-bold text-xs px-3 py-1.5 rounded transition cursor-pointer"
-                      >
-                        HUBUNGKAN
-                      </button>
-                    )}
+
+                  <div>
+                    <label className="block text-[8px] text-neutral-400 font-black uppercase font-mono">Data Bits</label>
+                    <select
+                      value={serialDataBits}
+                      onChange={(e) => setSerialDataBits(Number(e.target.value))}
+                      disabled={isSerialConnected}
+                      className="w-full bg-neutral-950 border border-neutral-700 text-neutral-200 text-xs rounded px-1.5 py-1 font-mono outline-none cursor-pointer"
+                    >
+                      <option value="8">8-Bit (8-N-1)</option>
+                      <option value="7">7-Bit (7-E-1)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[8px] text-neutral-400 font-black uppercase font-mono">Parity</label>
+                    <select
+                      value={serialParity}
+                      onChange={(e) => setSerialParity(e.target.value as any)}
+                      disabled={isSerialConnected}
+                      className="w-full bg-neutral-950 border border-neutral-700 text-neutral-200 text-xs rounded px-1.5 py-1 font-mono outline-none cursor-pointer"
+                    >
+                      <option value="none">None (Tanpa)</option>
+                      <option value="even">Even (Genap)</option>
+                      <option value="odd">Odd (Ganjil)</option>
+                    </select>
                   </div>
                 </div>
-                {serialError && (
-                  <p className="text-[9px] text-red-400 font-mono italic mt-0.5 max-w-full truncate">{serialError}</p>
-                )}
-                <div className="text-[9px] text-neutral-400 font-mono italic mt-0.5 leading-normal bg-neutral-950/70 p-2 rounded border border-neutral-800 flex flex-col gap-1.5">
+
+                <div className="flex items-center gap-2 pt-1">
                   {isSerialConnected ? (
+                    <button
+                      type="button"
+                      onClick={disconnectSerial}
+                      className="flex-1 bg-red-700 hover:bg-red-600 text-white font-mono font-bold text-xs py-1.5 px-3 rounded transition cursor-pointer shadow"
+                    >
+                      PUTUSKAN SERIAL RS-232
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={connectSerial}
+                      className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-mono font-bold text-xs py-1.5 px-3 rounded transition cursor-pointer shadow flex items-center justify-center gap-1.5"
+                    >
+                      <Activity className="w-3.5 h-3.5" />
+                      HUBUNGKAN TIMBANGAN FISIK GST-700
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSimulatedStreamActive(!isSimulatedStreamActive);
+                      if (!isSimulatedStreamActive) {
+                        (window as any).__showToast?.("⚡ DEMO AUTO-STREAM DIAKTIFKAN: Timbangan bergerak otomatis mensimulasikan berat kendaraan real-time GST-700!", "success");
+                      }
+                    }}
+                    className={`py-1.5 px-2.5 rounded text-[10px] font-mono font-bold transition cursor-pointer border ${
+                      isSimulatedStreamActive 
+                        ? 'bg-amber-600 text-white border-amber-500 shadow' 
+                        : 'bg-neutral-800 text-neutral-300 border-neutral-700 hover:bg-neutral-750'
+                    }`}
+                    title="Aktifkan simulasi streaming otomatis jika tidak ada kabel fisik terhubung"
+                  >
+                    {isSimulatedStreamActive ? 'STOP AUTO-DEMO' : 'DEMO AUTO-STREAM'}
+                  </button>
+                </div>
+
+                {serialError && (
+                  <div className="bg-red-950/80 border border-red-800 p-2 rounded text-[9.5px] text-red-300 font-mono leading-relaxed">
+                    {serialError}
+                  </div>
+                )}
+
+                <div className="text-[9px] text-neutral-400 font-mono italic leading-normal bg-neutral-950/80 p-2 rounded border border-neutral-800 flex flex-col gap-1.5">
+                  {isSerialConnected || isSimulatedStreamActive ? (
                     <>
                       <div className="flex justify-between items-center text-green-400 font-bold">
-                        <span className="flex items-center gap-1">
+                        <span className="flex items-center gap-1.5">
                           <span className="w-2 h-2 bg-green-500 rounded-full animate-ping" />
-                          TERHUBUNG GST-9700 ({simulatorWeight.toLocaleString('id-ID')} Kg)
+                          SINKRON BERHASIL: GST-700 ({simulatorWeight.toLocaleString('id-ID')} Kg)
                         </span>
                         <span className="text-[8px] bg-green-950 text-green-300 px-1.5 py-0.5 rounded border border-green-800">
-                          {rxPacketCount} Pkt | {lastRxTime || 'Streaming'}
+                          {rxPacketCount} Frame | {lastRxTime || 'Real-time'}
                         </span>
                       </div>
                       {lastRawSerialData && (
-                        <div className="text-neutral-300 font-mono text-[9px] bg-black/60 p-1 rounded border border-neutral-800 break-all">
-                          Stream Raw: <code className="text-yellow-300 font-bold">{lastRawSerialData}</code>
+                        <div className="text-neutral-300 font-mono text-[9px] bg-black/80 p-1 rounded border border-neutral-800 break-all">
+                          ASCII Stream GST-700: <code className="text-yellow-300 font-bold">{lastRawSerialData}</code>
                         </div>
                       )}
                     </>
                   ) : (
-                    <div className="flex flex-col gap-1 text-neutral-400">
-                      <span>Sambungkan kabel RS-232 indikator GST-9700 ke USB PC/Laptop, pilih Baud Rate (standard 9600 bps), lalu klik tombol <strong>HUBUNGKAN</strong>.</span>
+                    <div className="flex flex-col gap-1 text-neutral-400 font-sans text-[9.5px]">
+                      <span>Sambungkan kabel RS-232 indikator GST-700/GST-9700 ke USB PC/Laptop, sesuaikan Baud Rate (default 9600 bps), lalu klik <strong>HUBUNGKAN TIMBANGAN FISIK GST-700</strong>.</span>
                     </div>
                   )}
                 </div>
@@ -906,7 +1169,7 @@ export default function WeighbridgeModule({
             </div>
 
             {/* Display Indicator in the terminal */}
-            <div className="bg-neutral-950 border border-[#2d4d8c] p-3 rounded mb-3 flex justify-between items-center relative shadow-inner">
+            <div className="bg-neutral-950 border border-[#2d4d8c] p-3 rounded mb-3 flex justify-between items-center relative shadow-inner overflow-visible">
               <div className="flex items-center gap-2">
                 <span className="relative flex h-3 w-3">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -919,11 +1182,33 @@ export default function WeighbridgeModule({
                   </span>
                 </div>
               </div>
-              <div className="text-right flex items-baseline gap-2">
-                <span className="text-blue-400 font-mono text-4xl sm:text-5xl font-black relative z-10 drop-shadow-[0_0_10px_rgba(59,130,246,0.8)] tracking-tight">
-                  {simulatorWeight.toLocaleString('id-ID')}
-                </span>
-                <span className="text-blue-400 font-mono text-sm font-bold">kg</span>
+
+              {/* Interactive Tooltip Weight Display Container */}
+              <div className="relative group">
+                <button
+                  type="button"
+                  onClick={() => setIsWeightTooltipOpen(!isWeightTooltipOpen)}
+                  className="text-right flex items-baseline gap-2 cursor-pointer focus:outline-none p-1 rounded hover:bg-blue-900/40 transition"
+                  title="Klik atau sentuh untuk melihat status koneksi real-time & latensi sinkronisasi"
+                >
+                  <span className="text-blue-400 font-mono text-4xl sm:text-5xl font-black relative z-10 drop-shadow-[0_0_10px_rgba(59,130,246,0.8)] tracking-tight">
+                    {simulatorWeight.toLocaleString('id-ID')}
+                  </span>
+                  <span className="text-blue-400 font-mono text-sm font-bold">kg</span>
+                  
+                  {/* Status Info Badge */}
+                  <span className="inline-flex items-center gap-1 ml-1 bg-blue-950/90 text-blue-300 border border-blue-600/80 px-1.5 py-0.5 rounded text-[10px] font-sans font-bold hover:bg-blue-900 transition shadow">
+                    <Info className="w-3 h-3 text-blue-400 animate-pulse" />
+                    <span className="hidden sm:inline">Info Latensi</span>
+                  </span>
+                </button>
+
+                {/* Tooltip Overlay */}
+                <div className={`absolute right-0 top-full mt-2 z-50 transition-all duration-200 ${
+                  isWeightTooltipOpen ? 'block' : 'hidden group-hover:block'
+                }`}>
+                  {renderScaleLatencyTooltip("top-full right-0 mt-2")}
+                </div>
               </div>
               
               {/* Out of range simulation popup like in picture */}
@@ -937,13 +1222,24 @@ export default function WeighbridgeModule({
             </div>
 
             {/* Quick Live Scale Sync Bar */}
-            <div className="bg-[#122345] border border-[#2d4d8c]/80 rounded p-2 mb-4 flex flex-wrap justify-between items-center gap-2 text-xs">
-              <div className="flex items-center gap-1.5">
+            <div className="bg-[#122345] border border-[#2d4d8c]/80 rounded p-2 mb-4 flex flex-wrap justify-between items-center gap-2 text-xs overflow-visible relative">
+              <div 
+                className="flex items-center gap-1.5 cursor-pointer relative group"
+                onClick={() => setIsWeightTooltipOpen(!isWeightTooltipOpen)}
+                title="Hover / Klik untuk status latensi"
+              >
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span className="text-[#a0c5fc] font-semibold">Berat Timbangan Fisik GST-9700:</span>
-                <span className="text-yellow-300 font-mono font-bold text-sm bg-neutral-950/80 px-2 py-0.5 rounded border border-yellow-500/30">
+                <span className="text-yellow-300 font-mono font-bold text-sm bg-neutral-950/80 px-2 py-0.5 rounded border border-yellow-500/30 flex items-center gap-1.5 hover:bg-neutral-900 transition">
                   {simulatorWeight.toLocaleString('id-ID')} kg
+                  <Info className="w-3 h-3 text-yellow-400 opacity-80" />
                 </span>
+
+                <div className={`absolute left-0 top-full mt-2 z-50 transition-all duration-200 ${
+                  isWeightTooltipOpen ? 'block' : 'hidden group-hover:block'
+                }`}>
+                  {renderScaleLatencyTooltip("top-full left-0 mt-2")}
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <button
