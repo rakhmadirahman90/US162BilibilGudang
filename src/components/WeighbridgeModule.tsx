@@ -48,6 +48,9 @@ export default function WeighbridgeModule({
   const [serialBaudRate, setSerialBaudRate] = useState<number>(9600);
   const [serialError, setSerialError] = useState<string | null>(null);
   const [lastRawSerialData, setLastRawSerialData] = useState<string>("");
+  const [rxPacketCount, setRxPacketCount] = useState<number>(0);
+  const [lastRxTime, setLastRxTime] = useState<string>("");
+  const [isAutoSyncEnabled, setIsAutoSyncEnabled] = useState<boolean>(true);
 
   const serialPortRef = useRef<any>(null);
   const serialReaderRef = useRef<any>(null);
@@ -72,60 +75,68 @@ export default function WeighbridgeModule({
   const extractWeightValueFromCleanStr = (clean: string): number | null => {
     if (!clean) return null;
 
-    // Pattern 1: GST-9700 / GSC / Toledo / CAS standard prefix e.g. "ST,GS,+011330kg", "US,GS,  005420"
-    const gscMatches = Array.from(clean.matchAll(/(?:ST|US|WN|WW|GS|NT|OL|QT|TR|GR)[,\s:=]*([+-]?\s*\d+(?:\.\d+)?)\s*(?:kg|t|g)?/gi));
+    // Remove invisible control characters except spaces & standard printable ASCII
+    const sanitized = clean.replace(/[^\x20-\x7E]/g, ' ').trim();
+    if (!sanitized) return null;
+
+    // Pattern 1: GST-9700 / GSC / Toledo / CAS standard prefix e.g. "ST,GS,+011330kg", "US,GS,  005420", "ST,NT,+011330"
+    const gscMatches = Array.from(sanitized.matchAll(/(?:ST|US|WN|WW|GS|NT|OL|QT|TR|GR|G\.W\.|N\.W\.)[,\s:=]*([+-]?\s*\d+(?:[\.,]\d+)?)\s*(?:kg|t|g)?/gi));
     if (gscMatches.length > 0) {
       const lastMatch = gscMatches[gscMatches.length - 1];
       if (lastMatch && lastMatch[1]) {
-        const val = parseFloat(lastMatch[1].replace(/\s+/g, ''));
+        const numStr = lastMatch[1].replace(/\s+/g, '').replace(',', '.');
+        const val = parseFloat(numStr);
         if (!isNaN(val) && val >= 0) {
-          return formatParsedWeightVal(val, clean);
+          return formatParsedWeightVal(val, sanitized);
         }
       }
     }
 
-    // Pattern 2: Signed numbers e.g. "+011330", "=005420", "-000000", ":011330"
-    const signedMatches = Array.from(clean.matchAll(/[\+\=\:\#]\s*(\d+(?:\.\d+)?)/g));
+    // Pattern 2: Signed numbers e.g. "+011330", "=005420", "-000000", ":011330", "#011330"
+    const signedMatches = Array.from(sanitized.matchAll(/[\+\=\:\#]\s*(\d+(?:[\.,]\d+)?)/g));
     if (signedMatches.length > 0) {
       const lastMatch = signedMatches[signedMatches.length - 1];
       if (lastMatch && lastMatch[1]) {
-        const val = parseFloat(lastMatch[1]);
+        const numStr = lastMatch[1].replace(',', '.');
+        const val = parseFloat(numStr);
         if (!isNaN(val) && val >= 0) {
-          return formatParsedWeightVal(val, clean);
+          return formatParsedWeightVal(val, sanitized);
         }
       }
     }
 
     // Pattern 3: Yaohua / GSC reverse string format e.g. "033110+" (11330+)
-    const reverseMatches = Array.from(clean.matchAll(/\b(\d{4,7})[\+\=\-]/g));
+    const reverseMatches = Array.from(sanitized.matchAll(/\b(\d{4,7})[\+\=\-]/g));
     if (reverseMatches.length > 0) {
       const lastMatch = reverseMatches[reverseMatches.length - 1];
       if (lastMatch && lastMatch[1]) {
         const revDigits = lastMatch[1].split('').reverse().join('');
         const val = parseFloat(revDigits);
         if (!isNaN(val) && val >= 0) {
-          return formatParsedWeightVal(val, clean);
+          return formatParsedWeightVal(val, sanitized);
         }
       }
     }
 
-    // Pattern 4: Standalone numbers with length 3 to 7 digits (e.g., 11330, 5420, 11.330)
-    const digitMatches = Array.from(clean.matchAll(/\b\d{3,7}(?:\.\d+)?\b/g));
+    // Pattern 4: Standalone numbers with length 3 to 7 digits (e.g., 11330, 5420, 11.330, 011330)
+    const digitMatches = Array.from(sanitized.matchAll(/\b\d{3,7}(?:[\.,]\d+)?\b/g));
     if (digitMatches.length > 0) {
       const lastMatch = digitMatches[digitMatches.length - 1];
-      const val = parseFloat(lastMatch[0]);
+      const numStr = lastMatch[0].replace(',', '.');
+      const val = parseFloat(numStr);
       if (!isNaN(val) && val >= 0) {
-        return formatParsedWeightVal(val, clean);
+        return formatParsedWeightVal(val, sanitized);
       }
     }
 
     // Pattern 5: Any digits fallback
-    const anyMatches = Array.from(clean.matchAll(/\d+(?:\.\d+)?/g));
+    const anyMatches = Array.from(sanitized.matchAll(/\d+(?:[\.,]\d+)?/g));
     if (anyMatches.length > 0) {
       const lastMatch = anyMatches[anyMatches.length - 1];
-      const val = parseFloat(lastMatch[0]);
+      const numStr = lastMatch[0].replace(',', '.');
+      const val = parseFloat(numStr);
       if (!isNaN(val) && val >= 0) {
-        return formatParsedWeightVal(val, clean);
+        return formatParsedWeightVal(val, sanitized);
       }
     }
 
@@ -258,8 +269,13 @@ export default function WeighbridgeModule({
         if (done) {
           break;
         }
-        if (value) {
-          const chunkStr = decoder.decode(value, { stream: true });
+        if (value && value.length > 0) {
+          // 1. Convert bytes with 7-bit parity bit mask (0x7F) for RS232 7,E,1 / 7,O,1 indicators
+          const sanitizedBytes = new Uint8Array(value.length);
+          for (let i = 0; i < value.length; i++) {
+            sanitizedBytes[i] = value[i] & 0x7f;
+          }
+          const chunkStr = decoder.decode(sanitizedBytes, { stream: true });
           buffer += chunkStr;
 
           const { weight, rawFrame, remainingBuffer } = parseSerialIndicatorBuffer(buffer);
@@ -267,11 +283,15 @@ export default function WeighbridgeModule({
 
           if (rawFrame) {
             setLastRawSerialData(rawFrame);
+          } else if (chunkStr.trim()) {
+            setLastRawSerialData(chunkStr.trim());
           }
 
           if (weight !== null) {
             setSimulatorWeight(weight);
             setCustomSimulatorInput(String(weight));
+            setRxPacketCount(prev => prev + 1);
+            setLastRxTime(new Date().toLocaleTimeString('id-ID'));
           }
         }
       }
@@ -717,21 +737,28 @@ export default function WeighbridgeModule({
                 {serialError && (
                   <p className="text-[9px] text-red-400 font-mono italic mt-0.5 max-w-full truncate">{serialError}</p>
                 )}
-                <div className="text-[9px] text-neutral-400 font-mono italic mt-0.5 leading-normal bg-neutral-950/50 p-2 rounded border border-neutral-800 flex flex-col gap-1">
+                <div className="text-[9px] text-neutral-400 font-mono italic mt-0.5 leading-normal bg-neutral-950/70 p-2 rounded border border-neutral-800 flex flex-col gap-1.5">
                   {isSerialConnected ? (
                     <>
-                      <span className="text-green-400 font-bold flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping" />
-                        Aktif: Tersambung Indikator GST-9700 ({simulatorWeight.toLocaleString('id-ID')} Kg)
-                      </span>
-                      {lastRawSerialData && (
-                        <span className="text-neutral-300 font-mono text-[9px] truncate">
-                          Data Terbaca: <code className="text-yellow-300 font-bold">{lastRawSerialData}</code>
+                      <div className="flex justify-between items-center text-green-400 font-bold">
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 bg-green-500 rounded-full animate-ping" />
+                          TERHUBUNG GST-9700 ({simulatorWeight.toLocaleString('id-ID')} Kg)
                         </span>
+                        <span className="text-[8px] bg-green-950 text-green-300 px-1.5 py-0.5 rounded border border-green-800">
+                          {rxPacketCount} Pkt | {lastRxTime || 'Streaming'}
+                        </span>
+                      </div>
+                      {lastRawSerialData && (
+                        <div className="text-neutral-300 font-mono text-[9px] bg-black/60 p-1 rounded border border-neutral-800 break-all">
+                          Stream Raw: <code className="text-yellow-300 font-bold">{lastRawSerialData}</code>
+                        </div>
                       )}
                     </>
                   ) : (
-                    "Sambungkan kabel RS-232 indikator GST-9700 ke USB komputer, lalu klik Hubungkan."
+                    <div className="flex flex-col gap-1 text-neutral-400">
+                      <span>Sambungkan kabel RS-232 indikator GST-9700 ke USB PC/Laptop, pilih Baud Rate (standard 9600 bps), lalu klik tombol <strong>HUBUNGKAN</strong>.</span>
+                    </div>
                   )}
                 </div>
               </div>
