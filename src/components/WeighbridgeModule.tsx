@@ -116,6 +116,41 @@ export default function WeighbridgeModule({
   };
 
   /**
+   * Helper function to robustly parse weight packets from physical GST-9700 / GST-700 / GSC / Toledo / Yaohua indicators
+   */
+  const parseNumberValue = (numRaw: string, fullContext: string): number | null => {
+    if (!numRaw) return null;
+    
+    // Clean spaces
+    let numStr = numRaw.replace(/\s+/g, '');
+    if (!numStr) return null;
+
+    // Check if number format uses thousand separator dot or comma e.g. "11.330" or "11,330" or "011.330"
+    // In Indonesian weighbridges, "11.330" or "11,330" means 11,330 Kg.
+    if (/^[+-]?\d{1,3}[\.,]\d{3}$/.test(numStr)) {
+      numStr = numStr.replace(/[\.,]/g, '');
+    } else {
+      // Standard decimal: convert comma to dot if comma used as decimal point
+      numStr = numStr.replace(',', '.');
+    }
+
+    let val = parseFloat(numStr);
+    if (isNaN(val) || val < 0) return null;
+
+    // Check unit context
+    if (/\b(?:t|ton|tons|tonne)\b/i.test(fullContext)) {
+      return Math.round(val * 1000);
+    }
+    
+    // If value is a small decimal like 11.33 and unit is not explicitly "kg", check if it represents tons
+    if (val > 0 && val < 200 && /\./.test(numStr) && !/kg/i.test(fullContext)) {
+      return Math.round(val * 1000);
+    }
+
+    return Math.round(val);
+  };
+
+  /**
    * Extract weight value from clean ASCII string frame or sliding buffer
    */
   const extractWeightValueFromCleanStr = (clean: string): number | null => {
@@ -125,32 +160,28 @@ export default function WeighbridgeModule({
     const sanitized = clean.replace(/[^\x20-\x7E]/g, ' ').trim();
     if (!sanitized) return null;
 
-    // Pattern 1: GST-700 / GST-9700 / GSC / Toledo / CAS standard prefix e.g. "ST,GS,+011330kg", "US,GS,  005420", "ST,NT,+011330", "G.W.: +011330kg"
-    const gscMatches = Array.from(sanitized.matchAll(/(?:ST|US|WN|WW|GS|NT|OL|QT|TR|GR|G\.W\.|N\.W\.|Gross|Net)[,\s:=]*([+-]?\s*\d+(?:[\.,]\d+)?)\s*(?:kg|t|g)?/gi));
+    // Pattern 1: GST-9700 / GST-700 / GSC / Toledo / CAS standard prefix e.g. "ST,GS,+011330kg", "US,GS,  005420", "ST,NT,+011330", "G.W.: +011330kg"
+    const gscMatches = Array.from(
+      sanitized.matchAll(/(?:ST|US|WN|WW|OL|QT|TR|GR)?\s*,?\s*(?:GS|NT|G\.W\.|N\.W\.|Gross|Net)?[,\s:=]*([+-]?\s*\d+(?:[\s\.,]\d+)?)\s*(?:kg|t|g)?/gi)
+    );
     if (gscMatches.length > 0) {
       for (let i = gscMatches.length - 1; i >= 0; i--) {
         const match = gscMatches[i];
         if (match && match[1]) {
-          const numStr = match[1].replace(/\s+/g, '').replace(',', '.');
-          const val = parseFloat(numStr);
-          if (!isNaN(val) && val >= 0) {
-            return formatParsedWeightVal(val, sanitized);
-          }
+          const parsed = parseNumberValue(match[1], sanitized);
+          if (parsed !== null) return parsed;
         }
       }
     }
 
     // Pattern 2: Signed numbers e.g. "+011330", "=005420", "-000000", ":011330", "#011330"
-    const signedMatches = Array.from(sanitized.matchAll(/[\+\=\:\#]\s*(\d+(?:[\.,]\d+)?)/g));
+    const signedMatches = Array.from(sanitized.matchAll(/[\+\=\:\#]\s*(\d+(?:[\s\.,]\d+)?)/g));
     if (signedMatches.length > 0) {
       for (let i = signedMatches.length - 1; i >= 0; i--) {
         const match = signedMatches[i];
         if (match && match[1]) {
-          const numStr = match[1].replace(',', '.');
-          const val = parseFloat(numStr);
-          if (!isNaN(val) && val >= 0) {
-            return formatParsedWeightVal(val, sanitized);
-          }
+          const parsed = parseNumberValue(match[1], sanitized);
+          if (parsed !== null) return parsed;
         }
       }
     }
@@ -162,55 +193,32 @@ export default function WeighbridgeModule({
         const match = reverseMatches[i];
         if (match && match[1]) {
           const revDigits = match[1].split('').reverse().join('');
-          const val = parseFloat(revDigits);
-          if (!isNaN(val) && val >= 0) {
-            return formatParsedWeightVal(val, sanitized);
-          }
+          const parsed = parseNumberValue(revDigits, sanitized);
+          if (parsed !== null) return parsed;
         }
       }
     }
 
-    // Pattern 4: Unit suffixed numbers e.g. "11330kg", "11330 kg"
-    const unitMatches = Array.from(sanitized.matchAll(/(\d+(?:[\.,]\d+)?)\s*(?:kg|t|g)\b/gi));
+    // Pattern 4: Unit suffixed numbers e.g. "11330kg", "11330 kg", "11.330 kg"
+    const unitMatches = Array.from(sanitized.matchAll(/(\d+(?:[\s\.,]\d+)?)\s*(?:kg|t|g)\b/gi));
     if (unitMatches.length > 0) {
       for (let i = unitMatches.length - 1; i >= 0; i--) {
         const match = unitMatches[i];
         if (match && match[1]) {
-          const numStr = match[1].replace(',', '.');
-          const val = parseFloat(numStr);
-          if (!isNaN(val) && val >= 0) {
-            return formatParsedWeightVal(val, sanitized);
-          }
+          const parsed = parseNumberValue(match[1], sanitized);
+          if (parsed !== null) return parsed;
         }
       }
     }
 
-    // Pattern 5: Standalone numbers with length 3 to 7 digits (e.g., 11330, 5420, 011330)
-    const digitMatches = Array.from(sanitized.matchAll(/\b\d{3,7}(?:[\.,]\d+)?\b/g));
+    // Pattern 5: Standalone numbers with length 1 to 7 digits
+    const digitMatches = Array.from(sanitized.matchAll(/\b\d{1,7}(?:[\s\.,]\d+)?\b/g));
     if (digitMatches.length > 0) {
       for (let i = digitMatches.length - 1; i >= 0; i--) {
         const match = digitMatches[i];
         if (match && match[0]) {
-          const numStr = match[0].replace(',', '.');
-          const val = parseFloat(numStr);
-          if (!isNaN(val) && val >= 0) {
-            return formatParsedWeightVal(val, sanitized);
-          }
-        }
-      }
-    }
-
-    // Pattern 6: Any digits fallback
-    const anyMatches = Array.from(sanitized.matchAll(/\d+(?:[\.,]\d+)?/g));
-    if (anyMatches.length > 0) {
-      for (let i = anyMatches.length - 1; i >= 0; i--) {
-        const match = anyMatches[i];
-        if (match && match[0]) {
-          const numStr = match[0].replace(',', '.');
-          const val = parseFloat(numStr);
-          if (!isNaN(val) && val >= 0) {
-            return formatParsedWeightVal(val, sanitized);
-          }
+          const parsed = parseNumberValue(match[0], sanitized);
+          if (parsed !== null) return parsed;
         }
       }
     }
@@ -225,13 +233,14 @@ export default function WeighbridgeModule({
     if (!rawBuffer) return { weight: null, rawFrame: "", remainingBuffer: "" };
 
     let buffer = rawBuffer;
-    if (buffer.length > 1024) {
-      buffer = buffer.slice(-512);
+    if (buffer.length > 2048) {
+      buffer = buffer.slice(-1024);
     }
 
-    // Split by standard line and ASCII control boundaries (CR \r, LF \n, STX \x02, ETX \x03, EOT \x04, ESC \x1b)
-    const rawTokens = buffer.split(/[\r\n\x02\x03\x04\x1b;,]+/);
-    const hasEndingDelimiter = /[\r\n\x02\x03\x04\x1b;,]$/.test(buffer);
+    // Split ONLY by line breaks and ASCII control frame boundaries (\r, \n, STX \x02, ETX \x03, EOT \x04, ESC \x1b)
+    // DO NOT split by commas or semicolons as indicator frames contain commas (e.g. ST,GS,+011330kg)
+    const rawTokens = buffer.split(/[\r\n\x02\x03\x04\x1b]+/);
+    const hasEndingDelimiter = /[\r\n\x02\x03\x04\x1b]$/.test(buffer);
     
     const completeFrames = hasEndingDelimiter ? rawTokens : rawTokens.slice(0, -1);
     let remainingBuffer = hasEndingDelimiter ? "" : (rawTokens[rawTokens.length - 1] || "");
@@ -253,18 +262,17 @@ export default function WeighbridgeModule({
       }
     }
 
-    // 2. Fallback check on full buffer or remainingBuffer directly
+    // 2. Fallback check on full buffer or remainingBuffer if completeFrames didn't match
     if (detectedWeight === null) {
-      const cleanAll = buffer.replace(/[^\x20-\x7E]/g, '').trim();
+      const cleanAll = buffer.replace(/[^\x20-\x7E]/g, ' ').trim();
       const val = extractWeightValueFromCleanStr(cleanAll);
       if (val !== null) {
         detectedWeight = val;
         lastRawFrame = cleanAll;
-        remainingBuffer = ""; // Reset buffer since we successfully extracted the weight
       }
     }
 
-    if (remainingBuffer.length > 200) {
+    if (remainingBuffer.length > 300) {
       remainingBuffer = "";
     }
 
@@ -350,13 +358,10 @@ export default function WeighbridgeModule({
           break;
         }
         if (value && value.length > 0) {
-          // Handle 7-bit parity bit masking if parity is configured
-          let sanitizedBytes = value;
-          if (serialDataBits === 7 || serialParity !== 'none') {
-            sanitizedBytes = new Uint8Array(value.length);
-            for (let i = 0; i < value.length; i++) {
-              sanitizedBytes[i] = value[i] & 0x7f;
-            }
+          // ALWAYS sanitize bytes with 0x7F bitmask to strip parity/high bits in RS232 signals
+          const sanitizedBytes = new Uint8Array(value.length);
+          for (let i = 0; i < value.length; i++) {
+            sanitizedBytes[i] = value[i] & 0x7f;
           }
 
           const chunkStr = decoder.decode(sanitizedBytes, { stream: true });
@@ -1404,18 +1409,24 @@ export default function WeighbridgeModule({
                 <div className="border-t border-[#2d4d8c]/60 my-1 pt-1">
                   <div className="flex justify-between items-center text-xs text-[#a0c5fc]">
                     <span>{t.weigh1Label}</span>
-                    <span className="text-blue-400">{selectedTicket ? `${(selectedTicket.timbang1Weight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg` : '0 kg'}</span>
+                    <span className="text-blue-400 font-semibold font-mono">
+                      {selectedTicket 
+                        ? `${(selectedTicket.timbang1Weight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg` 
+                        : `${simulatorWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg`}
+                    </span>
                   </div>
                   <div className="text-[10px] text-neutral-400 mt-0.5">
-                    ({selectedTicket ? selectedTicket.timbang1Time : '-'})
+                    ({selectedTicket ? selectedTicket.timbang1Time : 'Live Scale'})
                   </div>
                 </div>
 
                 <div className="pt-0.5">
                   <div className="flex justify-between items-center text-xs text-[#a0c5fc]">
                     <span>{t.weigh2Label}</span>
-                    <span className="text-orange-400">
-                      {selectedTicket && selectedTicket.timbang2Time ? `${(selectedTicket.timbang2Weight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg` : '-'}
+                    <span className="text-orange-400 font-semibold font-mono">
+                      {selectedTicket && selectedTicket.timbang2Time 
+                        ? `${(selectedTicket.timbang2Weight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg` 
+                        : (selectedTicket ? `${simulatorWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')} kg (Live)` : '-')}
                     </span>
                   </div>
                   <div className="text-[10px] text-neutral-400 mt-0.5">
@@ -1429,7 +1440,11 @@ export default function WeighbridgeModule({
                 <div className="flex items-center justify-between">
                   <span className="text-[#a0c5fc]">{t.grossWeightLabel}</span>
                   <div className="text-right">
-                    <span className="text-yellow-300 font-bold">{selectedTicket ? (selectedTicket.grossWeight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '0'}</span>
+                    <span className="text-yellow-300 font-bold font-mono text-base">
+                      {selectedTicket 
+                        ? (selectedTicket.grossWeight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US') 
+                        : simulatorWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}
+                    </span>
                     <span className="text-neutral-400 text-xs ml-1">kg</span>
                   </div>
                 </div>
@@ -1437,7 +1452,11 @@ export default function WeighbridgeModule({
                 <div className="flex items-center justify-between">
                   <span className="text-[#a0c5fc]">{t.tareWeightLabel}</span>
                   <div className="text-right">
-                    <span className="text-[#efefef]">{selectedTicket ? (selectedTicket.tareWeight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '0'}</span>
+                    <span className="text-[#efefef] font-mono">
+                      {selectedTicket 
+                        ? (selectedTicket.tareWeight ?? 0).toLocaleString(language === 'id' ? 'id-ID' : 'en-US') 
+                        : (selectedTicket ? simulatorWeight.toLocaleString(language === 'id' ? 'id-ID' : 'en-US') : '0')}
+                    </span>
                     <span className="text-neutral-400 text-xs ml-1">kg</span>
                   </div>
                 </div>
