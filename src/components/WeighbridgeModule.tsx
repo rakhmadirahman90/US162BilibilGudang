@@ -65,7 +65,7 @@ export default function WeighbridgeModule({
     const timeStr = new Date().toLocaleTimeString('id-ID');
     setLastRxTime(timeStr);
     setRxPacketCount(prev => prev + 1);
-    (window as any).__showToast?.("⚡ SINKRONISASI BERHASIL: Buffer data serial dibersihkan & frame timbangan GST-700/GST-9700 tersinkronkan instan!", "success");
+    (window as any).__showToast?.("⚡ SINKRONISASI BERHASIL: Buffer data serial dibersihkan & frame timbangan GST-9700 tersinkronkan instan!", "success");
   };
 
   // Simulated Auto-Stream Effect for physical scale testing without serial hardware
@@ -302,7 +302,7 @@ export default function WeighbridgeModule({
       setIsSimulatedStreamActive(false);
       keepReadingRef.current = true;
       
-      (window as any).__showToast?.("✅ SINKRONISASI BERHASIL: Timbangan Fisik GST-700 / GST-9700 Terhubung! Data berat aktual otomatis tersinkron ke layar.", "success");
+      (window as any).__showToast?.("✅ SINKRONISASI BERHASIL: Timbangan Fisik GST-9700 Terhubung! Data berat aktual otomatis tersinkron ke layar.", "success");
 
       // Start reading stream asynchronously
       readSerialData(port);
@@ -325,11 +325,11 @@ export default function WeighbridgeModule({
 
       console.error("Serial connection error:", err);
       if (err?.name === 'SecurityError' || /Permissions policy|policy|disallowed/i.test(rawMsg)) {
-        const errorMsg = "⚠️ AKSES PORT SERIAL DIBLOKIR FRAME: Silakan klik tombol 'Buka di Tab Baru' ↗️ di pojok kanan atas preview agar browser dapat berkomunikasi langsung dengan kabel USB / RS-232 timbangan GST-700/GST-9700 Anda, atau aktifkan 'DEMO AUTO-STREAM' di bawah untuk uji coba otomatis.";
+        const errorMsg = "⚠️ AKSES PORT SERIAL DIBLOKIR FRAME: Silakan klik tombol 'Buka di Tab Baru' ↗️ di pojok kanan atas preview agar browser dapat berkomunikasi langsung dengan kabel USB / RS-232 timbangan GST-9700 Anda, atau aktifkan 'DEMO AUTO-STREAM' di bawah untuk uji coba otomatis.";
         setSerialError(errorMsg);
         (window as any).__showToast?.(errorMsg, "error");
       } else {
-        const errorMsg = `❌ KESALAHAN KONEKSI: Gagal membuka koneksi serial (${rawMsg}). Pastikan kabel RS-232 indikator GST-700/GST-9700 tersambung dengan benar ke USB PC/Laptop Anda, port COM tidak sedang digunakan aplikasi lain, dan indikator dalam kondisi menyala.`;
+        const errorMsg = `❌ KESALAHAN KONEKSI: Gagal membuka koneksi serial (${rawMsg}). Pastikan kabel RS-232 indikator GST-9700 tersambung dengan benar ke USB PC/Laptop Anda, port COM tidak sedang digunakan aplikasi lain, dan indikator dalam kondisi menyala.`;
         setSerialError(errorMsg);
         (window as any).__showToast?.(errorMsg, "error");
       }
@@ -383,7 +383,7 @@ export default function WeighbridgeModule({
     } catch (err: any) {
       console.error("Error reading serial stream:", err);
       if (keepReadingRef.current) {
-        setSerialError(`Koneksi terputus: ${err?.message || "Gagal membaca stream data dari timbangan GST-700"}`);
+        setSerialError(`Koneksi terputus: ${err?.message || "Gagal membaca stream data dari timbangan GST-9700"}`);
       }
     } finally {
       if (serialReaderRef.current) {
@@ -410,7 +410,7 @@ export default function WeighbridgeModule({
       serialPortRef.current = null;
     }
     setIsSerialConnected(false);
-    (window as any).__showToast?.("🔌 KONEKSI DIPUTUSKAN: Hubungan dengan timbangan fisik GST-700 / GST-9700 telah dinonaktifkan secara aman.", "info");
+    (window as any).__showToast?.("🔌 KONEKSI DIPUTUSKAN: Hubungan dengan timbangan fisik GST-9700 telah dinonaktifkan secara aman.", "info");
   };
   
   // Active Weighing Draft on Terminal
@@ -849,34 +849,50 @@ export default function WeighbridgeModule({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 font-sans" id="weighbridge-main">
       
-      {/* 1. PHYSICAL HARWARE INDICATOR EMULATOR (GST-9700) */}
+      {/* 1. PHYSICAL HARDWARE INDICATOR EMULATOR (GSC GST-9700) */}
       <div className="lg:col-span-4 flex flex-col gap-4">
-        <div className="bg-neutral-800 border-4 border-neutral-700 rounded-xl p-4 shadow-xl text-white">
-          <div className="flex justify-between items-center border-b border-neutral-700 pb-2 mb-3">
-            <span className="font-mono text-sm tracking-wider font-bold text-neutral-400">GSC GST-9700</span>
-            <span className="text-xs bg-red-600 font-bold px-2 py-0.5 rounded animate-pulse">{t.weighingIndicator}</span>
+        <div className="bg-stone-900 border-4 border-stone-700 rounded-2xl p-4 sm:p-5 shadow-2xl text-white">
+          <div className="flex justify-between items-center border-b border-stone-800 pb-2 mb-3">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-sm tracking-wider font-extrabold text-stone-200 bg-stone-800 px-2.5 py-0.5 rounded border border-stone-700">
+                GSC GST-9700
+              </span>
+              <span className="text-[10px] font-mono text-stone-400 uppercase tracking-widest hidden sm:inline">Weighing Terminal</span>
+            </div>
+            <span className="text-xs bg-red-600 font-bold px-2 py-0.5 rounded animate-pulse shadow-[0_0_8px_rgba(220,38,38,0.8)]">
+              {t.weighingIndicator}
+            </span>
           </div>
 
-          {/* LED Display screen */}
+          {/* LED Display screen - Red 7-Segment Style like physical GST-9700 */}
           <div 
             onClick={() => setIsWeightTooltipOpen(!isWeightTooltipOpen)}
-            className="bg-black border-2 border-neutral-900 rounded-lg p-4 sm:p-6 flex flex-col items-end relative overflow-visible shadow-inner my-2 cursor-pointer group hover:border-blue-700/80 transition"
+            className="bg-black border-2 border-stone-800 rounded-xl p-4 sm:p-5 flex flex-col items-end relative overflow-visible shadow-inner my-2 cursor-pointer group hover:border-red-600/80 transition"
             title="Klik untuk info latensi & status koneksi real-time"
           >
-            <div className="absolute top-2 left-3 flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${simulatorWeight > 0 ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,1)]' : 'bg-red-950'}`}></span>
-              <span className="text-[9px] font-mono text-neutral-500">{t.stable}</span>
-              <span className={`w-2 h-2 rounded-full ${simulatorWeight === 0 ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,1)]' : 'bg-blue-950'}`}></span>
-              <span className="text-[9px] font-mono text-neutral-500">{t.zero}</span>
+            {/* Status LEDs on indicator screen */}
+            <div className="absolute top-2.5 left-3 flex items-center gap-2 bg-stone-950/80 px-2 py-0.5 rounded border border-stone-800">
+              <div className="flex items-center gap-1">
+                <span className={`w-2.5 h-2.5 rounded-full ${simulatorWeight > 0 ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,1)] animate-pulse' : 'bg-red-950'}`}></span>
+                <span className="text-[9px] font-mono text-stone-300 font-bold">STABLE</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className={`w-2.5 h-2.5 rounded-full ${simulatorWeight === 0 ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,1)] animate-pulse' : 'bg-amber-950'}`}></span>
+                <span className="text-[9px] font-mono text-stone-300 font-bold">ZERO</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className={`w-2.5 h-2.5 rounded-full ${simulatorWeight > 0 ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,1)]' : 'bg-emerald-950'}`}></span>
+                <span className="text-[9px] font-mono text-stone-300 font-bold">GROSS</span>
+              </div>
             </div>
             
-            {/* LARGE SEVEN SEGMENT RESEMBLANCE */}
-            <div className="flex items-baseline gap-2">
-              <div className="text-blue-500 font-mono text-4xl sm:text-5xl font-extrabold tracking-widest leading-none drop-shadow-[0_0_6px_rgba(59,130,246,0.7)] group-hover:text-blue-400 transition">
+            {/* LARGE SEVEN SEGMENT RED DIGITAL LED RESEMBLANCE */}
+            <div className="flex items-baseline gap-2 mt-6 sm:mt-5">
+              <div className="text-red-500 font-mono text-5xl sm:text-6xl font-black tracking-widest leading-none drop-shadow-[0_0_14px_rgba(239,68,68,0.95)] group-hover:text-red-400 transition">
                 {simulatorWeight.toLocaleString('id-ID')}
               </div>
-              <div className="text-blue-400 font-mono text-xs sm:text-sm mt-1">kg</div>
-              <Info className="w-3.5 h-3.5 text-blue-400 opacity-60 group-hover:opacity-100 animate-pulse ml-1 shrink-0" />
+              <div className="text-red-400 font-mono text-sm sm:text-base font-bold drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]">kg</div>
+              <Info className="w-4 h-4 text-red-400 opacity-70 group-hover:opacity-100 animate-pulse ml-1 shrink-0" />
             </div>
 
             {/* Tooltip Popup on Hover / Click */}
@@ -887,12 +903,32 @@ export default function WeighbridgeModule({
             </div>
           </div>
 
+          {/* PHYSICAL TACTILE PUSH BUTTONS ON GST-9700 FRONT PANEL */}
+          <div className="grid grid-cols-4 gap-1.5 mt-2 mb-3 bg-stone-950 p-2 rounded-xl border border-stone-800">
+            <button type="button" onClick={resetZero} className="bg-stone-800 hover:bg-stone-700 text-red-400 font-mono text-[10px] font-bold py-1.5 rounded-lg border border-stone-700 flex flex-col items-center justify-center active:scale-95 transition cursor-pointer">
+              <span className="w-2 h-2 rounded-full bg-red-500 mb-0.5"></span>
+              ZERO
+            </button>
+            <button type="button" onClick={() => applySimulatorPreset(0)} className="bg-stone-800 hover:bg-stone-700 text-amber-400 font-mono text-[10px] font-bold py-1.5 rounded-lg border border-stone-700 flex flex-col items-center justify-center active:scale-95 transition cursor-pointer">
+              <span className="w-2 h-2 rounded-full bg-amber-500 mb-0.5"></span>
+              TARE
+            </button>
+            <button type="button" onClick={() => (window as any).__showToast?.("📊 MODE GROSS / NET GST-9700: Tampilan disinkronkan ke Mode Bruto", "info")} className="bg-stone-800 hover:bg-stone-700 text-blue-400 font-mono text-[10px] font-bold py-1.5 rounded-lg border border-stone-700 flex flex-col items-center justify-center active:scale-95 transition cursor-pointer">
+              <span className="w-2 h-2 rounded-full bg-blue-500 mb-0.5"></span>
+              G / N
+            </button>
+            <button type="button" onClick={handleForceSync} className="bg-stone-800 hover:bg-stone-700 text-emerald-400 font-mono text-[10px] font-bold py-1.5 rounded-lg border border-stone-700 flex flex-col items-center justify-center active:scale-95 transition cursor-pointer">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 mb-0.5"></span>
+              PRINT/SYNC
+            </button>
+          </div>
+
           {/* KONEKSI TIMBANGAN FISIK REALTIME (WEB SERIAL) */}
-          <div className="bg-neutral-900 border border-neutral-750 rounded-lg p-3 my-3">
+          <div className="bg-stone-950 border border-stone-800 rounded-xl p-3 my-2">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[11px] font-black tracking-wider uppercase text-neutral-300 flex items-center gap-1.5">
-                <span className={`w-2 h-2 rounded-full ${isSerialConnected || isSimulatedStreamActive ? 'bg-green-500 animate-pulse shadow-[0_0_6px_rgba(34,197,94,1)]' : 'bg-neutral-600'}`} />
-                Koneksi Timbangan Fisik GST-700 / GST-9700
+              <span className="text-[11px] font-black tracking-wider uppercase text-stone-300 flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full ${isSerialConnected || isSimulatedStreamActive ? 'bg-green-500 animate-pulse shadow-[0_0_6px_rgba(34,197,94,1)]' : 'bg-stone-600'}`} />
+                Koneksi Timbangan Fisik GST-9700
               </span>
               {(isSerialConnected || isSimulatedStreamActive) ? (
                 <span className="text-[9px] bg-green-950 text-green-300 border border-green-800 font-bold px-1.5 py-0.5 rounded uppercase tracking-wider flex items-center gap-1">
@@ -910,17 +946,17 @@ export default function WeighbridgeModule({
               <div className="flex flex-col gap-2.5">
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="block text-[8px] text-neutral-400 font-black uppercase font-mono">Baud Rate</label>
+                    <label className="block text-[8px] text-stone-400 font-black uppercase font-mono">Baud Rate</label>
                     <select
                       value={serialBaudRate}
                       onChange={(e) => setSerialBaudRate(Number(e.target.value))}
                       disabled={isSerialConnected}
-                      className="w-full bg-neutral-950 border border-neutral-700 text-neutral-200 text-xs rounded px-1.5 py-1 font-mono outline-none cursor-pointer"
+                      className="w-full bg-stone-900 border border-stone-700 text-stone-200 text-xs rounded px-1.5 py-1 font-mono outline-none cursor-pointer"
                     >
                       <option value="1200">1200 bps</option>
                       <option value="2400">2400 bps</option>
                       <option value="4800">4800 bps</option>
-                      <option value="9600">9600 bps (Standard GST-700)</option>
+                      <option value="9600">9600 bps (Standard GST-9700)</option>
                       <option value="19200">19200 bps</option>
                       <option value="38400">38400 bps</option>
                       <option value="115200">115200 bps</option>
@@ -928,12 +964,12 @@ export default function WeighbridgeModule({
                   </div>
 
                   <div>
-                    <label className="block text-[8px] text-neutral-400 font-black uppercase font-mono">Data Bits</label>
+                    <label className="block text-[8px] text-stone-400 font-black uppercase font-mono">Data Bits</label>
                     <select
                       value={serialDataBits}
                       onChange={(e) => setSerialDataBits(Number(e.target.value))}
                       disabled={isSerialConnected}
-                      className="w-full bg-neutral-950 border border-neutral-700 text-neutral-200 text-xs rounded px-1.5 py-1 font-mono outline-none cursor-pointer"
+                      className="w-full bg-stone-900 border border-stone-700 text-stone-200 text-xs rounded px-1.5 py-1 font-mono outline-none cursor-pointer"
                     >
                       <option value="8">8-Bit (8-N-1)</option>
                       <option value="7">7-Bit (7-E-1)</option>
@@ -941,12 +977,12 @@ export default function WeighbridgeModule({
                   </div>
 
                   <div>
-                    <label className="block text-[8px] text-neutral-400 font-black uppercase font-mono">Parity</label>
+                    <label className="block text-[8px] text-stone-400 font-black uppercase font-mono">Parity</label>
                     <select
                       value={serialParity}
                       onChange={(e) => setSerialParity(e.target.value as any)}
                       disabled={isSerialConnected}
-                      className="w-full bg-neutral-950 border border-neutral-700 text-neutral-200 text-xs rounded px-1.5 py-1 font-mono outline-none cursor-pointer"
+                      className="w-full bg-stone-900 border border-stone-700 text-stone-200 text-xs rounded px-1.5 py-1 font-mono outline-none cursor-pointer"
                     >
                       <option value="none">None (Tanpa)</option>
                       <option value="even">Even (Genap)</option>
@@ -960,7 +996,7 @@ export default function WeighbridgeModule({
                     <button
                       type="button"
                       onClick={disconnectSerial}
-                      className="flex-1 bg-red-700 hover:bg-red-600 text-white font-mono font-bold text-xs py-1.5 px-3 rounded transition cursor-pointer shadow"
+                      className="flex-1 bg-red-700 hover:bg-red-600 text-white font-mono font-bold text-xs py-1.5 px-3 rounded-lg transition cursor-pointer shadow"
                     >
                       PUTUSKAN SERIAL RS-232
                     </button>
@@ -968,10 +1004,10 @@ export default function WeighbridgeModule({
                     <button
                       type="button"
                       onClick={connectSerial}
-                      className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-mono font-bold text-xs py-1.5 px-3 rounded transition cursor-pointer shadow flex items-center justify-center gap-1.5"
+                      className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-mono font-bold text-xs py-1.5 px-3 rounded-lg transition cursor-pointer shadow flex items-center justify-center gap-1.5"
                     >
                       <Activity className="w-3.5 h-3.5" />
-                      HUBUNGKAN TIMBANGAN FISIK GST-700
+                      HUBUNGKAN TIMBANGAN FISIK GST-9700
                     </button>
                   )}
 
@@ -980,13 +1016,13 @@ export default function WeighbridgeModule({
                     onClick={() => {
                       setIsSimulatedStreamActive(!isSimulatedStreamActive);
                       if (!isSimulatedStreamActive) {
-                        (window as any).__showToast?.("⚡ DEMO AUTO-STREAM DIAKTIFKAN: Timbangan bergerak otomatis mensimulasikan berat kendaraan real-time GST-700!", "success");
+                        (window as any).__showToast?.("⚡ DEMO AUTO-STREAM DIAKTIFKAN: Timbangan bergerak otomatis mensimulasikan berat kendaraan real-time GST-9700!", "success");
                       }
                     }}
-                    className={`py-1.5 px-2.5 rounded text-[10px] font-mono font-bold transition cursor-pointer border ${
+                    className={`py-1.5 px-2.5 rounded-lg text-[10px] font-mono font-bold transition cursor-pointer border ${
                       isSimulatedStreamActive 
                         ? 'bg-amber-600 text-white border-amber-500 shadow' 
-                        : 'bg-neutral-800 text-neutral-300 border-neutral-700 hover:bg-neutral-750'
+                        : 'bg-stone-800 text-stone-300 border-stone-700 hover:bg-stone-750'
                     }`}
                     title="Aktifkan simulasi streaming otomatis jika tidak ada kabel fisik terhubung"
                   >
@@ -1000,27 +1036,27 @@ export default function WeighbridgeModule({
                   </div>
                 )}
 
-                <div className="text-[9px] text-neutral-400 font-mono italic leading-normal bg-neutral-950/80 p-2 rounded border border-neutral-800 flex flex-col gap-1.5">
+                <div className="text-[9px] text-stone-400 font-mono italic leading-normal bg-stone-900/90 p-2 rounded-lg border border-stone-800 flex flex-col gap-1.5">
                   {isSerialConnected || isSimulatedStreamActive ? (
                     <>
                       <div className="flex justify-between items-center text-green-400 font-bold">
                         <span className="flex items-center gap-1.5">
                           <span className="w-2 h-2 bg-green-500 rounded-full animate-ping" />
-                          SINKRON BERHASIL: GST-700 ({simulatorWeight.toLocaleString('id-ID')} Kg)
+                          SINKRON BERHASIL: GST-9700 ({simulatorWeight.toLocaleString('id-ID')} Kg)
                         </span>
                         <span className="text-[8px] bg-green-950 text-green-300 px-1.5 py-0.5 rounded border border-green-800">
                           {rxPacketCount} Frame | {lastRxTime || 'Real-time'}
                         </span>
                       </div>
                       {lastRawSerialData && (
-                        <div className="text-neutral-300 font-mono text-[9px] bg-black/80 p-1 rounded border border-neutral-800 break-all">
-                          ASCII Stream GST-700: <code className="text-yellow-300 font-bold">{lastRawSerialData}</code>
+                        <div className="text-stone-300 font-mono text-[9px] bg-black/80 p-1 rounded border border-stone-800 break-all">
+                          ASCII Stream GST-9700: <code className="text-yellow-300 font-bold">{lastRawSerialData}</code>
                         </div>
                       )}
                     </>
                   ) : (
-                    <div className="flex flex-col gap-1 text-neutral-400 font-sans text-[9.5px]">
-                      <span>Sambungkan kabel RS-232 indikator GST-700/GST-9700 ke USB PC/Laptop, sesuaikan Baud Rate (default 9600 bps), lalu klik <strong>HUBUNGKAN TIMBANGAN FISIK GST-700</strong>.</span>
+                    <div className="flex flex-col gap-1 text-stone-400 font-sans text-[9.5px]">
+                      <span>Sambungkan kabel RS-232 indikator GST-9700 ke USB PC/Laptop, sesuaikan Baud Rate (default 9600 bps), lalu klik <strong>HUBUNGKAN TIMBANGAN FISIK GST-9700</strong>.</span>
                     </div>
                   )}
                 </div>
