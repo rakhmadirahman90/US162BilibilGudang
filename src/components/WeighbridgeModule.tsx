@@ -67,6 +67,72 @@ export default function WeighbridgeModule({
   }, []);
 
   /**
+   * Extract weight value from clean ASCII string frame
+   */
+  const extractWeightValueFromCleanStr = (clean: string): number | null => {
+    if (!clean) return null;
+
+    // Pattern 1: GST-9700 / GSC / Toledo / CAS standard prefix e.g. "ST,GS,+011330kg", "US,GS,  005420"
+    const gscMatches = Array.from(clean.matchAll(/(?:ST|US|WN|WW|GS|NT|OL|QT|TR|GR)[,\s:=]*([+-]?\s*\d+(?:\.\d+)?)\s*(?:kg|t|g)?/gi));
+    if (gscMatches.length > 0) {
+      const lastMatch = gscMatches[gscMatches.length - 1];
+      if (lastMatch && lastMatch[1]) {
+        const val = parseFloat(lastMatch[1].replace(/\s+/g, ''));
+        if (!isNaN(val) && val >= 0) {
+          return formatParsedWeightVal(val, clean);
+        }
+      }
+    }
+
+    // Pattern 2: Signed numbers e.g. "+011330", "=005420", "-000000", ":011330"
+    const signedMatches = Array.from(clean.matchAll(/[\+\=\:\#]\s*(\d+(?:\.\d+)?)/g));
+    if (signedMatches.length > 0) {
+      const lastMatch = signedMatches[signedMatches.length - 1];
+      if (lastMatch && lastMatch[1]) {
+        const val = parseFloat(lastMatch[1]);
+        if (!isNaN(val) && val >= 0) {
+          return formatParsedWeightVal(val, clean);
+        }
+      }
+    }
+
+    // Pattern 3: Yaohua / GSC reverse string format e.g. "033110+" (11330+)
+    const reverseMatches = Array.from(clean.matchAll(/\b(\d{4,7})[\+\=\-]/g));
+    if (reverseMatches.length > 0) {
+      const lastMatch = reverseMatches[reverseMatches.length - 1];
+      if (lastMatch && lastMatch[1]) {
+        const revDigits = lastMatch[1].split('').reverse().join('');
+        const val = parseFloat(revDigits);
+        if (!isNaN(val) && val >= 0) {
+          return formatParsedWeightVal(val, clean);
+        }
+      }
+    }
+
+    // Pattern 4: Standalone numbers with length 3 to 7 digits (e.g., 11330, 5420, 11.330)
+    const digitMatches = Array.from(clean.matchAll(/\b\d{3,7}(?:\.\d+)?\b/g));
+    if (digitMatches.length > 0) {
+      const lastMatch = digitMatches[digitMatches.length - 1];
+      const val = parseFloat(lastMatch[0]);
+      if (!isNaN(val) && val >= 0) {
+        return formatParsedWeightVal(val, clean);
+      }
+    }
+
+    // Pattern 5: Any digits fallback
+    const anyMatches = Array.from(clean.matchAll(/\d+(?:\.\d+)?/g));
+    if (anyMatches.length > 0) {
+      const lastMatch = anyMatches[anyMatches.length - 1];
+      const val = parseFloat(lastMatch[0]);
+      if (!isNaN(val) && val >= 0) {
+        return formatParsedWeightVal(val, clean);
+      }
+    }
+
+    return null;
+  };
+
+  /**
    * Helper function to robustly parse weight packets from physical GST-9700/GSC weighing indicators
    */
   const parseSerialIndicatorBuffer = (rawBuffer: string): { weight: number | null; rawFrame: string; remainingBuffer: string } => {
@@ -78,76 +144,42 @@ export default function WeighbridgeModule({
     }
 
     // Split by standard line and ASCII control boundaries (CR \r, LF \n, STX \x02, ETX \x03, EOT \x04, ESC \x1b)
-    const frames = buffer.split(/[\r\n\x02\x03\x04\x1b]+/);
-    const remainingBuffer = frames.pop() || "";
+    const rawTokens = buffer.split(/[\r\n\x02\x03\x04\x1b;,]+/);
+    const hasEndingDelimiter = /[\r\n\x02\x03\x04\x1b;,]$/.test(buffer);
+    
+    const completeFrames = hasEndingDelimiter ? rawTokens : rawTokens.slice(0, -1);
+    let remainingBuffer = hasEndingDelimiter ? "" : (rawTokens[rawTokens.length - 1] || "");
 
     let detectedWeight: number | null = null;
     let lastRawFrame = "";
 
-    for (let i = frames.length - 1; i >= 0; i--) {
-      const raw = frames[i];
+    // 1. Check complete frames from newest to oldest
+    for (let i = completeFrames.length - 1; i >= 0; i--) {
+      const raw = completeFrames[i];
       const clean = raw.replace(/[^\x20-\x7E]/g, '').trim();
       if (!clean) continue;
 
-      // Pattern 1: GST-9700 / GSC / Toledo standard indicator frame: "ST,GS,+011530kg", "ST,GS,  11530kg", "US,GS,+011530"
-      const gscMatch = clean.match(/(?:ST|US|WN|WW|GS|NT)[,\s:=]*([+-]?\s*\d+(?:\.\d+)?)\s*(?:kg|t|g)?/i);
-      if (gscMatch && gscMatch[1]) {
-        const numStr = gscMatch[1].replace(/\s+/g, '');
-        const val = parseFloat(numStr);
-        if (!isNaN(val) && val >= 0) {
-          detectedWeight = formatParsedWeightVal(val, clean);
-          lastRawFrame = clean;
-          break;
-        }
-      }
-
-      // Pattern 2: Signed numbers e.g. "+011530", "=011530", "-000000"
-      const signedMatch = clean.match(/[\+\=\-]\s*(\d+(?:\.\d+)?)/);
-      if (signedMatch && signedMatch[1]) {
-        const val = parseFloat(signedMatch[1]);
-        if (!isNaN(val) && val >= 0) {
-          detectedWeight = formatParsedWeightVal(val, clean);
-          lastRawFrame = clean;
-          break;
-        }
-      }
-
-      // Pattern 3: Isolated digits or decimal values e.g. "011530", "11530", "11.530"
-      const digitMatch = clean.match(/\b\d{3,7}(?:\.\d+)?\b/);
-      if (digitMatch) {
-        const val = parseFloat(digitMatch[0]);
-        if (!isNaN(val) && val >= 0) {
-          detectedWeight = formatParsedWeightVal(val, clean);
-          lastRawFrame = clean;
-          break;
-        }
-      }
-
-      // Pattern 4: Fallback any digits in string
-      const anyNumMatch = clean.match(/\d+(?:\.\d+)?/);
-      if (anyNumMatch) {
-        const val = parseFloat(anyNumMatch[0]);
-        if (!isNaN(val) && val >= 0) {
-          detectedWeight = formatParsedWeightVal(val, clean);
-          lastRawFrame = clean;
-          break;
-        }
+      const val = extractWeightValueFromCleanStr(clean);
+      if (val !== null) {
+        detectedWeight = val;
+        lastRawFrame = clean;
+        break;
       }
     }
 
-    // Fallback if buffer has no delimiters yet, but contains a valid weight pattern
-    if (detectedWeight === null && buffer.length >= 4) {
-      const clean = buffer.replace(/[^\x20-\x7E]/g, '').trim();
-      const gscMatch = clean.match(/(?:ST|US|WN|WW|GS|NT)[,\s:=]*([+-]?\s*\d+(?:\.\d+)?)\s*(?:kg|t|g)?/i) ||
-                       clean.match(/[\+\=\-]\s*(\d+(?:\.\d+)?)/) ||
-                       clean.match(/\d{3,7}(?:\.\d+)?/);
-      if (gscMatch) {
-        const val = parseFloat(gscMatch[1] || gscMatch[0]);
-        if (!isNaN(val) && val >= 0) {
-          detectedWeight = formatParsedWeightVal(val, clean);
-          lastRawFrame = clean;
-        }
+    // 2. Fallback check on full buffer or remainingBuffer directly
+    if (detectedWeight === null) {
+      const cleanAll = buffer.replace(/[^\x20-\x7E]/g, '').trim();
+      const val = extractWeightValueFromCleanStr(cleanAll);
+      if (val !== null) {
+        detectedWeight = val;
+        lastRawFrame = cleanAll;
+        remainingBuffer = ""; // Reset buffer since we successfully extracted the weight
       }
+    }
+
+    if (remainingBuffer.length > 100) {
+      remainingBuffer = "";
     }
 
     return { weight: detectedWeight, rawFrame: lastRawFrame, remainingBuffer };
@@ -168,13 +200,29 @@ export default function WeighbridgeModule({
       }
 
       const port = await (navigator as any).serial.requestPort();
-      await port.open({ baudRate: serialBaudRate });
+      
+      // Open with full hardware RS-232 options
+      await port.open({
+        baudRate: serialBaudRate,
+        dataBits: 8,
+        stopBits: 1,
+        parity: "none",
+        flowControl: "none",
+        bufferSize: 2048,
+      });
+
+      // Assert RTS/DTR hardware signals for USB-to-Serial RS232 converters
+      try {
+        await port.setSignals({ dataTerminalReady: true, requestToSend: true });
+      } catch (e) {
+        console.warn("Hardware signals not supported or unnecessary on this port:", e);
+      }
       
       serialPortRef.current = port;
       setIsSerialConnected(true);
       keepReadingRef.current = true;
       
-      (window as any).__showToast?.("🔌 KONEKSI BERHASIL: Indikator Timbangan GST-9700 terhubung secara realtime! Nilai berat aktual sekarang akan otomatis tersinkronisasi ke dalam aplikasi tanpa perlu diinput manual.", "success");
+      (window as any).__showToast?.("🔌 TERHUBUNG: Indikator Timbangan Fisik GST-9700 tersambung via COM3! Berat aktual akan otomatis tersinkron ke layar.", "success");
 
       // Start reading stream asynchronously
       readSerialData(port);
