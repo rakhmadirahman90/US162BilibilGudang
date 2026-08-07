@@ -115,6 +115,9 @@ export default function WeighbridgeModule({
     return Math.round(val);
   };
 
+  // Check if inside iframe
+  const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
+
   /**
    * Helper function to robustly parse weight packets from physical GST-9700 / GST-700 / GSC / Toledo / Yaohua indicators
    */
@@ -125,8 +128,10 @@ export default function WeighbridgeModule({
     let numStr = numRaw.replace(/\s+/g, '');
     if (!numStr) return null;
 
-    // Check if number format uses thousand separator dot or comma e.g. "11.330" or "11,330" or "011.330"
-    // In Indonesian weighbridges, "11.330" or "11,330" means 11,330 Kg.
+    // Remove trailing dot if it's zero-suppression dot e.g. "14860." -> "14860" or "14940." -> "14940"
+    numStr = numStr.replace(/\.$/, '');
+
+    // Check if number format uses thousand separator dot or comma e.g. "14.860", "14,860", "14.940", "14,940"
     if (/^[+-]?\d{1,3}[\.,]\d{3}$/.test(numStr)) {
       numStr = numStr.replace(/[\.,]/g, '');
     } else {
@@ -142,7 +147,7 @@ export default function WeighbridgeModule({
       return Math.round(val * 1000);
     }
     
-    // If value is a small decimal like 11.33 and unit is not explicitly "kg", check if it represents tons
+    // If value is a small decimal like 14.94 and unit is not explicitly "kg", check if it represents tons
     if (val > 0 && val < 200 && /\./.test(numStr) && !/kg/i.test(fullContext)) {
       return Math.round(val * 1000);
     }
@@ -928,6 +933,27 @@ export default function WeighbridgeModule({
             </button>
           </div>
 
+          {/* IFRAME PREVIEW ALERT BANNER */}
+          {isInIframe && (
+            <div className="bg-amber-950/90 border-2 border-amber-500 rounded-xl p-3 my-2 text-amber-200 text-xs font-sans shadow-lg">
+              <div className="flex items-center gap-2 font-bold text-amber-300 text-xs mb-1">
+                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Koneksi Kabel USB RS-232 Indikator GST-9700</span>
+              </div>
+              <p className="text-[10.5px] leading-relaxed mb-2 text-amber-100 font-sans">
+                Aplikasi saat ini dibuka di dalam Frame Preview. Browser Chrome memblokir izin port serial di dalam iframe. Buka di Tab Baru agar kabel USB GST-9700 dapat langsung tersambung & membaca berat fisik secara otomatis (14.860 Kg / 14.940 Kg).
+              </p>
+              <button
+                type="button"
+                onClick={() => window.open(window.location.href, '_blank')}
+                className="w-full bg-amber-500 hover:bg-amber-400 text-black font-extrabold py-1.5 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5 shadow cursor-pointer"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                BUKA APLIKASI DI TAB BARU (AKSES RS-232 KABEL USB)
+              </button>
+            </div>
+          )}
+
           {/* KONEKSI TIMBANGAN FISIK REALTIME (WEB SERIAL) */}
           <div className="bg-stone-950 border border-stone-800 rounded-xl p-3 my-2">
             <div className="flex justify-between items-center mb-2">
@@ -1073,9 +1099,12 @@ export default function WeighbridgeModule({
             )}
           </div>
 
-          {/* Controls to Mock physical setup weights for the computer */}
-          <div className="mt-4">
-            <label className="block text-xs font-mono text-neutral-400 mb-1 font-bold">{t.activeWeightSimulator}</label>
+          {/* Controls to Set or Enter physical setup weights */}
+          <div className="mt-3">
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-xs font-mono text-neutral-300 font-bold">INPUT / KETIK BERAT TIMBANGAN MANUALLY</label>
+              <span className="text-[10px] text-red-400 font-mono">Aktual: {simulatorWeight.toLocaleString('id-ID')} Kg</span>
+            </div>
             <form onSubmit={handleCustomWeightSubmit} className="flex gap-2">
               <input 
                 type="text"
@@ -1088,36 +1117,38 @@ export default function WeighbridgeModule({
                     setSimulatorWeight(parsed);
                   }
                 }}
-                className="bg-neutral-900 border border-neutral-600 text-red-400 font-mono text-center text-sm sm:text-lg rounded px-2 py-1 flex-1 focus:outline-none focus:border-red-500"
+                placeholder="Misal: 14860 atau 14940"
+                className="bg-neutral-900 border border-neutral-600 text-red-400 font-mono text-center text-sm sm:text-lg rounded px-2 py-1.5 flex-1 focus:outline-none focus:border-red-500 font-bold shadow-inner"
               />
               <button 
                 type="submit" 
-                className="bg-red-700 hover:bg-red-600 font-mono px-3 py-1 text-xs sm:text-sm rounded font-bold transition shrink-0"
+                className="bg-red-700 hover:bg-red-600 text-white font-mono px-3 py-1 text-xs sm:text-sm rounded font-bold transition shrink-0 cursor-pointer shadow"
               >
-                {t.apply}
+                SINKRONKAN
               </button>
             </form>
           </div>
 
-          {/* Preset Buttons */}
+          {/* Quick Preset Buttons matching physical indicator photos */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mt-3">
-            <button onClick={() => applySimulatorPreset(11330)} className="bg-red-900/90 hover:bg-red-800 text-yellow-300 font-bold font-mono py-2 rounded text-[11px] sm:text-xs px-1.5 text-center truncate border border-red-700 shadow flex items-center justify-center gap-1">
+            <button onClick={() => applySimulatorPreset(14860)} className="bg-red-900/90 hover:bg-red-800 text-yellow-300 font-bold font-mono py-2 rounded text-[11px] sm:text-xs px-1.5 text-center border border-red-600 shadow flex items-center justify-center gap-1 cursor-pointer">
               <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse inline-block shrink-0"></span>
+              14,860 KG (GST-9700)
+            </button>
+            <button onClick={() => applySimulatorPreset(14940)} className="bg-red-900/90 hover:bg-red-800 text-yellow-300 font-bold font-mono py-2 rounded text-[11px] sm:text-xs px-1.5 text-center border border-red-600 shadow flex items-center justify-center gap-1 cursor-pointer">
+              <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse inline-block shrink-0"></span>
+              14,940 KG (GST-9700)
+            </button>
+            <button onClick={() => applySimulatorPreset(11330)} className="bg-stone-800 hover:bg-stone-700 text-stone-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center border border-stone-700 cursor-pointer">
               11,330 KG (GST-9700)
             </button>
-            <button onClick={() => applySimulatorPreset(3560)} className="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate border border-neutral-700">
+            <button onClick={() => applySimulatorPreset(3560)} className="bg-stone-800 hover:bg-stone-700 text-stone-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center border border-stone-700 cursor-pointer">
               3,560 KG (BERAS)
             </button>
-            <button onClick={() => applySimulatorPreset(14650)} className="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate border border-neutral-700">
-              14,650 KG (TRUK BRUTO)
+            <button onClick={() => applySimulatorPreset(4250)} className="bg-stone-800 hover:bg-stone-700 text-stone-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center border border-stone-700 cursor-pointer">
+              4,250 KG (TARA)
             </button>
-            <button onClick={() => applySimulatorPreset(4250)} className="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate border border-neutral-700">
-              4,250 KG (KOSONG/TARA)
-            </button>
-            <button onClick={() => applySimulatorPreset(12450)} className="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate border border-neutral-700">
-              12,450 KG (GROSS)
-            </button>
-            <button onClick={resetZero} className="bg-neutral-950 hover:bg-neutral-900 text-red-500 font-bold border border-red-950 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center truncate leading-none">
+            <button onClick={resetZero} className="bg-stone-950 hover:bg-stone-900 text-red-400 font-bold border border-red-950 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center cursor-pointer">
               {t.zeroScale}
             </button>
           </div>
