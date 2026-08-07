@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { WeighbridgeTicket, VehicleRecord, BuyerRecord, SupplierRecord, EmployeeRecord } from '../types';
-import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, FileText, Check, Trash2, Edit2, Edit3, Download, Clock, ChevronRight, Truck, Save, XCircle, MessageCircle, RefreshCw, Info, Activity, Wifi, Zap, HelpCircle, Radio, CheckCircle2 } from 'lucide-react';
+import { Scale, Printer, Search, PlusCircle, RotateCcw, AlertCircle, AlertTriangle, ExternalLink, FileText, Check, Trash2, Edit2, Edit3, Download, Clock, ChevronRight, Truck, Save, XCircle, MessageCircle, RefreshCw, Info, Activity, Wifi, Zap, HelpCircle, Radio, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { exportToCSV, printPDFReport, printSlip, getHTMLForPDF } from '../utils/exportHelper';
