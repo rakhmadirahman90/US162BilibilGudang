@@ -291,9 +291,18 @@ export default function WeighbridgeModule({
         throw new Error("Web Serial API tidak didukung di browser ini. Gunakan Chrome, Edge, atau Opera versi desktop terbaru.");
       }
 
-      const port = await (navigator as any).serial.requestPort();
-      
-      // Open with full hardware RS-232 options for GST-700 / GST-9700
+      let port = serialPortRef.current;
+      if (!port) {
+        port = await (navigator as any).serial.requestPort();
+        serialPortRef.current = port;
+      }
+
+      // If port is already open, try closing first
+      try {
+        await port.close();
+      } catch (e) {}
+
+      // Open with selected RS-232 options
       await port.open({
         baudRate: serialBaudRate,
         dataBits: serialDataBits,
@@ -310,12 +319,11 @@ export default function WeighbridgeModule({
         console.warn("Hardware signals not supported or unnecessary on this port:", e);
       }
       
-      serialPortRef.current = port;
       setIsSerialConnected(true);
       setIsSimulatedStreamActive(false);
       keepReadingRef.current = true;
       
-      (window as any).__showToast?.("✅ SINKRONISASI BERHASIL: Timbangan Fisik GST-9700 Terhubung! Data berat aktual otomatis tersinkron ke layar.", "success");
+      (window as any).__showToast?.(`✅ BERHASIL TERHUBUNG: Terhubung pada Port Serial USB (${serialBaudRate} bps)! Membaca data GST-9700...`, "success");
 
       // Start reading stream asynchronously
       readSerialData(port);
@@ -342,12 +350,64 @@ export default function WeighbridgeModule({
         setSerialError(errorMsg);
         (window as any).__showToast?.(errorMsg, "error");
       } else {
-        const errorMsg = `❌ KESALAHAN KONEKSI: Gagal membuka koneksi serial (${rawMsg}). Pastikan kabel RS-232 indikator GST-9700 tersambung dengan benar ke USB PC/Laptop Anda, port COM tidak sedang digunakan aplikasi lain, dan indikator dalam kondisi menyala.`;
+        const errorMsg = `❌ KESALAHAN KONEKSI: Gagal membuka port serial (${rawMsg}). Pastikan kabel RS-232 indikator GST-9700 tersambung ke USB PC/Laptop dan port tidak digunakan aplikasi lain.`;
         setSerialError(errorMsg);
         (window as any).__showToast?.(errorMsg, "error");
       }
       setIsSerialConnected(false);
     }
+  };
+
+  const reopenSerialWithConfig = async (baud: number, bits: number = 8, parityVal: "none" | "even" | "odd" = "none") => {
+    setSerialBaudRate(baud);
+    setSerialDataBits(bits);
+    setSerialParity(parityVal);
+    setSerialError(null);
+
+    // Stop current reader
+    keepReadingRef.current = false;
+    if (serialReaderRef.current) {
+      try {
+        await serialReaderRef.current.cancel();
+      } catch (e) {}
+      serialReaderRef.current = null;
+    }
+    
+    // Close current port if open
+    if (serialPortRef.current) {
+      try {
+        await serialPortRef.current.close();
+      } catch (e) {}
+    }
+
+    if (serialPortRef.current) {
+      try {
+        await serialPortRef.current.open({
+          baudRate: baud,
+          dataBits: bits,
+          stopBits: 1,
+          parity: parityVal,
+          flowControl: "none",
+          bufferSize: 2048,
+        });
+
+        try {
+          await serialPortRef.current.setSignals({ dataTerminalReady: true, requestToSend: true });
+        } catch (e) {}
+
+        setIsSerialConnected(true);
+        setIsSimulatedStreamActive(false);
+        keepReadingRef.current = true;
+        (window as any).__showToast?.(`🔄 Beralih ke Baud Rate ${baud} bps (${bits}-${parityVal === 'none' ? 'N' : parityVal === 'even' ? 'E' : 'O'}-1)...`, "info");
+        readSerialData(serialPortRef.current);
+        return;
+      } catch (err: any) {
+        console.warn("Reopen port directly failed:", err);
+      }
+    }
+
+    // Fallback to connectSerial if port ref is null
+    connectSerial();
   };
 
   const readSerialData = async (port: any) => {
@@ -393,7 +453,15 @@ export default function WeighbridgeModule({
     } catch (err: any) {
       console.error("Error reading serial stream:", err);
       if (keepReadingRef.current) {
-        setSerialError(`Koneksi terputus: ${err?.message || "Gagal membaca stream data dari timbangan GST-9700"}`);
+        const rawErrMsg = err?.message || String(err) || "";
+        const isFraming = /framing|parity|buffer|overflow|alignment/i.test(rawErrMsg);
+        if (isFraming) {
+          setSerialError(
+            `⚠️ FRAMING ERROR: Baud Rate di PC (${serialBaudRate} bps) tidak cocok dengan pengaturan fisik Indikator GST-9700. Klik salah satu tombol Baud Rate di bawah untuk mencocokkan (2400 / 4800 / 9600 bps).`
+          );
+        } else {
+          setSerialError(`Koneksi terputus: ${rawErrMsg || "Gagal membaca stream data dari timbangan GST-9700"}`);
+        }
       }
     } finally {
       if (serialReaderRef.current) {
@@ -1062,8 +1130,43 @@ export default function WeighbridgeModule({
                 </div>
 
                 {serialError && (
-                  <div className="bg-red-950/80 border border-red-800 p-2 rounded text-[9.5px] text-red-300 font-mono leading-relaxed">
-                    {serialError}
+                  <div className="bg-red-950/90 border border-red-700 p-2.5 rounded-lg text-[10px] text-red-200 font-mono leading-relaxed flex flex-col gap-2">
+                    <p>{serialError}</p>
+                    <div className="pt-1 border-t border-red-800/80">
+                      <span className="block text-[9px] text-amber-300 font-bold mb-1 font-sans">
+                        ⚡ Klik salah satu Baud Rate di bawah untuk mencoba ulang secara otomatis:
+                      </span>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1">
+                        <button
+                          type="button"
+                          onClick={() => reopenSerialWithConfig(2400, 8, 'none')}
+                          className="bg-red-900 hover:bg-red-800 text-yellow-300 font-bold py-1 px-1.5 rounded text-[10px] border border-red-600 cursor-pointer text-center"
+                        >
+                          Coba 2400 bps
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => reopenSerialWithConfig(4800, 8, 'none')}
+                          className="bg-red-900 hover:bg-red-800 text-yellow-300 font-bold py-1 px-1.5 rounded text-[10px] border border-red-600 cursor-pointer text-center"
+                        >
+                          Coba 4800 bps
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => reopenSerialWithConfig(9600, 8, 'none')}
+                          className="bg-red-900 hover:bg-red-800 text-yellow-300 font-bold py-1 px-1.5 rounded text-[10px] border border-red-600 cursor-pointer text-center"
+                        >
+                          Coba 9600 bps
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => reopenSerialWithConfig(1200, 8, 'none')}
+                          className="bg-red-900 hover:bg-red-800 text-yellow-300 font-bold py-1 px-1.5 rounded text-[10px] border border-red-600 cursor-pointer text-center"
+                        >
+                          Coba 1200 bps
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -1130,25 +1233,29 @@ export default function WeighbridgeModule({
           </div>
 
           {/* Quick Preset Buttons matching physical indicator photos */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 mt-3">
-            <button onClick={() => applySimulatorPreset(14860)} className="bg-red-900/90 hover:bg-red-800 text-yellow-300 font-bold font-mono py-2 rounded text-[11px] sm:text-xs px-1.5 text-center border border-red-600 shadow flex items-center justify-center gap-1 cursor-pointer">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mt-3">
+            <button type="button" onClick={() => applySimulatorPreset(4350)} className="bg-red-900/90 hover:bg-red-800 text-yellow-300 font-bold font-mono py-2 rounded text-[11px] sm:text-xs px-1 text-center border border-red-600 shadow flex items-center justify-center gap-1 cursor-pointer col-span-2 sm:col-span-1">
+              <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse inline-block shrink-0"></span>
+              4,350 KG (GST-9700)
+            </button>
+            <button type="button" onClick={() => applySimulatorPreset(14860)} className="bg-red-900/90 hover:bg-red-800 text-yellow-300 font-bold font-mono py-2 rounded text-[11px] sm:text-xs px-1 text-center border border-red-600 shadow flex items-center justify-center gap-1 cursor-pointer">
               <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse inline-block shrink-0"></span>
               14,860 KG (GST-9700)
             </button>
-            <button onClick={() => applySimulatorPreset(14940)} className="bg-red-900/90 hover:bg-red-800 text-yellow-300 font-bold font-mono py-2 rounded text-[11px] sm:text-xs px-1.5 text-center border border-red-600 shadow flex items-center justify-center gap-1 cursor-pointer">
+            <button type="button" onClick={() => applySimulatorPreset(14940)} className="bg-red-900/90 hover:bg-red-800 text-yellow-300 font-bold font-mono py-2 rounded text-[11px] sm:text-xs px-1 text-center border border-red-600 shadow flex items-center justify-center gap-1 cursor-pointer">
               <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse inline-block shrink-0"></span>
               14,940 KG (GST-9700)
             </button>
-            <button onClick={() => applySimulatorPreset(11330)} className="bg-stone-800 hover:bg-stone-700 text-stone-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center border border-stone-700 cursor-pointer">
-              11,330 KG (GST-9700)
+            <button type="button" onClick={() => applySimulatorPreset(11330)} className="bg-stone-800 hover:bg-stone-700 text-stone-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center border border-stone-700 cursor-pointer">
+              11,330 KG
             </button>
-            <button onClick={() => applySimulatorPreset(3560)} className="bg-stone-800 hover:bg-stone-700 text-stone-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center border border-stone-700 cursor-pointer">
+            <button type="button" onClick={() => applySimulatorPreset(3560)} className="bg-stone-800 hover:bg-stone-700 text-stone-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center border border-stone-700 cursor-pointer">
               3,560 KG (BERAS)
             </button>
-            <button onClick={() => applySimulatorPreset(4250)} className="bg-stone-800 hover:bg-stone-700 text-stone-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center border border-stone-700 cursor-pointer">
+            <button type="button" onClick={() => applySimulatorPreset(4250)} className="bg-stone-800 hover:bg-stone-700 text-stone-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center border border-stone-700 cursor-pointer">
               4,250 KG (TARA)
             </button>
-            <button onClick={resetZero} className="bg-stone-950 hover:bg-stone-900 text-red-400 font-bold border border-red-950 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center cursor-pointer">
+            <button type="button" onClick={resetZero} className="bg-stone-950 hover:bg-stone-900 text-red-400 font-bold border border-red-950 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center cursor-pointer col-span-2 sm:col-span-1">
               {t.zeroScale}
             </button>
           </div>
