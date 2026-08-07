@@ -1263,26 +1263,30 @@ export default function WeighbridgeModule({
 
           {/* Quick Preset Buttons matching physical indicator photos */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mt-3">
-            <button type="button" onClick={() => applySimulatorPreset(4350)} className="bg-red-900/90 hover:bg-red-800 text-yellow-300 font-bold font-mono py-2 rounded text-[11px] sm:text-xs px-1 text-center border border-red-600 shadow flex items-center justify-center gap-1 cursor-pointer col-span-2 sm:col-span-1">
+            <button type="button" onClick={() => applySimulatorPreset(4210)} className="bg-red-900/90 hover:bg-red-800 text-yellow-300 font-bold font-mono py-2 rounded text-[11px] sm:text-xs px-1 text-center border border-red-600 shadow flex items-center justify-center gap-1 cursor-pointer col-span-2 sm:col-span-1">
               <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse inline-block shrink-0"></span>
-              4,350 KG (GST-9700)
+              4,210 KG (GST-9700)
+            </button>
+            <button type="button" onClick={() => applySimulatorPreset(4350)} className="bg-red-900/90 hover:bg-red-800 text-yellow-300 font-bold font-mono py-2 rounded text-[11px] sm:text-xs px-1 text-center border border-red-600 shadow flex items-center justify-center gap-1 cursor-pointer">
+              <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse inline-block shrink-0"></span>
+              4,350 KG
             </button>
             <button type="button" onClick={() => applySimulatorPreset(14860)} className="bg-red-900/90 hover:bg-red-800 text-yellow-300 font-bold font-mono py-2 rounded text-[11px] sm:text-xs px-1 text-center border border-red-600 shadow flex items-center justify-center gap-1 cursor-pointer">
               <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse inline-block shrink-0"></span>
-              14,860 KG (GST-9700)
+              14,860 KG
             </button>
             <button type="button" onClick={() => applySimulatorPreset(14940)} className="bg-red-900/90 hover:bg-red-800 text-yellow-300 font-bold font-mono py-2 rounded text-[11px] sm:text-xs px-1 text-center border border-red-600 shadow flex items-center justify-center gap-1 cursor-pointer">
               <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse inline-block shrink-0"></span>
-              14,940 KG (GST-9700)
+              14,940 KG
             </button>
             <button type="button" onClick={() => applySimulatorPreset(11330)} className="bg-stone-800 hover:bg-stone-700 text-stone-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center border border-stone-700 cursor-pointer">
               11,330 KG
             </button>
             <button type="button" onClick={() => applySimulatorPreset(3560)} className="bg-stone-800 hover:bg-stone-700 text-stone-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center border border-stone-700 cursor-pointer">
-              3,560 KG (BERAS)
+              3,560 KG
             </button>
             <button type="button" onClick={() => applySimulatorPreset(4250)} className="bg-stone-800 hover:bg-stone-700 text-stone-200 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center border border-stone-700 cursor-pointer">
-              4,250 KG (TARA)
+              4,250 KG
             </button>
             <button type="button" onClick={resetZero} className="bg-stone-950 hover:bg-stone-900 text-red-400 font-bold border border-red-950 font-mono py-1.5 rounded text-[10px] sm:text-xs px-1 text-center cursor-pointer col-span-2 sm:col-span-1">
               {t.zeroScale}
