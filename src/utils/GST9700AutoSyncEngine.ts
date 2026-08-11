@@ -1,4 +1,4 @@
-export type GST9700ConnectionState = 'DISCONNECTED' | 'CONNECTING' | 'CONNECTED' | 'RECEIVING' | 'STALE' | 'ERROR' | 'RECONNECTING';
+export type GST9700ConnectionState = 'DISCONNECTED' | 'CONNECTING' | 'RECEIVING' | 'STALE' | 'ERROR' | 'RECONNECTING';
 
 export interface GST9700SyncSnapshot {
   weight: number | null;
@@ -7,13 +7,20 @@ export interface GST9700SyncSnapshot {
   gross: boolean;
   net: boolean;
   rawFrame: string;
+  rawHex: string;
   state: GST9700ConnectionState;
   rxCount: number;
+  rxBytes: number;
+  parsedCount: number;
+  invalidFrameCount: number;
   lastRxAt: string;
+  lastParsedAt: string;
+  lastWeightChangeAt: string;
   reconnectCount: number;
   error: string | null;
   hasLiveData: boolean;
   ageMs: number | null;
+  protocol: string;
 }
 
 type Listener = (snapshot: GST9700SyncSnapshot) => void;
@@ -30,6 +37,7 @@ export interface GST9700SerialConfig {
   stableToleranceKg?: number;
   reconnectDelayMs?: number;
   frameGapMs?: number;
+  maxWeightKg?: number;
 }
 
 const DEFAULT_CONFIG: GST9700SerialConfig = {
@@ -38,15 +46,34 @@ const DEFAULT_CONFIG: GST9700SerialConfig = {
   parity: 'none',
   stopBits: 1,
   flowControl: 'none',
-  bufferSize: 2048,
+  bufferSize: 4096,
   staleAfterMs: 3000,
   stableWindowSize: 5,
   stableToleranceKg: 10,
   reconnectDelayMs: 700,
-  frameGapMs: 80,
+  frameGapMs: 60,
+  maxWeightKg: 100000,
 };
 
-const FRAME_BOUNDARY = new RegExp('[' + String.fromCharCode(13, 10, 2, 3, 4, 27) + ']+');
+const FRAME_BOUNDARY = /[\r\n\x02\x03\x04\x1b]+/;
+const PRINTABLE = /[^\x20-\x7e]/g;
+
+function cleanAscii(value: string): string {
+  return value.replace(PRINTABLE, ' ').replace(/[ \t]+/g, ' ').trim();
+}
+
+function bytesToAscii(bytes: Uint8Array): string {
+  let out = '';
+  for (const byte of bytes) {
+    const b = byte & 0x7f;
+    out += b >= 0x20 && b <= 0x7e ? String.fromCharCode(b) : String.fromCharCode(b);
+  }
+  return out;
+}
+
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+}
 
 export class GST9700AutoSyncEngine {
   private port: any = null;
@@ -59,11 +86,29 @@ export class GST9700AutoSyncEngine {
   private frameGapTimer: ReturnType<typeof setTimeout> | null = null;
   private recentWeights: number[] = [];
   private runId = 0;
+  private lastParsedWeight: number | null = null;
 
   private snapshot: GST9700SyncSnapshot = {
-    weight: null, stable: false, zero: false, gross: true, net: false,
-    rawFrame: '', state: 'DISCONNECTED', rxCount: 0, lastRxAt: '',
-    reconnectCount: 0, error: null, hasLiveData: false, ageMs: null,
+    weight: null,
+    stable: false,
+    zero: false,
+    gross: true,
+    net: false,
+    rawFrame: '',
+    rawHex: '',
+    state: 'DISCONNECTED',
+    rxCount: 0,
+    rxBytes: 0,
+    parsedCount: 0,
+    invalidFrameCount: 0,
+    lastRxAt: '',
+    lastParsedAt: '',
+    lastWeightChangeAt: '',
+    reconnectCount: 0,
+    error: null,
+    hasLiveData: false,
+    ageMs: null,
+    protocol: 'AUTO / ASCII',
   };
 
   constructor(listener?: Listener) { this.listener = listener || null; }
@@ -97,61 +142,93 @@ export class GST9700AutoSyncEngine {
 
   private parseNumber(raw: string, context: string): number | null {
     let s = raw.replace(/[ \t]/g, '');
-    if (s.endsWith('.')) s = s.slice(0, -1);
     if (!s) return null;
+    if (s.endsWith('.')) s = s.slice(0, -1);
 
-    if (/^[+-]?[0-9]{1,3}[.,][0-9]{3}$/.test(s)) s = s.replace(/[.,]/g, '');
-    else s = s.replace(',', '.');
+    const unit = context.match(/(?:kg|kgs|t|ton|tons|tonne|tonnes|g)\b/i)?.[0]?.toLowerCase();
+    if (/^[+-]?\d{1,3}[.,]\d{3}$/.test(s)) {
+      s = s.replace(/[.,]/g, '');
+    } else if (s.includes(',') && s.includes('.')) {
+      s = s.lastIndexOf('.') > s.lastIndexOf(',') ? s.replace(/,/g, '') : s.replace(/\./g, '').replace(',', '.');
+    } else if (s.includes(',') && !/\d{1,3},\d{3}$/.test(s)) {
+      s = s.replace(',', '.');
+    }
 
     const n = Number.parseFloat(s);
     if (!Number.isFinite(n) || n < 0) return null;
-    if (/(^|[^A-Za-z])(t|ton|tons|tonne)($|[^A-Za-z])/i.test(context)) return Math.round(n * 1000);
-    if (n > 0 && n < 200 && s.includes('.') && !/kg/i.test(context)) return Math.round(n * 1000);
-    return Math.round(n);
+    const kg = unit && /^(t|ton|tons|tonne|tonnes)$/.test(unit) ? n * 1000 : unit === 'g' ? n / 1000 : n;
+    const rounded = Math.round(kg);
+    if (rounded > (this.config.maxWeightKg ?? 100000)) return null;
+    return rounded;
   }
 
-  private extract(frame: string) {
-    const clean = frame.replace(new RegExp('[^' + String.fromCharCode(32) + '-' + String.fromCharCode(126) + ']', 'g'), ' ').replace(/[ \t]+/g, ' ').trim();
-    const empty = { weight: null as number | null, stable: false, zero: false, gross: false, net: false };
+  private extract(frame: string): { weight: number | null; stable: boolean; zero: boolean; gross: boolean; net: boolean; protocol: string } {
+    const clean = cleanAscii(frame);
+    const empty = { weight: null, stable: false, zero: false, gross: false, net: false, protocol: 'UNKNOWN' };
     if (!clean) return empty;
 
-    const stable = /STABLE|^ST[, ]|,ST[, ]/i.test(clean);
-    const net = /(^|[, ])NT([, ]|$)|NET|N[.]W[.]/i.test(clean);
-    const gross = /(^|[, ])GS([, ]|$)|GROSS|G[.]W[.]/i.test(clean) || !net;
-    const zero = /ZERO|(^|[, ])ZR([, ]|$)/i.test(clean);
+    const stable = /\bSTABLE\b|^ST[, ]|[, ]ST[, ]/i.test(clean);
+    const net = /(^|[, ]|\b)NT([, ]|$)|\bNET\b|N[.]W[.]/i.test(clean);
+    const gross = /(^|[, ]|\b)GS([, ]|$)|\bGROSS\b|G[.]W[.]/i.test(clean) || !net;
+    const zero = /\bZERO\b|(^|[, ]|\b)ZR([, ]|$)/i.test(clean);
 
-    const patterns = [
-      /(?:ST|US|WN|WW|OL|QT|TR|GR)?[ ]*,?[ ]*(?:GS|NT|G[.]W[.]|N[.]W[.]|Gross|Net)?[, :=]*([+-]?[ ]*[0-9]+(?:[ .,-][0-9]+)?)[ ]*(kg|t|g)?/gi,
-      /[+=:#][ ]*([0-9]+(?:[ .,-][0-9]+)?)/g,
-      /([0-9]+(?:[ .,-][0-9]+)?)[ ]*(kg|t|g)(?:$|[^A-Za-z])/gi,
+    // Prefer explicit GST/GSC/indicator formats. This avoids interpreting IDs or timestamps as weight.
+    const labeledPatterns: RegExp[] = [
+      /(?:ST|US|WN|WW|OL|QT|TR|GR)\s*,?\s*(?:GS|NT)\s*[,=: ]+([+-]?\s*\d+(?:[.,]\d+)?)\s*(kg|kgs|t|ton|tons|tonne|tonnes|g)?/gi,
+      /(?:G[.]W[.]|N[.]W[.]|GROSS|NET)\s*[:= ]+([+-]?\s*\d+(?:[.,]\d+)?)\s*(kg|kgs|t|ton|tons|tonne|tonnes|g)?/gi,
     ];
 
-    const candidates: RegExpMatchArray[] = [];
-    for (const re of patterns) for (const match of clean.matchAll(re)) candidates.push(match);
-
-    for (let i = candidates.length - 1; i >= 0; i--) {
-      const match = candidates[i];
-      const value = this.parseNumber(match[1], clean + ' ' + (match[2] || ''));
-      if (value !== null) return { weight: value, stable, zero: zero || value === 0, gross, net };
+    for (const re of labeledPatterns) {
+      const matches = Array.from(clean.matchAll(re));
+      for (let i = matches.length - 1; i >= 0; i--) {
+        const m = matches[i];
+        const weight = this.parseNumber(m[1], `${clean} ${m[2] || ''}`);
+        if (weight !== null) return { weight, stable, zero: zero || weight === 0, gross, net, protocol: 'GST/GSC LABELED ASCII' };
+      }
     }
 
-    const reverseMatches = Array.from(clean.matchAll(/(^|[^0-9])([0-9]{4,7})[+=-]/g));
-    for (let i = reverseMatches.length - 1; i >= 0; i--) {
-      const value = this.parseNumber(reverseMatches[i][2].split('').reverse().join(''), clean);
-      if (value !== null) return { weight: value, stable, zero: zero || value === 0, gross, net };
+    // Signed / keyed formats such as +011330, =005420 or :11330.
+    const signed = Array.from(clean.matchAll(/[+=:#]\s*([+-]?\d{1,7}(?:[.,]\d+)?)\s*(kg|kgs|t|ton|tons|tonne|tonnes|g)?/gi));
+    for (let i = signed.length - 1; i >= 0; i--) {
+      const m = signed[i];
+      const weight = this.parseNumber(m[1], `${clean} ${m[2] || ''}`);
+      if (weight !== null) return { weight, stable, zero: zero || weight === 0, gross, net, protocol: 'SIGNED ASCII' };
     }
 
-    if (clean.length <= 24 && /^[+-]?[0-9]{1,7}$/.test(clean)) {
-      const value = this.parseNumber(clean, clean);
-      if (value !== null) return { weight: value, stable, zero: zero || value === 0, gross, net };
+    // Common reverse-display formats such as 033110+ => 011330.
+    const reverse = Array.from(clean.matchAll(/(?:^|[^0-9])([0-9]{4,7})[+=-]/g));
+    for (let i = reverse.length - 1; i >= 0; i--) {
+      const digits = reverse[i][1].split('').reverse().join('');
+      const weight = this.parseNumber(digits, clean);
+      if (weight !== null) return { weight, stable, zero: zero || weight === 0, gross, net, protocol: 'REVERSE ASCII' };
+    }
+
+    // Unit-suffixed ASCII is safe because the unit explicitly identifies the measurement.
+    const unitMatches = Array.from(clean.matchAll(/([+-]?\d{1,7}(?:[.,]\d+)?)\s*(kg|kgs|t|ton|tons|tonne|tonnes|g)\b/gi));
+    for (let i = unitMatches.length - 1; i >= 0; i--) {
+      const m = unitMatches[i];
+      const weight = this.parseNumber(m[1], `${m[1]} ${m[2]}`);
+      if (weight !== null) return { weight, stable, zero: zero || weight === 0, gross, net, protocol: 'UNIT ASCII' };
+    }
+
+    // Plain continuous ASCII output: use the final bounded 1–7 digit candidate, never the entire concatenated stream.
+    const digitCandidates = Array.from(clean.matchAll(/(?:^|[^0-9])(\d{1,7})(?:$|[^0-9])/g));
+    for (let i = digitCandidates.length - 1; i >= 0; i--) {
+      const weight = this.parseNumber(digitCandidates[i][1], clean);
+      if (weight !== null) return { weight, stable, zero: zero || weight === 0, gross, net, protocol: 'PLAIN ASCII' };
     }
 
     return empty;
   }
 
-  private processFrame(frame: string) {
-    const parsed = this.extract(frame);
-    if (parsed.weight === null) return;
+  private processFrame(frame: string, rawHex = '') {
+    const clean = cleanAscii(frame);
+    if (!clean) return;
+    const parsed = this.extract(clean);
+    if (parsed.weight === null) {
+      this.emit({ invalidFrameCount: this.snapshot.invalidFrameCount + 1, rawFrame: clean, rawHex });
+      return;
+    }
 
     this.recentWeights.push(parsed.weight);
     const windowSize = this.config.stableWindowSize ?? 5;
@@ -160,6 +237,9 @@ export class GST9700AutoSyncEngine {
     const max = Math.max(...this.recentWeights);
     const tolerance = this.config.stableToleranceKg ?? 10;
     const stableByWindow = this.recentWeights.length >= Math.min(3, windowSize) && max - min <= tolerance;
+    const now = new Date().toISOString();
+    const changed = this.lastParsedWeight === null || this.lastParsedWeight !== parsed.weight;
+    this.lastParsedWeight = parsed.weight;
 
     this.emit({
       weight: parsed.weight,
@@ -167,13 +247,16 @@ export class GST9700AutoSyncEngine {
       zero: parsed.zero,
       gross: parsed.gross,
       net: parsed.net,
-      rawFrame: frame,
+      rawFrame: clean,
+      rawHex,
       state: 'RECEIVING',
-      rxCount: this.snapshot.rxCount + 1,
-      lastRxAt: new Date().toISOString(),
+      parsedCount: this.snapshot.parsedCount + 1,
+      lastParsedAt: now,
+      lastWeightChangeAt: changed ? now : this.snapshot.lastWeightChangeAt,
       error: null,
       hasLiveData: true,
       ageMs: 0,
+      protocol: parsed.protocol,
     });
     this.armStaleTimer();
   }
@@ -181,45 +264,37 @@ export class GST9700AutoSyncEngine {
   private flushUndelimitedBuffer() {
     this.frameGapTimer = null;
     if (!this.keepReading || !this.buffer.trim()) return;
-    const candidate = this.buffer.replace(new RegExp('[^' + String.fromCharCode(32) + '-' + String.fromCharCode(126) + ']', 'g'), ' ').replace(/[ \t]+/g, ' ').trim();
+    const candidate = this.buffer;
     this.buffer = '';
-    if (candidate && this.extract(candidate).weight !== null) this.processFrame(candidate);
+    if (this.extract(candidate).weight !== null) this.processFrame(candidate);
+    else this.emit({ invalidFrameCount: this.snapshot.invalidFrameCount + 1, rawFrame: cleanAscii(candidate) });
   }
 
   private scheduleUndelimitedFlush() {
     this.clearFrameGapTimer();
-    this.frameGapTimer = setTimeout(() => this.flushUndelimitedBuffer(), this.config.frameGapMs ?? 80);
+    this.frameGapTimer = setTimeout(() => this.flushUndelimitedBuffer(), this.config.frameGapMs ?? 60);
   }
 
   private consumeBytes(value: Uint8Array) {
     if (!value?.length) return;
+    const now = new Date().toISOString();
+    const ascii = bytesToAscii(value);
+    const hex = bytesToHex(value);
+    this.emit({ rxCount: this.snapshot.rxCount + 1, rxBytes: this.snapshot.rxBytes + value.length, lastRxAt: now, ageMs: 0, rawHex: hex });
 
-    // RS-232 payload from GST-9700 is ASCII. Strip the high/parity bit so USB-serial
-    // adapters configured for 7-bit payloads do not turn digits into undecodable bytes.
-    const sanitized = new Uint8Array(value.length);
-    for (let i = 0; i < value.length; i++) sanitized[i] = value[i] & 0x7f;
-
-    let chunk = '';
-    for (let i = 0; i < sanitized.length; i++) chunk += String.fromCharCode(sanitized[i]);
-    if (!chunk) return;
-
-    this.buffer += chunk;
-    if (this.buffer.length > 8192) this.buffer = this.buffer.slice(-4096);
+    this.buffer += ascii;
+    if (this.buffer.length > 16384) this.buffer = this.buffer.slice(-8192);
 
     const parts = this.buffer.split(FRAME_BOUNDARY);
-    const hasBoundary = FRAME_BOUNDARY.test(this.buffer);
-
-    if (hasBoundary) {
-      const complete = parts.slice(0, -1);
-      this.buffer = parts[parts.length - 1] || '';
-      for (const frame of complete) if (frame.trim()) this.processFrame(frame.trim());
+    if (parts.length > 1) {
+      this.buffer = parts.pop() || '';
+      for (const frame of parts) {
+        if (frame.trim()) this.processFrame(frame, hex);
+      }
       if (this.buffer.trim()) this.scheduleUndelimitedFlush();
-      return;
+    } else {
+      this.scheduleUndelimitedFlush();
     }
-
-    // Important: do not parse an incomplete USB read such as "+01" as 1 kg.
-    // Wait for a short idle gap so a frame split across reads is reassembled first.
-    this.scheduleUndelimitedFlush();
   }
 
   private async releaseReader() {
@@ -234,6 +309,7 @@ export class GST9700AutoSyncEngine {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.buffer = '';
     this.recentWeights = [];
+    this.lastParsedWeight = null;
     this.runId += 1;
     const currentRun = this.runId;
 
@@ -241,18 +317,16 @@ export class GST9700AutoSyncEngine {
     if (!this.port.readable) throw new Error('Port GST-9700 tidak readable. Pastikan port sudah dibuka.');
 
     this.keepReading = true;
-    this.emit({ state: 'CONNECTING', error: null, hasLiveData: false, ageMs: null, stable: false });
+    this.clearStaleTimer();
+    this.emit({ state: 'CONNECTING', error: null, hasLiveData: false, ageMs: null, stable: false, protocol: 'AUTO / ASCII' });
 
     try {
       try { await this.port.setSignals({ dataTerminalReady: true, requestToSend: true }); } catch (_) {}
 
       while (this.keepReading && currentRun === this.runId) {
         if (!this.port?.readable) throw new Error('Port GST-9700 terputus atau tidak lagi readable.');
-
         try {
           this.reader = this.port.readable.getReader();
-          this.emit({ state: 'CONNECTED', error: null });
-
           while (this.keepReading && currentRun === this.runId) {
             const { value, done } = await this.reader.read();
             if (done) {
@@ -291,7 +365,7 @@ export class GST9700AutoSyncEngine {
     this.recentWeights = [];
     this.clearStaleTimer();
     this.clearFrameGapTimer();
-    this.emit({ error: null, stable: false });
+    this.emit({ error: null, stable: false, hasLiveData: false, ageMs: null, rawFrame: '', rawHex: '' });
   }
 
   async stop() {
@@ -302,6 +376,7 @@ export class GST9700AutoSyncEngine {
     this.clearFrameGapTimer();
     this.buffer = '';
     this.recentWeights = [];
+    this.lastParsedWeight = null;
     this.emit({ state: 'DISCONNECTED', hasLiveData: false, stable: false, ageMs: null });
   }
 }
