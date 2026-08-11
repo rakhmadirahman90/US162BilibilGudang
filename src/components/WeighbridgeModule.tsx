@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { exportToCSV, printPDFReport, printSlip, getHTMLForPDF } from '../utils/exportHelper';
 import { buildWeighbridgeWAText, sendWhatsAppMessage } from '../utils/whatsappHelper';
+import { GST9700AutoSyncEngine } from '../utils/GST9700AutoSyncEngine';
 import { formatNumberInput, parseNumberInput, formatReceiptDate } from '../utils/format';
 import SmartNumberInput from './SmartNumberInput';
 import ConfirmModal from './ConfirmModal';
@@ -59,13 +60,15 @@ export default function WeighbridgeModule({
   const serialPortRef = useRef<any>(null);
   const serialReaderRef = useRef<any>(null);
   const keepReadingRef = useRef<boolean>(false);
+  const autoSyncEngineRef = useRef<GST9700AutoSyncEngine | null>(null);
 
   // Force sync and buffer flush handler for latency resolution
   const handleForceSync = () => {
+    autoSyncEngineRef.current?.flush();
     const timeStr = new Date().toLocaleTimeString('id-ID');
     setLastRxTime(timeStr);
-    setRxPacketCount(prev => prev + 1);
-    (window as any).__showToast?.("⚡ SINKRONISASI BERHASIL: Buffer data serial dibersihkan & frame timbangan GST-9700 tersinkronkan instan!", "success");
+    setSerialError(null);
+    (window as any).__showToast?.("⚡ GST-9700 AUTO SYNC: buffer parser di-flush dan menunggu frame timbangan terbaru.", "success");
   };
 
   // Simulated Auto-Stream Effect for physical scale testing without serial hardware
@@ -93,10 +96,24 @@ export default function WeighbridgeModule({
   }, [isSimulatedStreamActive]);
 
   useEffect(() => {
+    autoSyncEngineRef.current = new GST9700AutoSyncEngine((snapshot) => {
+      if (snapshot.weight !== null) {
+        setSimulatorWeight(snapshot.weight);
+        setCustomSimulatorInput(String(snapshot.weight));
+      }
+      setLastRawSerialData(snapshot.rawFrame || '');
+      setRxPacketCount(snapshot.rxCount);
+      setLastRxTime(snapshot.lastRxAt);
+      if (snapshot.error) setSerialError(snapshot.error);
+      if (snapshot.state === 'RECEIVING' || snapshot.state === 'CONNECTED') setSerialError(null);
+      setIsSerialConnected(snapshot.state === 'CONNECTED' || snapshot.state === 'RECEIVING' || snapshot.state === 'STALE' || snapshot.state === 'RECONNECTING');
+    });
+
     setIsSerialSupported('serial' in navigator);
     return () => {
       // Cleanup on unmount
       keepReadingRef.current = false;
+      autoSyncEngineRef.current?.stop();
       if (serialReaderRef.current) {
         try {
           serialReaderRef.current.cancel().catch(() => {});
@@ -104,6 +121,34 @@ export default function WeighbridgeModule({
       }
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const autoReconnectAuthorizedPort = async () => {
+      try {
+        if (!(navigator as any).serial?.getPorts) return;
+        const ports = await (navigator as any).serial.getPorts();
+        if (cancelled || !ports?.length || serialPortRef.current || !isAutoSyncEnabled) return;
+        const port = ports[0];
+        serialPortRef.current = port;
+        try {
+          await port.open({ baudRate: serialBaudRate, dataBits: serialDataBits, stopBits: 1, parity: serialParity, flowControl: 'none', bufferSize: 2048 });
+        } catch (e: any) {
+          if (!/already open/i.test(e?.message || '')) throw e;
+        }
+        try { await port.setSignals({ dataTerminalReady: true, requestToSend: true }); } catch (_) {}
+        setIsSerialConnected(true);
+        setIsSimulatedStreamActive(false);
+        keepReadingRef.current = true;
+        autoSyncEngineRef.current?.start(port, { baudRate: serialBaudRate, dataBits: serialDataBits, parity: serialParity, stopBits: 1 });
+        (window as any).__showToast?.('🔄 GST-9700 AUTO SYNC: port yang sudah diberi izin tersambung kembali otomatis.', 'success');
+      } catch (e) {
+        console.info('GST-9700 auto reconnect skipped:', e);
+      }
+    };
+    autoReconnectAuthorizedPort();
+    return () => { cancelled = true; };
+  }, [isAutoSyncEnabled]);
 
   /**
    * Helper function to robustly parse weight packets from physical GST-700 / GST-9700 / GSC / Toledo / Yaohua indicators
@@ -326,7 +371,7 @@ export default function WeighbridgeModule({
       (window as any).__showToast?.(`✅ BERHASIL TERHUBUNG: Terhubung pada Port Serial USB (${serialBaudRate} bps)! Membaca data GST-9700...`, "success");
 
       // Start reading stream asynchronously
-      readSerialData(port);
+      autoSyncEngineRef.current?.start(port, { baudRate: serialBaudRate, dataBits: serialDataBits, parity: serialParity, stopBits: 1 });
     } catch (err: any) {
       const rawMsg = err?.message || String(err) || "Gagal membuka port serial";
       
@@ -399,7 +444,7 @@ export default function WeighbridgeModule({
         setIsSimulatedStreamActive(false);
         keepReadingRef.current = true;
         (window as any).__showToast?.(`🔄 Beralih ke Baud Rate ${baud} bps (${bits}-${parityVal === 'none' ? 'N' : parityVal === 'even' ? 'E' : 'O'}-1)...`, "info");
-        readSerialData(serialPortRef.current);
+        autoSyncEngineRef.current?.start(serialPortRef.current, { baudRate: baud, dataBits: bits, parity: parityVal, stopBits: 1 });
         return;
       } catch (err: any) {
         console.warn("Reopen port directly failed:", err);
@@ -504,6 +549,7 @@ export default function WeighbridgeModule({
 
   const disconnectSerial = async () => {
     keepReadingRef.current = false;
+    await autoSyncEngineRef.current?.stop();
     if (serialReaderRef.current) {
       try {
         await serialReaderRef.current.cancel();
