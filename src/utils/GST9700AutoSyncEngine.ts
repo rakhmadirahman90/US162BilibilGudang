@@ -135,7 +135,6 @@ export class GST9700AutoSyncEngine {
     let s = raw.replace(/\s+/g, '').replace(/\.$/, '');
     if (!s) return null;
 
-    // 14.860 / 14,860 = 14860. 11.330 kg = 11330 kg.
     if (/^[+-]?\d{1,3}[.,]\d{3}$/.test(s)) {
       s = s.replace(/[.,]/g, '');
     } else {
@@ -182,7 +181,6 @@ export class GST9700AutoSyncEngine {
       }
     }
 
-    // Some indicators send reversed numeric payloads such as 033110+.
     const reverse = clean.match(/\b(\d{4,7})[+=-]/);
     if (reverse?.[1]) {
       const value = this.parseNumber(reverse[1].split('').reverse().join(''), clean);
@@ -231,20 +229,25 @@ export class GST9700AutoSyncEngine {
     this.buffer += chunk;
     if (this.buffer.length > 8192) this.buffer = this.buffer.slice(-4096);
 
+    // Never parse an unterminated chunk merely because a number happens to be present.
+    // Serial frames can be split across multiple USB/serial reads, e.g.
+    // "ST,GS,+01" + "1330kg\r". Keeping the partial frame avoids false readings.
     const parts = this.buffer.split(FRAME_BOUNDARY);
-    const ended = FRAME_BOUNDARY.test(this.buffer.slice(-1));
-    const complete = ended ? parts : parts.slice(0, -1);
-    this.buffer = ended ? '' : (parts[parts.length - 1] || '');
+    const hasBoundary = FRAME_BOUNDARY.test(this.buffer);
+    const complete = hasBoundary ? parts.slice(0, -1) : [];
+    this.buffer = hasBoundary ? (parts[parts.length - 1] || '') : this.buffer;
 
     for (const frame of complete) {
       if (frame.trim()) this.processFrame(frame.trim());
     }
 
-    // GST-9700 variants sometimes stream a frame without a line terminator.
-    if (!ended && this.buffer.length > 0) {
-      const candidate = this.extract(this.buffer);
-      if (candidate.weight !== null) {
-        this.processFrame(this.buffer);
+    // If a device sends a complete printable frame without CR/LF, accept only
+    // an explicitly recognizable payload rather than a partial numeric prefix.
+    if (!hasBoundary && this.buffer.length <= 128) {
+      const candidate = this.buffer.trim();
+      const completePayload = /(?:kg|\bST\b|\bUS\b|\bWN\b|\bGS\b|\bNT\b|\bG\.W\.|\bN\.W\.|[+=:#]\s*\d{3,})/i.test(candidate);
+      if (completePayload && /(?:kg|[+=:#]\s*\d{3,})\s*$/i.test(candidate)) {
+        this.processFrame(candidate);
         this.buffer = '';
       }
     }
