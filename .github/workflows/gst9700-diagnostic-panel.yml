@@ -26,32 +26,100 @@ jobs:
         shell: python3 {0}
         run: |
           from pathlib import Path
-          import re
 
           path = Path('src/components/WeighbridgeModule.tsx')
           text = path.read_text(encoding='utf-8')
           original = text
 
-          # 1) Keep the complete engine snapshot in React state so the UI can expose
-          # connection lifecycle, RX counter, latest frame, parsed weight and age.
           if 'const [gst9700Diagnostic, setGst9700Diagnostic]' not in text:
-              anchor = '  const [lastRawSerialData, setLastRawSerialData] = useState<string>("");\n'
-              state = '''  const [gst9700Diagnostic, setGst9700Diagnostic] = useState({\n    state: 'DISCONNECTED',\n    weight: null as number | null,\n    stable: false,\n    zero: false,\n    gross: true,\n    net: false,\n    rawFrame: '',\n    rxCount: 0,\n    lastRxAt: '',\n    reconnectCount: 0,\n    error: null as string | null,\n    hasLiveData: false,\n    ageMs: null as number | null,\n  });\n'''
+              anchor = '  const [lastRawSerialData, setLastRawSerialData] = useState<string>("\");\n'
+              state = '''  const [gst9700Diagnostic, setGst9700Diagnostic] = useState({
+    state: 'DISCONNECTED',
+    weight: null as number | null,
+    stable: false,
+    zero: false,
+    gross: true,
+    net: false,
+    rawFrame: '',
+    rxCount: 0,
+    lastRxAt: '',
+    reconnectCount: 0,
+    error: null as string | null,
+    hasLiveData: false,
+    ageMs: null as number | null,
+  });
+'''
               if anchor not in text:
                   raise SystemExit('Diagnostic state anchor not found')
               text = text.replace(anchor, anchor + state, 1)
 
-          # 2) Mirror every engine snapshot into the diagnostic state.
           if 'setGst9700Diagnostic(snapshot);' not in text:
               marker = '    autoSyncEngineRef.current = new GST9700AutoSyncEngine((snapshot) => {\n'
               if marker not in text:
                   raise SystemExit('GST9700 engine listener anchor not found')
               text = text.replace(marker, marker + '      setGst9700Diagnostic(snapshot);\n', 1)
 
-          # 3) Render the diagnostic panel directly above the existing serial help/status box.
           if 'GST-9700 DIAGNOSTIC REALTIME' not in text:
-              marker = '''                <div className="text-[9px] text-neutral-400 font-mono italic mt-0.5 leading-normal bg-neutral-950/70 p-2 rounded border border-neutral-800 flex flex-col gap-1.5">'''
-              panel = '''                <div className="mt-2 rounded-xl border border-cyan-500/30 bg-slate-950/90 p-3 font-mono text-[10px] shadow-inner" data-gst9700-diagnostic="true">\n                  <div className="flex items-center justify-between gap-2 mb-2">\n                    <div className="flex items-center gap-2 text-cyan-300 font-bold tracking-wide">\n                      <span className={`w-2 h-2 rounded-full ${gst9700Diagnostic.hasLiveData ? 'bg-emerald-400 animate-pulse' : gst9700Diagnostic.state === 'ERROR' ? 'bg-red-500' : 'bg-amber-400'}`}></span>\n                      GST-9700 DIAGNOSTIC REALTIME\n                    </div>\n                    <span className={`px-2 py-0.5 rounded border ${gst9700Diagnostic.hasLiveData ? 'border-emerald-700 bg-emerald-950 text-emerald-300' : 'border-amber-700 bg-amber-950 text-amber-300'}`}>\n                      {gst9700Diagnostic.state}\n                    </span>\n                  </div>\n\n                  <div className="grid grid-cols-2 gap-1.5">\n                    <div className="rounded border border-neutral-800 bg-black/50 p-2">\n                      <div className="text-neutral-500 uppercase">Connection Status</div>\n                      <div className={gst9700Diagnostic.hasLiveData ? 'text-emerald-300 font-bold' : 'text-amber-300 font-bold'}>\n                        {gst9700Diagnostic.hasLiveData ? 'CONNECTED / RECEIVING' : gst9700Diagnostic.state}\n                      </div>\n                    </div>\n                    <div className="rounded border border-neutral-800 bg-black/50 p-2">\n                      <div className="text-neutral-500 uppercase">RX Packet</div>\n                      <div className="text-cyan-300 font-bold">{gst9700Diagnostic.rxCount.toLocaleString('id-ID')}</div>\n                    </div>\n                    <div className="rounded border border-neutral-800 bg-black/50 p-2">\n                      <div className="text-neutral-500 uppercase">Parsed Weight</div>\n                      <div className="text-yellow-300 font-bold text-sm">{gst9700Diagnostic.weight === null ? '--' : `${gst9700Diagnostic.weight.toLocaleString('id-ID')} kg`}</div>\n                    </div>\n                    <div className="rounded border border-neutral-800 bg-black/50 p-2">\n                      <div className="text-neutral-500 uppercase">Last RX</div>\n                      <div className="text-cyan-200 font-bold">{gst9700Diagnostic.lastRxAt ? new Date(gst9700Diagnostic.lastRxAt).toLocaleTimeString('id-ID') : '--'}</div>\n                    </div>\n                  </div>\n\n                  <div className="grid grid-cols-4 gap-1.5 mt-1.5">\n                    <div className={`rounded border p-1.5 text-center ${gst9700Diagnostic.stable ? 'border-emerald-700 bg-emerald-950/60 text-emerald-300' : 'border-neutral-800 bg-black/40 text-neutral-500'}`}>STABLE<br/><b>{gst9700Diagnostic.stable ? 'YES' : 'NO'}</b></div>\n                    <div className={`rounded border p-1.5 text-center ${gst9700Diagnostic.zero ? 'border-amber-700 bg-amber-950/60 text-amber-300' : 'border-neutral-800 bg-black/40 text-neutral-500'}`}>ZERO<br/><b>{gst9700Diagnostic.zero ? 'YES' : 'NO'}</b></div>\n                    <div className={`rounded border p-1.5 text-center ${gst9700Diagnostic.gross ? 'border-blue-700 bg-blue-950/60 text-blue-300' : 'border-neutral-800 bg-black/40 text-neutral-500'}`}>GROSS<br/><b>{gst9700Diagnostic.gross ? 'YES' : 'NO'}</b></div>\n                    <div className={`rounded border p-1.5 text-center ${gst9700Diagnostic.net ? 'border-purple-700 bg-purple-950/60 text-purple-300' : 'border-neutral-800 bg-black/40 text-neutral-500'}`}>NET<br/><b>{gst9700Diagnostic.net ? 'YES' : 'NO'}</b></div>\n                  </div>\n\n                  <div className="mt-1.5 rounded border border-neutral-800 bg-black/70 p-2">\n                    <div className="flex justify-between gap-2 text-neutral-500 uppercase">\n                      <span>Raw Frame</span>\n                      <span>Age: {gst9700Diagnostic.ageMs === null ? '--' : `${Math.max(0, gst9700Diagnostic.ageMs)} ms`}</span>\n                    </div>\n                    <pre className="mt-1 whitespace-pre-wrap break-all text-yellow-200 min-h-[24px]">{gst9700Diagnostic.rawFrame || '-- belum ada frame valid --'}</pre>\n                  </div>\n\n                  {gst9700Diagnostic.error && (\n                    <div className="mt-1.5 rounded border border-red-800 bg-red-950/40 p-2 text-red-300 break-words">ERROR: {gst9700Diagnostic.error}</div>\n                  )}\n\n                  <div className="mt-1.5 flex justify-between text-neutral-600">\n                    <span>Reconnect: {gst9700Diagnostic.reconnectCount}</span>\n                    <span>Live Data: {gst9700Diagnostic.hasLiveData ? 'YES' : 'NO'}</span>\n                  </div>\n                </div>\n\n'''
+              marker = '''                <div className="text-[9px] text-stone-400 font-mono italic leading-normal bg-stone-900/90 p-2 rounded-lg border border-stone-800 flex flex-col gap-1.5">
+'''
+              panel = '''                <div className="mt-2 rounded-xl border border-cyan-500/30 bg-slate-950/90 p-3 font-mono text-[10px] shadow-inner" data-gst9700-diagnostic="true">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2 text-cyan-300 font-bold tracking-wide">
+                      <span className={`w-2 h-2 rounded-full ${gst9700Diagnostic.hasLiveData ? 'bg-emerald-400 animate-pulse' : gst9700Diagnostic.state === 'ERROR' ? 'bg-red-500' : 'bg-amber-400'}`}></span>
+                      GST-9700 DIAGNOSTIC REALTIME
+                    </div>
+                    <span className={`px-2 py-0.5 rounded border ${gst9700Diagnostic.hasLiveData ? 'border-emerald-700 bg-emerald-950 text-emerald-300' : 'border-amber-700 bg-amber-950 text-amber-300'}`}>
+                      {gst9700Diagnostic.state}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <div className="rounded border border-neutral-800 bg-black/50 p-2">
+                      <div className="text-neutral-500 uppercase">Connection Status</div>
+                      <div className={gst9700Diagnostic.hasLiveData ? 'text-emerald-300 font-bold' : 'text-amber-300 font-bold'}>
+                        {gst9700Diagnostic.hasLiveData ? 'CONNECTED / RECEIVING' : gst9700Diagnostic.state}
+                      </div>
+                    </div>
+                    <div className="rounded border border-neutral-800 bg-black/50 p-2">
+                      <div className="text-neutral-500 uppercase">RX Packet</div>
+                      <div className="text-cyan-300 font-bold">{gst9700Diagnostic.rxCount.toLocaleString('id-ID')}</div>
+                    </div>
+                    <div className="rounded border border-neutral-800 bg-black/50 p-2">
+                      <div className="text-neutral-500 uppercase">Parsed Weight</div>
+                      <div className="text-yellow-300 font-bold text-sm">{gst9700Diagnostic.weight === null ? '--' : `${gst9700Diagnostic.weight.toLocaleString('id-ID')} kg`}</div>
+                    </div>
+                    <div className="rounded border border-neutral-800 bg-black/50 p-2">
+                      <div className="text-neutral-500 uppercase">Last RX</div>
+                      <div className="text-cyan-200 font-bold">{gst9700Diagnostic.lastRxAt ? new Date(gst9700Diagnostic.lastRxAt).toLocaleTimeString('id-ID') : '--'}</div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-4 gap-1.5 mt-1.5">
+                    <div className={`rounded border p-1.5 text-center ${gst9700Diagnostic.stable ? 'border-emerald-700 bg-emerald-950/60 text-emerald-300' : 'border-neutral-800 bg-black/40 text-neutral-500'}`}>STABLE<br/><b>{gst9700Diagnostic.stable ? 'YES' : 'NO'}</b></div>
+                    <div className={`rounded border p-1.5 text-center ${gst9700Diagnostic.zero ? 'border-amber-700 bg-amber-950/60 text-amber-300' : 'border-neutral-800 bg-black/40 text-neutral-500'}`}>ZERO<br/><b>{gst9700Diagnostic.zero ? 'YES' : 'NO'}</b></div>
+                    <div className={`rounded border p-1.5 text-center ${gst9700Diagnostic.gross ? 'border-blue-700 bg-blue-950/60 text-blue-300' : 'border-neutral-800 bg-black/40 text-neutral-500'}`}>GROSS<br/><b>{gst9700Diagnostic.gross ? 'YES' : 'NO'}</b></div>
+                    <div className={`rounded border p-1.5 text-center ${gst9700Diagnostic.net ? 'border-purple-700 bg-purple-950/60 text-purple-300' : 'border-neutral-800 bg-black/40 text-neutral-500'}`}>NET<br/><b>{gst9700Diagnostic.net ? 'YES' : 'NO'}</b></div>
+                  </div>
+
+                  <div className="mt-1.5 rounded border border-neutral-800 bg-black/70 p-2">
+                    <div className="flex justify-between gap-2 text-neutral-500 uppercase">
+                      <span>Raw Frame</span>
+                      <span>Age: {gst9700Diagnostic.ageMs === null ? '--' : `${Math.max(0, gst9700Diagnostic.ageMs)} ms`}</span>
+                    </div>
+                    <pre className="mt-1 whitespace-pre-wrap break-all text-yellow-200 min-h-[24px]">{gst9700Diagnostic.rawFrame || '-- belum ada frame valid --'}</pre>
+                  </div>
+
+                  {gst9700Diagnostic.error && (
+                    <div className="mt-1.5 rounded border border-red-800 bg-red-950/40 p-2 text-red-300 break-words">ERROR: {gst9700Diagnostic.error}</div>
+                  )}
+
+                  <div className="mt-1.5 flex justify-between text-neutral-600">
+                    <span>Reconnect: {gst9700Diagnostic.reconnectCount}</span>
+                    <span>Live Data: {gst9700Diagnostic.hasLiveData ? 'YES' : 'NO'}</span>
+                  </div>
+                </div>
+
+'''
               if marker not in text:
                   raise SystemExit('Serial status panel anchor not found')
               text = text.replace(marker, panel + marker, 1)
