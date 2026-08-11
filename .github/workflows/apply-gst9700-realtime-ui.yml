@@ -1,0 +1,45 @@
+name: Apply GST-9700 realtime UI patch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/apply-gst9700-realtime-ui.py'
+      - 'src/components/WeighbridgeModule.tsx'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply authoritative realtime UI patch
+        run: python scripts/apply-gst9700-realtime-ui.py
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Typecheck
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit patched application
+        run: |
+          if git diff --quiet; then
+            echo 'No source changes required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/components/WeighbridgeModule.tsx
+          git commit -m 'fix(gst9700): make auto sync realtime status authoritative [skip ci]'
+          git push origin HEAD:main
