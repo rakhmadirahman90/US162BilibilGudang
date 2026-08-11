@@ -1,5 +1,3 @@
-import React from 'react';
-
 export type GST9700ConnectionState = 'DISCONNECTED' | 'CONNECTING' | 'CONNECTED' | 'RECEIVING' | 'STALE' | 'ERROR' | 'RECONNECTING';
 
 export interface GST9700SyncSnapshot {
