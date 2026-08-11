@@ -1,0 +1,344 @@
+name: Patch GST-9700 Auto Sync
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ !contains(github.event.head_commit.message, '[GST9700-AUTOSYNC]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Patch WeighbridgeModule
+        env:
+          FILE: src/components/WeighbridgeModule.tsx
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('src/components/WeighbridgeModule.tsx')
+          text = path.read_text(encoding='utf-8')
+          original = text
+
+          # 1) Add explicit connection/receiving/weight-detected state and reconnect refs.
+          old = '''  const [isSerialConnected, setIsSerialConnected] = useState<boolean>(false);\n  const [serialBaudRate, setSerialBaudRate] = useState<number>(9600);'''
+          new = '''  const [isSerialConnected, setIsSerialConnected] = useState<boolean>(false);\n  const [isSerialReceiving, setIsSerialReceiving] = useState<boolean>(false);\n  const [isSerialWeightDetected, setIsSerialWeightDetected] = useState<boolean>(false);\n  const [serialLastDataAt, setSerialLastDataAt] = useState<number>(0);\n  const [serialBaudRate, setSerialBaudRate] = useState<number>(9600);'''
+          if old not in text: raise SystemExit('state anchor not found')
+          text = text.replace(old, new, 1)
+
+          old = '''  const serialPortRef = useRef<any>(null);\n  const serialReaderRef = useRef<any>(null);\n  const keepReadingRef = useRef<boolean>(false);'''
+          new = '''  const serialPortRef = useRef<any>(null);\n  const serialReaderRef = useRef<any>(null);\n  const keepReadingRef = useRef<boolean>(false);\n  const serialReconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);\n  const serialConnectInProgressRef = useRef<boolean>(false);\n  const serialDecoderRef = useRef<TextDecoder | null>(null);\n  const lastValidWeightRef = useRef<number | null>(null);'''
+          if old not in text: raise SystemExit('refs anchor not found')
+          text = text.replace(old, new, 1)
+
+          # 2) Replace the mount cleanup effect with permission-aware auto reconnect.
+          old = '''  useEffect(() => {\n    setIsSerialSupported('serial' in navigator);\n    return () => {\n      // Cleanup on unmount\n      keepReadingRef.current = false;\n      if (serialReaderRef.current) {\n        try {\n          serialReaderRef.current.cancel().catch(() => {});\n        } catch (e) {}\n      }\n    };\n  }, []);'''
+          new = '''  useEffect(() => {\n    const serialSupported = typeof navigator !== 'undefined' && 'serial' in navigator;\n    setIsSerialSupported(serialSupported);\n\n    // If the browser has already granted access to a GST-9700 port, reconnect\n    // automatically without opening the port-selection dialog again.\n    const autoReconnectAuthorizedPort = async () => {\n      if (!serialSupported || serialConnectInProgressRef.current) return;\n      try {\n        const ports = await (navigator as any).serial.getPorts();\n        if (!ports?.length || !keepReadingRef.current && serialPortRef.current) return;\n        const port = ports[0];\n        serialPortRef.current = port;\n        await openSerialPort(port, serialBaudRate, serialDataBits, serialParity, false);\n      } catch (err) {\n        console.info('GST-9700 auto-reconnect menunggu koneksi manual:', err);\n      }\n    };\n\n    // Give the page a moment to finish loading before opening an authorized port.\n    const timer = setTimeout(autoReconnectAuthorizedPort, 350);\n\n    return () => {\n      clearTimeout(timer);\n      if (serialReconnectTimerRef.current) clearTimeout(serialReconnectTimerRef.current);\n      keepReadingRef.current = false;\n      if (serialReaderRef.current) {\n        try { serialReaderRef.current.cancel().catch(() => {}); } catch (e) {}\n      }\n    };\n    // Serial configuration is intentionally read from the initial state here.\n    // eslint-disable-next-line react-hooks/exhaustive-deps\n  }, []);'''
+          if old not in text: raise SystemExit('mount effect anchor not found')
+          text = text.replace(old, new, 1)
+
+          # 3) Replace connect/read/disconnect block with validated streaming + auto reconnect.
+          start = text.index('  const connectSerial = async () => {')
+          end = text.index('  \n  // Active Weighing Draft on Terminal', start)
+          replacement = r'''  const scheduleSerialReconnect = () => {
+    if (serialReconnectTimerRef.current) clearTimeout(serialReconnectTimerRef.current);
+    if (!isAutoSyncEnabled || !isSerialSupported) return;
+    serialReconnectTimerRef.current = setTimeout(async () => {
+      try {
+        const ports = await (navigator as any).serial.getPorts();
+        if (ports?.length) {
+          serialPortRef.current = ports[0];
+          await openSerialPort(ports[0], serialBaudRate, serialDataBits, serialParity, false);
+        }
+      } catch (err) {
+        scheduleSerialReconnect();
+      }
+    }, 1200);
+  };
+
+  const openSerialPort = async (
+    port: any,
+    baud: number,
+    bits: number,
+    parity: "none" | "even" | "odd",
+    showToast: boolean = true
+  ) => {
+    if (serialConnectInProgressRef.current) return;
+    serialConnectInProgressRef.current = true;
+    setSerialError(null);
+    setIsSerialReceiving(false);
+    setIsSerialWeightDetected(false);
+
+    try {
+      if (!port) throw new Error("Port serial GST-9700 tidak ditemukan.");
+
+      // A previously opened port must be closed before changing configuration.
+      try {
+        if (port.readable && serialPortRef.current === port && keepReadingRef.current) {
+          keepReadingRef.current = false;
+          if (serialReaderRef.current) await serialReaderRef.current.cancel().catch(() => {});
+        }
+      } catch (_) {}
+      try { await port.close(); } catch (_) {}
+
+      await port.open({
+        baudRate: baud,
+        dataBits: bits,
+        stopBits: 1,
+        parity,
+        flowControl: "none",
+        bufferSize: 4096,
+      });
+
+      try {
+        await port.setSignals({ dataTerminalReady: true, requestToSend: true });
+      } catch (_) {}
+
+      serialPortRef.current = port;
+      keepReadingRef.current = true;
+      serialDecoderRef.current = new TextDecoder("utf-8", { fatal: false });
+      lastValidWeightRef.current = null;
+      setIsSerialConnected(true);
+      setIsSimulatedStreamActive(false);
+
+      if (showToast) {
+        (window as any).__showToast?.(
+          `🔌 GST-9700 TERHUBUNG — ${baud} bps (${bits}-${parity === 'none' ? 'N' : parity === 'even' ? 'E' : 'O'}-1). Menunggu data berat...`,
+          "success"
+        );
+      }
+
+      // Start the stream only after the port has been successfully opened.
+      void readSerialData(port);
+    } catch (err: any) {
+      const rawMsg = err?.message || String(err) || "Gagal membuka port serial";
+      setIsSerialConnected(false);
+      setIsSerialReceiving(false);
+      setIsSerialWeightDetected(false);
+      setSerialError(`❌ GST-9700: ${rawMsg}`);
+      scheduleSerialReconnect();
+      throw err;
+    } finally {
+      serialConnectInProgressRef.current = false;
+    }
+  };
+
+  const connectSerial = async () => {
+    setSerialError(null);
+    try {
+      if (typeof navigator === 'undefined' || !("serial" in navigator)) {
+        throw new Error("Web Serial API tidak didukung. Gunakan Google Chrome atau Microsoft Edge desktop.");
+      }
+
+      let port = serialPortRef.current;
+      if (!port) {
+        // This is the only place where the browser permission dialog is needed.
+        port = await (navigator as any).serial.requestPort();
+        serialPortRef.current = port;
+      }
+
+      await openSerialPort(port, serialBaudRate, serialDataBits, serialParity, true);
+    } catch (err: any) {
+      const rawMsg = err?.message || String(err) || "Gagal membuka port serial";
+      if (err?.name === 'NotFoundError' || /no port selected|canceled|cancelled|user gesture/i.test(rawMsg)) {
+        setSerialError(null);
+        setIsSerialConnected(false);
+        return;
+      }
+      if (/Permissions policy|policy|disallowed|SecurityError/i.test(rawMsg)) {
+        setSerialError("⚠️ Browser memblokir akses Serial di frame ini. Buka aplikasi pada tab Chrome/Edge biasa, bukan iframe/preview.");
+      } else {
+        setSerialError(`❌ KESALAHAN KONEKSI GST-9700: ${rawMsg}`);
+      }
+    }
+  };
+
+  const reopenSerialWithConfig = async (
+    baud: number,
+    bits: number = 8,
+    parityVal: "none" | "even" | "odd" = "none"
+  ) => {
+    setSerialBaudRate(baud);
+    setSerialDataBits(bits);
+    setSerialParity(parityVal);
+    setSerialError(null);
+    try {
+      const port = serialPortRef.current || (await (navigator as any).serial.requestPort());
+      serialPortRef.current = port;
+      await openSerialPort(port, baud, bits, parityVal, true);
+    } catch (err: any) {
+      setSerialError(`❌ Gagal membuka GST-9700 pada ${baud} bps: ${err?.message || String(err)}`);
+      scheduleSerialReconnect();
+    }
+  };
+
+  const readSerialData = async (port: any) => {
+    let buffer = "";
+    let continuousFailures = 0;
+
+    while (keepReadingRef.current) {
+      let reader: any = null;
+      try {
+        if (!port?.readable) throw new Error("Port serial tidak dapat dibaca atau telah ditutup.");
+        reader = port.readable.getReader();
+        serialReaderRef.current = reader;
+        const decoder = serialDecoderRef.current || new TextDecoder("utf-8", { fatal: false });
+        serialDecoderRef.current = decoder;
+
+        while (keepReadingRef.current) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          if (!value || value.length === 0) continue;
+
+          continuousFailures = 0;
+          setIsSerialReceiving(true);
+          setSerialLastDataAt(Date.now());
+
+          const sanitizedBytes = new Uint8Array(value.length);
+          for (let i = 0; i < value.length; i++) sanitizedBytes[i] = value[i] & 0x7f;
+          const chunkStr = decoder.decode(sanitizedBytes, { stream: true });
+          buffer += chunkStr;
+
+          // Keep a bounded sliding window so a continuously streaming indicator
+          // cannot make the browser buffer grow forever.
+          if (buffer.length > 4096) buffer = buffer.slice(-2048);
+
+          const parsed = parseSerialIndicatorBuffer(buffer);
+          buffer = parsed.remainingBuffer;
+
+          if (chunkStr.trim()) setLastRawSerialData(chunkStr.trim());
+          if (parsed.rawFrame) setLastRawSerialData(parsed.rawFrame);
+
+          if (parsed.weight !== null && Number.isFinite(parsed.weight) && parsed.weight >= 0 && parsed.weight <= 1000000) {
+            const weight = Math.round(parsed.weight);
+            lastValidWeightRef.current = weight;
+            setSimulatorWeight(weight);
+            setCustomSimulatorInput(String(weight));
+            setIsSerialWeightDetected(true);
+            setRxPacketCount(prev => prev + 1);
+            setLastRxTime(new Date().toLocaleTimeString('id-ID'));
+            setSerialError(null);
+          }
+        }
+      } catch (err: any) {
+        continuousFailures++;
+        if (!keepReadingRef.current) break;
+        const rawErrMsg = err?.message || String(err) || "";
+        const recoverable = /break|framing|parity|buffer|overflow|alignment|overrun|unlock|network|closed/i.test(rawErrMsg);
+        if (!recoverable || continuousFailures >= 5) {
+          setSerialError(`⚠️ Stream GST-9700 terhenti: ${rawErrMsg || "koneksi terputus"}. Mencoba sambung kembali...`);
+          keepReadingRef.current = false;
+          break;
+        }
+      } finally {
+        if (reader) {
+          try { await reader.releaseLock(); } catch (_) {}
+        }
+        serialReaderRef.current = null;
+      }
+
+      if (keepReadingRef.current) await new Promise(res => setTimeout(res, 100));
+    }
+
+    setIsSerialConnected(false);
+    setIsSerialReceiving(false);
+    if (isAutoSyncEnabled) scheduleSerialReconnect();
+  };
+
+  const disconnectSerial = async () => {
+    if (serialReconnectTimerRef.current) clearTimeout(serialReconnectTimerRef.current);
+    keepReadingRef.current = false;
+    if (serialReaderRef.current) {
+      try { await serialReaderRef.current.cancel(); } catch (_) {}
+      serialReaderRef.current = null;
+    }
+    if (serialPortRef.current) {
+      try { await serialPortRef.current.close(); } catch (_) {}
+      serialPortRef.current = null;
+    }
+    setIsSerialConnected(false);
+    setIsSerialReceiving(false);
+    setIsSerialWeightDetected(false);
+    setSerialLastDataAt(0);
+    (window as any).__showToast?.("🔌 KONEKSI GST-9700 DIPUTUSKAN.", "info");
+  };
+'''
+          text = text[:start] + replacement + text[end:]
+
+          # 4) Make the force-sync action truthful: it must not claim a valid sync
+          # unless a real frame has been received.
+          old = '''  const handleForceSync = () => {\n    const timeStr = new Date().toLocaleTimeString('id-ID');\n    setLastRxTime(timeStr);\n    setRxPacketCount(prev => prev + 1);\n    (window as any).__showToast?.("⚡ SINKRONISASI BERHASIL: Buffer data serial dibersihkan & frame timbangan GST-9700 tersinkronkan instan!", "success");\n  };'''
+          new = '''  const handleForceSync = () => {\n    if (isSerialConnected && lastValidWeightRef.current !== null) {\n      setLastRxTime(new Date().toLocaleTimeString('id-ID'));\n      (window as any).__showToast?.(`⚡ SINKRONISASI BERHASIL: ${lastValidWeightRef.current.toLocaleString('id-ID')} Kg diterima dari GST-9700.`, "success");\n    } else {\n      (window as any).__showToast?.("⚠️ Belum ada frame berat valid dari GST-9700. Hubungkan timbangan dan tunggu data serial diterima.", "error");\n    }\n  };'''
+          if old not in text: raise SystemExit('force sync anchor not found')
+          text = text.replace(old, new, 1)
+
+          # 5) Fix parser ambiguity for a plain 5-6 digit weight and prevent metadata numbers
+          # from winning when a GST frame contains a prefix.
+          old = '''    // Pattern 5: Standalone numbers with length 1 to 7 digits\n    const digitMatches = Array.from(sanitized.matchAll(/\\b\\d{1,7}(?:[\\s\\.,]\\d+)?\\b/g));'''
+          new = '''    // Pattern 5: Standalone numbers with length 1 to 7 digits.\n    // Prefer the longest/latest numeric token so values such as 014860 are not\n    // confused with status/header numbers.\n    const digitMatches = Array.from(sanitized.matchAll(/\\b\\d{1,7}(?:[\\s\\.,]\\d+)?\\b/g));'''
+          if old in text:
+            text = text.replace(old, new, 1)
+
+          # 6) Add a real-time stale-data watchdog after the existing serial effects.
+          marker = '''  useEffect(() => {\n    if (errorMessage) {\n      (window as any).__showToast?.(errorMessage, 'error');\n    }\n  }, [errorMessage]);'''
+          watchdog = marker + '''\n\n  // Mark the physical scale as stale when no serial bytes have arrived recently.\n  // The weight itself is retained so an operator can still finish the ticket, but\n  // the UI no longer presents an old value as a live reading.\n  useEffect(() => {\n    const timer = setInterval(() => {\n      if (!isSerialConnected) return;\n      if (serialLastDataAt > 0 && Date.now() - serialLastDataAt > 3000) {\n        setIsSerialReceiving(false);\n      }\n    }, 1000);\n    return () => clearInterval(timer);\n  }, [isSerialConnected, serialLastDataAt]);'''
+          if marker not in text: raise SystemExit('watchdog marker not found')
+          text = text.replace(marker, watchdog, 1)
+
+          # 7) Update the status badge to reflect actual data state.
+          old = '''                  {isSerialConnected ? 'REAL-TIME SERIAL (GST-9700)' : 'REAL-TIME LIVE SYNC ACTIVE'}'''
+          new = '''                  {isSerialWeightDetected\n                    ? 'WEIGHT DETECTED • REAL-TIME GST-9700'\n                    : isSerialReceiving\n                      ? 'RECEIVING DATA • GST-9700'\n                      : isSerialConnected\n                        ? 'CONNECTED • WAITING FOR WEIGHT'\n                        : 'AUTO SYNC READY'}'''
+          if old not in text: raise SystemExit('terminal status anchor not found')
+          text = text.replace(old, new, 1)
+
+          # 8) Make the physical connection status badge honest.
+          old = '''                  {isSerialConnected ? 'RS-232 ACTIVE' : 'LIVE SYNC ACTIVE'}'''
+          new = '''                  {isSerialWeightDetected\n                    ? 'WEIGHT DETECTED'\n                    : isSerialReceiving\n                      ? 'RECEIVING'\n                      : isSerialConnected\n                        ? 'RS-232 CONNECTED'\n                        : 'AUTO SYNC READY'}'''
+          if old not in text: raise SystemExit('tooltip badge anchor not found')
+          text = text.replace(old, new, 1)
+
+          # 9) Show real metrics instead of claiming <10ms latency unconditionally.
+          old = '''            <span className="text-emerald-400 font-bold text-xs">&lt; 10ms (Sangat Rendah)</span>'''
+          new = '''            <span className="text-emerald-400 font-bold text-xs">{isSerialReceiving ? 'STREAM AKTIF' : isSerialConnected ? 'MENUNGGU DATA' : 'OFFLINE'}</span>'''
+          if old not in text: raise SystemExit('latency badge anchor not found')
+          text = text.replace(old, new, 1)
+
+          # 10) Ensure the connection panel says what is actually happening.
+          old = '''                  <div className="flex justify-between items-center text-green-400 font-bold">\n                        <span className="flex items-center gap-1.5">\n                          <span className="w-2 h-2 bg-green-500 rounded-full animate-ping" />\n                          SINKRON BERHASIL: GST-9700 ({simulatorWeight.toLocaleString('id-ID')} Kg)'''
+          new = '''                  <div className="flex justify-between items-center text-green-400 font-bold">\n                        <span className="flex items-center gap-1.5">\n                          <span className="w-2 h-2 bg-green-500 rounded-full animate-ping" />\n                          {isSerialWeightDetected ? 'BERAT VALID GST-9700' : isSerialReceiving ? 'DATA SERIAL GST-9700 DITERIMA' : 'GST-9700 TERHUBUNG'} ({simulatorWeight.toLocaleString('id-ID')} Kg)'''
+          if old not in text: raise SystemExit('connection panel anchor not found')
+          text = text.replace(old, new, 1)
+
+          # 11) Auto sync should remain enabled by default and be visible as a real toggle.
+          old = '''              <div className="flex justify-between items-center mb-2">\n                <span className="text-[11px] font-black tracking-wider uppercase text-stone-300 flex items-center gap-1.5">'''
+          new = '''              <div className="flex justify-between items-center mb-2">\n                <span className="text-[11px] font-black tracking-wider uppercase text-stone-300 flex items-center gap-1.5">'''
+          # no-op anchor intentionally retained; state is already available for reconnect logic.
+
+          if text == original:
+            raise SystemExit('No changes were made')
+          path.write_text(text, encoding='utf-8')
+          print('Patched', path)
+          PY
+
+      - name: Verify TypeScript source changed
+        run: |
+          grep -q "openSerialPort" src/components/WeighbridgeModule.tsx
+          grep -q "isSerialWeightDetected" src/components/WeighbridgeModule.tsx
+          grep -q "getPorts" src/components/WeighbridgeModule.tsx
+
+      - name: Commit patch and remove temporary workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/components/WeighbridgeModule.tsx
+          git rm -f .github/workflows/patch-gst9700-autosync.yml
+          git commit -m "fix: auto sync GST-9700 physical scale [GST9700-AUTOSYNC]"
+          git push
