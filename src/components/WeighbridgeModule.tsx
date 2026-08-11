@@ -455,98 +455,6 @@ export default function WeighbridgeModule({
     connectSerial();
   };
 
-  const readSerialData = async (port: any) => {
-    let buffer = "";
-    let continuousFailures = 0;
-
-    while (keepReadingRef.current) {
-      let reader: any = null;
-      try {
-        if (!port || !port.readable) {
-          throw new Error("Port serial tidak dapat dibaca atau telah ditutup.");
-        }
-
-        reader = port.readable.getReader();
-        serialReaderRef.current = reader;
-        const decoder = new TextDecoder("utf-8");
-
-        while (keepReadingRef.current) {
-          const { value, done } = await reader.read();
-          if (done) {
-            break;
-          }
-          if (value && value.length > 0) {
-            continuousFailures = 0; // Reset failure count on valid read
-            
-            // ALWAYS sanitize bytes with 0x7F bitmask to strip parity/high bits in RS232 signals
-            const sanitizedBytes = new Uint8Array(value.length);
-            for (let i = 0; i < value.length; i++) {
-              sanitizedBytes[i] = value[i] & 0x7f;
-            }
-
-            const chunkStr = decoder.decode(sanitizedBytes, { stream: true });
-            buffer += chunkStr;
-
-            const { weight, rawFrame, remainingBuffer } = parseSerialIndicatorBuffer(buffer);
-            buffer = remainingBuffer;
-
-            if (rawFrame) {
-              setLastRawSerialData(rawFrame);
-            } else if (chunkStr.trim()) {
-              setLastRawSerialData(chunkStr.trim());
-            }
-
-            if (weight !== null) {
-              setSimulatorWeight(weight);
-              setCustomSimulatorInput(String(weight));
-              setRxPacketCount(prev => prev + 1);
-              setLastRxTime(new Date().toLocaleTimeString('id-ID'));
-              setSerialError(null);
-            }
-          }
-        }
-      } catch (err: any) {
-        console.warn("Serial stream read glitch/error caught:", err);
-        continuousFailures++;
-        
-        if (keepReadingRef.current) {
-          const rawErrMsg = err?.message || String(err) || "";
-          const isBreakOrGlitch = /break|framing|parity|buffer|overflow|alignment|overrun|unlock/i.test(rawErrMsg);
-
-          if (isBreakOrGlitch && continuousFailures < 20) {
-            // Soft auto-recovery from Break signal / framing glitch
-            setSerialError(
-              `⚡ TERDETEKSI SINYAL BREAK / FLUKTUASI VOLLTASE RS-232 ("${rawErrMsg}"). Mengambil ulang stream data GST-9700 secara otomatis...`
-            );
-          } else {
-            const errorMsg = `Koneksi terputus: ${rawErrMsg || "Gagal membaca stream data dari timbangan GST-9700"}`;
-            setSerialError(errorMsg);
-            
-            // If device disconnected or unrecoverable error, break loop
-            if (continuousFailures >= 20 || /closed|device lost|disconnected|device removed/i.test(rawErrMsg)) {
-              keepReadingRef.current = false;
-              break;
-            }
-          }
-        }
-      } finally {
-        if (reader) {
-          try {
-            await reader.releaseLock();
-          } catch (e) {}
-        }
-        serialReaderRef.current = null;
-      }
-
-      // Short delay before auto-re-acquiring reader stream if connection is active
-      if (keepReadingRef.current) {
-        await new Promise(res => setTimeout(res, 200));
-      }
-    }
-
-    setIsSerialConnected(false);
-  };
-
   const disconnectSerial = async () => {
     keepReadingRef.current = false;
     await autoSyncEngineRef.current?.stop();
@@ -669,11 +577,11 @@ export default function WeighbridgeModule({
   };
 
   // Helper values
-  const computedNet = (selectedTicket || isCreatingNew || isEditing) 
+  const computedNet = (selectedTicket || isCreatingNew || isEditing)
     ? calculateNetWeight(
-        selectedTicket ? selectedTicket.timbang1Weight : simulatorWeight, 
-        selectedTicket ? (selectedTicket.timbang2Weight > 0 ? selectedTicket.timbang2Weight : simulatorWeight) : 0, 
-        bagDeductionPercent, 
+        selectedTicket ? selectedTicket.timbang1Weight : simulatorWeight,
+        selectedTicket ? selectedTicket.timbang2Weight : 0,
+        bagDeductionPercent,
         refaksiPercent
       )
     : 0;
