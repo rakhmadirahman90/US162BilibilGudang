@@ -25,6 +25,11 @@ if (s.includes(snapshotNeedle) && !s.includes('setLastRxIso(snapshot.lastRxAt'))
   s = s.replace(snapshotNeedle, snapshotInsert, 1);
 }
 
+// WAITING_RX means the physical serial port is open and the reader is active; it is not disconnected.
+const connectionNeedle = `      setIsSerialConnected(snapshot.state === 'CONNECTED' || snapshot.state === 'RECEIVING' || snapshot.state === 'STALE' || snapshot.state === 'RECONNECTING');`;
+const connectionReplacement = `      setIsSerialConnected(snapshot.state === 'WAITING_RX' || snapshot.state === 'CONNECTED' || snapshot.state === 'RECEIVING' || snapshot.state === 'STALE' || snapshot.state === 'RECONNECTING');`;
+if (s.includes(connectionNeedle)) s = s.replace(connectionNeedle, connectionReplacement, 1);
+
 // Update RX age every 100 ms so the UI reflects the actual age of the last received frame.
 const engineEffectMarker = `  useEffect(() => {\n    autoSyncEngineRef.current = new GST9700AutoSyncEngine`;
 const ageEffect = `  useEffect(() => {\n    const timer = window.setInterval(() => {\n      if (!lastRxIso) {\n        setSyncAgeMs(null);\n        return;\n      }\n      const parsed = Date.parse(lastRxIso);\n      if (!Number.isFinite(parsed)) {\n        setSyncAgeMs(null);\n        return;\n      }\n      const age = Math.max(0, Date.now() - parsed);\n      setSyncAgeMs(age);\n      if (age > 3000) setHasLiveData(false);\n    }, 100);\n    return () => window.clearInterval(timer);\n  }, [lastRxIso]);\n\n`;
