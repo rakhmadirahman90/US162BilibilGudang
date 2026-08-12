@@ -1,4 +1,4 @@
-export type GST9700ConnectionState = 'DISCONNECTED' | 'CONNECTING' | 'RECEIVING' | 'STALE' | 'ERROR' | 'RECONNECTING';
+export type GST9700ConnectionState = 'DISCONNECTED' | 'CONNECTING' | 'WAITING_RX' | 'RECEIVING' | 'STALE' | 'ERROR' | 'RECONNECTING';
 
 export interface GST9700SyncSnapshot {
   weight: number | null;
@@ -63,12 +63,11 @@ function cleanAscii(value: string): string {
 }
 
 function bytesToAscii(bytes: Uint8Array): string {
-  let out = '';
-  for (const byte of bytes) {
-    const b = byte & 0x7f;
-    out += b >= 0x20 && b <= 0x7e ? String.fromCharCode(b) : String.fromCharCode(b);
-  }
-  return out;
+  return Array.from(bytes, byte => {
+    if (byte >= 0x20 && byte <= 0x7e) return String.fromCharCode(byte);
+    if (byte === 0x09) return ' ';
+    return ' ';
+  }).join('');
 }
 
 function bytesToHex(bytes: Uint8Array): string {
@@ -172,7 +171,6 @@ export class GST9700AutoSyncEngine {
     const gross = /(^|[, ]|\b)GS([, ]|$)|\bGROSS\b|G[.]W[.]/i.test(clean) || !net;
     const zero = /\bZERO\b|(^|[, ]|\b)ZR([, ]|$)/i.test(clean);
 
-    // Prefer explicit GST/GSC/indicator formats. This avoids interpreting IDs or timestamps as weight.
     const labeledPatterns: RegExp[] = [
       /(?:ST|US|WN|WW|OL|QT|TR|GR)\s*,?\s*(?:GS|NT)\s*[,=: ]+([+-]?\s*\d+(?:[.,]\d+)?)\s*(kg|kgs|t|ton|tons|tonne|tonnes|g)?/gi,
       /(?:G[.]W[.]|N[.]W[.]|GROSS|NET)\s*[:= ]+([+-]?\s*\d+(?:[.,]\d+)?)\s*(kg|kgs|t|ton|tons|tonne|tonnes|g)?/gi,
@@ -187,7 +185,6 @@ export class GST9700AutoSyncEngine {
       }
     }
 
-    // Signed / keyed formats such as +011330, =005420 or :11330.
     const signed = Array.from(clean.matchAll(/[+=:#]\s*([+-]?\d{1,7}(?:[.,]\d+)?)\s*(kg|kgs|t|ton|tons|tonne|tonnes|g)?/gi));
     for (let i = signed.length - 1; i >= 0; i--) {
       const m = signed[i];
@@ -195,7 +192,6 @@ export class GST9700AutoSyncEngine {
       if (weight !== null) return { weight, stable, zero: zero || weight === 0, gross, net, protocol: 'SIGNED ASCII' };
     }
 
-    // Common reverse-display formats such as 033110+ => 011330.
     const reverse = Array.from(clean.matchAll(/(?:^|[^0-9])([0-9]{4,7})[+=-]/g));
     for (let i = reverse.length - 1; i >= 0; i--) {
       const digits = reverse[i][1].split('').reverse().join('');
@@ -203,7 +199,6 @@ export class GST9700AutoSyncEngine {
       if (weight !== null) return { weight, stable, zero: zero || weight === 0, gross, net, protocol: 'REVERSE ASCII' };
     }
 
-    // Unit-suffixed ASCII is safe because the unit explicitly identifies the measurement.
     const unitMatches = Array.from(clean.matchAll(/([+-]?\d{1,7}(?:[.,]\d+)?)\s*(kg|kgs|t|ton|tons|tonne|tonnes|g)\b/gi));
     for (let i = unitMatches.length - 1; i >= 0; i--) {
       const m = unitMatches[i];
@@ -211,11 +206,12 @@ export class GST9700AutoSyncEngine {
       if (weight !== null) return { weight, stable, zero: zero || weight === 0, gross, net, protocol: 'UNIT ASCII' };
     }
 
-    // Plain continuous ASCII output: use the final bounded 1–7 digit candidate, never the entire concatenated stream.
-    const digitCandidates = Array.from(clean.matchAll(/(?:^|[^0-9])(\d{1,7})(?:$|[^0-9])/g));
-    for (let i = digitCandidates.length - 1; i >= 0; i--) {
-      const weight = this.parseNumber(digitCandidates[i][1], clean);
-      if (weight !== null) return { weight, stable, zero: zero || weight === 0, gross, net, protocol: 'PLAIN ASCII' };
+    // Some indicators transmit a fixed-width numeric frame without CR/LF.
+    // Prefer the newest 4-7 digit token; never parse a long concatenated number as one weight.
+    const fixedWidth = Array.from(clean.matchAll(/(?:^|[^0-9])(\d{4,7})(?=$|[^0-9])/g));
+    for (let i = fixedWidth.length - 1; i >= 0; i--) {
+      const weight = this.parseNumber(fixedWidth[i][1], clean);
+      if (weight !== null) return { weight, stable, zero: zero || weight === 0, gross, net, protocol: 'FIXED-WIDTH ASCII' };
     }
 
     return empty;
@@ -261,13 +257,42 @@ export class GST9700AutoSyncEngine {
     this.armStaleTimer();
   }
 
+  private tryExtractUndelimitedStream(raw: string, rawHex: string) {
+    const clean = cleanAscii(raw);
+    if (!clean) return false;
+
+    // Handle streams like +014280+014290 or repeated 6-digit fixed-width values.
+    const signedMatches = Array.from(clean.matchAll(/[+=:#]\s*([0-9]{4,7})(?:\s*(?:kg|kgs))?/gi));
+    if (signedMatches.length) {
+      const latest = signedMatches[signedMatches.length - 1];
+      const candidate = latest[0];
+      if (this.extract(candidate).weight !== null) {
+        this.processFrame(candidate, rawHex);
+        return true;
+      }
+    }
+
+    const unitMatches = Array.from(clean.matchAll(/([0-9]{4,7}(?:[.,][0-9]+)?)\s*(?:kg|kgs|t|ton|tons|tonne|tonnes)\b/gi));
+    if (unitMatches.length) {
+      const latest = unitMatches[unitMatches.length - 1][0];
+      if (this.extract(latest).weight !== null) {
+        this.processFrame(latest, rawHex);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   private flushUndelimitedBuffer() {
     this.frameGapTimer = null;
     if (!this.keepReading || !this.buffer.trim()) return;
     const candidate = this.buffer;
     this.buffer = '';
-    if (this.extract(candidate).weight !== null) this.processFrame(candidate);
-    else this.emit({ invalidFrameCount: this.snapshot.invalidFrameCount + 1, rawFrame: cleanAscii(candidate) });
+    if (!this.tryExtractUndelimitedStream(candidate, this.snapshot.rawHex)) {
+      if (this.extract(candidate).weight !== null) this.processFrame(candidate, this.snapshot.rawHex);
+      else this.emit({ invalidFrameCount: this.snapshot.invalidFrameCount + 1, rawFrame: cleanAscii(candidate) });
+    }
   }
 
   private scheduleUndelimitedFlush() {
@@ -280,7 +305,7 @@ export class GST9700AutoSyncEngine {
     const now = new Date().toISOString();
     const ascii = bytesToAscii(value);
     const hex = bytesToHex(value);
-    this.emit({ rxCount: this.snapshot.rxCount + 1, rxBytes: this.snapshot.rxBytes + value.length, lastRxAt: now, ageMs: 0, rawHex: hex });
+    this.emit({ rxCount: this.snapshot.rxCount + 1, rxBytes: this.snapshot.rxBytes + value.length, lastRxAt: now, ageMs: 0, rawHex: hex, state: this.snapshot.hasLiveData ? this.snapshot.state : 'WAITING_RX' });
 
     this.buffer += ascii;
     if (this.buffer.length > 16384) this.buffer = this.buffer.slice(-8192);
@@ -293,7 +318,10 @@ export class GST9700AutoSyncEngine {
       }
       if (this.buffer.trim()) this.scheduleUndelimitedFlush();
     } else {
-      this.scheduleUndelimitedFlush();
+      // Parse immediately when a complete signed/unit frame is already present;
+      // otherwise keep a short gap buffer for indicators that omit CR/LF.
+      if (!this.tryExtractUndelimitedStream(this.buffer, hex)) this.scheduleUndelimitedFlush();
+      else this.buffer = '';
     }
   }
 
@@ -318,7 +346,7 @@ export class GST9700AutoSyncEngine {
 
     this.keepReading = true;
     this.clearStaleTimer();
-    this.emit({ state: 'CONNECTING', error: null, hasLiveData: false, ageMs: null, stable: false, protocol: 'AUTO / ASCII' });
+    this.emit({ state: 'WAITING_RX', error: null, hasLiveData: false, ageMs: null, stable: false, protocol: 'AUTO / ASCII' });
 
     try {
       try { await this.port.setSignals({ dataTerminalReady: true, requestToSend: true }); } catch (_) {}
@@ -365,7 +393,7 @@ export class GST9700AutoSyncEngine {
     this.recentWeights = [];
     this.clearStaleTimer();
     this.clearFrameGapTimer();
-    this.emit({ error: null, stable: false, hasLiveData: false, ageMs: null, rawFrame: '', rawHex: '' });
+    this.emit({ error: null, stable: false, hasLiveData: false, ageMs: null, rawFrame: '', rawHex: '', state: this.keepReading ? 'WAITING_RX' : this.snapshot.state });
   }
 
   async stop() {
